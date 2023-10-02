@@ -47,7 +47,7 @@ C_DEPS := $(subst .o,.d,$(C_OBJS))
 ASM_DEPS := $(subst .o,.d,$(ASM_OBJS))
 DEPS := $(C_DEPS) $(ASM_DEPS)
 
-C_FLAGS += $(DEFINE) -mthumb -Wall -g --specs=nosys.specs -Wextra -Wwrite-strings -Wformat=2
+C_FLAGS += $(DEFINE) -O2 -mthumb -Wall -g --specs=nosys.specs -Wextra -Wwrite-strings -Wformat=2
 
 
         #   -Werror=format-nonliteral -Wvla -Wlogical-op -Wshadow -Wformat-signedness \
@@ -79,7 +79,6 @@ $(OUTDIR)/%.o: %.cpp
 	@$(CC) -xc++ $(CXX_FLAGS) $(INC) -MMD -MP -MF$(@:%.o=%.d) -MT$(@) -c $< -o $@
 
 $(OUTDIR)/%.o: %.c
-	@echo $(DEFINE)
 	@echo "CC:" $<
 	$(DIR_GUARD)
 	@$(CC) -xc $(C_FLAGS) $(INC) -MMD -MP -MF$(@:%.o=%.d) -MT$(@) -c $< -o $@
