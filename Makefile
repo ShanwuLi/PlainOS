@@ -7,6 +7,7 @@ CP       := $(CROSS_COMPILE)objcopy
 SIZE     := $(CROSS_COMPILE)size
 
 ARCH     := arm
+MCU      := -mcpu=cortex-m3
 CHIP     := stm32f103c8t6
 
 TOPDIR   := .
@@ -17,13 +18,12 @@ DEFINE   :=
 CXX_SRCS := 
 C_SRCS   := main.c
 ASM_SRCS := 
+LINK_SCRIPT :=
 
 ##################################################################################################
 INC      :=
 LIBDIR   :=
 LIBS     := -lc -lm -lnosys
-
-LINK_SCRIPT := -T$(TOPDIR)/arch/$(ARCH)/$(CHIP)/$(CHIP).ld
 
 RM := rm -rf
 
