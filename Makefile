@@ -5,6 +5,8 @@ CC       := $(CROSS_COMPILE)gcc
 OBJDUMP  := $(CROSS_COMPILE)objdump
 CP       := $(CROSS_COMPILE)objcopy
 SIZE     := $(CROSS_COMPILE)size
+OPTIMIZE := -O3
+DEBUG    := -g #-DNDEBUG to no debug using DEFINE.
 
 ARCH     := arm
 MCU      := -mcpu=cortex-m3
@@ -12,24 +14,26 @@ CHIP     := stm32f103c8t6
 
 TOPDIR   := .
 OUTDIR   := out
+INC      := -I$(TOPDIR)/include 
+LIBDIR   :=
+LIBS     := -lc -lm -lnosys
 TARGET   := $(OUTDIR)/main
-DEFINE   :=
+
+DEFINE   := #-DNDEBUG
 
 CXX_SRCS := 
 C_SRCS   := main.c
 ASM_SRCS := 
-LINK_SCRIPT :=
 
-##################################################################################################
-INC      :=
-LIBDIR   :=
-LIBS     := -lc -lm -lnosys
+#////////////////////////////// do not to modify following code //////////////////////////////////#
+LINK_SCRIPT := -T$(TOPDIR)/arch/$(ARCH)/$(CHIP)/$(CHIP).ld
 
 RM := rm -rf
 
 #=================================================================================================#
 # list of objects
--include arch/$(ARCH)/$(CHIP)/*.mk
+-include $(TOPDIR)/arch/$(ARCH)/$(CHIP)/*.mk
+-include $(TOPDIR)/drivers/*.mk
 
 CXX_OBJS_TMP = $(patsubst %.cpp,%.o,$(CXX_SRCS))
 CXX_OBJS := $(addprefix out/,$(CXX_OBJS_TMP))	# replace ".." to "."
@@ -47,23 +51,22 @@ C_DEPS := $(subst .o,.d,$(C_OBJS))
 ASM_DEPS := $(subst .o,.d,$(ASM_OBJS))
 DEPS := $(C_DEPS) $(ASM_DEPS)
 
-C_FLAGS += $(DEFINE) -O2 -mthumb -Wall -g --specs=nosys.specs -Wextra -Wwrite-strings -Wformat=2
-
-
-        #   -Werror=format-nonliteral -Wvla -Wlogical-op -Wshadow -Wformat-signedness \
-        #    -Wformat-overflow=2 -Wformat-truncation -Werror -Wmissing-declarations \
-        #    -fdiagnostics-color=always -ffunction-sections -fdata-sections -Wall \
-        #    -Werror=all -Werror=unused-function -Werror=unused-variable -Werror=deprecated-declarations \
-        #    -Wextra -Werror=unused-parameter -Werror=sign-compare  -gdwarf-4 -ggdb -nostartfiles -Og \
-        #    -fstrict-volatile-bitfields -Werror=unused-but-set-variable -fno-jump-tables \
-        #    -fno-tree-switch-conversion
+C_FLAGS += $(DEFINE) $(OPTIMIZE) $(DEBUG) -mthumb -Wall --specs=nosys.specs -Wextra -Wwrite-strings -Wformat=2 \
+           -Werror=format-nonliteral -Wvla -Wlogical-op -Wshadow -Wformat-signedness \
+           -Wformat-overflow=2 -Wformat-truncation -Werror -Wmissing-declarations \
+           -fdiagnostics-color=always -ffunction-sections -fdata-sections -Wall \
+           -Werror=all -Werror=unused-function -Werror=unused-variable -Werror=deprecated-declarations \
+           -Wextra -Werror=unused-parameter -Werror=sign-compare  -gdwarf-4 -ggdb -nostartfiles -Og \
+           -fstrict-volatile-bitfields -Werror=unused-but-set-variable -fno-jump-tables \
+           -fno-tree-switch-conversion
 
 CC_FLAGS := $(C_FLAGS) -Wmissing-prototypes -Werror=enum-conversion -Werror=old-style-declaration \
                        -std=c11
 
 CXX_FLAGS := $(C_FLAGS) -std=c++14
 
-LDFLAGS := $(MCU) $(LINK_SCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(TARGET).map,--cref -Wl,--gc-sections,--print-memory-usage
+LDFLAGS := $(MCU) $(LINK_SCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(TARGET).map,--cref \
+            -Wl,--gc-sections,--print-memory-usage
 
 TARGET_FILES := $(TARGET).elf $(TARGET).hex $(TARGET).bin $(TARGET).lst $(TARGET).map
 DIR_GUARD = @mkdir -p $(@D)

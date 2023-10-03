@@ -19,7 +19,7 @@ static void delay(int x)
             ;
     }
 }
-#include "USART.h"
+#include "drivers/USART.h"
 
 int main()
 {
@@ -39,7 +39,7 @@ int main()
 	{
 		USART1_PrintString("RTS Start\r\n");
 		GPIOC->ODR = ~GPIOC->ODR;
-		delay(1000);
+		delay(100000);
 	}
 }
 
