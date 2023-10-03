@@ -10,7 +10,7 @@ DEBUG    := -g #-DNDEBUG to close debug in DEFINE.
 
 ARCH     := arm
 MCU      := -mcpu=cortex-m3#-mmcu=atmega128
-CHIP     := stm32f103c8t6#atmega128#
+CHIP     := stm32f103c8t6#atmega128
 
 TOPDIR   := .
 OUTDIR   := out
