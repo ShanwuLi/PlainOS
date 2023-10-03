@@ -9,21 +9,21 @@ OPTIMIZE := -O3
 DEBUG    := -g #-DNDEBUG to close debug in DEFINE.
 
 ARCH     := arm
-MCU      := -mcpu=cortex-m3
-CHIP     := stm32f103c8t6
+MCU      := -mcpu=cortex-m3#-mmcu=atmega128
+CHIP     := stm32f103c8t6#atmega128#
 
 TOPDIR   := .
 OUTDIR   := out
 INC      := -I$(TOPDIR)/include 
 LIBDIR   :=
-LIBS     := -lc -lm -lnosys
-TARGET   := $(OUTDIR)/main
+LIBS     :=
+TARGET   := $(OUTDIR)/$(CHIP)
 
 DEFINE   := #-DNDEBUG
 
-CXX_SRCS := 
+CXX_SRCS :=
 C_SRCS   := main.c
-ASM_SRCS := 
+ASM_SRCS :=
 
 #////////////////////////////// Do not to modify following code //////////////////////////////////#
 LINK_SCRIPT := -T$(TOPDIR)/arch/$(ARCH)/$(CHIP)/$(CHIP).ld
@@ -33,7 +33,14 @@ RM := rm -rf
 #=================================================================================================#
 # include sub-makefile
 -include $(TOPDIR)/arch/$(ARCH)/$(CHIP)/*.mk
+-include $(TOPDIR)/kernel/*.mk
 -include $(TOPDIR)/drivers/*.mk
+
+# compiler flags
+CC_FLAGS  += $(MCU) $(INC) $(OPTIMIZE) $(DEBUG)
+CXX_FLAGS += $(MCU) $(INC) $(OPTIMIZE) $(DEBUG)
+ASM_FLAGS += $(MCU) $(INC) $(OPTIMIZE) $(DEBUG)
+LDFLAGS   += $(MCU) $(LINK_SCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(TARGET).map,--cref
 
 # list of objects
 CXX_OBJS_TMP = $(patsubst %.cpp,%.o,$(CXX_SRCS))
@@ -52,46 +59,28 @@ C_DEPS := $(subst .o,.d,$(C_OBJS))
 ASM_DEPS := $(subst .o,.d,$(ASM_OBJS))
 DEPS := $(C_DEPS) $(ASM_DEPS)
 
-# compiler flags
-C_FLAGS += $(DEFINE) $(OPTIMIZE) $(DEBUG) -mthumb -Wall --specs=nosys.specs -Wextra -Wwrite-strings -Wformat=2 \
-           -Werror=format-nonliteral -Wvla -Wlogical-op -Wshadow -Wformat-signedness \
-           -Wformat-overflow=2 -Wformat-truncation -Werror -Wmissing-declarations \
-           -fdiagnostics-color=always -ffunction-sections -fdata-sections -Wall \
-           -Werror=all -Werror=unused-function -Werror=unused-variable -Werror=deprecated-declarations \
-           -Wextra -Werror=unused-parameter -Werror=sign-compare  -gdwarf-4 -ggdb -nostartfiles -Og \
-           -fstrict-volatile-bitfields -Werror=unused-but-set-variable -fno-jump-tables \
-           -fno-tree-switch-conversion
-
-CC_FLAGS := $(C_FLAGS) -Wmissing-prototypes -Werror=enum-conversion -Werror=old-style-declaration \
-                       -std=c11
-
-CXX_FLAGS := $(C_FLAGS) -std=c++14
-
-LDFLAGS := $(MCU) $(LINK_SCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(TARGET).map,--cref \
-            -Wl,--gc-sections,--print-memory-usage
-
 TARGET_FILES := $(TARGET).elf $(TARGET).hex $(TARGET).bin $(TARGET).lst $(TARGET).map
 DIR_GUARD = @mkdir -p $(@D)
 
 # All Target
-all:  $(TARGET_FILES) $(TARGET).size
+all: $(TARGET_FILES) $(TARGET).size
 
 # Each subdirectory must supply rules for building sources it contributes
 
 $(OUTDIR)/%.o: %.cpp
 	@echo "CCXX:" $<
 	$(DIR_GUARD)
-	@$(CC) -xc++ $(CXX_FLAGS) $(INC) -MMD -MP -MF$(@:%.o=%.d) -MT$(@) -c $< -o $@
+	@$(CC) $(CXX_FLAGS) -MMD -MP -MF$(@:%.o=%.d) -MT$(@) -c $< -o $@
 
 $(OUTDIR)/%.o: %.c
 	@echo "CC:" $<
 	$(DIR_GUARD)
-	@$(CC) -xc $(C_FLAGS) $(INC) -MMD -MP -MF$(@:%.o=%.d) -MT$(@) -c $< -o $@
+	@$(CC) $(CC_FLAGS) -MMD -MP -MF$(@:%.o=%.d) -MT$(@) -c $< -o $@
 
 $(OUTDIR)/%.o: %.S
-	@echo "ASM:" $<
+	@echo "AS:" $<
 	$(DIR_GUARD)
-	@$(CC) -x assembler-with-cpp $(C_FLAGS) -MMD -MP -MF$(@:%.o=%.d) -MT$(@) -c $< -o $@ 
+	@$(CC) $(ASM_FLAGS) -MMD -MP -MF$(@:%.o=%.d) -MT$(@) -c $< -o $@
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(strip $(DEPS)),)
@@ -117,8 +106,7 @@ $(TARGET).lst: $(TARGET).elf
 	@$(OBJDUMP) -d --source --all-headers --demangle --line-numbers --wide $< > $@
 
 $(TARGET).size: $(TARGET).elf
-	@$(SIZE) --format=sysv --common $<
-
+	@$(SIZE) --common $<
 
 # Other Targets
 .PHONY:clean
