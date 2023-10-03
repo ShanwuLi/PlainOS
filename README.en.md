@@ -5,58 +5,58 @@ This project is Plain OS, aimed at developing a universal operating system with 
 
 #### Software Architecture
 Software architecture description
-
-plain-os                                             顶层目录
-   |---- main.c                                      系统入口
+```c++
+plain-os                                             top dirctory
+   |---- main.c                                      system entry
    |
-   |---- Makefile                                    顶层Makefile
+   |---- Makefile                                    top Makefile
    |
-   |---- arch                                        特定架构目录
+   |---- arch                                        specifical architecture
    |      |
-   |      |--- arm                                   arm目录
+   |      |--- arm                                   arm dirctory
    |      |     |
-   |      |     |---stm32f103c8t6                    stm32f103c8t6特性平台小系统启动目录
+   |      |     |---stm32f103c8t6                    stm32f103c8t6 platform feature setup code
    |      |     |    |
-   |      |     |    |--- arm.mk                     小系统启动目录层Makefile
-   |      |     |    |--- xxxx.c                     小系统启动目录层源文件
+   |      |     |    |--- arm.mk                     top Makefile of setup code
+   |      |     |    |--- xxxx.c                     source files of setup code
    |      |     |
-   |      |     |---stm32f407vet6                    stm32f407vet6特性平台小系统启动目录
-   |      |          |--- arm.mk                     小系统启动目录层Makefile
-   |      |          |--- xxxx.c                     小系统启动目录层源文件
+   |      |     |---stm32f407vet6                    stm32f407vet6 platform feature setup code
+   |      |          |--- arm.mk                     top Makefile of setup code
+   |      |          |--- xxxx.c                     source files of setup code
    |      |
    |      |--- avr                                   avr目录
    |      |     |
-   |      |     |---atmega128a                       atmega128a特性平台小系统启动目录
-   |      |     |    |--- arm.mk                     小系统启动目录层Makefile
-   |      |     |    |--- xxx.c                      小系统启动目录层源文件
+   |      |     |---atmega128a                       atmega128a platform feature setup code
+   |      |     |    |--- arm.mk                     top Makefile of setup code
+   |      |     |    |--- xxx.c                      source files of setup code
    |      |     |
-   |      |     |---atmega2560                       atmega2560特性平台小系统启动目录
-   |      |     |    |--- arm.mk                     小系统启动目录层Makefile
-   |      |     |    |--- xxx.c                      小系统启动目录层源文件
+   |      |     |---atmega2560                       atmega2560 platform feature setup code
+   |      |     |    |--- arm.mk                     top Makefile of setup code
+   |      |     |    |--- xxx.c                      source files of setup code
    |      |
-   |      |--- riscv                                 risc-v目录
+   |      |--- riscv                                 risc-v dirctory
    |            |
-   |            |---ch32vf103                        ch32vf103特性平台小系统启动目录
-   |                 |--- arm.mk                     小系统启动目录层Makefile
-   |                 |--- xxx.c                      小系统启动目录层源文件
+   |            |---ch32vf103                        ch32vf103 platform feature setup code
+   |                 |--- arm.mk                     top Makefile of setup code
+   |                 |--- xxx.c                      source files of setup code
    |
+   |  
+   |---- kernel                                      OS kernel dirctory
+   |      |
+   |      |---- kernel.mk                            kernel Makefile
    |
-   |---- kernel                                      OS内核目录
+   |---- drivers                                     driver dirctory
    |      |
-   |      |---- kernel.mk                            内核Makefile
-   |
-   |---- drivers                                     驱动目录
+   |      |---- driver.mk                            top Makefile of driver code
    |      |
-   |      |---- driver.mk                            驱动目录顶层Makefile
-   |      |
-   |      |---- uart                                 串口驱动
+   |      |---- uart                                 uart driver
    |      |
    |      |----  xxxx
+   | 
+   |---- include                                     head file dirctory
    |
-   |---- include                                     头文件目录
-   |
-   |---- os_test                                    os测试代码
-
+   |---- os_test                                     OS test code
+```
 
 #### Installation
 
