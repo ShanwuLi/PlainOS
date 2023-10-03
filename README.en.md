@@ -24,7 +24,7 @@ plain-os                                             top dirctory
    |      |          |--- arm.mk                     top Makefile of setup code
    |      |          |--- xxxx.c                     source files of setup code
    |      |
-   |      |--- avr                                   avr目录
+   |      |--- avr                                   avr dirctory
    |      |     |
    |      |     |---atmega128a                       atmega128a platform feature setup code
    |      |     |    |--- arm.mk                     top Makefile of setup code
