@@ -1,6 +1,8 @@
 # Build and Release Folders
 bin-debug/
 bin-release/
+out/
+.vscode/
 [Oo]bj/
 [Bb]in/
 
