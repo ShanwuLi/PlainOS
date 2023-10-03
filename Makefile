@@ -6,7 +6,7 @@ OBJDUMP  := $(CROSS_COMPILE)objdump
 CP       := $(CROSS_COMPILE)objcopy
 SIZE     := $(CROSS_COMPILE)size
 OPTIMIZE := -O3
-DEBUG    := -g #-DNDEBUG to no debug using DEFINE.
+DEBUG    := -g #-DNDEBUG to close debug in DEFINE.
 
 ARCH     := arm
 MCU      := -mcpu=cortex-m3
@@ -72,7 +72,7 @@ TARGET_FILES := $(TARGET).elf $(TARGET).hex $(TARGET).bin $(TARGET).lst $(TARGET
 DIR_GUARD = @mkdir -p $(@D)
 
 # All Target
-all:  $(TARGET_FILES) $(TARGET).size 
+all:  $(TARGET_FILES) $(TARGET).size
 
 # Each subdirectory must supply rules for building sources it contributes
 

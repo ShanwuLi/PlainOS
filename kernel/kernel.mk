@@ -1,0 +1,1 @@
+CSRCS += $(TOPDIR)/kernel/list.o

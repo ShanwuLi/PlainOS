@@ -1,1 +1,0 @@
-CSRCS += $(TOPDIR)/core/list.o
