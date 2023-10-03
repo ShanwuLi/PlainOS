@@ -25,16 +25,17 @@ CXX_SRCS :=
 C_SRCS   := main.c
 ASM_SRCS := 
 
-#////////////////////////////// do not to modify following code //////////////////////////////////#
+#////////////////////////////// Do not to modify following code //////////////////////////////////#
 LINK_SCRIPT := -T$(TOPDIR)/arch/$(ARCH)/$(CHIP)/$(CHIP).ld
 
 RM := rm -rf
 
 #=================================================================================================#
-# list of objects
+# include sub-makefile
 -include $(TOPDIR)/arch/$(ARCH)/$(CHIP)/*.mk
 -include $(TOPDIR)/drivers/*.mk
 
+# list of objects
 CXX_OBJS_TMP = $(patsubst %.cpp,%.o,$(CXX_SRCS))
 CXX_OBJS := $(addprefix out/,$(CXX_OBJS_TMP))	# replace ".." to "."
 
@@ -51,6 +52,7 @@ C_DEPS := $(subst .o,.d,$(C_OBJS))
 ASM_DEPS := $(subst .o,.d,$(ASM_OBJS))
 DEPS := $(C_DEPS) $(ASM_DEPS)
 
+# compiler flags
 C_FLAGS += $(DEFINE) $(OPTIMIZE) $(DEBUG) -mthumb -Wall --specs=nosys.specs -Wextra -Wwrite-strings -Wformat=2 \
            -Werror=format-nonliteral -Wvla -Wlogical-op -Wshadow -Wformat-signedness \
            -Wformat-overflow=2 -Wformat-truncation -Werror -Wmissing-declarations \
@@ -108,7 +110,7 @@ $(TARGET).hex: $(TARGET).elf
 	$(CP) -O ihex $< $@
 
 $(TARGET).bin: $(TARGET).elf
-	$(CP) -O binary -S $< $@	
+	$(CP) -O binary -S $< $@
 
 $(TARGET).lst: $(TARGET).elf
 	@echo "Making:" $@
@@ -124,7 +126,7 @@ clean:
 	@echo Removing all output files
 	@$(RM) $(TARGET_FILES) $(TARGET).bin
 ifneq (,$(wildcard $(OUTDIR)/*))
-	@$(RM) $(OUTDIR)/*
+	@$(RM) $(OUTDIR)
 endif
 
 rebuild:
