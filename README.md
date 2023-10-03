@@ -1,9 +1,9 @@
 # PlainOS
 
-#### 介绍
+#### 介绍  
 This project is Plain OS, aimed at developing a universal operating system with a plain and minimalist philosophy.
 
-#### 软件架构
+#### 软件架构    
 
 plain-os                                             顶层目录
    |---- main.c                                      系统入口
