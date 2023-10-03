@@ -1,1 +1,1 @@
-#C_SRCS += $(TOPDIR)/drivers/uart/USART.c
+C_SRCS += $(TOPDIR)/drivers/uart/USART.c

@@ -32,12 +32,12 @@ int main()
 	//PB0输出低电平
 	GPIOC->ODR &= (~(1 << 13));
 
-	//USART1_Init();
-	//USART1_PrintString("RTS Start\r\n");
+	USART1_Init();
+	USART1_PrintString("PlainOS\r\n");
 
 	while (1)
 	{
-		//USART1_PrintString("RTS Start\r\n");
+		USART1_PrintString("PlainOS\r\n");
 		GPIOC->ODR = ~GPIOC->ODR;
 		delay(100000);
 	}
