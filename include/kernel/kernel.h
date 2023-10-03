@@ -21,8 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef __CORE_H__
-#define __CORE_H__
+#ifndef __KERNEL_H__
+#define __KERNEL_H__
 
 #include <stdint.h>
 
@@ -52,4 +52,4 @@ typedef int64_t                          s64_t;
 
 
 
-#endif /* __CORE_H__ */
+#endif /* __KERNEL_H__ */

@@ -1,1 +1,1 @@
-CSRCS += $(TOPDIR)/kernel/list.o
+CSRCS += $(TOPDIR)/kernel/list.c

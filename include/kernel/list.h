@@ -23,7 +23,7 @@ SOFTWARE.
 #ifndef __LIST_H__
 #define __LIST_H__
 
-#include "core.h"
+#include "kernel.h"
 
 /*************************************************************************************
  * @prev: previous node of the list.
