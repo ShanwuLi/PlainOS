@@ -1,3 +1,24 @@
+# MIT License
+# Copyright (c) 2023 PlainOS
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 #=================================================================================================#
 # please install esptool using "pip install esptool" on your platform. 
 CROSS_COMPILE := arm-none-eabi-
@@ -25,7 +46,7 @@ C_SRCS   := main.c
 ASM_SRCS :=
 
 #////////////////////////////// Do not to modify following code //////////////////////////////////#
-LINK_SCRIPT := -T$(TOPDIR)/arch/$(ARCH)/$(CHIP)/$(CHIP).ld
+LINK_SCRIPT := $(TOPDIR)/arch/$(ARCH)/$(CHIP)/$(CHIP).ld
 
 RM := rm -rf
 
@@ -36,10 +57,10 @@ RM := rm -rf
 -include $(TOPDIR)/drivers/*.mk
 
 # compiler flags
-C_FLAGS  += $(MCU) $(INC) $(OPTIMIZE) $(DEBUG)
+C_FLAGS   += $(MCU) $(INC) $(OPTIMIZE) $(DEBUG)
 CXX_FLAGS += $(MCU) $(INC) $(OPTIMIZE) $(DEBUG)
 ASM_FLAGS += $(MCU) $(INC) $(OPTIMIZE) $(DEBUG)
-LDFLAGS   += $(MCU) $(LINK_SCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(TARGET).map,--cref
+LDFLAGS   += $(MCU) -T$(TARGET).lds $(LIBDIR) $(LIBS) -Wl,-Map=$(TARGET).map,--cref
 
 # list of objects
 CXX_OBJS_TMP = $(patsubst %.cpp,%.o,$(CXX_SRCS))
@@ -92,6 +113,8 @@ endif
 # Tool invocations
 $(TARGET).elf: $(OBJS)
 	@echo "Making:" $@
+	@echo "Making:" $(TARGET).lds
+	@$(CC) $(INC) -x assembler-with-cpp -E -P $(LINK_SCRIPT) -o $(TARGET).lds
 	@$(CC) $(LDFLAGS) $(OBJS) -o $@  $(LIBS)
 
 $(TARGET).hex: $(TARGET).elf

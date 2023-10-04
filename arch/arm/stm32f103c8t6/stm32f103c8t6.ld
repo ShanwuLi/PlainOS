@@ -29,6 +29,8 @@
 *****************************************************************************
 */
 
+#include <kernel/initcall.h>
+
 /* Entry Point */
 ENTRY(Reset_Handler)
 
@@ -69,13 +71,16 @@ SECTIONS
     *(.glue_7)         /* glue arm to thumb code */
     *(.glue_7t)        /* glue thumb to arm code */
 
-    KEEP (*(.init))
-    KEEP (*(.fini))
-
     . = ALIGN(4);
     _etext = .;        /* define a global symbols at end of code */
   } >FLASH
 
+   . = ALIGN(4);
+   .initcall.init :
+   {
+     INIT_CALLS
+   } >FLASH
+   . = ALIGN(4);
 
    .ARM.extab   : { *(.ARM.extab* .gnu.linkonce.armextab.*) } >FLASH
     .ARM : {

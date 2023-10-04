@@ -36,6 +36,10 @@ typedef int16_t                          s16_t;
 typedef int32_t                          s32_t;
 typedef int64_t                          s64_t;
 
+typedef int                              (*initcall_t)(void);
+typedef int                              (*exitcall_t)(void);
+
+#define __used                           __attribute__((used))
 /*************************************************************************************
  * Function Name: container_of
  * Description: Get the address of the structure instance.

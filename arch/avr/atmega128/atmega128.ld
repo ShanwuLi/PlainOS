@@ -1,3 +1,4 @@
+#include <kernel/initcall.h>
 /* Default linker script, for normal executables */
 OUTPUT_FORMAT("elf32-avr","elf32-avr","elf32-avr")
 OUTPUT_ARCH(avr:51)
@@ -89,6 +90,14 @@ SECTIONS
     KEEP (*(.fini0))
      _etext = . ;
   }  > text
+
+   . = ALIGN(4);
+   .initcall.init :
+   {
+     INIT_CALLS
+   } >text
+   . = ALIGN(4);
+
   .data	  : AT (ADDR (.text) + SIZEOF (.text))
   {
      PROVIDE (__data_start = .) ;
