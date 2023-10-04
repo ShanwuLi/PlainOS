@@ -1,0 +1,1 @@
+C_SRCS += $(DRV_PLATFORM_DIR)/uart/USART.c

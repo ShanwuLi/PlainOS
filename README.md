@@ -47,11 +47,19 @@ plain-os                                             顶层目录
    |
    |---- drivers                                     驱动目录
    |      |
-   |      |---- driver.mk                            驱动目录顶层Makefile
+   |      |---- drivers.mk                           驱动目录顶层Makefile
    |      |
-   |      |---- uart                                 串口驱动
+   |      |---- core                                 驱动核心抽象层
+   |      |      |
+   |      |      |--- core.mk                        驱动核心抽象层Makefile
+   |      |      |--- gpio                           gpio驱动核心抽象层
+   |      |      |--- xxx
    |      |
-   |      |----  xxxx
+   |      |---- platform                             平台驱动适配层
+   |      |      |
+   |      |      |--- platform.mk                    平台驱动相关层Makefile
+   |      |      |--- gpio                           gpio驱动核心抽象层
+   |      |      |--- xxx
    | 
    |---- include                                     头文件目录
    |

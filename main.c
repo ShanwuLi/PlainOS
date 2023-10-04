@@ -19,7 +19,7 @@ static void delay(int x)
             ;
     }
 }
-#include "drivers/USART.h"
+#include "drivers/uart/USART.h"
 
 int main()
 {

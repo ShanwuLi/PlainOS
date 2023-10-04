@@ -18,7 +18,6 @@ INC      := -I$(TOPDIR)/include
 LIBDIR   :=
 LIBS     :=
 TARGET   := $(OUTDIR)/$(CHIP)
-
 DEFINE   := #-DNDEBUG
 
 CXX_SRCS :=
