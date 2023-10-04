@@ -1,2 +1,2 @@
 
-CSRCS += $(TOPDIR)/arm/a.c
+CSRCS += $(TOPDIR)/riscv/a.c

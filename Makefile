@@ -37,7 +37,7 @@ RM := rm -rf
 -include $(TOPDIR)/drivers/*.mk
 
 # compiler flags
-CC_FLAGS  += $(MCU) $(INC) $(OPTIMIZE) $(DEBUG)
+C_FLAGS  += $(MCU) $(INC) $(OPTIMIZE) $(DEBUG)
 CXX_FLAGS += $(MCU) $(INC) $(OPTIMIZE) $(DEBUG)
 ASM_FLAGS += $(MCU) $(INC) $(OPTIMIZE) $(DEBUG)
 LDFLAGS   += $(MCU) $(LINK_SCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(TARGET).map,--cref
@@ -75,7 +75,7 @@ $(OUTDIR)/%.o: %.cpp
 $(OUTDIR)/%.o: %.c
 	@echo "CC:" $<
 	$(DIR_GUARD)
-	@$(CC) $(CC_FLAGS) -MMD -MP -MF$(@:%.o=%.d) -MT$(@) -c $< -o $@
+	@$(CC) $(C_FLAGS) -MMD -MP -MF$(@:%.o=%.d) -MT$(@) -c $< -o $@
 
 $(OUTDIR)/%.o: %.S
 	@echo "AS:" $<
@@ -96,10 +96,12 @@ $(TARGET).elf: $(OBJS)
 	@$(CC) $(LDFLAGS) $(OBJS) -o $@  $(LIBS)
 
 $(TARGET).hex: $(TARGET).elf
-	$(CP) -O ihex $< $@
+	@echo "Making:" $@
+	@$(CP) -O ihex $< $@
 
 $(TARGET).bin: $(TARGET).elf
-	$(CP) -O binary -S $< $@
+	@echo "Making:" $@
+	@$(CP) -O binary -S $< $@
 
 $(TARGET).lst: $(TARGET).elf
 	@echo "Making:" $@
