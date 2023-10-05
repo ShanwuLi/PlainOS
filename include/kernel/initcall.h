@@ -23,27 +23,13 @@ SOFTWARE.
 #ifndef __KERNEL_INITCALL_H__
 #define __KERNEL_INITCALL_H__
 
+#include <kernel/kernel.h>
+
+typedef int                          (*initcall_t)(void);
+typedef int                          (*exitcall_t)(void);
+
 #define __define_initcall(fn, id)    static initcall_t __initcall_##fn##id __used \
                                       __attribute__((section(".initcall" #id ".init"))) = fn
-
-#define INIT_CALLS_LEVEL(level)       __initcall##level##_start = .; \
-	                                  KEEP(*(.initcall##level##.init)) \
-	                                  KEEP(*(.initcall##level##s.init))
-
-#define INIT_CALLS                    __initcall_start = .; \
-	                                  KEEP(*(.initcallearly.init)) \
-	                                  INIT_CALLS_LEVEL(0) \
-	                                  INIT_CALLS_LEVEL(1) \
-	                                  INIT_CALLS_LEVEL(2) \
-	                                  INIT_CALLS_LEVEL(3) \
-	                                  INIT_CALLS_LEVEL(4) \
-	                                  INIT_CALLS_LEVEL(5) \
-	                                  INIT_CALLS_LEVEL(6) \
-	                                  INIT_CALLS_LEVEL(7) \
-	                                  INIT_CALLS_LEVEL(8) \
-	                                  INIT_CALLS_LEVEL(9) \
-	                                  __initcall_end = .;
-
 
 #define early_initcall(fn)            __define_initcall(fn, early)
 #define pure_initcall(fn)             __define_initcall(fn, 0)

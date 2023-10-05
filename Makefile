@@ -112,9 +112,9 @@ endif
 
 # Tool invocations
 $(TARGET).elf: $(OBJS)
-	@echo "Making:" $@
 	@echo "Making:" $(TARGET).lds
 	@$(CC) $(INC) -x assembler-with-cpp -E -P $(LINK_SCRIPT) -o $(TARGET).lds
+	@echo "Making:" $@
 	@$(CC) $(LDFLAGS) $(OBJS) -o $@  $(LIBS)
 
 $(TARGET).hex: $(TARGET).elf

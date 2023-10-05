@@ -15,7 +15,7 @@
 **
 **  Environment : Atollic TrueSTUDIO(R)
 **
-**  Distribution: The file is distributed “as is,” without any warranty
+**  Distribution: The file is distributed 揳s is,?without any warranty
 **                of any kind.
 **
 **  (c)Copyright Atollic AB.
@@ -29,7 +29,7 @@
 *****************************************************************************
 */
 
-#include <kernel/initcall.h>
+#include <kernel/sections.h>
 
 /* Entry Point */
 ENTRY(Reset_Handler)
@@ -71,16 +71,13 @@ SECTIONS
     *(.glue_7)         /* glue arm to thumb code */
     *(.glue_7t)        /* glue thumb to arm code */
 
+    KEEP (*(.init))
+    KEEP (*(.fini))
+
     . = ALIGN(4);
     _etext = .;        /* define a global symbols at end of code */
   } >FLASH
 
-   . = ALIGN(4);
-   .initcall.init :
-   {
-     INIT_CALLS
-   } >FLASH
-   . = ALIGN(4);
 
    .ARM.extab   : { *(.ARM.extab* .gnu.linkonce.armextab.*) } >FLASH
     .ARM : {
@@ -97,6 +94,14 @@ SECTIONS
     KEEP (*(.preinit_array*))
     PROVIDE_HIDDEN (__preinit_array_end = .);
   } >FLASH
+
+  .initcall.init :
+  {
+    . = ALIGN(4);
+    INIT_CALLS
+    . = ALIGN(4);
+  } >FLASH
+
   .init_array :
   {
     PROVIDE_HIDDEN (__init_array_start = .);

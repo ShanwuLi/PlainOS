@@ -47,7 +47,7 @@ plain-os                                             top dirctory
    |
    |---- drivers                                     driver dirctory
    |      |
-   |      |---- drivers.mk                            top Makefile of driver code
+   |      |---- drivers.mk                           top Makefile of driver code
    |      |
    |      |---- uart                                 uart driver
    |      |

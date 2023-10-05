@@ -1,4 +1,4 @@
-#include <kernel/initcall.h>
+#include <kernel/sections.h>
 /* Default linker script, for normal executables */
 OUTPUT_FORMAT("elf32-avr","elf32-avr","elf32-avr")
 OUTPUT_ARCH(avr:51)
