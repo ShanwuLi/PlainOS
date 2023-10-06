@@ -20,5 +20,5 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-DRV_DIR := $(TOPDIR)/psh
--include $(DRV_DIR)/core/core.mk
+PSH_DIR := $(TOPDIR)/psh
+-include $(PSH_DIR)/*/*.mk
