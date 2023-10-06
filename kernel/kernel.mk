@@ -21,3 +21,4 @@
 # SOFTWARE.
 
 C_SRCS += $(TOPDIR)/kernel/list.c
+C_SRCS += $(TOPDIR)/kernel/hiprio.c

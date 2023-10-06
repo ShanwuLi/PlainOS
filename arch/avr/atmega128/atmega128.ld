@@ -91,12 +91,12 @@ SECTIONS
      _etext = . ;
   }  > text
 
-   . = ALIGN(4);
    .initcall.init :
    {
+     . = ALIGN(4);
      INIT_CALLS
+     . = ALIGN(4);
    } >text
-   . = ALIGN(4);
 
   .data	  : AT (ADDR (.text) + SIZEOF (.text))
   {

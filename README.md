@@ -56,12 +56,17 @@ plain-os                                             顶层目录
    |      |      |--- xxx
    |      |
    |      |---- platform                             平台驱动适配层
-   |      |      |
-   |      |      |--- platform.mk                    平台驱动相关层Makefile
-   |      |      |--- gpio                           gpio驱动核心抽象层
-   |      |      |--- xxx
-   | 
+   |             |
+   |             |--- platform.mk                    平台驱动相关层Makefile
+   |             |--- gpio                           gpio驱动核心抽象层
+   |             |--- xxx
+   |
    |---- include                                     头文件目录
+   |      |
+   |      |---- drivers                              驱动头文件目录
+   |      |---- kernel                               内核头文件目录
+   |
+   |---- psh                                         PlainOS Shell
    |
    |---- os_test                                     OS测试代码
 ```

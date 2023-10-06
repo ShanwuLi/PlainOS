@@ -51,7 +51,7 @@ LINK_SCRIPT := $(TOPDIR)/arch/$(ARCH)/$(CHIP)/$(CHIP).ld
 RM := rm -rf
 
 #=================================================================================================#
-# include sub-makefile
+# include sub-makefiles
 -include $(TOPDIR)/arch/$(ARCH)/$(CHIP)/*.mk
 -include $(TOPDIR)/kernel/*.mk
 -include $(TOPDIR)/drivers/*.mk
@@ -112,6 +112,7 @@ endif
 
 # Tool invocations
 $(TARGET).elf: $(OBJS)
+	@echo "INC:" $(INC)
 	@echo "Making:" $(TARGET).lds
 	@$(CC) $(INC) -x assembler-with-cpp -E -P $(LINK_SCRIPT) -o $(TARGET).lds
 	@echo "Making:" $@
@@ -144,6 +145,3 @@ endif
 rebuild:
 	@make clean
 	@make all
-
-derege:
-	@echo $(LINK_SCRIPT)

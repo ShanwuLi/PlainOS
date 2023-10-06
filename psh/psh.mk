@@ -20,17 +20,5 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# compiler flags
-TEMP_FLAGS += $(DEFINE) -Wall -Wextra -Wwrite-strings -Wformat=2 \
-              -Werror=format-nonliteral -Wvla -Wlogical-op -Wshadow \
-              -Werror -Wmissing-declarations \
-              -ffunction-sections -fdata-sections -Wall \
-              -Werror=all -Werror=unused-function -Werror=deprecated-declarations \
-              -Wextra -Werror=unused-parameter -Werror=sign-compare -ggdb -nostartfiles \
-              -fno-jump-tables
-C_FLAGS   += $(TEMP_FLAGS) -xc -Wmissing-prototypes -Werror=old-style-declaration \
-                           -std=c99
-CXX_FLAGS += $(TEMP_FLAGS) -xc++ -std=c++99
-ASM_FLAGS += -x assembler-with-cpp
-LDFLAGS   += -Wl,--gc-sections
-LIBS      += -lc -lm
+DRV_DIR := $(TOPDIR)/psh
+-include $(DRV_DIR)/core/core.mk
