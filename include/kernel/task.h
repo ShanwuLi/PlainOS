@@ -21,45 +21,46 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef __KERNEL_KERNEL_H__
-#define __KERNEL_KERNEL_H__
+#ifndef __KERNEL_TASK_H__
+#define __KERNEL_TASK_H__
 
-#include <stdint.h>
+#include <kernel/kernel.h>
 #include <kernel/list.h>
 
 /*************************************************************************************
- * Type Name: type
- * Description: define a lots of  variable type.
- ************************************************************************************/
-typedef uint8_t                          u8_t;
-typedef uint16_t                         u16_t;
-typedef uint32_t                         u32_t;
-typedef uint64_t                         u64_t;
-
-typedef int8_t                           s8_t;
-typedef int16_t                          s16_t;
-typedef int32_t                          s32_t;
-typedef int64_t                          s64_t;
-
-#define __used                           __attribute__((used))
-
-#define ARRAY_SIZE(a)                   (sizeof(a) / sizeof(a[0]))
-
-/*************************************************************************************
- * Function Name: container_of
- * Description: Get the address of the structure instance.
+ * Structure Name: tcb
+ * Description: task controller block.
  *
  * Param:
- *   @ptr: address of the structure member.
- *   @struct_type: type of the structure.
- *   @member: member name of the ptr in structure.
- * Return:
- *   void
+ *   @task_sp: task stack pointer.
+ *   @node: list node of tcb.
+ *   @next: pointer to next tcb of the same priority in rdy list.
+ *   @past_state: past state of system.
+ *   @curr_state: current state of system.
+ *   @prio: priority of the task.
+ *   @tid: task id.
+ *   @signal: signal of the task received.
+ *   @dly_ticks_hi: hight 32bit ticks of delay.
+ *   @dly_ticks_lo: lower 32bit ticks of delay.
+ *
  ************************************************************************************/
-#define container_of(ptr, struct_type, member) \
-	((void *)ptr - (void *)(&(((struct_type *)0)->member)))
+struct tcb
+{
+	void *task_sp;
+	struct list_node node;
+	struct tcb *next;
+	u8_t past_state;
+	u8_t curr_state;
+	u16_t prio;
+	u16_t tid;
+	u16_t signal;
+
+#ifdef POS_CFG_TASK_DLY
+	u32_t dly_ticks_hi;
+	u32_t dly_ticks_lo;
+#endif
+};
 
 
 
-
-#endif /* __KERNEL_KERNEL_H__ */
+#endif /* __KERNEL_TASK_H__ */

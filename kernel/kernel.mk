@@ -20,5 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+INC += -I$(TOPDIR)/kernel
+
 C_SRCS += $(TOPDIR)/kernel/list.c
 C_SRCS += $(TOPDIR)/kernel/hiprio.c
+C_SRCS += $(TOPDIR)/kernel/rdytask.c

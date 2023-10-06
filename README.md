@@ -61,7 +61,7 @@ plain-os                                             顶层目录
    |             |--- gpio                           gpio驱动核心抽象层
    |             |--- xxx
    |
-   |---- include                                     头文件目录
+   |---- include                                     头文件目录(提供给OS上层的通用接口)
    |      |
    |      |---- drivers                              驱动头文件目录
    |      |---- kernel                               内核头文件目录

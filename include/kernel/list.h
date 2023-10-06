@@ -20,8 +20,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#ifndef __LIST_H__
-#define __LIST_H__
+#ifndef __KERNEL_LIST_H__
+#define __KERNEL_LIST_H__
 
 #include "kernel.h"
 
@@ -136,4 +136,4 @@ void list_del_front(struct list_node *head);
 }
 #endif
 
-#endif /* __LIST_H__ */
+#endif /* __KERNEL_LIST_H__ */
