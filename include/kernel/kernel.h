@@ -41,6 +41,21 @@ typedef int16_t                          s16_t;
 typedef int32_t                          s32_t;
 typedef int64_t                          s64_t;
 
+
+/*************************************************************************************
+ * kernel definitions
+ *************************************************************************************/
+
+/* maximum priority of plainos */
+#define PLAINOS_CFG_PRIORITIES_MAX       (100u)
+#define PLPAINOS_CFG_TASK_DLY            (1u)
+
+
+
+
+
+
+
 #define __used                           __attribute__((used))
 
 #define ARRAY_SIZE(a)                   (sizeof(a) / sizeof(a[0]))

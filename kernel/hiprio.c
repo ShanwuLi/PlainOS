@@ -22,12 +22,11 @@ SOFTWARE.
 */
 
 #include "hiprio.h"
+#include "kernel/kernel.h"
 
-#define POS_CFG_PRIORITIES_MAX                  100
-
-#define HIPRIO_BITMAP_SIZE                      ((POS_CFG_PRIORITIES_MAX + 7) / 8)
-#define HIPRIO_LEV1_BITMAP_SIZE                 ((POS_CFG_PRIORITIES_MAX + 63) / 64)
-#define HIPRIO_LEV2_BITMAP_SIZE                 ((POS_CFG_PRIORITIES_MAX + 511) / 512)
+#define HIPRIO_BITMAP_SIZE                      ((PLAINOS_CFG_PRIORITIES_MAX + 7) / 8)
+#define HIPRIO_LEV1_BITMAP_SIZE                 ((PLAINOS_CFG_PRIORITIES_MAX + 63) / 64)
+#define HIPRIO_LEV2_BITMAP_SIZE                 ((PLAINOS_CFG_PRIORITIES_MAX + 511) / 512)
 #define HIPRIO_OF(lv2_idx, lv1_idx, idx, bit)   ( ((lv2_idx) << 9) \
                                                 | ((lv1_idx) << 6) \
                                                 | ((idx) << 3) \
@@ -70,7 +69,7 @@ static u8_t g_hiprio_bitmap_lv2[HIPRIO_LEV2_BITMAP_SIZE];
 static u8_t g_hiprio_bitmap_lv3;
 
 /*************************************************************************************
- * Function Name: pos_get_hiprio
+ * Function Name: plainos_get_hiprio
  * Description: Get current highest priority.
  *
  * Param:
@@ -79,7 +78,7 @@ static u8_t g_hiprio_bitmap_lv3;
  * Return:
  *   @hiprio: current highest priority
  ************************************************************************************/
-u16_t pos_get_hiprio(void)
+u16_t plainos_get_hiprio(void)
 {
 	u16_t hiprio;
 	u8_t bitmap_bit;
@@ -103,7 +102,7 @@ u16_t pos_get_hiprio(void)
 }
 
 /*************************************************************************************
- * Function Name: pos_clear_bit_of_hiprio_bitmap
+ * Function Name: plainos_clear_bit_of_hiprio_bitmap
  * Description: clear the bit of highest priority table.
  *
  * Param:
@@ -112,7 +111,7 @@ u16_t pos_get_hiprio(void)
  * Return:
  *   void
  ************************************************************************************/
-void pos_clear_bit_of_hiprio_bitmap(u16_t prio)
+void plainos_clear_bit_of_hiprio_bitmap(u16_t prio)
 {
 	g_hiprio_bitmap[prio >> 3] &= (u8_t)(~(1 << (prio & 7)));
 	if (g_hiprio_bitmap[prio >> 3] != 0)
@@ -130,7 +129,7 @@ void pos_clear_bit_of_hiprio_bitmap(u16_t prio)
 }
 
 /*************************************************************************************
- * Function Name: pos_set_bit_of_hiprio_bitmap
+ * Function Name: plainos_set_bit_of_hiprio_bitmap
  * Description: set the bit of highest priority table.
  *
  * Param:
@@ -139,12 +138,10 @@ void pos_clear_bit_of_hiprio_bitmap(u16_t prio)
  * Return:
  *   void
  ************************************************************************************/
-void pos_set_bit_of_hiprio_bitmap(u8_t prio)
+void plainos_set_bit_of_hiprio_bitmap(u16_t prio)
 {
 	g_hiprio_bitmap[prio >> 3]     |= (u8_t)(1 << ((prio & 7) >> 0));
 	g_hiprio_bitmap_lv1[prio >> 6] |= (u8_t)(1 << ((prio & 63) >> 3));
 	g_hiprio_bitmap_lv2[prio >> 9] |= (u8_t)(1 << ((prio & 511) >> 6));
 	g_hiprio_bitmap_lv3            |= (u8_t)(1 << ((prio & 4096) >> 9));
 }
-
-

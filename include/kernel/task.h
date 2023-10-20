@@ -31,7 +31,7 @@ SOFTWARE.
  * Structure Name: tcb
  * Description: task controller block.
  *
- * Param:
+ * Parameters:
  *   @task_sp: task stack pointer.
  *   @node: list node of tcb.
  *   @next: pointer to next tcb of the same priority in rdy list.
@@ -40,7 +40,7 @@ SOFTWARE.
  *   @prio: priority of the task.
  *   @tid: task id.
  *   @signal: signal of the task received.
- *   @dly_ticks_hi: hight 32bit ticks of delay.
+ *   @dly_ticks_hi: high 32bit ticks of delay.
  *   @dly_ticks_lo: lower 32bit ticks of delay.
  *
  ************************************************************************************/
@@ -48,19 +48,16 @@ struct tcb
 {
 	void *task_sp;
 	struct list_node node;
-	struct tcb *next;
 	u8_t past_state;
 	u8_t curr_state;
 	u16_t prio;
 	u16_t tid;
 	u16_t signal;
 
-#ifdef POS_CFG_TASK_DLY
+#ifdef PLPAINOS_CFG_TASK_DLY
 	u32_t dly_ticks_hi;
 	u32_t dly_ticks_lo;
-#endif
+#endif /* POS_CFG_TASK_DLY */
 };
-
-
 
 #endif /* __KERNEL_TASK_H__ */

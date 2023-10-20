@@ -22,3 +22,92 @@ SOFTWARE.
 */
 
 #include <kernel/task.h>
+#include <kernel/list.h>
+#include <kernel/kernel.h>
+
+struct rdytask_list {
+	struct list_node *head;
+	u16_t num;
+};
+
+/*************************************************************************************
+ * Function Name: plainos_rdytask_list_init
+ * Description:  Initialize list of ready task.
+ ************************************************************************************/
+static struct rdytask_list g_rdytask_list[PLAINOS_CFG_PRIORITIES_MAX + 1];
+
+/*************************************************************************************
+ * Function Name: plainos_rdytask_list_init
+ * Description:  Initialize list of ready task.
+ *
+ * Param:
+ *   void
+ * Return:
+ *   void
+ ************************************************************************************/
+static void plainos_rdytask_list_init(void)
+{
+	u16_t i;
+
+	for (i = 0; i < PLAINOS_CFG_PRIORITIES_MAX + 1; i++) {
+		g_rdytask_list[i].head = NULL;
+		g_rdytask_list[i].num = 0;
+	}
+}
+
+/*************************************************************************************
+ * Function Name: plainos_insert_tcb_to_rdylist
+ * Description:  Initialize list of ready task.
+ *
+ * Param:
+ *   void
+ * Return:
+ *   void
+ ************************************************************************************/
+void  plainos_insert_tcb_to_rdylist(struct tcb *tcb)
+{
+	u16_t prio = tcb->prio;
+	struct rdytask_list *rdylist = &g_rdytask_list[prio];
+
+	if(rdylist == NULL) {
+		rdylist.head = tcb;  
+		list_init(tcb);
+	} else {
+		list_add_tail(rdylist.head, tcb);
+	}
+
+	++rdylist->num;
+	plainos_set_bit_of_hiprio_bitmap(prio);
+}
+
+/*************************************************************************************
+ * Function Name: plainos_remove_tcb_from_rdylist
+ * Description:  Initialize list of ready task.
+ *
+ * Param:
+ *   void
+ * Return:
+ *   void
+ ************************************************************************************/
+void plainos_remove_tcb_from_rdylist(TCB_t *tcb)
+{
+	u16_t prio = tcb->prio;
+	struct rdytask_list *rdylist = &g_rdytask_list[prio];
+	u16_t num = rdylist->num;
+
+	if(num == 1) {
+		plainos_clear_bit_of_hiprio_bitmap(prio);
+		rdylist->head = NULL;
+		rdylist->num = 0;
+
+		return;
+	}
+
+	//////////////////////////////////////////////////////////////////////
+	if (rdylist->head == tcb)
+		rdylist->head = tcb->next;
+
+	tcb->prev->next = tcb->next;
+	tcb->next->prev = tcb->prev;
+	--rts_gb_rdy_lh_tbl[prio].node_num;
+}

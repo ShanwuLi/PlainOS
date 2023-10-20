@@ -26,7 +26,7 @@ SOFTWARE.
 #include <kernel/kernel.h>
 
 /*************************************************************************************
- * Function Name: pos_get_hiprio
+ * Function Name: plainos_get_hiprio
  * Description: Get current highest priority.
  *
  * Param:
@@ -35,10 +35,10 @@ SOFTWARE.
  * Return:
  *   @hiprio: current highest priority
  ************************************************************************************/
-u16_t pos_get_hiprio(void);
+u16_t plainos_get_hiprio(void);
 
 /*************************************************************************************
- * Function Name: pos_clear_bit_of_hiprio_bitmap
+ * Function Name: plainos_clear_bit_of_hiprio_bitmap
  * Description: clear the bit of highest priority table.
  *
  * Param:
@@ -47,10 +47,10 @@ u16_t pos_get_hiprio(void);
  * Return:
  *   void
  ************************************************************************************/
-void pos_clear_bit_of_hiprio_bitmap(u16_t prio);
+void plainos_clear_bit_of_hiprio_bitmap(u16_t prio);
 
 /*************************************************************************************
- * Function Name: pos_set_bit_of_hiprio_bitmap
+ * Function Name: plainos_set_bit_of_hiprio_bitmap
  * Description: set the bit of highest priority table.
  *
  * Param:
@@ -59,6 +59,6 @@ void pos_clear_bit_of_hiprio_bitmap(u16_t prio);
  * Return:
  *   void
  ************************************************************************************/
-void pos_set_bit_of_hiprio_bitmap(u8_t prio);
+void plainos_set_bit_of_hiprio_bitmap(u16_t prio);
 
 #endif /* __KERNEL_HIPRIO_H__ */
