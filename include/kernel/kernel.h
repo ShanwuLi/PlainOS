@@ -26,7 +26,6 @@ SOFTWARE.
 
 #include <stdint.h>
 #include <kernel/list.h>
-#include <task.h>
 
 /*************************************************************************************
  * Type Name: type
