@@ -61,6 +61,6 @@ SOFTWARE.
 
 
 #define EREGED       35 /* Has registered */
-#define ERROR        36 /* Unknow error */
+#define ERROR        -36 /* Unknow error */
 
 #endif /* __ERRNO_H__ */
