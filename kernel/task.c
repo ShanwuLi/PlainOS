@@ -21,9 +21,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "hiprio.h"
-#include "kernel/kernel.h"
+#include <kernel/task.h>
+#include <kernel/list.h>
+#include <kernel/kernel.h>
 
+/*************************************************************************************
+ * Description: Definitions for highest priority of task.
+ ************************************************************************************/
 #define HIPRIO_BITMAP_SIZE                      ((PLAINOS_CFG_PRIORITIES_MAX + 7) / 8)
 #define HIPRIO_LEV1_BITMAP_SIZE                 ((PLAINOS_CFG_PRIORITIES_MAX + 63) / 64)
 #define HIPRIO_LEV2_BITMAP_SIZE                 ((PLAINOS_CFG_PRIORITIES_MAX + 511) / 512)
@@ -31,6 +35,15 @@ SOFTWARE.
                                                 | ((lv1_idx) << 6) \
                                                 | ((idx) << 3) \
                                                 | ((bit) << 0));
+
+/*************************************************************************************
+ * structure Name: rdytask_list
+ * Description: Define a list of ready task.
+ ************************************************************************************/
+struct rdytask_list {
+	struct tcb *head;
+	u16_t num;
+};
 
 /*************************************************************************************
  * Global Variable Name: g_hiprio_idx_tbl
@@ -69,7 +82,13 @@ static u8_t g_hiprio_bitmap_lv2[HIPRIO_LEV2_BITMAP_SIZE];
 static u8_t g_hiprio_bitmap_lv3;
 
 /*************************************************************************************
- * Function Name: plainos_get_hiprio
+ * Global Variable Name: g_rdytask_list
+ * Description:  List of ready task.
+ ************************************************************************************/
+static struct rdytask_list g_rdytask_list[PLAINOS_CFG_PRIORITIES_MAX + 1];
+
+/*************************************************************************************
+ * Function Name: get_hiprio
  * Description: Get current highest priority.
  *
  * Param:
@@ -78,7 +97,7 @@ static u8_t g_hiprio_bitmap_lv3;
  * Return:
  *   @hiprio: current highest priority
  ************************************************************************************/
-u16_t plainos_get_hiprio(void)
+static u16_t get_hiprio(void)
 {
 	u16_t hiprio;
 	u8_t bitmap_bit;
@@ -102,7 +121,7 @@ u16_t plainos_get_hiprio(void)
 }
 
 /*************************************************************************************
- * Function Name: plainos_clear_bit_of_hiprio_bitmap
+ * Function Name: clear_bit_of_hiprio_bitmap
  * Description: clear the bit of highest priority table.
  *
  * Param:
@@ -111,25 +130,25 @@ u16_t plainos_get_hiprio(void)
  * Return:
  *   void
  ************************************************************************************/
-void plainos_clear_bit_of_hiprio_bitmap(u16_t prio)
+static void clear_bit_of_hiprio_bitmap(u16_t prio)
 {
-	g_hiprio_bitmap[prio >> 3] &= (u8_t)(~(1 << (prio & 7)));
+	g_hiprio_bitmap[prio >> 3] &= (u8_t)(~(1 << (prio & 0x7)));
 	if (g_hiprio_bitmap[prio >> 3] != 0)
 		return;
 
-	g_hiprio_bitmap_lv1[prio >> 6] &= (u8_t)(~(1 << ((prio & 63) >> 3)));
+	g_hiprio_bitmap_lv1[prio >> 6] &= (u8_t)(~(1 << ((prio & 0x3f) >> 3)));
 	if (g_hiprio_bitmap_lv1[prio >> 6] != 0)
 		return;
 
-	g_hiprio_bitmap_lv2[prio >> 9] &= (u8_t)(~(1 << ((prio & 511) >> 6)));
+	g_hiprio_bitmap_lv2[prio >> 9] &= (u8_t)(~(1 << ((prio & 0x1ff) >> 6)));
 	if (g_hiprio_bitmap_lv2[prio >> 9] != 0)
 		return;
 
-	g_hiprio_bitmap_lv3 &= (u8_t)(~(1 << ((prio & 4096) >> 9)));
+	g_hiprio_bitmap_lv3 &= (u8_t)(~(1 << ((prio & 0x1000) >> 9)));
 }
 
 /*************************************************************************************
- * Function Name: plainos_set_bit_of_hiprio_bitmap
+ * Function Name: set_bit_of_hiprio_bitmap
  * Description: set the bit of highest priority table.
  *
  * Param:
@@ -138,10 +157,86 @@ void plainos_clear_bit_of_hiprio_bitmap(u16_t prio)
  * Return:
  *   void
  ************************************************************************************/
-void plainos_set_bit_of_hiprio_bitmap(u16_t prio)
+static void set_bit_of_hiprio_bitmap(u16_t prio)
 {
-	g_hiprio_bitmap[prio >> 3]     |= (u8_t)(1 << ((prio & 7) >> 0));
-	g_hiprio_bitmap_lv1[prio >> 6] |= (u8_t)(1 << ((prio & 63) >> 3));
-	g_hiprio_bitmap_lv2[prio >> 9] |= (u8_t)(1 << ((prio & 511) >> 6));
-	g_hiprio_bitmap_lv3            |= (u8_t)(1 << ((prio & 4096) >> 9));
+	g_hiprio_bitmap[prio >> 3]     |= (u8_t)(1 << ((prio & 0x7) >> 0));
+	g_hiprio_bitmap_lv1[prio >> 6] |= (u8_t)(1 << ((prio & 0x3f) >> 3));
+	g_hiprio_bitmap_lv2[prio >> 9] |= (u8_t)(1 << ((prio & 0x1ff) >> 6));
+	g_hiprio_bitmap_lv3            |= (u8_t)(1 << ((prio & 0x1000) >> 9));
 }
+
+/*************************************************************************************
+ * Function Name: rdytask_list_init
+ * Description:  Initialize list of ready task.
+ *
+ * Param:
+ *   void
+ * Return:
+ *   void
+ ************************************************************************************/
+static void rdytask_list_init(void)
+{
+	u16_t i;
+
+	for (i = 0; i < PLAINOS_CFG_PRIORITIES_MAX + 1; i++) {
+		g_rdytask_list[i].head = NULL;
+		g_rdytask_list[i].num = 0;
+	}
+}
+
+/*************************************************************************************
+ * Function Name: insert_tcb_to_rdylist
+ * Description: Insert a tcb to list of ready task.
+ *
+ * Param:
+ *   @tcb: task control block.
+ * Return:
+ *   void
+ ************************************************************************************/
+static void insert_tcb_to_rdylist(struct tcb *tcb)
+{
+	u16_t prio = tcb->prio;
+	struct rdytask_list *rdylist = &g_rdytask_list[prio];
+
+	if (rdylist.head == NULL) {
+		list_init(&tcb->node);
+		rdylist->head = tcb;
+	} else {
+		list_add_node_at_tail(&rdylist->head->node, tcb);
+	}
+
+	++rdylist->num;
+	set_bit_of_hiprio_bitmap(prio);
+}
+
+/*************************************************************************************
+ * Function Name: remove_tcb_from_rdylist
+ * Description:  remove a tcb form list of ready task.
+ *
+ * Param:
+ *   @tcb: task control block.
+ * Return:
+ *   void
+ ************************************************************************************/
+static void remove_tcb_from_rdylist(struct tcb *tcb)
+{
+	u16_t prio = tcb->prio;
+	struct rdytask_list *rdylist = &g_rdytask_list[prio];
+	u16_t num = rdylist->num;
+
+	if(num == 1) {
+		clear_bit_of_hiprio_bitmap(prio);
+		rdylist->head = NULL;
+		rdylist->num = 0;
+		return;
+	}
+
+	list_del_node(&tcb->node);
+	if (rdylist->head == tcb)
+		rdylist->head = list_next_entry(tcb, struct tcb, node);
+
+	--rdylist->num;
+}
+
+
+
