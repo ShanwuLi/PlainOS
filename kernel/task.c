@@ -22,6 +22,7 @@ SOFTWARE.
 */
 
 #include <errno.h>
+#include <config.h>
 #include <kernel/task.h>
 #include <kernel/list.h>
 #include <kernel/kernel.h>
@@ -206,11 +207,11 @@ static void insert_tcb_to_rdylist(struct tcb *tcb)
 	u16_t prio = tcb->prio;
 	struct rdytask_list *rdylist = &g_rdytask_list[prio];
 
-	if (rdylist.head == NULL) {
+	if (rdylist->head == NULL) {
 		list_init(&tcb->node);
 		rdylist->head = tcb;
 	} else {
-		list_add_node_at_tail(&rdylist->head->node, tcb);
+		list_add_node_at_tail(&rdylist->head->node, &tcb->node);
 	}
 
 	++rdylist->num;
@@ -258,7 +259,7 @@ static void remove_tcb_from_rdylist(struct tcb *tcb)
 void plainos_switch_to_next_same_prio_task(void)
 {
 	g_plainos_curr_task_tcb = list_next_entry(g_plainos_curr_task_tcb, struct tcb, node);
-	plainos_schedule();
+	plainos_port_schedule();
 }
 
 /*************************************************************************************
@@ -281,5 +282,5 @@ void plainos_switch_to_hiprio_task(void)
 	}
 
 	/* OS schedule */
-	plainos_schedule();
+	plainos_port_schedule();
 }

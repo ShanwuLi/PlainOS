@@ -25,7 +25,7 @@ SOFTWARE.
 #define __KERNEL_KERNEL_H__
 
 #include <stdint.h>
-#include <kernel/list.h>
+#include <config.h>
 
 /*************************************************************************************
  * Type Name: type
@@ -42,18 +42,26 @@ typedef int32_t                          s32_t;
 typedef int64_t                          s64_t;
 
 
-/*************************************************************************************
- * kernel definitions
- *************************************************************************************/
+#if (PLAINOS_CFG_MACHINE_WIDTH == 16u)
+typedef uint16_t                        size_t;
+typedef int16_t                         ssize_t;
+#elif (PLAINOS_CFG_MACHINE_WIDTH == 32u)
+typedef uint32_t                        size_t;
+typedef int32_t                         ssize_t;
+#elif (PLAINOS_CFG_MACHINE_WIDTH == 64u)
+typedef uint64_t                        size_t;
+typedef int64_t                         ssize_t;
+#else
+#error PLAINOS_CFG_MACHINE_WIDTH is invalid
+#endif
 
-/* maximum priority of plainos */
-#define PLAINOS_CFG_PRIORITIES_MAX       (100u)
-#define PLPAINOS_CFG_TASK_DLY            (1u)
-
-#define __used                           __attribute__((used))
+#define __used                          __attribute__((used))
 
 #define ARRAY_SIZE(a)                   (sizeof(a) / sizeof(a[0]))
 
+#ifndef NULL
+#define NULL                            ((void*)0)
+#endif
 /*************************************************************************************
  * Function Name: container_of
  * Description: Get the address of the structure instance.
@@ -66,6 +74,6 @@ typedef int64_t                          s64_t;
  *   void
  ************************************************************************************/
 #define container_of(ptr, struct_type, member) \
-	((void *)ptr - (void *)(&(((struct_type *)0)->member)))
+	((struct_type *)((void *)ptr - (void*)(&(((struct_type *)0)->member))))
 
 #endif /* __KERNEL_KERNEL_H__ */

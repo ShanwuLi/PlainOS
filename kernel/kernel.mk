@@ -22,6 +22,4 @@
 
 INC += -I$(TOPDIR)/kernel
 
-C_SRCS += $(TOPDIR)/kernel/list.c
-C_SRCS += $(TOPDIR)/kernel/hiprio.c
-C_SRCS += $(TOPDIR)/kernel/rdytask.c
+C_SRCS += $(TOPDIR)/kernel/task.c

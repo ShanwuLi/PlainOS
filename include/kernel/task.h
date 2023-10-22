@@ -24,6 +24,7 @@ SOFTWARE.
 #ifndef __KERNEL_TASK_H__
 #define __KERNEL_TASK_H__
 
+#include <config.h>
 #include <kernel/kernel.h>
 #include <kernel/list.h>
 
@@ -61,12 +62,13 @@ struct tcb
 	u16_t tid;
 	u16_t signal;
 
-#ifdef PLPAINOS_CFG_TASK_DLY
+#ifdef PLAINOS_CFG_TASK_DLY
 	u32_t dly_ticks_hi;
 	u32_t dly_ticks_lo;
 #endif /* POS_CFG_TASK_DLY */
 };
 
+typedef int (*task_t)(int argc, char *argv[]);
 
 #ifdef __cplusplus
 extern "C" {

@@ -112,7 +112,6 @@ endif
 
 # Tool invocations
 $(TARGET).elf: $(OBJS)
-	@echo "INC:" $(INC)
 	@echo "Making:" $(TARGET).lds
 	@$(CC) $(INC) -x assembler-with-cpp -E -P $(LINK_SCRIPT) -o $(TARGET).lds
 	@echo "Making:" $@
@@ -145,3 +144,7 @@ endif
 rebuild:
 	@make clean
 	@make all
+
+disp_flags:
+	@echo "C_OBJS" : $(C_OBJS)
+	@echo "C_FLAGS:" $(C_FLAGS)
