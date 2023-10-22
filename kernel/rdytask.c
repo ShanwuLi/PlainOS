@@ -26,7 +26,7 @@ SOFTWARE.
 #include <kernel/kernel.h>
 
 struct rdytask_list {
-	struct list_node *head;
+	struct tcb *head;
 	u16_t num;
 };
 
@@ -34,7 +34,7 @@ struct rdytask_list {
  * Function Name: plainos_rdytask_list_init
  * Description:  Initialize list of ready task.
  ************************************************************************************/
-static struct rdytask_list g_rdytask_list[PLAINOS_CFG_PRIORITIES_MAX + 1];
+static struct struct rdytask_list g_rdytask_list[PLAINOS_CFG_PRIORITIES_MAX + 1];
 
 /*************************************************************************************
  * Function Name: plainos_rdytask_list_init
@@ -69,14 +69,15 @@ void  plainos_insert_tcb_to_rdylist(struct tcb *tcb)
 	u16_t prio = tcb->prio;
 	struct rdytask_list *rdylist = &g_rdytask_list[prio];
 
-	if(rdylist == NULL) {
-		rdylist.head = tcb;  
-		list_init(tcb);
+	if (rdylist.head == NULL) {
+		list_init(&tcb->node);
+		rdylist->head = tcb;
+		rdylist->num = 1;
 	} else {
-		list_add_tail(rdylist.head, tcb);
+		list_add_node_at_tail(&rdylist->head->node, tcb);
+		++rdylist->num;
 	}
 
-	++rdylist->num;
 	plainos_set_bit_of_hiprio_bitmap(prio);
 }
 
@@ -89,7 +90,7 @@ void  plainos_insert_tcb_to_rdylist(struct tcb *tcb)
  * Return:
  *   void
  ************************************************************************************/
-void plainos_remove_tcb_from_rdylist(TCB_t *tcb)
+void plainos_remove_tcb_from_rdylist(struct tcb *tcb)
 {
 	u16_t prio = tcb->prio;
 	struct rdytask_list *rdylist = &g_rdytask_list[prio];
@@ -99,15 +100,12 @@ void plainos_remove_tcb_from_rdylist(TCB_t *tcb)
 		plainos_clear_bit_of_hiprio_bitmap(prio);
 		rdylist->head = NULL;
 		rdylist->num = 0;
-
 		return;
 	}
 
-	//////////////////////////////////////////////////////////////////////
+	list_del_node(&tcb->node);
 	if (rdylist->head == tcb)
-		rdylist->head = tcb->next;
+		rdylist->head = list_next_entry(tcb, struct tcb, node);
 
-	tcb->prev->next = tcb->next;
-	tcb->next->prev = tcb->prev;
-	--rts_gb_rdy_lh_tbl[prio].node_num;
+	--rdylist->num;
 }
