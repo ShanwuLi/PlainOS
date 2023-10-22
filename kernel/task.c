@@ -21,9 +21,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#include <errno.h>
 #include <kernel/task.h>
 #include <kernel/list.h>
 #include <kernel/kernel.h>
+#include <plainos_port.h>
 
 /*************************************************************************************
  * Description: Definitions for highest priority of task.
@@ -68,6 +70,12 @@ static const u8_t g_hiprio_idx_tbl[256] = {
 	5, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,  /* 0xE0 to 0xEF */
 	4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0   /* 0xF0 to 0xFF */
 };
+
+/*************************************************************************************
+ * Global Variable Name: g_rdytask_list
+ * Description:  List of ready task.
+ ************************************************************************************/
+struct tcb *g_plainos_curr_task_tcb;
 
 /*************************************************************************************
  * Global Variable Name: g_hiprio_bitmap, g_hiprio_bitmap_lv1, g_hiprio_bitmap_lv2,
@@ -238,5 +246,40 @@ static void remove_tcb_from_rdylist(struct tcb *tcb)
 	--rdylist->num;
 }
 
+/*************************************************************************************
+ * Function Name: plainos_switch_to_next_same_prio_task
+ * Description: Switch to the next task of same priority.
+ *
+ * Param:
+ *   void
+ * Return:
+ *   void
+ ************************************************************************************/
+void plainos_switch_to_next_same_prio_task(void)
+{
+	g_plainos_curr_task_tcb = list_next_entry(g_plainos_curr_task_tcb, struct tcb, node);
+	plainos_schedule();
+}
 
+/*************************************************************************************
+ * Function Name: plainos_switch_to_next_same_prio_task
+ * Description: Switch to the task of highest priority.
+ *
+ * Param:
+ *   void
+ * Return:
+ *   void
+ ************************************************************************************/
+void plainos_switch_to_hiprio_task(void)
+{
+	u16_t hiprio = get_hiprio();
 
+	if (hiprio >= g_plainos_curr_task_tcb->prio) {
+		g_plainos_curr_task_tcb = list_next_entry(g_plainos_curr_task_tcb, struct tcb, node);
+	} else {
+		g_plainos_curr_task_tcb = g_rdytask_list[hiprio].head;
+	}
+
+	/* OS schedule */
+	plainos_schedule();
+}

@@ -28,10 +28,17 @@ SOFTWARE.
 #include <kernel/list.h>
 
 /*************************************************************************************
+ * Type Name: task_schedule_t
+ * Description: task schedule of plain os port.
+ *
+ ************************************************************************************/
+typedef void (*task_schedule_t)(void);
+
+/*************************************************************************************
  * Structure Name: tcb
  * Description: task controller block.
  *
- * Parameters:
+ * Members:
  *   @task_sp: task stack pointer.
  *   @node: list node of tcb.
  *   @next: pointer to next tcb of the same priority in rdy list.
@@ -61,5 +68,34 @@ struct tcb
 };
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+/*************************************************************************************
+ * Function Name: plainos_switch_to_next_same_prio_task
+ * Description: Switch to the next task of same priority.
+ *
+ * Param:
+ *   void
+ * Return:
+ *   void
+ ************************************************************************************/
+void plainos_switch_to_next_same_prio_task(void);
+
+/*************************************************************************************
+ * Function Name: plainos_switch_to_next_same_prio_task
+ * Description: Switch to the task of highest priority.
+ *
+ * Param:
+ *   void
+ * Return:
+ *   void
+ ************************************************************************************/
+void plainos_switch_to_hiprio_task(void);
+
+
+#ifdef __cplusplus
+}
+#endif
 #endif /* __KERNEL_TASK_H__ */

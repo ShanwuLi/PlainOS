@@ -20,25 +20,18 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#ifndef __KERNEL_SECTIONS_H__
-#define __KERNEL_SECTIONS_H__
 
-#define INIT_CALLS_LEVEL(level)       __initcall##level##_start = .; \
-	                                  KEEP(*(.initcall##level##.init)) \
-	                                  KEEP(*(.initcall##level##s.init))
+#ifndef __PLAINOS_PORT_H__
+#define __PLAINOS_PORT_H__
 
-#define INIT_CALLS                    __initcall_start = .; \
-	                                  KEEP(*(.initcallearly.init)) \
-	                                  INIT_CALLS_LEVEL(0) \
-	                                  INIT_CALLS_LEVEL(1) \
-	                                  INIT_CALLS_LEVEL(2) \
-	                                  INIT_CALLS_LEVEL(3) \
-	                                  INIT_CALLS_LEVEL(4) \
-	                                  INIT_CALLS_LEVEL(5) \
-	                                  INIT_CALLS_LEVEL(6) \
-	                                  INIT_CALLS_LEVEL(7) \
-	                                  INIT_CALLS_LEVEL(8) \
-	                                  INIT_CALLS_LEVEL(9) \
-	                                  __initcall_end = .;
+typedef struct plainos_irqstate
+{
+	unsigned int state;
+} plainos_irqstate_t;
 
-#endif /* __KERNEL_SECTIONS_H__ */
+plainos_irqstate_t plainos_port_irq_save(void);
+void plainos_port_irq_store(plainos_irqstate_t);
+void plainos_schedule(void);
+
+
+#endif /* __PLAINOS_PORT_H__ */

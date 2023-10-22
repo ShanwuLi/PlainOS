@@ -26,6 +26,7 @@ SOFTWARE.
 
 #include <stdint.h>
 #include <kernel/list.h>
+#include <task.h>
 
 /*************************************************************************************
  * Type Name: type
@@ -50,12 +51,6 @@ typedef int64_t                          s64_t;
 #define PLAINOS_CFG_PRIORITIES_MAX       (100u)
 #define PLPAINOS_CFG_TASK_DLY            (1u)
 
-
-
-
-
-
-
 #define __used                           __attribute__((used))
 
 #define ARRAY_SIZE(a)                   (sizeof(a) / sizeof(a[0]))
@@ -73,8 +68,5 @@ typedef int64_t                          s64_t;
  ************************************************************************************/
 #define container_of(ptr, struct_type, member) \
 	((void *)ptr - (void *)(&(((struct_type *)0)->member)))
-
-
-
 
 #endif /* __KERNEL_KERNEL_H__ */
