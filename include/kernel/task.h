@@ -41,6 +41,7 @@ typedef void (*task_schedule_t)(void);
  *
  * Members:
  *   @task_sp: task stack pointer.
+ *   @parent: pointer to parent task.
  *   @node: list node of tcb.
  *   @next: pointer to next tcb of the same priority in rdy list.
  *   @past_state: past state of system.
