@@ -55,6 +55,7 @@ typedef void (*task_schedule_t)(void);
 struct tcb
 {
 	void *task_sp;
+	struct tcb *parent;
 	struct list_node node;
 	u8_t past_state;
 	u8_t curr_state;
