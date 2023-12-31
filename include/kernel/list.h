@@ -35,7 +35,7 @@ struct list_node {
 	struct list_node *next;
 };
 
-#define LIST_NODE(name) \
+#define LIST_HEAD(name) \
 	struct list_node name = {.next = &(name), .prev = &(name)}
 
 /*************************************************************************************
@@ -70,10 +70,10 @@ struct list_node {
  * Param:
  *   @entry: specific entry.
  * Return:
- *   @entry_type: previous entry of specific entry.
+ *   @member_name: previous entry of specific entry.
  ************************************************************************************/
-#define list_prev_entry(entry, entry_type, list_node_member) \
-	container_of(entry->list_node_member.prev, entry_type, list_node_member)
+#define list_prev_entry(entry, entry_type, member_name) \
+	container_of(entry->member_name.prev, entry_type, member_name)
 
 /*************************************************************************************
  * Function Name: list_for_each_entry
@@ -83,14 +83,14 @@ struct list_node {
  *   @pos: the &struct list_head to use as a loop cursor.
  *   @list_head: the head for your list.
  *   @entry_type: type of the struct.
- *   @list_node_member: member name of the list_node in structure.
+ *   @member_name: member name of the list_node in structure.
  * Return:
  *   void
  ************************************************************************************/
-#define list_for_each_entry(pos, list_head, entry_type, list_node_member) \
-	for (pos = container_of((list_head)->next, entry_type, list_node_member); \
-	     &pos->list_node_member != (list_head); \
-	     pos = container_of(pos->list_node_member.next, entry_type, list_node_member))
+#define list_for_each_entry(pos, list_head, entry_type, member_name) \
+	for (pos = container_of((list_head)->next, entry_type, member_name); \
+	     &pos->member_name != (list_head); \
+	     pos = container_of(pos->member_name.next, entry_type, member_name))
 
 /*************************************************************************************
  * Function Name: list_init
@@ -101,7 +101,7 @@ struct list_node {
  * Return:
  *   void
  ************************************************************************************/
-static void list_init(struct list_node *node)
+static void __used list_init(struct list_node *node)
 {
 	node->next = node;
 	node->prev = node;
@@ -117,7 +117,7 @@ static void list_init(struct list_node *node)
  * Return:
  *   void
  ************************************************************************************/
-static void list_add_node_at_tail(struct list_node *head, struct list_node *node)
+static void __used list_add_node_at_tail(struct list_node *head, struct list_node *node)
 {
 	struct list_node *tail = head->prev;
 
@@ -137,7 +137,7 @@ static void list_add_node_at_tail(struct list_node *head, struct list_node *node
  * Return:
  *   void
  ************************************************************************************/
-static void list_add_node_at_front(struct list_node *head, struct list_node *node)
+static void __used list_add_node_at_front(struct list_node *head, struct list_node *node)
 {
 	struct list_node *front = head->next;
 
@@ -156,7 +156,7 @@ static void list_add_node_at_front(struct list_node *head, struct list_node *nod
  * Return:
  *   void
  ************************************************************************************/
-static void list_del_tail_node(struct list_node *head)
+static void __used list_del_tail_node(struct list_node *head)
 {
 	struct list_node *tail_prev = head->prev->prev;
 
@@ -173,7 +173,7 @@ static void list_del_tail_node(struct list_node *head)
  * Return:
  *   void
  ************************************************************************************/
-static void list_del_front_node(struct list_node *head)
+static void __used list_del_front_node(struct list_node *head)
 {
 	struct list_node *front_next = head->next->next;
 
@@ -190,7 +190,7 @@ static void list_del_front_node(struct list_node *head)
  * Return:
  *   void
  ************************************************************************************/
-static void list_del_node(struct list_node *node)
+static void __used list_del_node(struct list_node *node)
 {
 	node->prev->next = node->next;
 	node->next->prev = node->prev;
@@ -205,7 +205,7 @@ static void list_del_node(struct list_node *node)
  * Return:
  *   @bool: is empty.
  ************************************************************************************/
-static bool list_is_empty(struct list_node *head)
+static bool __used list_is_empty(struct list_node *head)
 {
 	return head->next == head;
 }
@@ -219,7 +219,7 @@ static bool list_is_empty(struct list_node *head)
  * Return:
  *   @list_node*: next node of specific node.
  ************************************************************************************/
-static struct list_node* list_next_node(struct list_node *node)
+static struct list_node* __used list_next_node(struct list_node *node)
 {
 	return node->next;
 }
@@ -233,7 +233,7 @@ static struct list_node* list_next_node(struct list_node *node)
  * Return:
  *   @list_node*: previous node of specific node.
  ************************************************************************************/
-static struct list_node* list_prev_node(struct list_node *node)
+static struct list_node* __used list_prev_node(struct list_node *node)
 {
 	return node->prev;
 }

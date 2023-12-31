@@ -94,7 +94,7 @@ static u8_t g_hiprio_bitmap_lv3;
  * Global Variable Name: g_rdytask_list
  * Description:  List of ready task.
  ************************************************************************************/
-static struct rdytask_list g_rdytask_list[PLAINOS_CFG_PRIORITIES_MAX + 1];
+static struct rdytask_list __used g_rdytask_list[PLAINOS_CFG_PRIORITIES_MAX + 1];
 
 /*************************************************************************************
  * Function Name: get_hiprio
@@ -139,7 +139,7 @@ static u16_t get_hiprio(void)
  * Return:
  *   void
  ************************************************************************************/
-static void clear_bit_of_hiprio_bitmap(u16_t prio)
+static void __used clear_bit_of_hiprio_bitmap(u16_t prio)
 {
 	g_hiprio_bitmap[prio >> 3] &= (u8_t)(~(1 << (prio & 0x7)));
 	if (g_hiprio_bitmap[prio >> 3] != 0)
@@ -166,7 +166,7 @@ static void clear_bit_of_hiprio_bitmap(u16_t prio)
  * Return:
  *   void
  ************************************************************************************/
-static void set_bit_of_hiprio_bitmap(u16_t prio)
+static void __used set_bit_of_hiprio_bitmap(u16_t prio)
 {
 	g_hiprio_bitmap[prio >> 3]     |= (u8_t)(1 << ((prio & 0x7) >> 0));
 	g_hiprio_bitmap_lv1[prio >> 6] |= (u8_t)(1 << ((prio & 0x3f) >> 3));
@@ -183,7 +183,7 @@ static void set_bit_of_hiprio_bitmap(u16_t prio)
  * Return:
  *   void
  ************************************************************************************/
-static void rdytask_list_init(void)
+static void __used rdytask_list_init(void)
 {
 	u16_t i;
 
@@ -202,7 +202,7 @@ static void rdytask_list_init(void)
  * Return:
  *   void
  ************************************************************************************/
-static void insert_tcb_to_rdylist(struct tcb *tcb)
+static void __used insert_tcb_to_rdylist(struct tcb *tcb)
 {
 	u16_t prio = tcb->prio;
 	struct rdytask_list *rdylist = &g_rdytask_list[prio];
@@ -227,7 +227,7 @@ static void insert_tcb_to_rdylist(struct tcb *tcb)
  * Return:
  *   void
  ************************************************************************************/
-static void remove_tcb_from_rdylist(struct tcb *tcb)
+static void __used remove_tcb_from_rdylist(struct tcb *tcb)
 {
 	u16_t prio = tcb->prio;
 	struct rdytask_list *rdylist = &g_rdytask_list[prio];
@@ -284,3 +284,5 @@ void plainos_switch_to_hiprio_task(void)
 	/* OS schedule */
 	plainos_port_schedule();
 }
+
+

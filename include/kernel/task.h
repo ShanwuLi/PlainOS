@@ -67,7 +67,7 @@ struct tcb
 #ifdef PLAINOS_CFG_TASK_DLY
 	u32_t dly_ticks_hi;
 	u32_t dly_ticks_lo;
-#endif /* POS_CFG_TASK_DLY */
+#endif /* PLAINOS_CFG_TASK_DLY */
 };
 
 typedef int (*task_t)(int argc, char *argv[]);
@@ -97,7 +97,6 @@ void plainos_switch_to_next_same_prio_task(void);
  *   void
  ************************************************************************************/
 void plainos_switch_to_hiprio_task(void);
-
 
 #ifdef __cplusplus
 }
