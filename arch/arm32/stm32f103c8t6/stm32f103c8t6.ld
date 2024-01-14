@@ -94,6 +94,13 @@ SECTIONS
     . = ALIGN(4);
   } >FLASH
 
+  .errno :
+  {
+     . = ALIGN(4);
+     ERRNO_SECTION
+     . = ALIGN(4);
+  } >FLASH
+
   .init_array :
   {
     PROVIDE_HIDDEN (__init_array_start = .);

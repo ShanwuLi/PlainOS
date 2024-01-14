@@ -84,5 +84,46 @@ void USART1_PrintString(const char *String)
 
 }
 
+void USART1_PrintNumber(unsigned long number)
+{
+      unsigned char usart_save[16]={0};
+			unsigned char *usart_p;
+			unsigned char i=1;
+			unsigned int num=0;
+			num=number;
+				
+			while(num/10)
+			{
+				num/=10;
+				i++;
+			}
+			usart_p=usart_save;
+			for(;i>0;i--)
+			{
+				usart_save[i-1]=number%10+48;
+				number/=10;
+			}
+      while(*usart_p)
+      {
+      USART1->DR=*usart_p;                        
+      while(!(USART1->SR&(1<<6)));
+      usart_p++;
+      }
+	
+}
+
+void USART1_PrintInteger(int integer)
+{
+	 unsigned int a=0;
+   if(integer >= 0)
+		 USART1_PrintNumber(integer);
+	 else
+	 {
+		 USART1_PrintString(" -");
+		 a =  (~(unsigned int)(integer)) + 1;
+		 USART1_PrintNumber(a);
+	 }
+}
+
 #endif
 

@@ -10,6 +10,7 @@
 */
 #include "stm32f10x.h"
 #include <kernel/initcall.h>
+#include "errno.h"
 
 static void delay(int x)
 {
@@ -128,6 +129,10 @@ int main()
 
 	USART1_PrintString("PlainOS\r\n");
 
+	long *err_Ptr = ERR_TO_PTR(-4);
+
+	USART1_PrintInteger(*err_Ptr);
+	USART1_PrintString("\r\n");
 	while (1)
 	{
 		USART1_PrintString("PlainOS\r\n");

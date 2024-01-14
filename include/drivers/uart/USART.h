@@ -38,6 +38,8 @@
 #if(USART1_EN==1)
 void USART1_Init(void);                                
 void USART1_PrintString(const  char *String);
+void USART1_PrintNumber(unsigned long number);
+void USART1_PrintInteger(int integer);
 #endif
 /*#############################����ΪUSRAT2�ӿں���############################################*/
 //��ע��USART1����ΪPA3��PA2��ʹ��USART2�������������޷��������
