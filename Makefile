@@ -137,10 +137,10 @@ $(TARGET).size: $(TARGET).elf
 .PHONY:clean
 clean:
 	@echo Removing all output files
-	@$(RM) $(TARGET_FILES) $(TARGET).bin
 ifneq (,$(wildcard $(OUTDIR)/*))
 	@$(RM) $(OUTDIR)
 endif
+	@echo Removing done
 
 rebuild:
 	@make clean

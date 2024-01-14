@@ -26,6 +26,14 @@ SOFTWARE.
 
 #include <stdint.h>
 
+#ifndef NULL
+#define NULL                            ((void*)0)
+#endif
+
+#ifndef nullptr
+#define nullptr                         ((void*)0)
+#endif
+
 /*************************************************************************************
  * Type Name: type
  * Description: define a lots of  variable type.
@@ -52,5 +60,6 @@ typedef signed long long                 ll_t;
 
 #define UINTPTR_T_MAX                    (~((uintptr_t)0))
 #define UINTPTR_T_BITS                   (sizeof(uintptr_t) << 3)
+
 
 #endif /* __KERNEL_TYPES_H__ */

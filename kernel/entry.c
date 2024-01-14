@@ -115,6 +115,9 @@ static int UART_INIT5(void)
 late_initcall(UART_INIT5);
 
 
+static __const int adenckenv = 190;
+
+
 int main()
 {
 	initcalls_call();
@@ -129,9 +132,8 @@ int main()
 
 	USART1_PrintString("PlainOS\r\n");
 
-	long *err_Ptr = ERR_TO_PTR(-4);
 
-	USART1_PrintInteger(*err_Ptr);
+	USART1_PrintInteger(adenckenv);
 	USART1_PrintString("\r\n");
 	while (1)
 	{

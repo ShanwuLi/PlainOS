@@ -28,14 +28,10 @@ SOFTWARE.
 #include <config.h>
 
 #define __used                          __attribute__((used))
-
+#define __const                         __attribute__((section("__const")))
+#define USED(sym)                       ((void)(sym))
 #define ARRAY_SIZE(a)                   (sizeof(a) / sizeof(a[0]))
 
-#ifndef NULL
-#define NULL                            ((void*)0)
-#endif
-
-#define USED(sym)                       ((void)(sym))
 /*************************************************************************************
  * Function Name: container_of
  * Description: Get the address of the structure instance.

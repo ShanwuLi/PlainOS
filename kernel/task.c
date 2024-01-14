@@ -53,7 +53,7 @@ struct rdytask_list {
  * Description: Obtain the highest priority through the priority index table.
  *              Supports up to 4096 priority levels.
  ************************************************************************************/
-static const u8_t g_hiprio_idx_tbl[256] = {
+static __const u8_t g_hiprio_idx_tbl[256] = {
 	0, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,  /* 0x00 to 0x0F */
 	4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,  /* 0x10 to 0x1F */
 	5, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,  /* 0x20 to 0x2F */
