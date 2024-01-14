@@ -25,7 +25,6 @@ SOFTWARE.
 #define __KERNEL_MEM_POOL_H__
 #include "types.h"
 #include <stddef.h>
-#include <stdbool.h>
 
 struct mem_pool {
 	ushrt_t id;

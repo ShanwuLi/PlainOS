@@ -24,6 +24,7 @@ SOFTWARE.
 #include <errno.h>
 #include <kernel/mem_pool.h>
 #include <kernel/kernel.h>
+#include <stdbool.h>
 
 /*************************************************************************************
  * Description: definitions.
@@ -212,7 +213,7 @@ struct mem_pool *plainos_mem_pool_init(void *pool, ushrt_t id,
 	mp->blk_first_bits = (uchar_t *)(mp->blk_bitmaps + blk_num);
 	mp->blk_max_bits = mp->blk_first_bits + blk_num;
 	mp->data_pool = mp->blk_max_bits + blk_num;
-	mp->data_pool = align_address(mp->data_pool, sizeof(uintptr_t) << 2);
+	mp->data_pool = (uchar_t *)align_address(mp->data_pool, sizeof(uintptr_t) << 2);
 	mp->data_pool_size = pool_size - ((size_t)mp->data_pool - (size_t)mp);
 	mp->data_pool_size &= (~(((size_t)1 << grain_order) - 1));
 
@@ -422,12 +423,12 @@ static void update_bit_map(struct mem_pool *mp, size_t blk_start_idx,
 		max_bits = UINTPTR_T_BITS;
 	}
 
-	if (bit_num >= UINTPTR_T_MAX) {
+	if (bit_num >= UINTPTR_T_BITS) {
 		for (i = 0; i < bit_num / UINTPTR_T_BITS; i++) {
 			mp->blk_first_bits[blk_offset] = first_bits;
 			mp->blk_max_bits[blk_offset] = max_bits;
 			mp->blk_bitmaps[blk_offset] = bitmap;
-			blk_offset += i;
+			++blk_offset;
 		}
 	}
 

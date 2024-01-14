@@ -46,6 +46,6 @@ SOFTWARE.
  *   void
  ************************************************************************************/
 #define container_of(ptr, struct_type, member) \
-	((struct_type *)((void *)ptr - (void*)(&(((struct_type *)0)->member))))
+	((struct_type *)((char *)ptr - (char *)(&(((struct_type *)0)->member))))
 
 #endif /* __KERNEL_KERNEL_H__ */
