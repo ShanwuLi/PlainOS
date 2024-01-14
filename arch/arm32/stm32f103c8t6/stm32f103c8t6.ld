@@ -96,6 +96,13 @@ SECTIONS
     . = ALIGN(4);
   } >FLASH
 
+  .appcall.app :
+  {
+    . = ALIGN(4);
+    APPS_CALLS_SECTION
+    . = ALIGN(4);
+  }
+
   .errno :
   {
      . = ALIGN(4);
