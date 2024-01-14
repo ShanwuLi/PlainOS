@@ -7,17 +7,15 @@ This project is Plain OS, aimed at developing a universal operating system with 
 
 ```c++
 plain-os                                             顶层目录
-   |---- main.c                                      系统入口
+   |---- Makefile                                    顶层Makefile（编译入口）
    |
-   |---- Makefile                                    顶层Makefile
-   |
-   |---- arch                                        特定架构目录
+   |---- arch                                        特定架构目录（BSP驱动）
    |      |
-   |      |--- arm                                   arm目录
+   |      |--- arm32                                 arm32目录
    |      |     |
    |      |     |---stm32f103c8t6                    stm32f103c8t6特性平台小系统启动目录
    |      |     |    |
-   |      |     |    |--- arm.mk                     小系统启动目录层Makefile
+   |      |     |    |--- arm32.mk                   小系统启动目录层Makefile
    |      |     |    |--- xxxx.c                     小系统启动目录层源文件
    |      |     |
    |      |     |---stm32f407vet6                    stm32f407vet6特性平台小系统启动目录
@@ -27,25 +25,25 @@ plain-os                                             顶层目录
    |      |--- avr                                   avr目录
    |      |     |
    |      |     |---atmega128a                       atmega128a特性平台小系统启动目录
-   |      |     |    |--- arm.mk                     小系统启动目录层Makefile
+   |      |     |    |--- avr.mk                     小系统启动目录层Makefile
    |      |     |    |--- xxx.c                      小系统启动目录层源文件
    |      |     |
    |      |     |---atmega2560                       atmega2560特性平台小系统启动目录
-   |      |     |    |--- arm.mk                     小系统启动目录层Makefile
+   |      |     |    |--- avr.mk                     小系统启动目录层Makefile
    |      |     |    |--- xxx.c                      小系统启动目录层源文件
    |      |
    |      |--- riscv                                 risc-v目录
    |            |
    |            |---ch32vf103                        ch32vf103特性平台小系统启动目录
-   |                 |--- arm.mk                     小系统启动目录层Makefile
+   |                 |--- rescv.mk                   小系统启动目录层Makefile
    |                 |--- xxx.c                      小系统启动目录层源文件
    |
-   |  
+   |
    |---- kernel                                      OS内核目录
    |      |
    |      |---- kernel.mk                            内核Makefile
    |
-   |---- drivers                                     驱动目录
+   |---- drivers                                     驱动目录（BSP驱动）
    |      |
    |      |---- drivers.mk                           驱动目录顶层Makefile
    |      |
@@ -66,9 +64,15 @@ plain-os                                             顶层目录
    |      |---- drivers                              驱动头文件目录
    |      |---- kernel                               内核头文件目录
    |
-   |---- psh                                         PlainOS Shell
+   |---- apps                                        app目录，应用程序入口
    |
-   |---- os_test                                     OS测试代码
+   |---- out                                         镜像输出及obj相关文件
+   |
+   |---- os_test                                     OS自测试代码
+   |
+   |---- documents                                   OS文档
+
+
 ```
 
 #### 安装教程
