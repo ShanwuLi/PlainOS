@@ -90,7 +90,7 @@ SECTIONS
   .initcall.init :
   {
     . = ALIGN(4);
-    INIT_CALLS
+    INIT_CALLS_SECTION
     . = ALIGN(4);
   } >FLASH
 

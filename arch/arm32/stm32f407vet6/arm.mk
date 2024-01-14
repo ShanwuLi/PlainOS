@@ -15,5 +15,5 @@ ASM_FLAGS += -x assembler-with-cpp
 LDFLAGS   += -Wl,--gc-sections,--print-memory-usage -specs=nano.specs
 LIBS      += -lc -lm -lnosys
 
-INC += -I$(TOPDIR)/arch/arm/stm32f407vet6
-INC += -I$(TOPDIR)/arch/arm/stm32f407vet6/cmsis
+INC += -I$(TOPDIR)/arch/arm32/stm32f407vet6
+INC += -I$(TOPDIR)/arch/arm32/stm32f407vet6/cmsis

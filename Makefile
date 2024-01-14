@@ -29,9 +29,12 @@ SIZE     := $(CROSS_COMPILE)size
 OPTIMIZE := -O3
 DEBUG    := -g #-DNDEBUG to close debug in DEFINE.
 
-ARCH     := arm
+ARCH     := arm32
 MCU      := -mcpu=cortex-m3#-mmcu=atmega128
 CHIP     := stm32f103c8t6#atmega128
+
+#=================================================================================================#
+#////////////////////////////// Do not to modify following code //////////////////////////////////#
 
 TOPDIR   := .
 OUTDIR   := out
@@ -42,19 +45,17 @@ TARGET   := $(OUTDIR)/$(CHIP)
 DEFINE   := #-DNDEBUG
 
 CXX_SRCS :=
-C_SRCS   := main.c
+C_SRCS   :=
 ASM_SRCS :=
-
-#////////////////////////////// Do not to modify following code //////////////////////////////////#
-LINK_SCRIPT := $(TOPDIR)/arch/$(ARCH)/$(CHIP)/$(CHIP).ld
-
+LINK_SCRIPT :=
 RM := rm -rf
 
-#=================================================================================================#
+#-------------------------------------------------------------------------------------------------#
 # include sub-makefiles
--include $(TOPDIR)/arch/$(ARCH)/$(CHIP)/*.mk
--include $(TOPDIR)/kernel/*.mk
--include $(TOPDIR)/drivers/*.mk
+-include $(TOPDIR)/arch/arch.mk
+-include $(TOPDIR)/kernel/kernel.mk
+-include $(TOPDIR)/drivers/drivers.mk
+-include $(TOPDIR)/apps/apps.mk
 
 # compiler flags
 C_FLAGS   += $(MCU) $(INC) $(OPTIMIZE) $(DEBUG)
@@ -148,3 +149,4 @@ rebuild:
 disp_flags:
 	@echo "C_OBJS" : $(C_OBJS)
 	@echo "C_FLAGS:" $(C_FLAGS)
+	@echo "INC:" $(INC)

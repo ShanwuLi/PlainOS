@@ -20,8 +20,5 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-INC += -I$(TOPDIR)/kernel
-
-C_SRCS += $(TOPDIR)/kernel/entry.c
-C_SRCS += $(TOPDIR)/kernel/task.c
-C_SRCS += $(TOPDIR)/kernel/mem_pool.c
+ARCH_DIR := $(TOPDIR)/arch
+-include $(ARCH_DIR)/$(ARCH)/$(CHIP)/$(ARCH).mk

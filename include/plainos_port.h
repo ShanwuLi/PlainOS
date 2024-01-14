@@ -24,6 +24,7 @@ SOFTWARE.
 #ifndef __PLAINOS_PORT_H__
 #define __PLAINOS_PORT_H__
 
+#include <stddef.h>
 #include <kernel/kernel.h>
 #include <kernel/task.h>
 

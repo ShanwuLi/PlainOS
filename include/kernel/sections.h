@@ -27,7 +27,7 @@ SOFTWARE.
 	                                  KEEP(*(.initcall##level##.init)) \
 	                                  KEEP(*(.initcall##level##s.init))
 
-#define INIT_CALLS                    __initcall_start = .; \
+#define INIT_CALLS_SECTION            __initcall_start = .; \
 	                                  KEEP(*(.initcallearly.init)) \
 	                                  INIT_CALLS_LEVEL(0) \
 	                                  INIT_CALLS_LEVEL(1) \
@@ -40,5 +40,8 @@ SOFTWARE.
 	                                  INIT_CALLS_LEVEL(8) \
 	                                  INIT_CALLS_LEVEL(9) \
 	                                  __initcall_end = .;
+
+
+#define ERRNO_SECTION
 
 #endif /* __KERNEL_SECTIONS_H__ */

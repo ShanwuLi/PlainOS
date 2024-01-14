@@ -21,31 +21,36 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef __KERNEL_KERNEL_H__
-#define __KERNEL_KERNEL_H__
+#ifndef __KERNEL_TYPES_H__
+#define __KERNEL_TYPES_H__
 
-#include "types.h"
-#include <config.h>
+#include <stdint.h>
 
-#define __used                          __attribute__((used))
-
-#define ARRAY_SIZE(a)                   (sizeof(a) / sizeof(a[0]))
-
-#ifndef NULL
-#define NULL                            ((void*)0)
-#endif
 /*************************************************************************************
- * Function Name: container_of
- * Description: Get the address of the structure instance.
- *
- * Param:
- *   @ptr: address of the structure member.
- *   @struct_type: type of the structure.
- *   @member: member name of the ptr in structure.
- * Return:
- *   void
+ * Type Name: type
+ * Description: define a lots of  variable type.
  ************************************************************************************/
-#define container_of(ptr, struct_type, member) \
-	((struct_type *)((void *)ptr - (void*)(&(((struct_type *)0)->member))))
+typedef uint8_t                          u8_t;
+typedef uint16_t                         u16_t;
+typedef uint32_t                         u32_t;
+typedef uint64_t                         u64_t;
 
-#endif /* __KERNEL_KERNEL_H__ */
+typedef int8_t                           s8_t;
+typedef int16_t                          s16_t;
+typedef int32_t                          s32_t;
+typedef int64_t                          s64_t;
+
+typedef unsigned char                    uchar_t;
+typedef unsigned short int               ushrt_t;
+typedef unsigned long int                uint_t;
+typedef unsigned long long               ull_t;
+
+typedef signed char                      char_t;
+typedef signed short int                 shrt_t;
+typedef signed long int                  int_t;
+typedef signed long long                 ll_t;
+
+#define UINTPTR_T_MAX                    (~((uintptr_t)0))
+#define UINTPTR_T_BITS                   (sizeof(uintptr_t) << 3)
+
+#endif /* __KERNEL_TYPES_H__ */
