@@ -34,3 +34,5 @@ CXX_FLAGS += $(TEMP_FLAGS) -xc++ -std=c++99
 ASM_FLAGS += -x assembler-with-cpp
 LDFLAGS   += -Wl,--gc-sections
 LIBS      += -lc -lm
+
+LINK_SCRIPT := $(ARCH_DIR)/avr/atmega128/atmega128.ld

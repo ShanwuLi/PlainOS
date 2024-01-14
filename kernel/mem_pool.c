@@ -187,7 +187,6 @@ struct mem_pool *plainos_mem_pool_init(void *pool, ushrt_t id,
 	struct mem_pool *mp;
 	uchar_t *body;
 	size_t blk_num;
-	size_t data_pool_size;
 	size_t min_pool_size;
 
 	if (pool == NULL)
@@ -280,6 +279,7 @@ static bool find_bit_condition(struct mem_pool *mp, size_t iter,
 	    >= alloc_size)
 		return true;
 
+	USED(arg);
 	return false;
 }
 
@@ -337,7 +337,7 @@ static size_t get_bit_offset(struct mem_pool *mp, size_t blk_idx,
                          uchar_t grain_order, size_t alloc_size)
 {
 	size_t i;
-	uchar_t max_continue_bits = 0;
+	size_t max_continue_bits = 0;
 	uintptr_t blk_bitmap = mp->blk_bitmaps[blk_idx];
 
 	if (alloc_size >= (((size_t)1 << grain_order) * UINTPTR_T_BITS))

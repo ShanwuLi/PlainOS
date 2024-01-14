@@ -28,7 +28,6 @@ SOFTWARE.
  *************************************************************************************/
 
 /* maximum priority of plainos */
-#define PLAINOS_CFG_MACHINE_WIDTH       (32u) 
 #define PLAINOS_CFG_PRIORITIES_MAX      (100u)
 #define PLAINOS_CFG_TASK_DLY
 

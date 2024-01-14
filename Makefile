@@ -20,8 +20,8 @@
 # SOFTWARE.
 
 #=================================================================================================#
-# please install esptool using "pip install esptool" on your platform. 
-CROSS_COMPILE := arm-none-eabi-
+# please replace to your toochain.
+CROSS_COMPILE := arm-none-eabi-#avr
 CC       := $(CROSS_COMPILE)gcc
 OBJDUMP  := $(CROSS_COMPILE)objdump
 CP       := $(CROSS_COMPILE)objcopy
@@ -30,7 +30,7 @@ OPTIMIZE := -O3
 DEBUG    := -g #-DNDEBUG to close debug in DEFINE.
 
 ARCH     := arm32
-MCU      := -mcpu=cortex-m3#-mmcu=atmega128
+MCU      := -mcpu=cortex-m3#-mmcu=atmega128 
 CHIP     := stm32f103c8t6#atmega128
 
 #=================================================================================================#

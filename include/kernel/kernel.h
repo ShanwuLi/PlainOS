@@ -34,6 +34,8 @@ SOFTWARE.
 #ifndef NULL
 #define NULL                            ((void*)0)
 #endif
+
+#define USED(sym)                       ((void)(sym))
 /*************************************************************************************
  * Function Name: container_of
  * Description: Get the address of the structure instance.
