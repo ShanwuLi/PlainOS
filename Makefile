@@ -65,13 +65,13 @@ LDFLAGS   += $(MCU) -T$(TARGET).lds $(LIBDIR) $(LIBS) -Wl,-Map=$(TARGET).map,--c
 
 # list of objects
 CXX_OBJS_TMP = $(patsubst %.cpp,%.o,$(CXX_SRCS))
-CXX_OBJS := $(addprefix out/,$(CXX_OBJS_TMP))	# replace ".." to "."
+CXX_OBJS := $(addprefix out/,$(CXX_OBJS_TMP))
 
 C_OBJS_TMP = $(patsubst %.c,%.o,$(C_SRCS))
-C_OBJS := $(addprefix out/,$(C_OBJS_TMP))	# replace ".." to "."
+C_OBJS := $(addprefix out/,$(C_OBJS_TMP))
 
 ASM_OBJS_TMP += $(patsubst %.S,%.o,$(ASM_SRCS))
-ASM_OBJS := $(addprefix out/,$(ASM_OBJS_TMP))	# replace ".." to "."
+ASM_OBJS := $(addprefix out/,$(ASM_OBJS_TMP))
 
 OBJS := $(C_OBJS) $(ASM_OBJS) $(CXX_OBJS)
 
