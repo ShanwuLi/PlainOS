@@ -284,5 +284,3 @@ void plainos_switch_to_hiprio_task(void)
 	/* OS schedule */
 	plainos_port_schedule();
 }
-
-
