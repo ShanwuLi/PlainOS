@@ -40,11 +40,11 @@ struct plainos_app_call {
 		.argv = argv, \
 	}
 
-#define system_appcall(app, argc, argv)      __define_appcall(app, argc, argv, 0)
-#define dfx_appcall(app, argc, argv)         __define_appcall(app, argc, argv, 1)
-#define exception_appcall(app, argc, argv)   __define_appcall(app, argc, argv, 2)
-#define perf_appcall(app, argc, argv)        __define_appcall(app, argc, argv, 3)
-#define test_appcall(app, argc, argv)        __define_appcall(app, argc, argv, 4)
-#define user_appcall(app, argc, argv)        __define_appcall(app, argc, argv, 5)
+#define system_app_register(app, argc, argv)      __define_appcall(app, argc, argv, 0)
+#define dfx_app_register(app, argc, argv)         __define_appcall(app, argc, argv, 1)
+#define excep_app_register(app, argc, argv)       __define_appcall(app, argc, argv, 2)
+#define perf_app_register(app, argc, argv)        __define_appcall(app, argc, argv, 3)
+#define test_app_register(app, argc, argv)        __define_appcall(app, argc, argv, 4)
+#define user_app_register(app, argc, argv)        __define_appcall(app, argc, argv, 5)
 
 #endif /* __KERNEL_APPCALL_H__ */

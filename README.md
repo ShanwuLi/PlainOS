@@ -82,7 +82,7 @@ plain-os                                             顶层目录
 2.  修改顶层Makefile中的交叉工具链变量
 3.  添加平台相关启动系统代码（BSP）驱动
 4.  进入顶层目录make
-5.  在apps目录中添加应用层代码，使用xxx_appcall完成app注册
+5.  在apps目录中添加应用层代码，使用xxx_app_register完成app注册
 
 #### 使用说明
 
