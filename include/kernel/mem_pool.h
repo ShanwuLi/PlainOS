@@ -51,7 +51,7 @@ extern "C" {
 #endif
 
 /*************************************************************************************
- * Function Name: plainos_mem_pool_init
+ * Function Name: pl_mem_pool_init
  * 
  * Description:
  *    Memory pool initialization interface.
@@ -66,11 +66,11 @@ extern "C" {
  * Return:
  *   handle of memory pool.
  ************************************************************************************/
-struct mem_pool *plainos_mem_pool_init(void *pool, ushrt_t id,
+struct mem_pool *pl_mem_pool_init(void *pool, ushrt_t id,
                       size_t pool_size, uchar_t grain_order);
 
 /*************************************************************************************
- * Function Name: plainos_mem_pool_alloc
+ * Function Name: pl_mem_pool_alloc
  *
  * Description:
  *   Update bitmap when memory is allocated or free.
@@ -82,11 +82,11 @@ struct mem_pool *plainos_mem_pool_init(void *pool, ushrt_t id,
  * Return:
  *   address of memory.
  ************************************************************************************/
-void *plainos_mem_pool_alloc(struct mem_pool *mp, size_t size);
+void *pl_mem_pool_alloc(struct mem_pool *mp, size_t size);
 
 
 /*************************************************************************************
- * Function Name: plainos_mem_pool_free
+ * Function Name: pl_mem_pool_free
  *
  * Description:
  *   Free memory interface.
@@ -98,10 +98,10 @@ void *plainos_mem_pool_alloc(struct mem_pool *mp, size_t size);
  * Return:
  *   void.
  ************************************************************************************/
-void plainos_mem_pool_free(struct mem_pool *mp, void *p);
+void pl_mem_pool_free(struct mem_pool *mp, void *p);
 
 /*************************************************************************************
- * Function Name: plainos_mem_pool_get_free_bytes
+ * Function Name: pl_mem_pool_get_free_bytes
  *
  * Description:
  *   Get the remaining memory of the memory block interface.
@@ -112,11 +112,11 @@ void plainos_mem_pool_free(struct mem_pool *mp, void *p);
  * Return:
  *   remaining size of memory pool.
  ************************************************************************************/
-size_t plainos_mem_pool_get_free_bytes(struct mem_pool *mp);
+size_t pl_mem_pool_get_free_bytes(struct mem_pool *mp);
 
 
 /*************************************************************************************
- * Function Name: plainos_mem_pool_set
+ * Function Name: pl_mem_pool_set
  *
  * Description:
  *   set value of memory block.
@@ -130,11 +130,11 @@ size_t plainos_mem_pool_get_free_bytes(struct mem_pool *mp);
  * Return:
  *   the end of setting value address.
  ************************************************************************************/
-void *plainos_mem_pool_set(struct mem_pool *mp, void *p, uint8_t val, size_t size);
+void *pl_mem_pool_set(struct mem_pool *mp, void *p, uint8_t val, size_t size);
 
 
 /*************************************************************************************
- * Function Name: plainos_mem_pool_zalloc
+ * Function Name: pl_mem_pool_zalloc
  *
  * Description:
  *   Alloca memory interface of zero value.
@@ -147,10 +147,10 @@ void *plainos_mem_pool_set(struct mem_pool *mp, void *p, uint8_t val, size_t siz
  * Return:
  *   memory address.
  ************************************************************************************/
-void *plainos_mem_pool_zalloc(struct mem_pool *mp, size_t size);
+void *pl_mem_pool_zalloc(struct mem_pool *mp, size_t size);
 
 /*************************************************************************************
- * Function Name: plainos_mem_pool_calloc
+ * Function Name: pl_mem_pool_calloc
  *
  * Description:
  *   Alloca memory interface of array method.
@@ -164,7 +164,7 @@ void *plainos_mem_pool_zalloc(struct mem_pool *mp, size_t size);
  * Return:
  *   memory address.
  ************************************************************************************/
-void *plainos_mem_pool_calloc(struct mem_pool *mp, size_t num, size_t size);
+void *pl_mem_pool_calloc(struct mem_pool *mp, size_t num, size_t size);
 
 #ifdef __cplusplus
 }

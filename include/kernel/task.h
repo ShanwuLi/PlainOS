@@ -24,7 +24,7 @@ SOFTWARE.
 #ifndef __KERNEL_TASK_H__
 #define __KERNEL_TASK_H__
 
-#include <config.h>
+#include <pl_cfg.h>
 #include <kernel/kernel.h>
 #include <kernel/list.h>
 
@@ -85,10 +85,10 @@ extern "C" {
  * Return:
  *   void
  ************************************************************************************/
-void plainos_switch_to_next_same_prio_task(void);
+void pl_switch_to_next_same_prio_task(void);
 
 /*************************************************************************************
- * Function Name: plainos_switch_to_next_same_prio_task
+ * Function Name: pl_switch_to_next_same_prio_task
  * Description: Switch to the task of highest priority.
  *
  * Param:
@@ -96,7 +96,7 @@ void plainos_switch_to_next_same_prio_task(void);
  * Return:
  *   void
  ************************************************************************************/
-void plainos_switch_to_hiprio_task(void);
+void pl_switch_to_hiprio_task(void);
 
 #ifdef __cplusplus
 }

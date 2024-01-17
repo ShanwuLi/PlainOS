@@ -20,30 +20,24 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-
-#ifndef __KERNEL_KERNEL_H__
-#define __KERNEL_KERNEL_H__
-
-#include "types.h"
-#include <pl_cfg.h>
-
-#define __used                          __attribute__((used))
-#define __const                         __attribute__((section("__const")))
-#define USED(sym)                       ((void)(sym))
-#define ARRAY_SIZE(a)                   (sizeof(a) / sizeof(a[0]))
+#ifndef __ANSI_COLOR_H__
+#define __ANSI_COLOR_H__
 
 /*************************************************************************************
- * Function Name: container_of
- * Description: Get the address of the structure instance.
+ * NOTE:
+ *    ANSI escape codes are a standard for in-band signaling to control the cursor
+ * location, color, and other options on text terminals. The ANSI x3.64 standard
+ * was released in 1979 and later updated by the 5th edition ECMA-48 standard in 1991,
+ * ISO/IEC 6429 in 1992, and ISO-8613-3 in 1995.
+ *    ANSI escape codes are started using \e[ and contain numeric codes separated by
+ * semicolons. The escape code is terminated with an 'm'.
  *
- * Param:
- *   @ptr: address of the structure member.
- *   @struct_type: type of the structure.
- *   @member: member name of the ptr in structure.
- * Return:
- *   void
+ * This header file is reference to https://tintin.mudhalla.net/info/ansicolor/
+ *
  ************************************************************************************/
-#define container_of(ptr, struct_type, member) \
-	((struct_type *)((char *)ptr - (char *)(&(((struct_type *)0)->member))))
 
-#endif /* __KERNEL_KERNEL_H__ */
+
+
+
+
+#endif /* __ANSI_COLOR_H__ */

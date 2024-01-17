@@ -1,24 +1,40 @@
-#include <plainos_port.h>
+#include <pl_port.h>
+#include "early_setup/early_uart.h"
 
-plainos_irqstate_t plainos_port_irq_save(void)
+int pl_early_port_putc_init(void)
 {
-	plainos_irqstate_t irqstate;
+	USART1_Init();
+
+	return 0;
+}
+
+int pl_early_port_putc(char c)
+{
+	int ret = USART1_PrintChar(c);
+	return ret;
+}
+
+
+
+pl_irqstate_t pl_port_irq_save(void)
+{
+	pl_irqstate_t irqstate;
 
 	irqstate.state = 0;
 	return irqstate;
 }
 
-void plainos_port_irq_store(plainos_irqstate_t irqstate)
+void pl_port_irq_store(pl_irqstate_t irqstate)
 {
 	(void)irqstate;
 }
 
-void plainos_port_schedule(void)
+void pl_port_schedule(void)
 {
 
 }
 
-void *plainos_port_task_stack_init(task_t task,
+void *pl_port_task_stack_init(task_t task,
                                    void *task_stack,
                                    size_t stack_size)
 {

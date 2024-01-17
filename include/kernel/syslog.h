@@ -21,29 +21,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef __KERNEL_KERNEL_H__
-#define __KERNEL_KERNEL_H__
+#ifndef __KERNEL_SYSLOG_H__
+#define __KERNEL_SYSLOG_H__
 
-#include "types.h"
-#include <pl_cfg.h>
+#define LM(log_meta)   (void *)
+#define LOG(...)       ({char *log[] = { __VA_ARGS__ , NULL}; log;})
 
-#define __used                          __attribute__((used))
-#define __const                         __attribute__((section("__const")))
-#define USED(sym)                       ((void)(sym))
-#define ARRAY_SIZE(a)                   (sizeof(a) / sizeof(a[0]))
+int pl_early_syslog_info(char *fmt, char **log);
+int pl_early_syslog_warn(char *fmt, char **log);
+int pl_early_syslog_err(char *fmt, char **log);
 
-/*************************************************************************************
- * Function Name: container_of
- * Description: Get the address of the structure instance.
- *
- * Param:
- *   @ptr: address of the structure member.
- *   @struct_type: type of the structure.
- *   @member: member name of the ptr in structure.
- * Return:
- *   void
- ************************************************************************************/
-#define container_of(ptr, struct_type, member) \
-	((struct_type *)((char *)ptr - (char *)(&(((struct_type *)0)->member))))
-
-#endif /* __KERNEL_KERNEL_H__ */
+#endif /* __KERNEL_SYSLOG_H__ */

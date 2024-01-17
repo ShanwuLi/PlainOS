@@ -156,7 +156,7 @@ static void mem_pool_blk_init(struct mem_pool *mp)
 }
 
 /*************************************************************************************
- * Function Name: plainos_mem_pool_init
+ * Function Name: pl_mem_pool_init
  * 
  * Description:
  *    Memory pool initialization interface.
@@ -181,7 +181,7 @@ static void mem_pool_blk_init(struct mem_pool *mp)
  *                                     |
  *                                pool_szie
  ************************************************************************************/
-struct mem_pool *plainos_mem_pool_init(void *pool, ushrt_t id,
+struct mem_pool *pl_mem_pool_init(void *pool, ushrt_t id,
                       size_t pool_size, uchar_t grain_order)
 {
 	struct mem_pool *mp;
@@ -443,7 +443,7 @@ static void update_bit_map(struct mem_pool *mp, size_t blk_start_idx,
 }
 
 /*************************************************************************************
- * Function Name: plainos_mem_pool_alloc
+ * Function Name: pl_mem_pool_alloc
  *
  * Description:
  *   Update bitmap when memory is allocated or free.
@@ -455,7 +455,7 @@ static void update_bit_map(struct mem_pool *mp, size_t blk_start_idx,
  * Return:
  *   address of memory.
  ************************************************************************************/
-void *plainos_mem_pool_alloc(struct mem_pool *mp, size_t size)
+void *pl_mem_pool_alloc(struct mem_pool *mp, size_t size)
 {
 	bool found;
 	size_t blk_idx;
@@ -541,7 +541,7 @@ static struct mem_pool_data *get_mem_pool_data(struct mem_pool *mp, void *p)
 }
 
 /*************************************************************************************
- * Function Name: plainos_mem_pool_free
+ * Function Name: pl_mem_pool_free
  *
  * Description:
  *   Free memory interface.
@@ -553,7 +553,7 @@ static struct mem_pool_data *get_mem_pool_data(struct mem_pool *mp, void *p)
  * Return:
  *   void.
  ************************************************************************************/
-void plainos_mem_pool_free(struct mem_pool *mp, void *p)
+void pl_mem_pool_free(struct mem_pool *mp, void *p)
 {
 	size_t blk_idx;
 	size_t bit_offset;
@@ -598,7 +598,7 @@ static size_t mem_pool_blk_get_free_bytes(struct mem_pool *mp, size_t blk_idx,
 }
 
 /*************************************************************************************
- * Function Name: plainos_mem_pool_get_free_bytes
+ * Function Name: pl_mem_pool_get_free_bytes
  *
  * Description:
  *   Get the remaining memory of the memory block interface.
@@ -609,7 +609,7 @@ static size_t mem_pool_blk_get_free_bytes(struct mem_pool *mp, size_t blk_idx,
  * Return:
  *   remaining size of memory pool.
  ************************************************************************************/
-size_t plainos_mem_pool_get_free_bytes(struct mem_pool *mp)
+size_t pl_mem_pool_get_free_bytes(struct mem_pool *mp)
 {
 	size_t i;
 	size_t rest_bytes = 0;
@@ -624,7 +624,7 @@ size_t plainos_mem_pool_get_free_bytes(struct mem_pool *mp)
 }
 
 /*************************************************************************************
- * Function Name: plainos_mem_pool_set
+ * Function Name: pl_mem_pool_set
  *
  * Description:
  *   set value of memory block.
@@ -638,7 +638,7 @@ size_t plainos_mem_pool_get_free_bytes(struct mem_pool *mp)
  * Return:
  *   the end of setting value address.
  ************************************************************************************/
-void *plainos_mem_pool_set(struct mem_pool *mp, void *p, uint8_t val, size_t size)
+void *pl_mem_pool_set(struct mem_pool *mp, void *p, uint8_t val, size_t size)
 {
 	size_t i;
 	char *char_p;
@@ -664,7 +664,7 @@ void *plainos_mem_pool_set(struct mem_pool *mp, void *p, uint8_t val, size_t siz
 }
 
 /*************************************************************************************
- * Function Name: plainos_mem_pool_zalloc
+ * Function Name: pl_mem_pool_zalloc
  *
  * Description:
  *   Alloca memory interface of zero value.
@@ -677,19 +677,19 @@ void *plainos_mem_pool_set(struct mem_pool *mp, void *p, uint8_t val, size_t siz
  * Return:
  *   memory address.
  ************************************************************************************/
-void *plainos_mem_pool_zalloc(struct mem_pool *mp, size_t size)
+void *pl_mem_pool_zalloc(struct mem_pool *mp, size_t size)
 {
 	void *data;
 
-	data = plainos_mem_pool_alloc(mp, size);
+	data = pl_mem_pool_alloc(mp, size);
 	if (data != NULL)
-		plainos_mem_pool_set(mp, data, 0, size);
+		pl_mem_pool_set(mp, data, 0, size);
 
 	return data;
 }
 
 /*************************************************************************************
- * Function Name: plainos_mem_pool_calloc
+ * Function Name: pl_mem_pool_calloc
  *
  * Description:
  *   Alloca memory interface of array method.
@@ -703,14 +703,14 @@ void *plainos_mem_pool_zalloc(struct mem_pool *mp, size_t size)
  * Return:
  *   memory address.
  ************************************************************************************/
-void *plainos_mem_pool_calloc(struct mem_pool *mp, size_t num, size_t size)
+void *pl_mem_pool_calloc(struct mem_pool *mp, size_t num, size_t size)
 {
 	void *data;
 	size_t alloc_size = num * size;
 
-	data = plainos_mem_pool_alloc(mp, alloc_size);
+	data = pl_mem_pool_alloc(mp, alloc_size);
 	if (data != NULL)
-		plainos_mem_pool_set(mp, data, 0, alloc_size);
+		pl_mem_pool_set(mp, data, 0, alloc_size);
 
 	return data;
 }

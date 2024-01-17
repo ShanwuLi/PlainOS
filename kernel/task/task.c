@@ -22,18 +22,18 @@ SOFTWARE.
 */
 
 #include <errno.h>
-#include <config.h>
+#include <pl_cfg.h>
 #include <kernel/task.h>
 #include <kernel/list.h>
 #include <kernel/kernel.h>
-#include <plainos_port.h>
+#include <pl_port.h>
 
 /*************************************************************************************
  * Description: Definitions for highest priority of task.
  ************************************************************************************/
-#define HIPRIO_BITMAP_SIZE                      ((PLAINOS_CFG_PRIORITIES_MAX + 7) / 8)
-#define HIPRIO_LEV1_BITMAP_SIZE                 ((PLAINOS_CFG_PRIORITIES_MAX + 63) / 64)
-#define HIPRIO_LEV2_BITMAP_SIZE                 ((PLAINOS_CFG_PRIORITIES_MAX + 511) / 512)
+#define HIPRIO_BITMAP_SIZE                      ((PL_CFG_PRIORITIES_MAX + 7) / 8)
+#define HIPRIO_LEV1_BITMAP_SIZE                 ((PL_CFG_PRIORITIES_MAX + 63) / 64)
+#define HIPRIO_LEV2_BITMAP_SIZE                 ((PL_CFG_PRIORITIES_MAX + 511) / 512)
 #define HIPRIO_OF(lv2_idx, lv1_idx, idx, bit)   ( ((lv2_idx) << 9) \
                                                 | ((lv1_idx) << 6) \
                                                 | ((idx) << 3) \
@@ -76,7 +76,7 @@ static __const u8_t g_hiprio_idx_tbl[256] = {
  * Global Variable Name: g_rdytask_list
  * Description:  List of ready task.
  ************************************************************************************/
-struct tcb *g_plainos_curr_task_tcb;
+struct tcb *g_pl_curr_task_tcb;
 
 /*************************************************************************************
  * Global Variable Name: g_hiprio_bitmap, g_hiprio_bitmap_lv1, g_hiprio_bitmap_lv2,
@@ -94,7 +94,7 @@ static u8_t g_hiprio_bitmap_lv3;
  * Global Variable Name: g_rdytask_list
  * Description:  List of ready task.
  ************************************************************************************/
-static struct rdytask_list __used g_rdytask_list[PLAINOS_CFG_PRIORITIES_MAX + 1];
+static struct rdytask_list __used g_rdytask_list[PL_CFG_PRIORITIES_MAX + 1];
 
 /*************************************************************************************
  * Function Name: get_hiprio
@@ -187,7 +187,7 @@ static void __used rdytask_list_init(void)
 {
 	u16_t i;
 
-	for (i = 0; i < PLAINOS_CFG_PRIORITIES_MAX + 1; i++) {
+	for (i = 0; i < PL_CFG_PRIORITIES_MAX + 1; i++) {
 		g_rdytask_list[i].head = NULL;
 		g_rdytask_list[i].num = 0;
 	}
@@ -248,7 +248,7 @@ static void __used remove_tcb_from_rdylist(struct tcb *tcb)
 }
 
 /*************************************************************************************
- * Function Name: plainos_switch_to_next_same_prio_task
+ * Function Name: pl_switch_to_next_same_prio_task
  * Description: Switch to the next task of same priority.
  *
  * Param:
@@ -256,14 +256,14 @@ static void __used remove_tcb_from_rdylist(struct tcb *tcb)
  * Return:
  *   void
  ************************************************************************************/
-void plainos_switch_to_next_same_prio_task(void)
+void pl_switch_to_next_same_prio_task(void)
 {
-	g_plainos_curr_task_tcb = list_next_entry(g_plainos_curr_task_tcb, struct tcb, node);
-	plainos_port_schedule();
+	g_pl_curr_task_tcb = list_next_entry(g_pl_curr_task_tcb, struct tcb, node);
+	pl_port_schedule();
 }
 
 /*************************************************************************************
- * Function Name: plainos_switch_to_next_same_prio_task
+ * Function Name: pl_switch_to_hiprio_task
  * Description: Switch to the task of highest priority.
  *
  * Param:
@@ -271,16 +271,16 @@ void plainos_switch_to_next_same_prio_task(void)
  * Return:
  *   void
  ************************************************************************************/
-void plainos_switch_to_hiprio_task(void)
+void pl_switch_to_hiprio_task(void)
 {
 	u16_t hiprio = get_hiprio();
 
-	if (hiprio >= g_plainos_curr_task_tcb->prio) {
-		g_plainos_curr_task_tcb = list_next_entry(g_plainos_curr_task_tcb, struct tcb, node);
+	if (hiprio >= g_pl_curr_task_tcb->prio) {
+		g_pl_curr_task_tcb = list_next_entry(g_pl_curr_task_tcb, struct tcb, node);
 	} else {
-		g_plainos_curr_task_tcb = g_rdytask_list[hiprio].head;
+		g_pl_curr_task_tcb = g_rdytask_list[hiprio].head;
 	}
 
 	/* OS schedule */
-	plainos_port_schedule();
+	pl_port_schedule();
 }

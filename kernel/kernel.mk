@@ -23,5 +23,5 @@
 INC += -I$(TOPDIR)/kernel
 
 C_SRCS += $(TOPDIR)/kernel/entry.c
-C_SRCS += $(TOPDIR)/kernel/task.c
-C_SRCS += $(TOPDIR)/kernel/mem_pool.c
+C_SRCS += $(TOPDIR)/kernel/task/task.c
+C_SRCS += $(TOPDIR)/kernel/mem/mem_pool.c

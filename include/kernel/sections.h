@@ -91,6 +91,7 @@ SOFTWARE.
 	                                LONG(-EDOM   ) \
 	                                LONG(-ERANGE ) \
 	                                LONG(-EREGED ) \
+	                                LONG(-ETIMEOUT) \
 	                                LONG(ERROR  ) \
 	                                __errno_end = .;
 

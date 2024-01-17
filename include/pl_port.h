@@ -28,14 +28,23 @@ SOFTWARE.
 #include <kernel/kernel.h>
 #include <kernel/task.h>
 
-typedef struct plainos_irqstate
+/*================================== early ports =======================================*/
+int pl_early_port_putc_init(void);
+int pl_early_port_putc(char c);
+
+
+
+
+
+/*=================================== task ports =======================================*/
+typedef struct pl_irqstate
 {
 	unsigned int state;
-} plainos_irqstate_t;
+} pl_irqstate_t;
 
-plainos_irqstate_t plainos_port_irq_save(void);
-void plainos_port_irq_store(plainos_irqstate_t);
-void plainos_port_schedule(void);
-void *plainos_port_task_stack_init(task_t task, void *task_stack, size_t stack_size);
+pl_irqstate_t pl_port_irq_save(void);
+void pl_port_irq_store(pl_irqstate_t);
+void pl_port_schedule(void);
+void *pl_port_task_stack_init(task_t task, void *task_stack, size_t stack_size);
 
 #endif /* __PLAINOS_PORT_H__ */
