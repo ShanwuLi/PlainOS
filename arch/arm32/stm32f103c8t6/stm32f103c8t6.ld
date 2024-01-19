@@ -21,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include <kernel/sections.h>
+#include <sections.h>
 
 /* Entry Point */
 ENTRY(Reset_Handler)
@@ -89,6 +89,13 @@ SECTIONS
     PROVIDE_HIDDEN (__preinit_array_end = .);
   } >FLASH
 
+  .pl_init.init :
+  {
+    . = ALIGN(4);
+    PL_INIT_SECTION
+    . = ALIGN(4);
+  } >FLASH
+
   .initcall.init :
   {
     . = ALIGN(4);
@@ -101,7 +108,7 @@ SECTIONS
     . = ALIGN(4);
     APPS_CALLS_SECTION
     . = ALIGN(4);
-  }
+  } >FLASH
 
   .errno :
   {

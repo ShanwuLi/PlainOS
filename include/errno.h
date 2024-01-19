@@ -81,4 +81,5 @@ SOFTWARE.
 	                            err = *(ptr); \
 	                       err;})
 
+
 #endif /* __ERRNO_H__ */

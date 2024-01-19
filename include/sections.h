@@ -23,13 +23,15 @@ SOFTWARE.
 #ifndef __KERNEL_SECTIONS_H__
 #define __KERNEL_SECTIONS_H__
 
-#include "../errno.h"
+#include "errno.h"
 
 #define CONST_SECTION               *(__const)
 
 #define INIT_CALLS_LEVEL(level)     __initcall##level##_start = .; \
 	                                KEEP(*(.initcall##level##.init)) \
 	                                KEEP(*(.initcall##level##s.init))
+
+#define PL_INIT_SECTION             *(.pl_init.init) /* __init */
 
 #define INIT_CALLS_SECTION          __initcall_start = .; \
 	                                KEEP(*(.initcallearly.init)) \

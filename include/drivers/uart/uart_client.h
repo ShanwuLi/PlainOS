@@ -24,7 +24,7 @@ SOFTWARE.
 #ifndef __DRIVER_UART_H__
 #define __DRIVER_UART_H__
 
-#include <kernel/types.h>
+#include <types.h>
 
 
 

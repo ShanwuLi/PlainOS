@@ -20,35 +20,40 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+.global pl_port_rodata_read8
+.global pl_port_rodata_read16
+.global pl_port_rodata_read32
+.global pl_port_rodata_read
 
-#ifndef __PLAINOS_PORT_H__
-#define __PLAINOS_PORT_H__
+	.section .text, "ax"
+	.type pl_port_rodata_read8, %function
+pl_port_rodata_read8:
+	mov r30, r24
+	mov r31, r25
+	elpm r24, z
+	ret
 
-#include <stddef.h>
-#include <kernel/kernel.h>
-#include <kernel/task.h>
-#include <types.h>
+	.section .text, "ax"
+	.type pl_port_rodata_read16, %function
+pl_port_rodata_read16:
+	mov r30, r24
+	mov r31, r25
+	elpm r24, z+
+	elpm r25, z
+	ret
 
-/*================================== rodata ports =======================================*/
-u8_t pl_port_rodata_read8(void *addr);
-u16_t pl_port_rodata_read16(void *addr);
-u32_t pl_port_rodata_read32(void *addr);
-uintptr_t pl_port_rodata_read(void *addr);
+	.section .text, "ax"
+	.type pl_port_rodata_read32, %function
+pl_port_rodata_read32:
+	mov r30, r24
+	mov r31, r25
+	elpm r22, z+
+	elpm r23, z+
+	elpm r24, z+
+	elpm r25, z
+	ret
 
-/*================================== early ports =======================================*/
-void pl_entry(void);
-int pl_early_port_putc_init(void);
-int pl_early_port_putc(const char c);
-
-/*=================================== task ports =======================================*/
-typedef struct pl_irqstate
-{
-	unsigned int state;
-} pl_irqstate_t;
-
-pl_irqstate_t pl_port_irq_save(void);
-void pl_port_irq_store(pl_irqstate_t);
-void pl_port_schedule(void);
-void *pl_port_task_stack_init(task_t task, void *task_stack, size_t stack_size);
-
-#endif /* __PLAINOS_PORT_H__ */
+	.section .text, "ax"
+	.type pl_port_rodata_read, %function
+pl_port_rodata_read:
+	jmp pl_port_rodata_read16

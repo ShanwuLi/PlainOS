@@ -29,9 +29,9 @@ TEMP_FLAGS += $(DEFINE) -mthumb -Wall --specs=nosys.specs -Wextra -Wwrite-string
               -Werror=all -Werror=deprecated-declarations \
               -Wextra -Werror=unused-parameter -Werror=sign-compare  -gdwarf-4 -ggdb -nostartfiles \
               -fstrict-volatile-bitfields -Werror=unused-but-set-variable -fno-jump-tables \
-              -fno-tree-switch-conversion
+              -fno-tree-switch-conversion -Werror=unused-function -Werror=unused-variable \
+              -Wmissing-prototypes
 
-#-Werror=unused-function -Werror=unused-variable
 C_FLAGS  += $(DEFINE) -xc -Wmissing-prototypes -Werror=old-style-declaration \
                             -std=gnu17
 CXX_FLAGS += $(TEMP_FLAGS) -xc++ -std=c++14
@@ -46,5 +46,6 @@ ASM_SRCS += $(ARCH_DIR)/arm32/stm32f103c8t6/startup_stm32f10x_md.S
 C_SRCS += $(ARCH_DIR)/arm32/stm32f103c8t6/system_stm32f10x.c
 C_SRCS += $(ARCH_DIR)/arm32/stm32f103c8t6/stm32f10x_it.c
 C_SRCS += $(ARCH_DIR)/arm32/stm32f103c8t6/stm32f103c8t6_port.c
+C_SRCS += $(ARCH_DIR)/arm32/stm32f103c8t6/early_setup/early_uart.c
 
 LINK_SCRIPT := $(ARCH_DIR)/arm32/stm32f103c8t6/stm32f103c8t6.ld

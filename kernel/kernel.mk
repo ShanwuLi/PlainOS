@@ -22,6 +22,7 @@
 
 INC += -I$(TOPDIR)/kernel
 
-C_SRCS += $(TOPDIR)/kernel/entry.c
+C_SRCS += $(TOPDIR)/kernel/pl_entry.c
 C_SRCS += $(TOPDIR)/kernel/task/task.c
 C_SRCS += $(TOPDIR)/kernel/mem/mem_pool.c
+C_SRCS += $(TOPDIR)/kernel/syslog/syslog.c

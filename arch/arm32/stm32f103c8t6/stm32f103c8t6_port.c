@@ -3,7 +3,7 @@
 
 int pl_early_port_putc_init(void)
 {
-	USART1_Init();
+	USART1_Init(115200);
 
 	return 0;
 }
@@ -13,8 +13,6 @@ int pl_early_port_putc(char c)
 	int ret = USART1_PrintChar(c);
 	return ret;
 }
-
-
 
 pl_irqstate_t pl_port_irq_save(void)
 {
@@ -35,8 +33,8 @@ void pl_port_schedule(void)
 }
 
 void *pl_port_task_stack_init(task_t task,
-                                   void *task_stack,
-                                   size_t stack_size)
+                              void *task_stack,
+                              size_t stack_size)
 {
 	u32_t *stack = task_stack;
     stack      +=  stack_size;
@@ -60,3 +58,22 @@ void *pl_port_task_stack_init(task_t task,
     return stack;
 }
 
+u8_t pl_port_rodata_read8(void *addr)
+{
+	return *(u8_t *)(addr);
+}
+
+u16_t pl_port_rodata_read16(void *addr)
+{
+	return *(u16_t *)(addr);
+}
+
+u32_t pl_port_rodata_read32(void *addr)
+{
+	return *(u32_t *)(addr);
+}
+
+uintptr_t pl_port_rodata_read(void *addr)
+{
+	return *(uintptr_t *)(addr);
+}

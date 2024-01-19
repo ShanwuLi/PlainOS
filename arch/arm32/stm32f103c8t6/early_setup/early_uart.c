@@ -1,8 +1,10 @@
 #include  "../stm32f10x.h"
 #include <errno.h>
+#include <types.h>
+#include "early_uart.h"
 
-void USART1_Init(void)
-{   
+void USART1_Init(uint_t USART1_BaudRate)
+{
    unsigned int integer;                   //����һ���������洢��������
    float   decimal;                        //����һ���������洢С������
    RCC->APB2ENR|=(1<<14)|(1<<2);           //����USART1ʱ�Ӻ�GPIOAʱ��
@@ -26,7 +28,6 @@ void USART1_Init(void)
    NVIC_SetPriorityGrouping(1);            //�������ȼ�����1
    NVIC_SetPriority(USART1_IRQn, NVIC_EncodePriority(1,2,1));     //������ռ���ȼ�Ϊ1�������ȼ�Ϊ1
    NVIC_EnableIRQ(USART1_IRQn);            //ʹ��USART�ж�
-   
 }
 
 int USART1_PrintChar(char c)

@@ -26,13 +26,19 @@ TEMP_FLAGS += $(DEFINE) -Wall -Wextra -Wwrite-strings -Wformat=2 \
               -Werror -Wmissing-declarations \
               -ffunction-sections -fdata-sections -Wall \
               -Werror=all -Werror=unused-function -Werror=deprecated-declarations \
-              -Wextra -Werror=unused-parameter -Werror=sign-compare -ggdb -nostartfiles \
+              -Wextra -Werror=unused-parameter -Werror=sign-compare -nostartfiles \
               -fno-jump-tables
+
 C_FLAGS   += $(TEMP_FLAGS) -xc -Wmissing-prototypes -Werror=old-style-declaration \
                            -std=c99
 CXX_FLAGS += $(TEMP_FLAGS) -xc++ -std=c++99
 ASM_FLAGS += -x assembler-with-cpp
 LDFLAGS   += -Wl,--gc-sections
 LIBS      += -lc -lm
+
+
+C_SRCS += $(ARCH_DIR)/avr/atmega128/early_uart.c
+C_SRCS += $(ARCH_DIR)/avr/atmega128/atmega128_port.c
+ASM_SRCS += $(ARCH_DIR)/avr/atmega128/atmega128_asm_port.S
 
 LINK_SCRIPT := $(ARCH_DIR)/avr/atmega128/atmega128.ld

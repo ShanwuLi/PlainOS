@@ -31,6 +31,8 @@ typedef int                          (*exitcall_t)(void);
 #define __define_initcall(fn, id)    static initcall_t __initcall_##fn##id __used \
                                       __attribute__((section(".initcall" #id ".init"))) = fn
 
+#define __init                        __attribute__((section(".pl_init.init")))
+
 #define early_initcall(fn)            __define_initcall(fn, early)
 #define pure_initcall(fn)             __define_initcall(fn, 0)
 #define pure_initcall_sync(fn)        __define_initcall(fn, 0s)

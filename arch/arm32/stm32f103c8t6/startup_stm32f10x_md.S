@@ -35,6 +35,7 @@
 .global	g_pfnVectors
 .global	Default_Handler
 .extern SystemInit
+.extern pl_entry
 
 
 /* start address for the initialization values of the .data section.
@@ -97,7 +98,7 @@ LoopFillZerobss:
 /* Call static constructors */
     bl __libc_init_array
 /* Call the application's entry point.*/
-	bl	main
+	bl	pl_entry
 	bx	lr
   .size	 Reset_Handler, .-Reset_Handler
 

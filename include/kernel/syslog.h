@@ -27,6 +27,7 @@ SOFTWARE.
 #define LM(log_meta)   (void *)
 #define LOG(...)       ({char *log[] = { __VA_ARGS__ , NULL}; log;})
 
+int early_put_string(char *str);
 int pl_early_syslog_info(char *fmt, char **log);
 int pl_early_syslog_warn(char *fmt, char **log);
 int pl_early_syslog_err(char *fmt, char **log);
