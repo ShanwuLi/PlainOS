@@ -53,10 +53,12 @@ static int put_format_log(const char *fmt, char **log)
 			break;
 
 		default:
-			ret = printf("%c", *ch);
-			if (ret < 0) {
-				printf("putc error");
-				return -EFAULT;
+			for (;ch <= fmt; ch++) {
+				ret = printf("%c", *ch);
+				if (ret < 0) {
+					printf("putc error");
+					return -EFAULT;
+				}
 			}
 			break;
 		}
@@ -77,5 +79,8 @@ int main(void)
 	put_format_log("%s, 0x%x, %x, dehdekfenv\n", LOG("this is a test", va(0x90), "defef"));
 	put_format_log("%s, %u, %s, dehdekfenv\n", LOG("this is a test", va(0x90), "defef"));
 	put_format_log("%s, %d, %s, dehdekfenv\n", LOG(va("this is a test"), va(0x90), va("defef")));
+	put_format_log("%s, 0x%, %x, deh%uekfenv\n", LOG("this is a test", va(0x90), "defef"));
+	put_format_log("%s, %lu, %s, dehdekfenv\n", LOG("this is a test", va(0x90), "defef"));
+	put_format_log("%s, %d, %s, dehde%kfenv\n", LOG(va("this is a test"), va(0x90), va("defef")));
 	return 0;
 }
