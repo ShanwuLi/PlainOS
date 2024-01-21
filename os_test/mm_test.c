@@ -82,5 +82,25 @@ int main(void)
 	put_format_log("%s, 0x%, %x, deh%uekfenv\n", LOG("this is a test", va(0x90), "defef"));
 	put_format_log("%s, %lu, %s, dehdekfenv\n", LOG("this is a test", va(0x90), "defef"));
 	put_format_log("%s, %d, %s, dehde%kfenv\n", LOG(va("this is a test"), va(0x90), va("defef")));
+
+
+
+	printf("%s, %d\n", "%%", '%');
+	printf("%s, %d\n", "%d", '%' + 'd');
+	printf("%s, %d\n", "%x", '%' + 'x');
+	printf("%s, %d\n", "%b", '%' + 'b');
+	printf("%s, %d\n", "%s", '%' + 's');
+	printf("%s, %d\n", "%u", '%' + 'u');
+
+	printf("%s, %d\n", "%ld", '%' + 'l' + 'd');
+	printf("%s, %d\n", "%lx", '%' + 'l' + 'x');
+	printf("%s, %d\n", "%lb", '%' + 'l' + 'b');
+	printf("%s, %d\n", "%lu", '%' + 'l' + 'u');
+
+	printf("%s, %d\n", "%lld", '%' + 'l' + 'l' + 'd');
+	printf("%s, %d\n", "%llx", '%' + 'l' + 'l' + 'x');
+	printf("%s, %d\n", "%llb", '%' + 'l' + 'l' + 'b');
+	printf("%s, %d\n", "%llu", '%' + 'l' + 'l' + 'u');
+
 	return 0;
 }
