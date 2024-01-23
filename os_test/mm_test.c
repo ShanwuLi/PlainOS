@@ -1,15 +1,31 @@
 #include "../include/errno.h"
 #include <stdio.h>
+#include <lib/pl_string.h>
 
+static int put_chars(const char *start, const char *end)
+{
+	int ret;
+	const char *ch;
+ 
+	for (ch = start; ch <= end; ch++) {
+		ret = printf("%c", *ch);
+		if (ret < 0) {
+			printf("putc error");
+			return ret;
+		}
+	}
+
+	return OK;
+}
 
 static int put_format_log(const char *fmt, char **log)
 {
 	int ret;
 	int state = 0;
 	const char *ch = fmt;
+	char str[24];
 
 	for (; *fmt != '\0' && log != 0; fmt++) {
-
 		state += *fmt;
 		switch (state) {
 		case '%':
@@ -18,6 +34,7 @@ static int put_format_log(const char *fmt, char **log)
 		continue;
 
 		case '%' + 's':
+			ull2str(str, )
 			printf("%s", *(log++));
 			break;
 
@@ -53,12 +70,10 @@ static int put_format_log(const char *fmt, char **log)
 			break;
 
 		default:
-			for (;ch <= fmt; ch++) {
-				ret = printf("%c", *ch);
-				if (ret < 0) {
-					printf("putc error");
-					return -EFAULT;
-				}
+			ret = put_chars(ch, fmt);
+			if (ret < 0) {
+				printf("putc error");
+				return -EFAULT;
 			}
 			break;
 		}

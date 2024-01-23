@@ -21,16 +21,31 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef __KERNEL_SYSLOG_H__
-#define __KERNEL_SYSLOG_H__
+#include <errno.h>
 
-/* avoid to dangling pointer */
-#define m(x)      (void *)(x)
-#define LOG(...)  ((char **)({char *temp[] = { __VA_ARGS__ , NULL}; (uintptr_t)temp;}))
+int ull2str(char *str, unsigned long long n, unsigned char base)
+{
+	int ret;
+	char val;
+	char i = 1;
+	unsigned long long num = n;
 
-int early_put_string(char *str);
-int pl_early_syslog_info(char *fmt, char **log);
-int pl_early_syslog_warn(char *fmt, char **log);
-int pl_early_syslog_err(char *fmt, char **log);
+	if (base > 16)
+		return ERROR;
 
-#endif /* __KERNEL_SYSLOG_H__ */
+	while(num / base) {
+		num /= base;
+		i++;
+	}
+
+	ret = i;
+	for(; i > 0; i--) {
+		val = (n % base);
+		str[i - 1] = val + (val > 9) ? 'a' : '0';
+		n /= base;
+	}
+
+	str[ret] = '\0';
+	return ret;
+}
+

@@ -20,11 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-KERNEL_DIR := $(TOPDIR)/kernel
+LIB_DIR := $(TOPDIR)/lib
 
-C_SRCS += $(KERNEL_DIR)/pl_entry.c
-
--include $(KERNEL_DIR)/common/common.mk
--include $(KERNEL_DIR)/mm/mm.mk
--include $(KERNEL_DIR)/syslog/syslog.mk
--include $(KERNEL_DIR)/task/task.mk
+-include $(LIB_DIR)/string/string.mk

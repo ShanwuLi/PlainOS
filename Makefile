@@ -52,6 +52,7 @@ RM := rm -rf
 
 #-------------------------------------------------------------------------------------------------#
 # include sub-makefiles
+-include $(TOPDIR)/lib/lib.mk
 -include $(TOPDIR)/arch/arch.mk
 -include $(TOPDIR)/kernel/kernel.mk
 -include $(TOPDIR)/drivers/drivers.mk

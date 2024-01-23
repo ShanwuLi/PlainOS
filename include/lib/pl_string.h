@@ -20,17 +20,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+#ifndef __LIB_PL_STRING_H__
+#define __LIB_PL_STRING_H__
 
-#ifndef __KERNEL_SYSLOG_H__
-#define __KERNEL_SYSLOG_H__
+int ull2str(char *str, unsigned long long n, unsigned char base);
 
-/* avoid to dangling pointer */
-#define m(x)      (void *)(x)
-#define LOG(...)  ((char **)({char *temp[] = { __VA_ARGS__ , NULL}; (uintptr_t)temp;}))
 
-int early_put_string(char *str);
-int pl_early_syslog_info(char *fmt, char **log);
-int pl_early_syslog_warn(char *fmt, char **log);
-int pl_early_syslog_err(char *fmt, char **log);
-
-#endif /* __KERNEL_SYSLOG_H__ */
+#endif /* __LIB_PL_STRING_H__ */
