@@ -20,8 +20,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#ifndef __KERNEL_SECTIONS_H__
-#define __KERNEL_SECTIONS_H__
+#ifndef __SECTIONS_H__
+#define __SECTIONS_H__
 
 #include "errno.h"
 
@@ -97,4 +97,4 @@ SOFTWARE.
 	                                LONG(ERROR  ) \
 	                                __errno_end = .;
 
-#endif /* __KERNEL_SECTIONS_H__ */
+#endif /* __SECTIONS_H__ */

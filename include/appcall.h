@@ -20,8 +20,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#ifndef __KERNEL_APPCALL_H__
-#define __KERNEL_APPCALL_H__
+#ifndef __APPCALL_H__
+#define __APPCALL_H__
 
 typedef int (*plainos_app_call_t)(int argc, char *argv[]);
 
@@ -47,4 +47,4 @@ struct plainos_app_call {
 #define test_app_register(app, argc, argv)        __define_appcall(app, argc, argv, 4)
 #define user_app_register(app, argc, argv)        __define_appcall(app, argc, argv, 5)
 
-#endif /* __KERNEL_APPCALL_H__ */
+#endif /* __APPCALL_H__ */

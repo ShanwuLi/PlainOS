@@ -1,44 +1,34 @@
 
 #include <kernel/syslog.h>
-#include <pl_cfg.h>
-#include "../common/ansi_color.h"
-#include <pl_port.h>
 #include <errno.h>
 #include <lib/pl_string.h>
+#include <types.h>
 
 static void put_string(int (*putc)(const char c), char *str)
 {
-	int ret;
-
-	while (*str) {
-		putc(*str);
-		str++;
-	}
-
-	return OK;
+	while (*str)
+		putc(*(str++));
 }
 
 static void put_chars(int (*putc)(const char c),
              const char *start, const char *end)
 {
-	int ret;
 	const char *ch;
  
 	for (ch = start; ch <= end; ch++)
 		putc(*ch);
-
-	return OK;
 }
 
-static int put_format_log(int (*putc)(const char c),
-                        const char *fmt, char **log)
+void pl_put_format_log(int (*putc)(const char c), const char *fmt, ...)
 {
 	int ret;
-	int state = 0;
-	const char *ch = fmt;
 	char str[24];
+	int state = 0;
+	va_list valist;
+	va_start(valist, fmt);
+	const char *ch = fmt;
 
-	for (; *fmt != '\0' && log != 0; fmt++) {
+	for (; *fmt != '\0'; fmt++) {
 		state += *fmt;
 		switch (state) {
 		case '%':
@@ -47,40 +37,41 @@ static int put_format_log(int (*putc)(const char c),
 		continue;
 
 		case '%' + 's':
-			put_string(putc, *(log++));
+			put_string(putc, va_arg(valist, char *));
 			break;
 
 		case '%' + 'd':
-			ull2str(str, (*(log++)));
+			ll2str(str, va_arg(valist, int_t), 10);
 			put_string(putc, str);
 			break;
 
 		case '%' + 'x':
-			printf("%x", *(log++));
+			ull2str(str, va_arg(valist, uint_t), 16);
+			put_string(putc, str);
 			break;
 
 		case '%' + 'u':
-			printf("%u", *(log++));
+			ull2str(str, va_arg(valist, uint_t), 10);
+			put_string(putc, str);
 			break;
 
 		case '%' + 'l' + 'd':
-			printf("%ld", *(log++));
+			ll2str(str, va_arg(valist, l_t), 10);
+			put_string(putc, str);
 			break;
 
 		case '%' + 'l' + 'x':
-			printf("%lx", *(log++));
+			ull2str(str, va_arg(valist, ul_t), 16);
+			put_string(putc, str);
 			break;
 
 		case '%' + 'l' + 'u':
-			printf("%lu", *(log++));
+			ull2str(str, va_arg(valist, ul_t), 10);
+			put_string(putc, str);
 			break;
 
 		default:
-			ret = put_chars(ch, fmt);
-			if (ret < 0) {
-				printf("putc error");
-				return -EFAULT;
-			}
+			put_chars(putc, ch, fmt);
 			break;
 		}
 
@@ -88,64 +79,5 @@ static int put_format_log(int (*putc)(const char c),
 		ch = fmt + 1;
 	}
 
-	return 0;
+	va_end(valist);
 }
-
-int main(void)
-{
-	put_format_log("%s, 0x%x, %x, dehdekfenv\n", LOG("this is a test", va(0x90), "defef"));
-	put_format_log("%s, %u, %s, dehdekfenv\n", LOG("this is a test", va(0x90), "defef"));
-	put_format_log("%s, %d, %s, dehdekfenv\n", LOG(va("this is a test"), va(0x90), va("defef")));
-	put_format_log("%s, 0x%, %x, deh%uekfenv\n", LOG("this is a test", va(0x90), "defef"));
-	put_format_log("%s, %lu, %s, dehdekfenv\n", LOG("this is a test", va(0x90), "defef"));
-	put_format_log("%s, %d, %s, dehde%kfenv\n", LOG(va("this is a test"), va(0x90), va("defef")));
-
-
-
-	printf("%s, %d\n", "%%", '%');
-	printf("%s, %d\n", "%d", '%' + 'd');
-	printf("%s, %d\n", "%x", '%' + 'x');
-	printf("%s, %d\n", "%b", '%' + 'b');
-	printf("%s, %d\n", "%s", '%' + 's');
-	printf("%s, %d\n", "%u", '%' + 'u');
-
-	printf("%s, %d\n", "%ld", '%' + 'l' + 'd');
-	printf("%s, %d\n", "%lx", '%' + 'l' + 'x');
-	printf("%s, %d\n", "%lb", '%' + 'l' + 'b');
-	printf("%s, %d\n", "%lu", '%' + 'l' + 'u');
-
-	printf("%s, %d\n", "%lld", '%' + 'l' + 'l' + 'd');
-	printf("%s, %d\n", "%llx", '%' + 'l' + 'l' + 'x');
-	printf("%s, %d\n", "%llb", '%' + 'l' + 'l' + 'b');
-	printf("%s, %d\n", "%llu", '%' + 'l' + 'l' + 'u');
-
-	return 0;
-}
-
-
-
-#if 0
-int pl_early_syslog_info(char *fmt, char **log)
-{
-	return OK;
-}
-
-int pl_early_syslog_warn(char *fmt, char **log)
-{
-#ifdef PL_CFG_SYSLOG_ANSI_COLOR
-	
-#endif /* PL_CFG_SYSLOG_ANSI_COLOR */
-
-	return OK;
-}
-
-int pl_early_syslog_err(char *fmt, char **log)
-{
-#ifdef PL_CFG_SYSLOG_ANSI_COLOR
-
-#endif /* PL_CFG_SYSLOG_ANSI_COLOR */
-	return OK;
-}
-
-#endif
-

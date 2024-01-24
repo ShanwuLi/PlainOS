@@ -1,6 +1,7 @@
 #include "../include/errno.h"
 #include <stdio.h>
-#include <lib/pl_string.h>
+
+
 
 static int put_chars(const char *start, const char *end)
 {
@@ -34,7 +35,6 @@ static int put_format_log(const char *fmt, char **log)
 		continue;
 
 		case '%' + 's':
-			ull2str(str, )
 			printf("%s", *(log++));
 			break;
 
@@ -87,7 +87,7 @@ static int put_format_log(const char *fmt, char **log)
 
 /* avoid to dangling pointer */
 #define va(x)     (void *)(x)
-#define LOG(...)  ((char **)({char *temp[] = { __VA_ARGS__ , NULL}; (uintptr_t)temp;}))
+#define LOG(...)  ((char **)({char *temp[] = { __VA_ARGS__ , NULL}; temp;}))
 
 int main(void)
 {

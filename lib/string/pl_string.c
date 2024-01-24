@@ -22,6 +22,7 @@ SOFTWARE.
 */
 
 #include <errno.h>
+#include <lib/pl_string.h>
 
 int ull2str(char *str, unsigned long long n, unsigned char base)
 {
@@ -41,11 +42,25 @@ int ull2str(char *str, unsigned long long n, unsigned char base)
 	ret = i;
 	for(; i > 0; i--) {
 		val = (n % base);
-		str[i - 1] = val + (val > 9) ? 'a' : '0';
+		str[i - 1] = (val > 9) ? (val - 10 + 'a') : (val + '0');
 		n /= base;
 	}
 
 	str[ret] = '\0';
+	return ret;
+}
+
+int ll2str(char *str, long long n, unsigned char base)
+{
+	int ret;
+	char i = 0;
+
+	if (n < 0) {
+		i = 1;
+		str[0] = '-';
+	}
+
+	ret = ull2str(&str[i], n, base);
 	return ret;
 }
 

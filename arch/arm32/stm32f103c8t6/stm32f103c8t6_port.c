@@ -4,7 +4,7 @@
 int pl_early_port_putc_init(void)
 {
 	USART1_Init(115200);
-
+	pl_early_port_putc(' ');
 	return 0;
 }
 

@@ -21,8 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef __KERNEL_TYPES_H__
-#define __KERNEL_TYPES_H__
+#ifndef __TYPES_H__
+#define __TYPES_H__
 
 #include <stdint.h>
 
@@ -50,16 +50,18 @@ typedef int64_t                          s64_t;
 
 typedef unsigned char                    uchar_t;
 typedef unsigned short int               ushrt_t;
-typedef unsigned long int                uint_t;
+typedef unsigned int                     uint_t;
+typedef unsigned long int                ul_t;
 typedef unsigned long long               ull_t;
 
 typedef signed char                      char_t;
 typedef signed short int                 shrt_t;
 typedef signed long int                  int_t;
+typedef long int                         l_t;
 typedef signed long long                 ll_t;
 
 #define UINTPTR_T_MAX                    (~((uintptr_t)0))
 #define UINTPTR_T_BITS                   (sizeof(uintptr_t) << 3)
 
 
-#endif /* __KERNEL_TYPES_H__ */
+#endif /* __TYPES_H__ */

@@ -20,8 +20,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#ifndef __ANSI_COLOR_H__
-#define __ANSI_COLOR_H__
+#ifndef __COMMON_ANSI_COLOR_H__
+#define __COMMON_ANSI_COLOR_H__
 
 /*************************************************************************************
  * NOTE:
@@ -76,4 +76,4 @@ SOFTWARE.
 #define ANSI_COLOR_BACK_WHITE          '\033[47m' /* Background: white */
 #define ANSI_COLOR_BACK_RESET          '\033[49m' /* Background: rest backround color to default */
 
-#endif /* __ANSI_COLOR_H__ */
+#endif /* __COMMON_ANSI_COLOR_H__ */

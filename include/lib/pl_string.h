@@ -24,6 +24,6 @@ SOFTWARE.
 #define __LIB_PL_STRING_H__
 
 int ull2str(char *str, unsigned long long n, unsigned char base);
-
+int ll2str(char *str, long long n, unsigned char base);
 
 #endif /* __LIB_PL_STRING_H__ */
