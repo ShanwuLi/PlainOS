@@ -1,10 +1,33 @@
 
-#include <kernel/syslog.h>
-#include <errno.h>
-#include <lib/pl_string.h>
-#include <types.h>
+/* MIT License
 
-static void put_string(int (*putc)(const char c), char *str)
+Copyright (c) 2023 PlainOS
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+#include <errno.h>
+#include <types.h>
+#include <lib/pl_string.h>
+#include <kernel/syslog.h>
+
+static void put_string(int (*putc)(const char c), const char *str)
 {
 	while (*str)
 		putc(*(str++));
@@ -19,15 +42,16 @@ static void put_chars(int (*putc)(const char c),
 		putc(*ch);
 }
 
-void pl_put_format_log(int (*putc)(const char c), const char *fmt, ...)
+void pl_put_format_log(int (*putc)(const char c), const char *front,
+                       const char *rear, const const char *fmt, ...)
 {
-	int ret;
 	char str[24];
 	int state = 0;
 	va_list valist;
-	va_start(valist, fmt);
 	const char *ch = fmt;
 
+	put_string(putc, front);
+	va_start(valist, fmt);
 	for (; *fmt != '\0'; fmt++) {
 		state += *fmt;
 		switch (state) {
@@ -41,32 +65,47 @@ void pl_put_format_log(int (*putc)(const char c), const char *fmt, ...)
 			break;
 
 		case '%' + 'd':
-			ll2str(str, va_arg(valist, int_t), 10);
+			pl_ll2str(str, va_arg(valist, int_t), 10);
 			put_string(putc, str);
 			break;
 
 		case '%' + 'x':
-			ull2str(str, va_arg(valist, uint_t), 16);
+			pl_ull2str(str, va_arg(valist, uint_t), 16);
 			put_string(putc, str);
 			break;
 
 		case '%' + 'u':
-			ull2str(str, va_arg(valist, uint_t), 10);
+			pl_ull2str(str, va_arg(valist, uint_t), 10);
 			put_string(putc, str);
 			break;
 
 		case '%' + 'l' + 'd':
-			ll2str(str, va_arg(valist, l_t), 10);
+			pl_ll2str(str, va_arg(valist, l_t), 10);
 			put_string(putc, str);
 			break;
 
 		case '%' + 'l' + 'x':
-			ull2str(str, va_arg(valist, ul_t), 16);
+			pl_ull2str(str, va_arg(valist, ul_t), 16);
 			put_string(putc, str);
 			break;
 
 		case '%' + 'l' + 'u':
-			ull2str(str, va_arg(valist, ul_t), 10);
+			pl_ull2str(str, va_arg(valist, ul_t), 10);
+			put_string(putc, str);
+			break;
+
+		case '%' + 'l' + 'l' + 'd':
+			pl_ll2str(str, va_arg(valist, ll_t), 10);
+			put_string(putc, str);
+			break;
+
+		case '%' + 'l' + 'l' + 'x':
+			pl_ull2str(str, va_arg(valist, ull_t), 16);
+			put_string(putc, str);
+			break;
+
+		case '%' + 'l' + 'l' + 'u':
+			pl_ull2str(str, va_arg(valist, ull_t), 10);
 			put_string(putc, str);
 			break;
 
@@ -80,4 +119,5 @@ void pl_put_format_log(int (*putc)(const char c), const char *fmt, ...)
 	}
 
 	va_end(valist);
+	put_string(putc, rear);
 }

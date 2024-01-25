@@ -20,10 +20,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+
 #ifndef __LIB_PL_STRING_H__
 #define __LIB_PL_STRING_H__
 
-int ull2str(char *str, unsigned long long n, unsigned char base);
-int ll2str(char *str, long long n, unsigned char base);
+int pl_ull2str(char *str, unsigned long long n, unsigned char base);
+int pl_ll2str(char *str, long long n, unsigned char base);
 
 #endif /* __LIB_PL_STRING_H__ */

@@ -24,11 +24,11 @@ SOFTWARE.
 #include <errno.h>
 #include <lib/pl_string.h>
 
-int ull2str(char *str, unsigned long long n, unsigned char base)
+int pl_ull2str(char *str, unsigned long long n, unsigned char base)
 {
 	int ret;
-	char val;
-	char i = 1;
+	int val;
+	int i = 1;
 	unsigned long long num = n;
 
 	if (base > 16)
@@ -50,17 +50,18 @@ int ull2str(char *str, unsigned long long n, unsigned char base)
 	return ret;
 }
 
-int ll2str(char *str, long long n, unsigned char base)
+int pl_ll2str(char *str, long long n, unsigned char base)
 {
 	int ret;
-	char i = 0;
+	int i = 0;
 
 	if (n < 0) {
 		i = 1;
 		str[0] = '-';
+		n = (~(unsigned long long)n) + 1;
 	}
 
-	ret = ull2str(&str[i], n, base);
+	ret = pl_ull2str(&str[i], n, base);
 	return ret;
 }
 

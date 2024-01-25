@@ -89,6 +89,18 @@ static int put_format_log(const char *fmt, char **log)
 #define va(x)     (void *)(x)
 #define LOG(...)  ((char **)({char *temp[] = { __VA_ARGS__ , NULL}; temp;}))
 
+#include <stdarg.h>
+
+static int add(int dhje, ...)
+{
+	return 0;
+}
+
+static int dkdef(int c, ...)
+{
+	add(c, ...);
+}
+
 int main(void)
 {
 	put_format_log("%s, 0x%x, %x, dehdekfenv\n", LOG("this is a test", va(0x90), "defef"));
