@@ -41,13 +41,13 @@ int pl_early_port_putc_init(void);
 int pl_early_port_putc(const char c);
 
 /*=================================== task ports =======================================*/
-typedef struct pl_irqstate
+typedef struct irqstate
 {
 	unsigned int state;
-} pl_irqstate_t;
+} irqstate_t;
 
-pl_irqstate_t pl_port_irq_save(void);
-void pl_port_irq_store(pl_irqstate_t);
+irqstate_t pl_port_irq_save(void);
+void pl_port_irq_store(irqstate_t);
 void pl_port_schedule(void);
 void *pl_port_task_stack_init(task_t task, void *task_stack, size_t stack_size);
 

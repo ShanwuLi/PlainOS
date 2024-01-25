@@ -14,15 +14,15 @@ int pl_early_port_putc(char c)
 	return ret;
 }
 
-pl_irqstate_t pl_port_irq_save(void)
+irqstate_t pl_port_irq_save(void)
 {
-	pl_irqstate_t irqstate;
+	irqstate_t irqstate;
 
 	irqstate.state = 0;
 	return irqstate;
 }
 
-void pl_port_irq_store(pl_irqstate_t irqstate)
+void pl_port_irq_store(irqstate_t irqstate)
 {
 	(void)irqstate;
 }
