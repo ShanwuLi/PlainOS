@@ -21,23 +21,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include <errno.h>
-#include <kernel/mem_pool.h>
-#include <kernel/kernel.h>
 #include <stdbool.h>
+#include <kernel/kernel.h>
+#include <kernel/mem_pool.h>
 
 /*************************************************************************************
  * Description: definitions.
  *
  ************************************************************************************/
-#define MEM_POOL_DATA_MAGIC         ((uintptr_t)(0x900DDA7A900DDA7A))
-
-typedef bool (*find_bit_condition_t)(struct mem_pool *mp, size_t iter,
-                                     size_t alloc_size, size_t *arg);
+typedef bool (*find_bit_condition_t)(struct mem_pool* mp, size_t iter,
+	size_t alloc_size, size_t* arg);
 
 /*************************************************************************************
  * Function Name: calculate_min_pool_size
- * 
+ *
  * Description:
  *    Before initialization, we need to calculate the minimum memory size.
  * If the given memory block is smaller than this value, it will cause
@@ -46,9 +43,9 @@ typedef bool (*find_bit_condition_t)(struct mem_pool *mp, size_t iter,
  * Param:
  *   @grain_order: the minimum granularity that memory allocators need to manage.
  *                 grain_order_size = (1 << grain_order).
- * 
+ *
  * Return:
- *   minimum size of mempool we needed. 
+ *   minimum size of mempool we needed.
  ************************************************************************************/
 static size_t calculate_min_pool_size(uchar_t grain_order)
 {
@@ -68,7 +65,7 @@ static size_t calculate_min_pool_size(uchar_t grain_order)
 
 /*************************************************************************************
  * Function Name: calculate_blk_num
- * 
+ *
  * Description:
  *    Calculate the number of bitmaps based on the size of the memory pool
  *
@@ -76,7 +73,7 @@ static size_t calculate_min_pool_size(uchar_t grain_order)
  *   @grain_order: the minimum granularity that memory allocators need to manage.
  *                 grain_order_size = (1 << grain_order).
  *   @pool_size: size of memory pool.
- * 
+ *
  * Return:
  *   The number of blocks that require a bitmap to manage.
  ************************************************************************************/
@@ -106,11 +103,11 @@ static size_t calculate_blk_num(uchar_t grain_order, size_t pool_size)
  * Param:
  *   @addr: the address of memory.
  *   @align: alignment coefficient.
- * 
+ *
  * Return:
  *   Aligned address.
  ************************************************************************************/
-static void *align_address(void *addr, uchar_t align)
+static void* align_address(void* addr, uchar_t align)
 {
 	size_t align_mask = (size_t)align - 1;
 	return (void*)(((uintptr_t)addr + align_mask) & (~align_mask));
@@ -118,17 +115,17 @@ static void *align_address(void *addr, uchar_t align)
 
 /*************************************************************************************
  * Function Name: mem_pool_blk_init
- * 
+ *
  * Description:
  *    Memory pool block initialization function.
  *
  * Param:
  *   @mp: memory pool.
- * 
+ *
  * Return:
  *   Aligned address.
  ************************************************************************************/
-static void mem_pool_blk_init(struct mem_pool *mp)
+static void mem_pool_blk_init(struct mem_pool* mp)
 {
 	size_t i;
 	uchar_t grain_num;
@@ -157,7 +154,7 @@ static void mem_pool_blk_init(struct mem_pool *mp)
 
 /*************************************************************************************
  * Function Name: pl_mem_pool_init
- * 
+ *
  * Description:
  *    Memory pool initialization interface.
  *
@@ -167,7 +164,7 @@ static void mem_pool_blk_init(struct mem_pool *mp)
  *   @pool_size: user provided memory block size required.
  *   @grain_order: the minimum granularity that memory allocators need to manage.
  *                 grain_order_size = (1 << grain_order).
- * 
+ *
  * Return:
  *   handle of memory pool.
  *
@@ -181,25 +178,23 @@ static void mem_pool_blk_init(struct mem_pool *mp)
  *                                     |
  *                                pool_szie
  ************************************************************************************/
-struct mem_pool *pl_mem_pool_init(void *pool, ushrt_t id,
-                      size_t pool_size, uchar_t grain_order)
+struct mem_pool* pl_mem_pool_init(void* pool, ushrt_t id,
+	size_t pool_size, uchar_t grain_order)
 {
-	struct mem_pool *mp;
-	uchar_t *body;
+	struct mem_pool* mp;
 	size_t blk_num;
 	size_t min_pool_size;
 
 	if (pool == NULL)
 		return NULL;
 
-	mp = (struct mem_pool *)align_address(pool, sizeof(uintptr_t));
+	mp = (struct mem_pool*)align_address(pool, sizeof(uintptr_t));
 	min_pool_size = calculate_min_pool_size(grain_order);
 	if ((uintptr_t)pool + pool_size < (uintptr_t)mp + min_pool_size)
 		return NULL;
 
 	/* get actual size of pool */
 	pool_size -= ((uintptr_t)mp - (uintptr_t)pool);
-	body = (uchar_t *)mp + sizeof(struct mem_pool);
 	blk_num = calculate_blk_num(grain_order, pool_size);
 	if (blk_num == 0)
 		return NULL;
@@ -208,11 +203,11 @@ struct mem_pool *pl_mem_pool_init(void *pool, ushrt_t id,
 	mp->state = 0;
 	mp->grain_order = grain_order;
 	mp->blk_num = blk_num;
-	mp->blk_bitmaps = (uintptr_t *)((uchar_t *)mp + sizeof(struct mem_pool));
-	mp->blk_first_bits = (uchar_t *)(mp->blk_bitmaps + blk_num);
+	mp->blk_bitmaps = (uintptr_t*)((uchar_t *)mp + sizeof(struct mem_pool));
+	mp->blk_first_bits = (uchar_t*)(mp->blk_bitmaps + blk_num);
 	mp->blk_max_bits = mp->blk_first_bits + blk_num;
 	mp->data_pool = mp->blk_max_bits + blk_num;
-	mp->data_pool = (uchar_t *)align_address(mp->data_pool, sizeof(uintptr_t) << 2);
+	mp->data_pool = (uchar_t*)align_address(mp->data_pool, sizeof(uintptr_t) << 2);
 	mp->data_pool_size = pool_size - ((size_t)mp->data_pool - (size_t)mp);
 	mp->data_pool_size &= (~(((size_t)1 << grain_order) - 1));
 
@@ -222,7 +217,7 @@ struct mem_pool *pl_mem_pool_init(void *pool, ushrt_t id,
 
 /*************************************************************************************
  * Function Name: find_blk_condition
- * 
+ *
  * Description:
  *   Conditions for finding Memory index numbers by bitmap blocks.
  *
@@ -231,24 +226,24 @@ struct mem_pool *pl_mem_pool_init(void *pool, ushrt_t id,
  *   @iter: idx of block.
  *   @alloc_size: memory size to be allocated.
  *   @arg: passed argument.
- * 
+ *
  * Return:
  *   true: can find.
  *   false: can't find.
  *   can or can't we find it.
  ************************************************************************************/
-static bool find_blk_condition(struct mem_pool *mp, size_t iter,
-                               size_t alloc_size, size_t *arg)
+static bool find_blk_condition(struct mem_pool* mp, size_t iter,
+	size_t alloc_size, size_t* arg)
 {
 	size_t first_blk_alloc = 0;
 
 	if (iter < mp->blk_num - 1)
 		first_blk_alloc = ((size_t)1 << mp->grain_order) *
-		                    mp->blk_first_bits[iter + 1];
+		mp->blk_first_bits[iter + 1];
 
 	*arg = (mp->blk_bitmaps[iter] == UINTPTR_T_MAX) ? *arg + 1 : 0;
 	if ((((*arg << mp->grain_order) * UINTPTR_T_BITS) |
-	    first_blk_alloc) >= alloc_size) {
+		first_blk_alloc) >= alloc_size) {
 		*arg -= 1;
 		return true;
 	}
@@ -258,7 +253,7 @@ static bool find_blk_condition(struct mem_pool *mp, size_t iter,
 
 /*************************************************************************************
  * Function Name: find_bit_condition
- * 
+ *
  * Description: Conditions for finding Memory index numbers in bitmap block.
  *
  * Param:
@@ -266,17 +261,17 @@ static bool find_blk_condition(struct mem_pool *mp, size_t iter,
  *   @iter: idx of block.
  *   @alloc_size: memory size to be allocated.
  *   @arg: passed argument.
- * 
+ *
  * Return:
  *   true: can find.
  *   false: can't find.
  *   can or can't we find it.
  ************************************************************************************/
-static bool find_bit_condition(struct mem_pool *mp, size_t iter,
-                                   size_t alloc_size, size_t *arg)
+static bool find_bit_condition(struct mem_pool* mp, size_t iter,
+	size_t alloc_size, size_t* arg)
 {
 	if (mp->blk_max_bits[iter] * ((uintptr_t)1 << mp->grain_order)
-	    >= alloc_size)
+		>= alloc_size)
 		return true;
 
 	USED(arg);
@@ -294,13 +289,13 @@ static bool find_bit_condition(struct mem_pool *mp, size_t iter,
  *   @alloc_size: memory size to be allocated.
  *   @condition: find condition.
  *   @idx: got index of block.
- * 
+ *
  * Return:
  *   true: got it.
  *   false: can't find.
  ************************************************************************************/
-static bool get_blk_idx(struct mem_pool *mp, size_t alloc_size,
-                  find_bit_condition_t condition, size_t *idx)
+static bool get_blk_idx(struct mem_pool* mp, size_t alloc_size,
+	find_bit_condition_t condition, size_t* idx)
 {
 	size_t i;
 	bool res;
@@ -329,12 +324,12 @@ static bool get_blk_idx(struct mem_pool *mp, size_t alloc_size,
  *   @grain_order: the minimum granularity that memory allocators need to manage.
  *                 grain_order_size = (1 << grain_order).
  *   @idx: got index of block.
- * 
+ *
  * Return:
  *   offset bit in blk_idx.
  ************************************************************************************/
-static size_t get_bit_offset(struct mem_pool *mp, size_t blk_idx,
-                         uchar_t grain_order, size_t alloc_size)
+static size_t get_bit_offset(struct mem_pool* mp, size_t blk_idx,
+	uchar_t grain_order, size_t alloc_size)
 {
 	size_t i;
 	size_t max_continue_bits = 0;
@@ -345,7 +340,7 @@ static size_t get_bit_offset(struct mem_pool *mp, size_t blk_idx,
 
 	for (i = 0; i < UINTPTR_T_BITS; i++) {
 		max_continue_bits = blk_bitmap & ((uintptr_t)1 << i) ?
-		                     max_continue_bits + 1 : 0;
+			max_continue_bits + 1 : 0;
 		if ((max_continue_bits << grain_order) >= alloc_size)
 			break;
 	}
@@ -362,11 +357,11 @@ static size_t get_bit_offset(struct mem_pool *mp, size_t blk_idx,
  * Param:
  *   @mp: Memory pool.
  *   @blk_idx: index of block.
- * 
+ *
  * Return:
  *   void.
  ************************************************************************************/
-static void update_blk_bits(struct mem_pool *mp, size_t blk_idx)
+static void update_blk_bits(struct mem_pool* mp, size_t blk_idx)
 {
 	size_t i;
 	uchar_t fbits = 0;
@@ -379,7 +374,8 @@ static void update_blk_bits(struct mem_pool *mp, size_t blk_idx)
 		if (blk_bitmap & ((uintptr_t)1 << i)) {
 			fbits += fbits_inc;
 			++bits;
-		} else {
+		}
+		else {
 			fbits_inc = 0;
 			mbits = bits > mbits ? bits : mbits;
 			bits = 0;
@@ -403,12 +399,12 @@ static void update_blk_bits(struct mem_pool *mp, size_t blk_idx)
  *   @bit_offset: bit offset.
  *   @bit_num: the number of bits.
  *   @set_bits: set or clear bits.
- * 
+ *
  * Return:
  *   void.
  ************************************************************************************/
-static void update_bit_map(struct mem_pool *mp, size_t blk_start_idx,
-                   size_t bit_offset, size_t bit_num, bool set_bits)
+static void update_bit_map(struct mem_pool* mp, size_t blk_start_idx,
+	size_t bit_offset, size_t bit_num, bool set_bits)
 {
 	size_t i = 0;
 	uintptr_t bitmap = 0;
@@ -451,16 +447,16 @@ static void update_bit_map(struct mem_pool *mp, size_t blk_start_idx,
  * Param:
  *   @mp: memory pool.
  *   @size: memory size to require.
- * 
+ *
  * Return:
  *   address of memory.
  ************************************************************************************/
-void *pl_mem_pool_alloc(struct mem_pool *mp, size_t size)
+void* pl_mem_pool_alloc(struct mem_pool* mp, size_t size)
 {
 	bool found;
 	size_t blk_idx;
 	size_t bit_offset;
-	struct mem_pool_data *data_addr;
+	struct mem_pool_data* data_addr;
 	size_t grain_size = (uintptr_t)1 << mp->grain_order;
 	size_t alloc_size = size + sizeof(struct mem_pool_data);
 	size_t bit_num = (alloc_size + grain_size - 1) / grain_size;
@@ -471,7 +467,7 @@ void *pl_mem_pool_alloc(struct mem_pool *mp, size_t size)
 
 	/* get block index */
 	if (bit_num < UINTPTR_T_BITS)
-	 	found = get_blk_idx(mp, alloc_size, find_bit_condition, &blk_idx);
+		found = get_blk_idx(mp, alloc_size, find_bit_condition, &blk_idx);
 	else
 		found = get_blk_idx(mp, alloc_size, find_blk_condition, &blk_idx);
 
@@ -481,20 +477,18 @@ void *pl_mem_pool_alloc(struct mem_pool *mp, size_t size)
 
 	/* get bit offset */
 	bit_offset = get_bit_offset(mp, blk_idx, mp->grain_order, alloc_size);
-	data_addr = (struct mem_pool_data *)(mp->data_pool +
-	            (((blk_idx << mp->grain_order) * UINTPTR_T_BITS) |
-	             (bit_offset << mp->grain_order)));
+	data_addr = (struct mem_pool_data*)(mp->data_pool +
+		(((blk_idx << mp->grain_order) * UINTPTR_T_BITS) |
+			(bit_offset << mp->grain_order)));
 
 	/* set data structure */
-	data_addr->mp = mp;
-	data_addr->magic = MEM_POOL_DATA_MAGIC;
 	data_addr->bit_idx = (blk_idx * UINTPTR_T_BITS) | bit_offset;
 	data_addr->bit_num = bit_num;
 
 	/* update bitmap */
 	update_bit_map(mp, blk_idx, bit_offset, bit_num, false);
 
-	return (void *)data_addr->data;
+	return (void*)data_addr->data;
 }
 
 /*************************************************************************************
@@ -506,16 +500,14 @@ void *pl_mem_pool_alloc(struct mem_pool *mp, size_t size)
  * Param:
  *   @mp: memory pool.
  *   @p: memory address.
- * 
+ *
  * Return:
  *   data in the memory pool.
  ************************************************************************************/
-static struct mem_pool_data *get_mem_pool_data(struct mem_pool *mp, void *p)
+static struct mem_pool_data* get_mem_pool_data(struct mem_pool* mp, void* p)
 {
 	size_t blk_idx;
-	uintptr_t magic;
-	struct mem_pool *mp_of_data;
-	struct mem_pool_data *data_addr;
+	struct mem_pool_data* data_addr;
 
 	/* check mp and p */
 	if (mp == NULL || p == NULL)
@@ -523,18 +515,15 @@ static struct mem_pool_data *get_mem_pool_data(struct mem_pool *mp, void *p)
 
 	/* get address of data and check it */
 	data_addr = container_of(p, struct mem_pool_data, data);
-	if ((uchar_t *)data_addr >= (mp->data_pool + mp->data_pool_size) ||
-	    (uchar_t *)data_addr < mp->data_pool)
+	if ((uchar_t*)data_addr >= (mp->data_pool + mp->data_pool_size) ||
+		(uchar_t*)data_addr < mp->data_pool)
 		return NULL;
 
 	/* get magic of data and block index */
-	mp_of_data = data_addr->mp;
-	magic = data_addr->magic;
 	blk_idx = data_addr->bit_idx / UINTPTR_T_BITS;
 
 	/* check mp and magic of data */
-	if (mp_of_data != mp || magic != MEM_POOL_DATA_MAGIC ||
-	    blk_idx >= mp->blk_num)
+	if (blk_idx >= mp->blk_num)
 		return NULL;
 
 	return data_addr;
@@ -549,15 +538,15 @@ static struct mem_pool_data *get_mem_pool_data(struct mem_pool *mp, void *p)
  * Param:
  *   @mp: memory pool.
  *   @p: memory address.
- * 
+ *
  * Return:
  *   void.
  ************************************************************************************/
-void pl_mem_pool_free(struct mem_pool *mp, void *p)
+void pl_mem_pool_free(struct mem_pool* mp, void* p)
 {
 	size_t blk_idx;
 	size_t bit_offset;
-	struct mem_pool_data *data_addr;
+	struct mem_pool_data* data_addr;
 
 	data_addr = get_mem_pool_data(mp, p);
 	if (data_addr == NULL)
@@ -579,12 +568,12 @@ void pl_mem_pool_free(struct mem_pool *mp, void *p)
  *   @blk_idx: index of block.
  *   @grain_order: the minimum granularity that memory allocators need to manage.
  *                 grain_order_size = (1 << grain_order).
- * 
+ *
  * Return:
  *   remaining size of memory block.
  ************************************************************************************/
-static size_t mem_pool_blk_get_free_bytes(struct mem_pool *mp, size_t blk_idx,
-                                         uchar_t grain_order)
+static size_t mem_pool_blk_get_free_bytes(struct mem_pool* mp, size_t blk_idx,
+	uchar_t grain_order)
 {
 	size_t i;
 	size_t rest_bit_num = 0;
@@ -605,11 +594,11 @@ static size_t mem_pool_blk_get_free_bytes(struct mem_pool *mp, size_t blk_idx,
  *
  * Param:
  *   @mp: memory pool.
- * 
+ *
  * Return:
  *   remaining size of memory pool.
  ************************************************************************************/
-size_t pl_mem_pool_get_free_bytes(struct mem_pool *mp)
+size_t pl_mem_pool_get_free_bytes(struct mem_pool* mp)
 {
 	size_t i;
 	size_t rest_bytes = 0;
@@ -634,16 +623,16 @@ size_t pl_mem_pool_get_free_bytes(struct mem_pool *mp)
  *   @p: address of memory
  *   @val: set value required.
  *   @size: the sizeof memory.
- * 
+ *
  * Return:
  *   the end of setting value address.
  ************************************************************************************/
-void *pl_mem_pool_set(struct mem_pool *mp, void *p, uint8_t val, size_t size)
+void* pl_mem_pool_set(struct mem_pool* mp, void* p, uint8_t val, size_t size)
 {
 	size_t i;
-	char *char_p;
+	char* char_p;
 	uintptr_t uintptr_val = val;
-	uintptr_t *set_p = (uintptr_t *)p;
+	uintptr_t* set_p = (uintptr_t*)p;
 	size_t words = size / sizeof(uintptr_t);
 	size_t slice = size & (sizeof(uintptr_t) - 1);
 
@@ -656,7 +645,7 @@ void *pl_mem_pool_set(struct mem_pool *mp, void *p, uint8_t val, size_t size)
 	for (i = 0; i < words; i++)
 		*(set_p++) = uintptr_val;
 
-	char_p = (char *)set_p;
+	char_p = (char*)set_p;
 	for (i = 0; i < slice; i++)
 		*(char_p++) = val;
 
@@ -673,13 +662,13 @@ void *pl_mem_pool_set(struct mem_pool *mp, void *p, uint8_t val, size_t size)
  * Param:
  *   @mp: memory pool.
  *   @size: the size of alloacte required.
- * 
+ *
  * Return:
  *   memory address.
  ************************************************************************************/
-void *pl_mem_pool_zalloc(struct mem_pool *mp, size_t size)
+void* pl_mem_pool_zalloc(struct mem_pool* mp, size_t size)
 {
-	void *data;
+	void* data;
 
 	data = pl_mem_pool_alloc(mp, size);
 	if (data != NULL)
@@ -699,13 +688,13 @@ void *pl_mem_pool_zalloc(struct mem_pool *mp, size_t size)
  *   @mp: memory pool.
  *   @num: number of memory.
  *   @size: size of each memory block.
- * 
+ *
  * Return:
  *   memory address.
  ************************************************************************************/
-void *pl_mem_pool_calloc(struct mem_pool *mp, size_t num, size_t size)
+void* pl_mem_pool_calloc(struct mem_pool* mp, size_t num, size_t size)
 {
-	void *data;
+	void* data;
 	size_t alloc_size = num * size;
 
 	data = pl_mem_pool_alloc(mp, alloc_size);

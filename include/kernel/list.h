@@ -57,23 +57,29 @@ struct list_node {
  *
  * Param:
  *   @entry: specific entry.
+ *   @entry_type: the type of entry.
+ *   @member: the name of the list_head within the struct.
+ *
  * Return:
  *   @entry_type: next entry of specific entry.
  ************************************************************************************/
-#define list_next_entry(entry, entry_type, list_node_member) \
-	container_of(entry->list_node_member.next, entry_type, list_node_member)
+#define list_next_entry(entry, entry_type, member) \
+	container_of(entry->member.next, entry_type, member)
 
 /*************************************************************************************
- * Function Name: list_prev_entry
- * Description: Return the previous entry of specific node.
+ * Function Name: list_next_entry
+ * Description: Return the next entry of specific node.
  *
  * Param:
  *   @entry: specific entry.
+ *   @entry_type: the type of entry.
+ *   @member: the name of the list_head within the struct.
+ *
  * Return:
- *   @member_name: previous entry of specific entry.
+ *   @entry_type: next entry of specific entry.
  ************************************************************************************/
-#define list_prev_entry(entry, entry_type, member_name) \
-	container_of(entry->member_name.prev, entry_type, member_name)
+#define list_prev_entry(entry, entry_type, member) \
+	container_of(entry->member.prev, entry_type, member)
 
 /*************************************************************************************
  * Function Name: list_for_each_entry
@@ -83,14 +89,35 @@ struct list_node {
  *   @pos: the &struct list_head to use as a loop cursor.
  *   @list_head: the head for your list.
  *   @entry_type: type of the struct.
- *   @member_name: member name of the list_node in structure.
+ *   @member: member name of the list_node in structure.
+ *
  * Return:
  *   void
  ************************************************************************************/
-#define list_for_each_entry(pos, list_head, entry_type, member_name) \
-	for (pos = container_of((list_head)->next, entry_type, member_name); \
-	     &pos->member_name != (list_head); \
-	     pos = container_of(pos->member_name.next, entry_type, member_name))
+#define list_for_each_entry(pos, list_head, entry_type, member) \
+	for (pos = container_of((list_head)->next, entry_type, member); \
+	     &pos->member != (list_head); \
+	     pos = container_of(pos->member.next, entry_type, member))
+
+/*************************************************************************************
+ * Function Name: list_for_each_entry_safe
+ * Description: foreach the list inserted in a structure.
+ *
+ * Param:
+ *   @pos: the type * to use as a loop cursor.
+ *   @temp: another type * to use as temporary storage
+ *   @list_head: the head for your list.
+ *   @entry_type: type of the struct.
+ *   @member: member name of the list_node in structure.
+ *
+ * Return:
+ *   none
+ ************************************************************************************/
+#define list_for_each_entry_safe(pos, temp, list_head, entry_type, member) \
+	for (pos = container_of((list_head)->next, entry_type, member), \
+	     temp = list_next_entry(pos, entry_type, member); \
+	     &pos->member != (list_head); \
+	     pos = temp, temp = list_next_entry(temp, entry_type, member))
 
 /*************************************************************************************
  * Function Name: list_init

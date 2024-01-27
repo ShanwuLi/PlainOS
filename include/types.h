@@ -25,6 +25,8 @@ SOFTWARE.
 #define __TYPES_H__
 
 #include <stdint.h>
+#include <stdbool.h>
+#include <stddef.h>
 
 #ifndef NULL
 #define NULL                            ((void*)0)

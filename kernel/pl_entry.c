@@ -5,6 +5,30 @@
 #include <kernel/syslog.h>
 #include "common/ansi_color.h"
 #include <stdio.h>
+#include <kernel/task.h>
+#include <pl_port.h>
+
+static struct tcb task_tcb;
+static u32_t __attribute__((aligned(8))) task_stack[256];
+
+static int task(int argc, char *argv[])
+{
+	pl_early_syslog_warn("task===============================\r\n");
+	USED(argc);
+	USED(argv);
+	int i = 0;
+	while (1)
+	{
+		i++;
+		pl_early_syslog_warn("PlainOS counter:0x%x\r\n", i);
+		if (i > 12)
+			i = 0;
+	}
+
+	return -100;
+}
+
+
 
 static void delay(int x)
 {
@@ -75,8 +99,11 @@ static int __init UART_INIT1(void)
 }
 pure_initcall_sync(UART_INIT1);
 
-void pl_entry(void)
+void pl_callee_entry(void)
 {
+	int i = 0;
+	int j = 0;
+	tid_t task_tid;
 	pl_early_port_putc_init();
 
 	pl_early_syslog_warn("PlainOS 0x%x, %s, %d\r\n", 0x89, "dwowocwvwv", -89);
@@ -85,11 +112,20 @@ void pl_entry(void)
 	pl_early_syslog_warn("PlainOS 0x%fdgd, %s, %x\r\n", "dwowocwvwv", 1233535);
 
 	initcalls_call();
+	pl_task_core_blk_init();
 
-	//while (1)
+	task_tid = pl_task_create_with_stack("task1", task, 1, &task_tcb, task_stack,
+	                                      256 * 4, 0, NULL);
+
+	pl_early_syslog_info("task_tid:%d\r\n", task_tid);
+	void *context_sp = pl_callee_update_context();
+	pl_port_first_task_switch(context_sp);
+
+	while (1)
 	{
-		pl_early_syslog_err("PlainOS:%ld\r\n", 1233535);
-		pl_early_syslog_warn("PlainOS 0x%x, %ld, %u\r\n", 87, -1233535, 1233535);
-		delay(1000);
+		pl_early_syslog_err("PlainOS:%ld, counter:%d\r\n", 1233535, i++);
+		pl_early_syslog_warn("PlainOS counter:0x%x\r\n", j + i);
+		j++;
+		delay(100000);
 	}
 }

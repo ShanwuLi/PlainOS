@@ -16,46 +16,46 @@ int pl_early_port_putc(char c)
 
 irqstate_t pl_port_irq_save(void)
 {
-	irqstate_t irqstate;
-
-	irqstate.state = 0;
+	irqstate_t irqstate = 0;
 	return irqstate;
 }
 
-void pl_port_irq_store(irqstate_t irqstate)
+void pl_port_irq_restore(irqstate_t irqstate)
 {
 	(void)irqstate;
 }
 
-void pl_port_schedule(void)
+void pl_port_task_switch(void *sp_context_restore)
 {
-
+	(void)sp_context_restore;
 }
 
 void *pl_port_task_stack_init(task_t task,
                               void *task_stack,
-                              size_t stack_size)
+                              size_t stack_size,
+                              int argc, char *argv[])
 {
-	u32_t *stack = task_stack;
-    stack      +=  stack_size;
-    *(--stack)  = (u32_t)(1<<24); //XPSR
-    *(--stack)  = (u32_t)task;    //PC
-    *(--stack)  = 0ul;   //R0
-    *(--stack)  = 0ul;   //R1
-    *(--stack)  = 0ul;   //R2
-    *(--stack)  = 0ul;   //R3
-    *(--stack)  = 0ul;   //R12
-    *(--stack)  = 0ul;   //LR
+	u32_t *stack = (u32_t *)task_stack;
 
-    *(--stack)  = 0ul;   //R4
-    *(--stack)  = 0ul;   //R5
-    *(--stack)  = 0ul;   //R6
-    *(--stack)  = 0ul;   //R7
-    *(--stack)  = 0ul;   //R8
-    *(--stack)  = 0ul;   //R9
-    *(--stack)  = 0ul;   //R10
-    *(--stack)  = 0ul;   //R11
-    return stack;
+	stack       +=  stack_size / 4;
+	*(--stack)  = (u32_t)(1<<24);  /* XPSR */
+	*(--stack)  = (u32_t)task;     /* PC */
+	*(--stack)  = (u32_t)0;        /* LR - task_return_entry */
+	*(--stack)  = (u32_t)0;        /* R12 */
+	*(--stack)  = (u32_t)0;        /* R3 */
+	*(--stack)  = (u32_t)0;        /* R2 */
+	*(--stack)  = (u32_t)argv;     /* R1 */
+	*(--stack)  = (u32_t)argc;     /* R0 */
+
+	*(--stack)  = (u32_t)0;        /* R4 */
+	*(--stack)  = (u32_t)0;        /* R5 */
+	*(--stack)  = (u32_t)0;        /* R6 */
+	*(--stack)  = (u32_t)0;        /* R7 */
+	*(--stack)  = (u32_t)0;        /* R8 */
+	*(--stack)  = (u32_t)0;        /* R9 */
+	*(--stack)  = (u32_t)0;        /* R10 */
+	*(--stack)  = (u32_t)0;        /* R11 */
+	return stack;
 }
 
 u8_t pl_port_rodata_read8(void *addr)

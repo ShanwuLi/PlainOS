@@ -28,6 +28,7 @@ SOFTWARE.
  *************************************************************************************/
 
 /* maximum priority of plainos */
+#define PL_CFG_MAX_TASKS_NUM       (10u)
 #define PL_CFG_PRIORITIES_MAX      (100u)
 #define PL_CFG_TASK_DLY
 //#define PL_CFG_SYSLOG_ANSI_COLOR

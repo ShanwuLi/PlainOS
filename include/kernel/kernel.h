@@ -46,4 +46,9 @@ SOFTWARE.
 #define container_of(ptr, struct_type, member) \
 	((struct_type *)((char *)ptr - (char *)(&(((struct_type *)0)->member))))
 
+struct count {
+	u32_t hi32;
+	u32_t lo32;
+};
+
 #endif /* __KERNEL_KERNEL_H__ */

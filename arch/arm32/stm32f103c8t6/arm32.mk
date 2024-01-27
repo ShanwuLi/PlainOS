@@ -32,8 +32,8 @@ TEMP_FLAGS += $(DEFINE) -mthumb -Wall --specs=nosys.specs -Wextra -Wwrite-string
               -fno-tree-switch-conversion -Werror=unused-function -Werror=unused-variable \
               -Wmissing-prototypes
 
-C_FLAGS  += $(DEFINE) -xc -Wmissing-prototypes -Werror=old-style-declaration \
-                            -std=gnu17
+C_FLAGS  += $(DEFINE) $(TEMP_FLAGS) -xc -Wmissing-prototypes -Werror=old-style-declaration \
+                                    -std=gnu17
 CXX_FLAGS += $(TEMP_FLAGS) -xc++ -std=c++14
 ASM_FLAGS += -x assembler-with-cpp
 LDFLAGS   +=  -Wl,--gc-sections,--print-memory-usage -specs=nano.specs
@@ -43,6 +43,7 @@ INC += -I$(ARCH_DIR)/arm32/stm32f103c8t6
 INC += -I$(ARCH_DIR)/arm32/stm32f103c8t6/cmsis
 
 ASM_SRCS += $(ARCH_DIR)/arm32/stm32f103c8t6/startup_stm32f10x_md.S
+ASM_SRCS += $(ARCH_DIR)/arm32/stm32f103c8t6/stm32f103c8t6_port_asm.S
 C_SRCS += $(ARCH_DIR)/arm32/stm32f103c8t6/system_stm32f10x.c
 C_SRCS += $(ARCH_DIR)/arm32/stm32f103c8t6/stm32f10x_it.c
 C_SRCS += $(ARCH_DIR)/arm32/stm32f103c8t6/stm32f103c8t6_port.c

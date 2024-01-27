@@ -27,76 +27,119 @@ SOFTWARE.
 #include <pl_cfg.h>
 #include <kernel/kernel.h>
 #include <kernel/list.h>
+#include <types.h>
 
 /*************************************************************************************
  * Type Name: task_schedule_t
  * Description: task schedule of plain os port.
  *
  ************************************************************************************/
-typedef void (*task_schedule_t)(void);
+enum task_state {
+	TASK_STATE_READY = 0,
+	TASK_STATE_DELAY = 1,
+	TASK_STATE_PEND = 2,
+	TASK_STATE_EXIT = 3,
+	TASK_STATE_FATAL = 4,
+};
+
+typedef int (*task_t)(int argc, char *argv[]);
 
 /*************************************************************************************
  * Structure Name: tcb
  * Description: task controller block.
  *
  * Members:
- *   @task_sp: task stack pointer.
+ *   @context_sp: task stack pointer.
+ *   @name: task name.
  *   @parent: pointer to parent task.
- *   @node: list node of tcb.
- *   @next: pointer to next tcb of the same priority in rdy list.
+ *   @node: list node of the same priority tcb.
  *   @past_state: past state of system.
  *   @curr_state: current state of system.
- *   @prio: priority of the task.
- *   @tid: task id.
+ *   @prio: priority of the task, support priority up to 4096.
  *   @signal: signal of the task received.
- *   @dly_ticks_hi: high 32bit ticks of delay.
- *   @dly_ticks_lo: lower 32bit ticks of delay.
+ *   @delay_ticks: high/low 32bit ticks of delay.
  *
  ************************************************************************************/
-struct tcb
-{
-	void *task_sp;
+struct tcb {
+	void *context_sp;
+	task_t task;
+	const char *name;
 	struct tcb *parent;
 	struct list_node node;
 	u8_t past_state;
 	u8_t curr_state;
 	u16_t prio;
-	u16_t tid;
-	u16_t signal;
+	uint_t signal;
 
 #ifdef PLAINOS_CFG_TASK_DLY
-	u32_t dly_ticks_hi;
-	u32_t dly_ticks_lo;
-#endif /* PLAINOS_CFG_TASK_DLY */
+	struct count delay_ticks;
+#endif
+
+	uintptr_t magic;
 };
 
-typedef int (*task_t)(int argc, char *argv[]);
+typedef struct tcb* tid_t;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /*************************************************************************************
- * Function Name: plainos_switch_to_next_same_prio_task
- * Description: Switch to the next task of same priority.
+ * Function Name: pl_enable_schedule
+ * Description: enable scheduler.
  *
- * Param:
- *   void
+ * Parameters:
+ *   none
+ *
  * Return:
- *   void
+ *   none
  ************************************************************************************/
-void pl_switch_to_next_same_prio_task(void);
+void pl_enable_schedule(void);
 
 /*************************************************************************************
- * Function Name: pl_switch_to_next_same_prio_task
- * Description: Switch to the task of highest priority.
+ * Function Name: pl_disable_schedule
+ * Description: disable scheduler.
  *
- * Param:
- *   void
+ * Parameters:
+ *   none
+ *
  * Return:
- *   void
+ *   none
  ************************************************************************************/
-void pl_switch_to_hiprio_task(void);
+void pl_disable_schedule(void);
+
+/*************************************************************************************
+ * Function Name: pl_task_create_with_stack
+ * Description: create a task with stack that must be provided.
+ *
+ * Parameters:
+ *   @name: name of the task (optional).
+ *   @task: task, prototype is "int task(int argc, char *argv[])"
+ *   @prio: priority of the task, if is 0, it will be its parent's priority (optional).
+ *   @tcb: tcb of the task (must provide).
+ *   @stack: stack of the task (must provide).
+ *   @stack_size: size of the stack (must specify).
+ *   @argc: the count of argv (optional).
+ *   @argv: argv[] (optional).
+ *
+ * Return:
+ *   task handle.
+ ************************************************************************************/
+tid_t pl_task_create_with_stack(const char *name, task_t task, u16_t prio,
+                                struct tcb *tcb, void *stack, size_t stack_size,
+                                int argc, char *argv[]);
+
+/*************************************************************************************
+ * Function Name: pl_task_core_blk_init
+ * Description: initialize task core block.
+ *
+ * Parameters:
+ *   void
+ *
+ * Return:
+ *   none
+ ************************************************************************************/
+void pl_task_core_blk_init(void);
 
 #ifdef __cplusplus
 }

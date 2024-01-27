@@ -24,31 +24,238 @@ SOFTWARE.
 #ifndef __PLAINOS_PORT_H__
 #define __PLAINOS_PORT_H__
 
+#include <types.h>
 #include <stddef.h>
 #include <kernel/kernel.h>
 #include <kernel/task.h>
-#include <types.h>
 
-/*================================== rodata ports =======================================*/
+/////////////////////////////////// system callee ////////////////////////////////////
+/*************************************************************************************
+ * Function Name: pl_callee_entry
+ *
+ * Description:
+ *   PlainOS entry, We must call pl_entry in my own architecture machine. Then PlainOS
+ *   will take over the machine.
+ *
+ * Parameters:
+ *   none.
+ * 
+ * Return:
+ *   none.
+ ************************************************************************************/
+void pl_callee_entry(void);
+
+/*************************************************************************************
+ * Function Name: pl_callee_systick_expiration
+ *
+ * Description:
+ *   The function is used to switch task, we must call it in systick handler
+ *   on systick system.
+ * 
+ * Parameters:
+ *  none
+ *
+ * Return:
+ *  none
+ ************************************************************************************/
+void pl_callee_systick_expiration(void);
+
+/*************************************************************************************
+ * Function Name: pl_callee_update_context
+ * Description: update context and return context_sp of the current task.
+ *
+ * Parameters:
+ *  none
+ *
+ * Return:
+ *    void *context sp;
+ ************************************************************************************/
+void *pl_callee_update_context(void);
+
+
+/////////////////////////////////// rodata ports /////////////////////////////////////
+/*************************************************************************************
+ * Function Name: pl_port_rodata_read8
+ *
+ * Description:
+ *   The function is used to read only data of 8bits.
+ *
+ * Parameters:
+ *   @addr: the address of data we want to read.
+ * 
+ * Return:
+ *   data of 8bits.
+ ************************************************************************************/
 u8_t pl_port_rodata_read8(void *addr);
+
+/*************************************************************************************
+ * Function Name: pl_port_rodata_read16
+ *
+ * Description:
+ *   The function is used to read only data of 16bits.
+ *
+ * Param:
+ *   @addr: the address of data we want to read.
+ * 
+ * Return:
+ *   data of 16bits.
+ ************************************************************************************/
 u16_t pl_port_rodata_read16(void *addr);
+
+/*************************************************************************************
+ * Function Name: pl_port_rodata_read32
+ *
+ * Description:
+ *   The function is used to read only data of 32bits.
+ *
+ * Parameters:
+ *   @addr: the address of data we want to read.
+ * 
+ * Return:
+ *   data of 32bits.
+ ************************************************************************************/
 u32_t pl_port_rodata_read32(void *addr);
+
+/*************************************************************************************
+ * Function Name: pl_port_rodata_read32
+ *
+ * Description:
+ *   The function is used to read only data of uintptr_t.
+ *
+ * Parameters:
+ *   @addr: the address of data we want to read.
+ * 
+ * Return:
+ *   data of uintptr_t.
+ ************************************************************************************/
 uintptr_t pl_port_rodata_read(void *addr);
 
-/*================================== early ports =======================================*/
-void pl_entry(void);
+
+///////////////////////////////////// early ports ////////////////////////////////////
+/*************************************************************************************
+ * Function Name: pl_early_port_putc_init
+ *
+ * Description:
+ *   initializetion function of early putc, it will be called in pl_entry of
+ *   early stage. Then we can use pl_early_port_putc in early stage before
+ *   the first task setup.
+ *
+ * Parameters:
+ *   none.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 with failure.
+ ************************************************************************************/
 int pl_early_port_putc_init(void);
+
+/*************************************************************************************
+ * Function Name: pl_early_port_putc
+ *
+ * Description:
+ *   The function is used to put char in early stage before the first task setup.
+ *
+ * Parameters:
+ *   @c: the char we want to put.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 with failure.
+ ************************************************************************************/
 int pl_early_port_putc(const char c);
 
-/*=================================== task ports =======================================*/
-typedef struct irqstate
-{
-	unsigned int state;
-} irqstate_t;
 
+
+////////////////////////////////////  task ports /////////////////////////////////////
+typedef uintptr_t irqstate_t;
+
+/*************************************************************************************
+ * Function Name: pl_port_irq_save
+ * for example in atmega128:
+ *  irqstate_t pl_port_irq_save(void)
+ *  {
+ *     return SREG;
+ *  }
+ *
+ * Description:
+ *   The function is used to save interrupt mask status.
+ *
+ * Parameters:
+ *   none.
+ *
+ * Return:
+ *  The interrupt mask status we want to save.
+ ************************************************************************************/
 irqstate_t pl_port_irq_save(void);
-void pl_port_irq_store(irqstate_t);
-void pl_port_schedule(void);
-void *pl_port_task_stack_init(task_t task, void *task_stack, size_t stack_size);
+
+/*************************************************************************************
+ * Function Name: pl_port_irq_restore
+ *
+ * Description:
+ *   The function is used to restore interrupt mask status.
+ *   void pl_port_irq_restore(irqstate_t irqstate)
+ *   {
+ *      SREG = (u8_t)irqstate;
+ *   }
+ *
+ * Parameters:
+ *   none.
+ *
+ * Return:
+ *  The interrupt status we want to restore.
+ ************************************************************************************/
+void pl_port_irq_restore(irqstate_t irqstate);
+
+/*************************************************************************************
+ * Function Name: pl_port_task_switch_firstly
+ *
+ * Description:
+ *   The function is used to switch task firstly.
+ *
+ * Parameters:
+ *   @sp_context_restore: location of context restore.
+ *
+ * Return:
+ *  none.
+ ************************************************************************************/
+void pl_port_first_task_switch(void *sp_context_restore);
+
+/*************************************************************************************
+ * Function Name: pl_port_task_switch
+ *
+ * Description:
+ *   The function is used to switch task.
+ *
+ * Parameters:
+ *   @sp_context_restore: location of context restore.
+ *
+ * Return:
+ *  none.
+ ************************************************************************************/
+void pl_port_task_switch(void *sp_context_restore);
+
+/*************************************************************************************
+ * Function Name: pl_port_task_stack_init
+ *
+ * Description:
+ *   The function is used to initialize stack of the task.
+ *            _______________________________________________________
+ * stack top |                   |                                   | stack bottom
+ *           |___________________|___________________________________|
+ *           A                   A                                   A
+ *           |                   |                                   |
+ *       task_stack       task_stack + regs                task_stack + stack_size
+ 
+ * Parameters:
+ *  @task: the task of initialization, prototype is "int task(int argc, char *argv[])"
+ *  @task_stack: task stack.
+ *  @stack_size: stack size.
+ *  @argc: the count of argv.
+ *  @argv: argv[].
+ *
+ * Return:
+ *  pointer to the task_stack + regs.
+ ************************************************************************************/
+void *pl_port_task_stack_init(task_t task, void *task_stack, size_t stack_size,
+                              int argc, char *argv[]);
+
 
 #endif /* __PLAINOS_PORT_H__ */
