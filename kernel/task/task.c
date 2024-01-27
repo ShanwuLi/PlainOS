@@ -29,7 +29,11 @@ SOFTWARE.
 #include <pl_port.h>
 #include <kernel/syslog.h>
 
+<<<<<<< HEAD
 #define TASK_TCB_MAGIC                         0xDeadBeef
+=======
+#define TASK_TCB_MAGIC                         0xdeadbeef
+>>>>>>> 39695197d0a41dc6b7f369e1cd33c404ecfdd146
 /*************************************************************************************
  * Description: Definitions of highest priority of task.
  ************************************************************************************/
