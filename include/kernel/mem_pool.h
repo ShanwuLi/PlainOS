@@ -23,7 +23,8 @@ SOFTWARE.
 
 #ifndef __KERNEL_MEM_POOL_H__
 #define __KERNEL_MEM_POOL_H__
-#include "types.h"
+
+#include <types.h>
 #include <stddef.h>
 
 struct mem_pool {
@@ -39,8 +40,6 @@ struct mem_pool {
 };
 
 struct mem_pool_data {
-	struct mem_pool *mp;
-	uintptr_t magic;
 	size_t bit_idx;
 	size_t bit_num;
 	uchar_t *data[0];

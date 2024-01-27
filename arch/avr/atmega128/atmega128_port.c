@@ -19,7 +19,7 @@ static usart USART1={
 
 int main(void)
 {
-	pl_entry();
+	pl_callee_entry();
 }
 
 int pl_early_port_putc_init(void)

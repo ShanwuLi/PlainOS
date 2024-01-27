@@ -27,10 +27,16 @@ SOFTWARE.
 #include <kernel/list.h>
 #include <kernel/kernel.h>
 #include <pl_port.h>
+#include <kernel/syslog.h>
 
+#define TASK_TCB_MAGIC                         0xdeadbeef
 /*************************************************************************************
- * Description: Definitions for highest priority of task.
+ * Description: Definitions of highest priority of task.
  ************************************************************************************/
+#if (PL_CFG_PRIORITIES_MAX >= 4096)
+	#error PL_CFG_PRIORITIES_MAX must less 4096
+#endif
+
 #define HIPRIO_BITMAP_SIZE                      ((PL_CFG_PRIORITIES_MAX + 7) / 8)
 #define HIPRIO_LEV1_BITMAP_SIZE                 ((PL_CFG_PRIORITIES_MAX + 63) / 64)
 #define HIPRIO_LEV2_BITMAP_SIZE                 ((PL_CFG_PRIORITIES_MAX + 511) / 512)
@@ -40,12 +46,34 @@ SOFTWARE.
                                                 | ((bit) << 0));
 
 /*************************************************************************************
- * structure Name: rdytask_list
- * Description: Define a list of ready task.
+ * structure Name: task_list
+ * Description: Define task list.
  ************************************************************************************/
-struct rdytask_list {
+struct task_list {
 	struct tcb *head;
 	u16_t num;
+};
+
+/*************************************************************************************
+ * Structure Name: task_core_blk
+ * Description: task core block.
+ *
+ * Members:
+ *   @ready_list: list head array of ready tasks.
+ *   @pend_list: list head of pending tasks.
+ *   @delay_list: list head of delay tasks.
+ *   @curr_tcb: current context tcb.
+ *   @systicks: systicks.
+ *   @sched_enable: schedule state, true: enable schedule, false: disable schedule.
+ *
+ ************************************************************************************/
+struct task_core_blk {
+	struct task_list ready_list[PL_CFG_PRIORITIES_MAX + 1];
+	struct task_list pend_list;
+	struct task_list delay_list;
+	struct tcb *curr_tcb;
+	struct count systicks;
+	bool sched_enable;
 };
 
 /*************************************************************************************
@@ -53,7 +81,7 @@ struct rdytask_list {
  * Description: Obtain the highest priority through the priority index table.
  *              Supports up to 4096 priority levels.
  ************************************************************************************/
-static __const u8_t g_hiprio_idx_tbl[256] = {
+static u8_t __const g_hiprio_idx_tbl[256] = {
 	0, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,  /* 0x00 to 0x0F */
 	4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,  /* 0x10 to 0x1F */
 	5, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,  /* 0x20 to 0x2F */
@@ -73,12 +101,6 @@ static __const u8_t g_hiprio_idx_tbl[256] = {
 };
 
 /*************************************************************************************
- * Global Variable Name: g_rdytask_list
- * Description:  List of ready task.
- ************************************************************************************/
-struct tcb *g_pl_curr_task_tcb;
-
-/*************************************************************************************
  * Global Variable Name: g_hiprio_bitmap, g_hiprio_bitmap_lv1, g_hiprio_bitmap_lv2,
  *                       g_hiprio_bitmap_lv3
  *
@@ -91,16 +113,16 @@ static u8_t g_hiprio_bitmap_lv2[HIPRIO_LEV2_BITMAP_SIZE];
 static u8_t g_hiprio_bitmap_lv3;
 
 /*************************************************************************************
- * Global Variable Name: g_rdytask_list
- * Description:  List of ready task.
+ * Global Variable Name: g_task_core_blk
+ * Description:  task core block.
  ************************************************************************************/
-static struct rdytask_list __used g_rdytask_list[PL_CFG_PRIORITIES_MAX + 1];
+static struct task_core_blk g_task_core_blk;
 
 /*************************************************************************************
  * Function Name: get_hiprio
  * Description: Get current highest priority.
  *
- * Param:
+ * Parameters:
  *   void
  *
  * Return:
@@ -130,16 +152,58 @@ static u16_t get_hiprio(void)
 }
 
 /*************************************************************************************
+ * Function Name: pl_switch_to_hiprio_task
+ * Description: Switch to the task of highest priority.
+ *
+ * Parameters:
+ *   void
+ *
+ * Return:
+ *   void
+ ************************************************************************************/
+static struct tcb *get_next_rdy_tcb(void)
+{
+	struct tcb *next_tcb;
+	u16_t hiprio = get_hiprio();
+	struct tcb *curr_tcb = g_task_core_blk.curr_tcb;
+
+	if (hiprio >= curr_tcb->prio)
+		next_tcb = list_next_entry(curr_tcb, struct tcb, node);
+	else
+		next_tcb = g_task_core_blk.ready_list[hiprio].head;
+
+	return next_tcb;
+}
+
+/*************************************************************************************
+ * Function Name: pl_callee_update_context
+ * Description: update context and return context_sp of the current task.
+ *
+ * Parameters:
+ *  none
+ *
+ * Return:
+ *    void *context sp;
+ ************************************************************************************/
+void *pl_callee_update_context(void)
+{
+	struct tcb *next_tcb = get_next_rdy_tcb();
+	g_task_core_blk.curr_tcb = next_tcb;
+
+	return next_tcb->context_sp;
+}
+
+/*************************************************************************************
  * Function Name: clear_bit_of_hiprio_bitmap
  * Description: clear the bit of highest priority table.
  *
- * Param:
+ * Parameters:
  *   @prio: priority
  *
  * Return:
  *   void
  ************************************************************************************/
-static void __used clear_bit_of_hiprio_bitmap(u16_t prio)
+static void clear_bit_of_hiprio_bitmap(u16_t prio)
 {
 	g_hiprio_bitmap[prio >> 3] &= (u8_t)(~(1 << (prio & 0x7)));
 	if (g_hiprio_bitmap[prio >> 3] != 0)
@@ -166,7 +230,7 @@ static void __used clear_bit_of_hiprio_bitmap(u16_t prio)
  * Return:
  *   void
  ************************************************************************************/
-static void __used set_bit_of_hiprio_bitmap(u16_t prio)
+static void set_bit_of_hiprio_bitmap(u16_t prio)
 {
 	g_hiprio_bitmap[prio >> 3]     |= (u8_t)(1 << ((prio & 0x7) >> 0));
 	g_hiprio_bitmap_lv1[prio >> 6] |= (u8_t)(1 << ((prio & 0x3f) >> 3));
@@ -178,18 +242,19 @@ static void __used set_bit_of_hiprio_bitmap(u16_t prio)
  * Function Name: rdytask_list_init
  * Description:  Initialize list of ready task.
  *
- * Param:
+ * Parameters:
  *   void
+ *
  * Return:
  *   void
  ************************************************************************************/
-static void __used rdytask_list_init(void)
+static void rdytask_list_init(void)
 {
 	u16_t i;
 
 	for (i = 0; i < PL_CFG_PRIORITIES_MAX + 1; i++) {
-		g_rdytask_list[i].head = NULL;
-		g_rdytask_list[i].num = 0;
+		g_task_core_blk.ready_list[i].head = NULL;
+		g_task_core_blk.ready_list[i].num = 0;
 	}
 }
 
@@ -202,10 +267,10 @@ static void __used rdytask_list_init(void)
  * Return:
  *   void
  ************************************************************************************/
-static void __used insert_tcb_to_rdylist(struct tcb *tcb)
+static void insert_tcb_to_rdylist(struct tcb *tcb)
 {
 	u16_t prio = tcb->prio;
-	struct rdytask_list *rdylist = &g_rdytask_list[prio];
+	struct task_list *rdylist = &g_task_core_blk.ready_list[prio];
 
 	if (rdylist->head == NULL) {
 		list_init(&tcb->node);
@@ -230,7 +295,7 @@ static void __used insert_tcb_to_rdylist(struct tcb *tcb)
 static void __used remove_tcb_from_rdylist(struct tcb *tcb)
 {
 	u16_t prio = tcb->prio;
-	struct rdytask_list *rdylist = &g_rdytask_list[prio];
+	struct task_list *rdylist = &g_task_core_blk.ready_list[prio];
 	u16_t num = rdylist->num;
 
 	if(num == 1) {
@@ -248,39 +313,117 @@ static void __used remove_tcb_from_rdylist(struct tcb *tcb)
 }
 
 /*************************************************************************************
- * Function Name: pl_switch_to_next_same_prio_task
- * Description: Switch to the next task of same priority.
+ * Function Name: pl_enable_schedule
+ * Description: enable scheduler.
  *
- * Param:
- *   void
+ * Parameters:
+ *   none
+ *
  * Return:
- *   void
+ *   none
  ************************************************************************************/
-void pl_switch_to_next_same_prio_task(void)
+void pl_enable_schedule(void)
 {
-	g_pl_curr_task_tcb = list_next_entry(g_pl_curr_task_tcb, struct tcb, node);
-	pl_port_schedule();
+	g_task_core_blk.sched_enable = true;
 }
 
 /*************************************************************************************
- * Function Name: pl_switch_to_hiprio_task
- * Description: Switch to the task of highest priority.
+ * Function Name: pl_disable_schedule
+ * Description: disable scheduler.
  *
- * Param:
+ * Parameters:
+ *   none
+ *
+ * Return:
+ *   none
+ ************************************************************************************/
+void pl_disable_schedule(void)
+{
+	g_task_core_blk.sched_enable = false;
+}
+
+/*************************************************************************************
+ * Function Name: pl_switch_to_next_same_prio_task
+ * Description: Switch to the next task of same priority.
+ *
+ * Parameters:
  *   void
+ *
  * Return:
  *   void
  ************************************************************************************/
-void pl_switch_to_hiprio_task(void)
+void pl_switch_to_next_same_prio_task(void);
+void pl_switch_to_next_same_prio_task(void)
 {
-	u16_t hiprio = get_hiprio();
+	struct tcb *curr_tcb = g_task_core_blk.curr_tcb;
 
-	if (hiprio >= g_pl_curr_task_tcb->prio) {
-		g_pl_curr_task_tcb = list_next_entry(g_pl_curr_task_tcb, struct tcb, node);
-	} else {
-		g_pl_curr_task_tcb = g_rdytask_list[hiprio].head;
+	g_task_core_blk.curr_tcb = list_next_entry(curr_tcb, struct tcb, node);
+	pl_port_task_switch(NULL);
+}
+
+/*************************************************************************************
+ * Function Name: pl_task_create_with_stack
+ * Description: create a task with stack that must be provided.
+ *
+ * Parameters:
+ *   @name: name of the task (optional).
+ *   @task: task, prototype is "int task(int argc, char *argv[])"
+ *   @prio: priority of the task, if is 0, it will be its parent's priority (optional).
+ *   @tcb: tcb of the task (must provide).
+ *   @stack: stack of the task (must provide).
+ *   @stack_size: size of the stack (must specify).
+ *   @argc: the count of argv (optional).
+ *   @argv: argv[] (optional).
+ *
+ * Return:
+ *   task handle.
+ ************************************************************************************/
+tid_t pl_task_create_with_stack(const char *name, task_t task, u16_t prio,
+                                struct tcb *tcb, void *stack, size_t stack_size,
+                                int argc, char *argv[])
+{
+	if (task == NULL || tcb == NULL || stack == NULL) {
+		pl_early_syslog_err("task, tcb or stack is NULL\n");
+		return (tid_t)ERR_TO_PTR(-EFAULT);
 	}
 
-	/* OS schedule */
-	pl_port_schedule();
+	stack = pl_port_task_stack_init(task, stack, stack_size, argc, argv);
+
+	tcb->name = name;
+	tcb->parent = g_task_core_blk.curr_tcb;
+	tcb->signal = 0;
+	tcb->prio = (prio > 0) ? prio : tcb->parent->prio;
+	tcb->curr_state = TASK_STATE_READY;
+	tcb->past_state = TASK_STATE_EXIT;
+	tcb->context_sp = stack;
+	tcb->magic = TASK_TCB_MAGIC;
+	tcb->task = task;
+
+	pl_disable_schedule();
+	insert_tcb_to_rdylist(tcb);
+	pl_enable_schedule();
+
+	return tcb;
+}
+
+
+
+
+/*************************************************************************************
+ * Function Name: pl_task_core_blk_init
+ * Description: initialize task core block.
+ *
+ * Parameters:
+ *   void
+ *
+ * Return:
+ *   none
+ ************************************************************************************/
+void pl_task_core_blk_init(void)
+{
+	rdytask_list_init();
+	g_task_core_blk.curr_tcb = NULL;
+	g_task_core_blk.systicks.hi32 = 0;
+	g_task_core_blk.systicks.lo32 = 0;
+	g_task_core_blk.sched_enable = false;
 }

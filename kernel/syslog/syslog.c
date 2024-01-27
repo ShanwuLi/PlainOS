@@ -27,12 +27,39 @@ SOFTWARE.
 #include <lib/pl_string.h>
 #include <kernel/syslog.h>
 
+/*************************************************************************************
+ * Function Name: put_string
+ *
+ * Description:
+ *   put a string using puc.
+ *
+ * Param:
+ *   @putc: putc function.
+ *   @str: string.
+ * 
+ * Return:
+ *   none.
+ ************************************************************************************/
 static void put_string(int (*putc)(const char c), const char *str)
 {
 	while (*str)
 		putc(*(str++));
 }
 
+/*************************************************************************************
+ * Function Name: put_chars
+ *
+ * Description:
+ *   put chars using puc.
+ *
+ * Param:
+ *   @putc: putc function.
+ *   @start: start char.
+ *   @end: end char.
+ * 
+ * Return:
+ *   none.
+ ************************************************************************************/
 static void put_chars(int (*putc)(const char c),
              const char *start, const char *end)
 {
@@ -42,8 +69,23 @@ static void put_chars(int (*putc)(const char c),
 		putc(*ch);
 }
 
+/*************************************************************************************
+ * Function Name: pl_put_format_log
+ *
+ * Description:
+ *   put format log using putc. It will put [front][fmt][rear] string using putc.
+ *
+ * Param:
+ *   @putc: putc function.
+ *   @front: the front of fmt.
+ *   @rear: the rear of fmt .
+ *   @fmt: format string.
+ * 
+ * Return:
+ *   none.
+ ************************************************************************************/
 void pl_put_format_log(int (*putc)(const char c), const char *front,
-                       const char *rear, const const char *fmt, ...)
+                             const char *rear, const char *fmt, ...)
 {
 	char str[24];
 	int state = 0;
