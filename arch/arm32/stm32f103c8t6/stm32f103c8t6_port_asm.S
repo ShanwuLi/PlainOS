@@ -53,7 +53,6 @@ pl_port_task_switch:
  PendSV异常中断服务函数
 ---------------------------------------------*/
 .section	.text.PendSV_Handler
-.weak	PendSV_Handler
 .type	PendSV_Handler, %function
 
 PendSV_Handler:
@@ -77,20 +76,6 @@ switch_bottom:
 	ldmia r0!, {r4-r11}
 	msr   psp, r0
 	orr   lr, lr, #0x04
-	bx    lr
-
-/*--------------------------------------------
- switch to first task
----------------------------------------------*/
-.section	.text.pl_port_first_task_switch
-.weak	pl_port_first_task_switch
-.type	pl_port_first_task_switch, %function
-pl_port_first_task_switch:
-	/* restore */
-	ldmia r0!, {r4-r11}
-	msr   psp, r0
-	orr   lr, lr, #0x04
-	cpsie i
 	bx    lr
 
 .section	.text.GetReturnValue

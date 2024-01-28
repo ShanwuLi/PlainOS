@@ -25,11 +25,6 @@ void pl_port_irq_restore(irqstate_t irqstate)
 	(void)irqstate;
 }
 
-void pl_port_task_switch(void *sp_context_restore)
-{
-	(void)sp_context_restore;
-}
-
 void *pl_port_task_stack_init(task_t task,
                               void *task_stack,
                               size_t stack_size,
@@ -37,7 +32,7 @@ void *pl_port_task_stack_init(task_t task,
 {
 	u32_t *stack = (u32_t *)task_stack;
 
-	stack       +=  stack_size / 4;
+	stack       +=  stack_size;
 	*(--stack)  = (u32_t)(1<<24);  /* XPSR */
 	*(--stack)  = (u32_t)task;     /* PC */
 	*(--stack)  = (u32_t)0;        /* LR - task_return_entry */

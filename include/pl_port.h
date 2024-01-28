@@ -205,32 +205,18 @@ irqstate_t pl_port_irq_save(void);
 void pl_port_irq_restore(irqstate_t irqstate);
 
 /*************************************************************************************
- * Function Name: pl_port_task_switch_firstly
- *
- * Description:
- *   The function is used to switch task firstly.
- *
- * Parameters:
- *   @sp_context_restore: location of context restore.
- *
- * Return:
- *  none.
- ************************************************************************************/
-void pl_port_first_task_switch(void *sp_context_restore);
-
-/*************************************************************************************
  * Function Name: pl_port_task_switch
  *
  * Description:
  *   The function is used to switch task.
  *
  * Parameters:
- *   @sp_context_restore: location of context restore.
+ *   none.
  *
  * Return:
  *  none.
  ************************************************************************************/
-void pl_port_task_switch(void *sp_context_restore);
+void pl_port_task_switch(void);
 
 /*************************************************************************************
  * Function Name: pl_port_task_stack_init

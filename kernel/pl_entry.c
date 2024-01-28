@@ -20,7 +20,7 @@ static int task(int argc, char *argv[])
 	while (1)
 	{
 		i++;
-		pl_early_syslog_warn("PlainOS counter:0x%x\r\n", i);
+		pl_early_syslog_warn("task===============================\r\n");
 		if (i > 12)
 			i = 0;
 	}
@@ -114,13 +114,22 @@ void pl_callee_entry(void)
 	initcalls_call();
 	pl_task_core_blk_init();
 
+
+
+
+	pl_early_syslog_warn("task:0x%x\r\n", task);
 	task_tid = pl_task_create_with_stack("task1", task, 1, &task_tcb, task_stack,
-	                                      256 * 4, 0, NULL);
+	                                      256, 0, NULL);
+
 
 	pl_early_syslog_info("task_tid:%d\r\n", task_tid);
-	void *context_sp = pl_callee_update_context();
-	pl_port_first_task_switch(context_sp);
+	//void *context_sp = pl_callee_update_context();
+	//pl_early_syslog_warn("context_sp:0x%x\r\n", context_sp);
+	pl_port_task_switch(NULL);
 
+
+
+	while(1);
 	while (1)
 	{
 		pl_early_syslog_err("PlainOS:%ld, counter:%d\r\n", 1233535, i++);
