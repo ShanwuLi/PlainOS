@@ -35,11 +35,11 @@ SOFTWARE.
  *
  ************************************************************************************/
 enum task_state {
-	TASK_STATE_READY = 0,
-	TASK_STATE_DELAY = 1,
-	TASK_STATE_PEND = 2,
-	TASK_STATE_EXIT = 3,
-	TASK_STATE_FATAL = 4,
+	PL_TASK_STATE_READY = 0,
+	PL_TASK_STATE_DELAY = 1,
+	PL_TASK_STATE_PEND = 2,
+	PL_TASK_STATE_EXIT = 3,
+	PL_TASK_STATE_FATAL = 4,
 };
 
 typedef int (*task_t)(int argc, char *argv[]);
@@ -85,6 +85,18 @@ extern "C" {
 #endif
 
 /*************************************************************************************
+ * Function Name: pl_get_curr_tcb
+ * Description: get current tcb.
+ *
+ * Parameters:
+ *  none
+ *
+ * Return:
+ *    struct tcb *;
+ ************************************************************************************/
+struct tcb *pl_get_curr_tcb(void);
+
+/*************************************************************************************
  * Function Name: pl_enable_schedule
  * Description: enable scheduler.
  *
@@ -128,18 +140,6 @@ void pl_disable_schedule(void);
 tid_t pl_task_create_with_stack(const char *name, task_t task, u16_t prio,
                                 struct tcb *tcb, void *stack, size_t stack_size,
                                 int argc, char *argv[]);
-
-/*************************************************************************************
- * Function Name: pl_task_core_blk_init
- * Description: initialize task core block.
- *
- * Parameters:
- *   void
- *
- * Return:
- *   none
- ************************************************************************************/
-void pl_task_core_blk_init(void);
 
 #ifdef __cplusplus
 }

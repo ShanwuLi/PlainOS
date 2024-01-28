@@ -20,7 +20,7 @@ static int task(int argc, char *argv[])
 	while (1)
 	{
 		i++;
-		pl_early_syslog_warn("PlainOS counter:0x%x\r\n", i);
+		pl_early_syslog_warn(" counter:0x%x\r\n", i);
 		if (i > 12)
 			i = 0;
 	}
@@ -69,6 +69,7 @@ static initcall_t *initcall_levels[] = {
 void initcalls_call(void);
 void initcalls_call(void)
 {
+	int ret;
 	initcall_t **init_fns;
 	initcall_t *init_fn;
 	initcall_t init_f;
@@ -76,7 +77,11 @@ void initcalls_call(void)
 	for (init_fns = &initcall_levels[0]; init_fns < &initcall_levels[10]; init_fns++) {
 		for (init_fn = *init_fns; init_fn < *(init_fns + 1); init_fn++) {
 			init_f = (initcall_t)pl_port_rodata_read(init_fn);
-			init_f();
+			ret = init_f();
+			if (ret < 0) {
+				pl_early_syslog_err("init call return error:%d\r\n", ret);
+				while(1);
+			}
 		}
 	}
 }
@@ -112,12 +117,11 @@ void pl_callee_entry(void)
 	pl_early_syslog_warn("PlainOS 0x%fdgd, %s, %x\r\n", "dwowocwvwv", 1233535);
 
 	initcalls_call();
-	pl_task_core_blk_init();
 
 	task_tid = pl_task_create_with_stack("task1", task, 1, &task_tcb, task_stack,
 	                                      256 * 4, 0, NULL);
 
-	pl_early_syslog_info("task_tid:%d\r\n", task_tid);
+	pl_early_syslog_info("task_tid:0x%x\r\n", task_tid);
 	void *context_sp = pl_callee_update_context();
 	pl_port_first_task_switch(context_sp);
 
