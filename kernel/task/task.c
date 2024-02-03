@@ -540,7 +540,7 @@ static int pl_task_core_blk_init(void)
 	pl_task_create_with_stack("ewrett", idle1_task, 10, &g_idle1_task,
 	                           g_idle1_task_stack, 256, 0, NULL);
 	pl_early_syslog_info("task core init successfully\r\n");
-
+	pl_port_task_switch();
 	return OK;
 }
 core_initcall(pl_task_core_blk_init);
