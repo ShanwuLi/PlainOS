@@ -29,6 +29,7 @@ SOFTWARE.
 #include <pl_port.h>
 #include <kernel/initcall.h>
 #include <kernel/syslog.h>
+#include <kernel/initcall.h>
 
 #define TASK_TCB_MAGIC                         0xDeadBeef
 /*************************************************************************************
@@ -211,6 +212,21 @@ void *pl_callee_update_context(void)
 
 	//pl_early_syslog_info("pl_callee_update_context, sp:0x%x\r\n", next_tcb->context_sp);
 	return next_tcb->context_sp;
+}
+
+/*************************************************************************************
+ * Function Name: pl_get_curr_tcb
+ * Description: get current tcb.
+ *
+ * Parameters:
+ *  none
+ *
+ * Return:
+ *    struct tcb *;
+ ************************************************************************************/
+struct tcb *pl_get_curr_tcb(void)
+{
+	return g_task_core_blk.curr_tcb;
 }
 
 /*************************************************************************************
@@ -402,6 +418,8 @@ tid_t pl_task_create_with_stack(const char *name, task_t task, u16_t prio,
                                 struct tcb *tcb, void *stack, size_t stack_size,
                                 int argc, char *argv[])
 {
+	irqstate_t irqstate;
+
 	if (task == NULL || tcb == NULL || stack == NULL) {
 		pl_early_syslog_err("task, tcb or stack is NULL\n");
 		return (tid_t)ERR_TO_PTR(-EFAULT);
@@ -413,14 +431,15 @@ tid_t pl_task_create_with_stack(const char *name, task_t task, u16_t prio,
 	tcb->parent = g_task_core_blk.curr_tcb;
 	tcb->signal = 0;
 	tcb->prio = (prio > 0) ? prio : tcb->parent->prio;
-	tcb->curr_state = TASK_STATE_READY;
-	tcb->past_state = TASK_STATE_EXIT;
+	tcb->curr_state = PL_TASK_STATE_READY;
+	tcb->past_state = PL_TASK_STATE_EXIT;
 	tcb->context_sp = stack;
 	tcb->magic = TASK_TCB_MAGIC;
 	tcb->task = task;
 
-	pl_disable_schedule();
+	irqstate = pl_port_irq_save();
 	insert_tcb_to_rdylist(tcb);
+	pl_port_irq_restore(irqstate);
 	pl_enable_schedule();
 	//pl_port_task_switch();
 
@@ -515,11 +534,13 @@ static int pl_task_core_blk_init(void)
 	g_task_core_blk.systicks.lo32 = 0;
 	g_task_core_blk.sched_enable = false;
 
+
 	pl_task_create_with_stack("fegeg", idle_task, 10, &g_task_core_blk.idle_task,
 	                           g_idle_task_stack, 256, 0, NULL);
 	pl_task_create_with_stack("ewrett", idle1_task, 10, &g_idle1_task,
 	                           g_idle1_task_stack, 256, 0, NULL);
 	pl_early_syslog_info("task core init successfully\r\n");
+
 	return OK;
 }
 core_initcall(pl_task_core_blk_init);

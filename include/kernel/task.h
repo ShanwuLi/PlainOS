@@ -35,11 +35,11 @@ SOFTWARE.
  *
  ************************************************************************************/
 enum task_state {
-	TASK_STATE_READY = 0,
-	TASK_STATE_DELAY = 1,
-	TASK_STATE_PEND = 2,
-	TASK_STATE_EXIT = 3,
-	TASK_STATE_FATAL = 4,
+	PL_TASK_STATE_READY = 0,
+	PL_TASK_STATE_DELAY = 1,
+	PL_TASK_STATE_PEND = 2,
+	PL_TASK_STATE_EXIT = 3,
+	PL_TASK_STATE_FATAL = 4,
 };
 
 typedef int (*task_t)(int argc, char *argv[]);
@@ -83,6 +83,18 @@ typedef struct tcb* tid_t;
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/*************************************************************************************
+ * Function Name: pl_get_curr_tcb
+ * Description: get current tcb.
+ *
+ * Parameters:
+ *  none
+ *
+ * Return:
+ *    struct tcb *;
+ ************************************************************************************/
+struct tcb *pl_get_curr_tcb(void);
 
 /*************************************************************************************
  * Function Name: pl_enable_schedule
