@@ -31,10 +31,16 @@ SOFTWARE.
 	                                KEEP(*(.initcall##level##.init)) \
 	                                KEEP(*(.initcall##level##s.init))
 
+#define APP_CALLS_LEVEL(level)      __appcall##level##_start = .; \
+	                                KEEP(*(.appcall##level##.app)) \
+	                                KEEP(*(.appcall##level##s.app))
+
 #define PL_INIT_SECTION             *(.pl_init.init) /* __init */
 
 #define INIT_CALLS_SECTION          __initcall_start = .; \
+	                                __early_initcall_start = .; \
 	                                KEEP(*(.initcallearly.init)) \
+	                                __early_initcall_end = .; \
 	                                INIT_CALLS_LEVEL(0) \
 	                                INIT_CALLS_LEVEL(1) \
 	                                INIT_CALLS_LEVEL(2) \
@@ -48,12 +54,12 @@ SOFTWARE.
 	                                __initcall_end = .;
 
 #define APPS_CALLS_SECTION          __appcall_start = .; \
-	                                KEEP(*(.appcall0.app)) \
-	                                KEEP(*(.appcall1.app)) \
-	                                KEEP(*(.appcall2.app)) \
-	                                KEEP(*(.appcall3.app)) \
-	                                KEEP(*(.appcall4.app)) \
-	                                KEEP(*(.appcall5.app)) \
+	                                APP_CALLS_LEVEL(0) \
+	                                APP_CALLS_LEVEL(1) \
+	                                APP_CALLS_LEVEL(2) \
+	                                APP_CALLS_LEVEL(3) \
+	                                APP_CALLS_LEVEL(4) \
+	                                APP_CALLS_LEVEL(5) \
 	                                __appcall_end = .;
 
 #define ERRNO_SECTION               __errno_start = .;  \

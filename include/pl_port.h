@@ -61,6 +61,18 @@ void pl_callee_entry(void);
 void pl_callee_systick_expiration(void);
 
 /*************************************************************************************
+ * Function Name: pl_callee_save_curr_context_sp
+ * Description: update context and return context_sp of the current task.
+ *
+ * Parameters:
+ *  none
+ *
+ * Return:
+ *    void *context sp;
+ ************************************************************************************/
+void pl_callee_save_curr_context_sp(void *context_sp);
+
+/*************************************************************************************
  * Function Name: pl_callee_update_context
  * Description: update context and return context_sp of the current task.
  *
@@ -133,22 +145,6 @@ uintptr_t pl_port_rodata_read(void *addr);
 
 ///////////////////////////////////// early ports ////////////////////////////////////
 /*************************************************************************************
- * Function Name: pl_early_port_putc_init
- *
- * Description:
- *   initializetion function of early putc, it will be called in pl_entry of
- *   early stage. Then we can use pl_early_port_putc in early stage before
- *   the first task setup.
- *
- * Parameters:
- *   none.
- *
- * Return:
- *  Greater than or equal to 0 on success, less than 0 with failure.
- ************************************************************************************/
-int pl_early_port_putc_init(void);
-
-/*************************************************************************************
  * Function Name: pl_early_port_putc
  *
  * Description:
@@ -203,6 +199,20 @@ irqstate_t pl_port_irq_save(void);
  *  The interrupt status we want to restore.
  ************************************************************************************/
 void pl_port_irq_restore(irqstate_t irqstate);
+
+/*************************************************************************************
+ * Function Name: pl_port_first_task_switch
+ *
+ * Description:
+ *   The function is used to switch task.
+ *
+ * Parameters:
+ *   none.
+ *
+ * Return:
+ *  none.
+ ************************************************************************************/
+void pl_port_first_task_switch(void);
 
 /*************************************************************************************
  * Function Name: pl_port_task_switch

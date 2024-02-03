@@ -129,18 +129,6 @@ tid_t pl_task_create_with_stack(const char *name, task_t task, u16_t prio,
                                 struct tcb *tcb, void *stack, size_t stack_size,
                                 int argc, char *argv[]);
 
-/*************************************************************************************
- * Function Name: pl_task_core_blk_init
- * Description: initialize task core block.
- *
- * Parameters:
- *   void
- *
- * Return:
- *   none
- ************************************************************************************/
-void pl_task_core_blk_init(void);
-
 #ifdef __cplusplus
 }
 #endif

@@ -6,8 +6,7 @@
  附言：该文件针对STM32F103的RTS操作系统移植
 
 ===============================================================================================*/
-#define  SCB_ICSR_REG   0xE000ED04
-
+#define SCB_ICSR_REG   0xE000ED04
 .extern pl_callee_update_context
 
 .global PendSV_Handler
@@ -33,12 +32,10 @@ arm-none-eabi-gcc -c(gcc -mthumb对于汇编来说似乎无关紧要，只是编
 .cpu cortex-m3
 .fpu softvfp
 .thumb
-/*--------------------------------------------
- PendSV异常触发函数
----------------------------------------------*/
-.section	.text.pl_port_task_switch
-.weak	pl_port_task_switch
-.type	pl_port_task_switch, %function
+
+
+.section .text.pl_port_task_switch
+.type pl_port_task_switch, %function
 
 pl_port_task_switch:
 
@@ -49,37 +46,64 @@ pl_port_task_switch:
 	str   r2, [r1,#0]
 	bx    lr
 
-/*--------------------------------------------
- PendSV异常中断服务函数
----------------------------------------------*/
-.section	.text.PendSV_Handler
-.type	PendSV_Handler, %function
+
+.section .data
+once_entry:
+	.word 0x0
+
+.section .text.PendSV_Handler
+.type PendSV_Handler, %function
 
 PendSV_Handler:
-	/* 清除PendSV挂起标志位 */
+	/* clear pending bit of PendSV */
 	ldr   r1, =SCB_ICSR_REG
-	ldr   r2, [r1,#0]
+	ldr   r2, [r1]
 	orr   r2, r2, #0x80000000
-	str   r2, [r1,#0]
+	str   r2, [r1]
+
+	ldr   r1, =once_entry
+	ldr   r2, [r1]
+	ldr   r3, =0xff
+	str   r3, [r1]
+	ldr   r3, =0
+	cmp   r2, r3
+	beq   switch_bottom
 
 switch_top:
 	/* save context */
-	mrs   r2, psp
-	stmdb r2!, {r4-r11}
+	mrs   r0, psp
+	stmdb r0!, {r4-r11}
+	push {lr}
+	/* r0 = pl_callee_save_curr_context_sp(sp) */
+	bl   pl_callee_save_curr_context_sp
+	pop  {lr}
 
 switch_bottom:
-	push  {lr}
+
+	push {lr}
 	/* r0 = pl_callee_update_context() */
-	blx   pl_callee_update_context
-	pop   {lr}
+	bl   pl_callee_update_context
+	pop  {lr}
 	/* restore context */
 	ldmia r0!, {r4-r11}
 	msr   psp, r0
 	orr   lr, lr, #0x04
+	cpsie i
 	bx    lr
 
-.section	.text.GetReturnValue
-.weak	GetReturnValue
-.type	GetReturnValue, %function
+
+.section .text.pl_port_first_task_switch
+.type pl_port_first_task_switch, %function
+
+pl_port_first_task_switch:
+	/* set psp to msp for first task switch */
+	mrs   r2, msp
+	msr   psp, r2
+	cpsie i
+	b     pl_port_task_switch
+
+.section .text.GetReturnValue
+.weak GetReturnValue
+.type GetReturnValue, %function
 GetReturnValue:
 	bx  lr

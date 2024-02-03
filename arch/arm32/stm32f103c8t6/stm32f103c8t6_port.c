@@ -1,12 +1,16 @@
 #include <pl_port.h>
+#include <kernel/initcall.h>
 #include "early_setup/early_uart.h"
+#include "stm32f10x.h"
 
-int pl_early_port_putc_init(void)
+static int putc_init(void)
 {
+	NVIC_EnableIRQ(PendSV_IRQn);
 	USART1_Init(115200);
 	pl_early_port_putc(' ');
 	return 0;
 }
+early_initcall(putc_init);
 
 int pl_early_port_putc(char c)
 {
@@ -23,6 +27,25 @@ irqstate_t pl_port_irq_save(void)
 void pl_port_irq_restore(irqstate_t irqstate)
 {
 	(void)irqstate;
+}
+
+//RTS OS滴答定时器初始化，移植时需要用户自己实现
+int RTS_PORT_SystickInit(void);
+int RTS_PORT_SystickInit(void)
+{
+    /** 填写你的OS滴答定时器初始化代码 **/
+    SysTick_Config(3600); //50us   1ms
+	__asm__ volatile("cpsid	i\n\t");     /*< 关中断 */
+	NVIC_EnableIRQ(PendSV_IRQn);
+	__asm__ volatile("cpsie	i\n\t");     /*< 关中断 */
+	return 0;
+}
+
+
+void SysTick_Handler(void);
+void SysTick_Handler(void)
+{
+	pl_callee_systick_expiration();
 }
 
 void *pl_port_task_stack_init(task_t task,

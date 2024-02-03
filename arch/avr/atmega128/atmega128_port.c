@@ -1,5 +1,6 @@
 #include "early_uart.h"
 #include <pl_port.h>
+#include <kernel/initcall.h>
 
 
 static usart USART1={
@@ -22,11 +23,13 @@ int main(void)
 	pl_callee_entry();
 }
 
-int pl_early_port_putc_init(void)
+static int pl_early_port_putc_init(void)
 {
 	usart_init(&USART1);
+	pl_early_port_putc('A');
 	return 0;
 }
+early_initcall(pl_early_port_putc_init);
 
 int pl_early_port_putc(const char c)
 {
