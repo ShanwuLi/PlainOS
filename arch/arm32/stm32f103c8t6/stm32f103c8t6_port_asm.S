@@ -10,7 +10,7 @@
 .extern pl_callee_update_context
 
 .global PendSV_Handler
-.global pl_port_task_switch
+.global pl_port_context_switch
 .global pl_port_first_task_switch
 .global GetReturnValue
 
@@ -34,10 +34,10 @@ arm-none-eabi-gcc -c(gcc -mthumb对于汇编来说似乎无关紧要，只是编
 .thumb
 
 
-.section .text.pl_port_task_switch
-.type pl_port_task_switch, %function
+.section .text.pl_port_context_switch
+.type pl_port_context_switch, %function
 
-pl_port_task_switch:
+pl_port_context_switch:
 
 	ldr   r1, =SCB_ICSR_REG
 	ldr   r2, [r1,#0]
@@ -65,8 +65,7 @@ PendSV_Handler:
 	ldr   r2, [r1]
 	ldr   r3, =0xff
 	str   r3, [r1]
-	ldr   r3, =0
-	cmp   r2, r3
+	cmp   r2, #0
 	beq   switch_bottom
 
 switch_top:
@@ -90,17 +89,6 @@ switch_bottom:
 	orr   lr, lr, #0x04
 	cpsie i
 	bx    lr
-
-
-.section .text.pl_port_first_task_switch
-.type pl_port_first_task_switch, %function
-
-pl_port_first_task_switch:
-	/* set psp to msp for first task switch */
-	mrs   r2, msp
-	msr   psp, r2
-	cpsie i
-	b     pl_port_task_switch
 
 .section .text.GetReturnValue
 .weak GetReturnValue

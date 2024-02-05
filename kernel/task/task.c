@@ -76,7 +76,6 @@ struct task_core_blk {
 	struct tcb *curr_tcb;
 	struct count systicks;
 	bool sched_enable;
-	struct tcb idle_task;
 };
 
 /*************************************************************************************
@@ -120,8 +119,6 @@ static u8_t g_hiprio_bitmap_lv3;
  * Description:  task core block.
  ************************************************************************************/
 static struct task_core_blk g_task_core_blk;
-static u32_t g_idle_task_stack[256];
-static u32_t g_idle1_task_stack[256];
 
 /*************************************************************************************
  * Function Name: get_hiprio
@@ -136,22 +133,24 @@ static u32_t g_idle1_task_stack[256];
 static u16_t get_hiprio(void)
 {
 	u16_t hiprio;
-	u8_t bitmap_bit;
-	u8_t bitmap_index;
-	u8_t bitmap_lv1_index;
-	u8_t bitmap_lv2_index;
+	u16_t bitmap_bit;
+	u16_t bitmap_index;
+	u16_t bitmap_lv1_index;
+	u16_t bitmap_lv2_index;
 
-	bitmap_lv2_index = g_hiprio_idx_tbl[g_hiprio_bitmap_lv3];
-	hiprio           = HIPRIO_OF(bitmap_lv2_index, 0, 0, 0);
+	bitmap_lv2_index  = g_hiprio_idx_tbl[g_hiprio_bitmap_lv3];
+	hiprio            = HIPRIO_OF(bitmap_lv2_index, 0, 0, 0);
 
-	bitmap_lv1_index = g_hiprio_idx_tbl[g_hiprio_bitmap_lv2[hiprio]];
-	hiprio          += HIPRIO_OF(0, bitmap_lv1_index, 0, 0);
+	bitmap_lv1_index  = g_hiprio_idx_tbl[g_hiprio_bitmap_lv2[bitmap_lv2_index]];
+	hiprio           += HIPRIO_OF(0, bitmap_lv1_index, 0, 0);
 
-	bitmap_index     = g_hiprio_idx_tbl[g_hiprio_bitmap_lv1[hiprio]];
-	hiprio          += HIPRIO_OF(0, 0, bitmap_index, 0);
+	bitmap_lv1_index += bitmap_lv2_index << 3;
+	bitmap_index      = g_hiprio_idx_tbl[g_hiprio_bitmap_lv1[bitmap_lv1_index]];
+	hiprio           += HIPRIO_OF(0, 0, bitmap_index, 0);
 
-	bitmap_bit       = g_hiprio_idx_tbl[g_hiprio_bitmap[bitmap_index]];
-	hiprio          += HIPRIO_OF(0, 0, 0, bitmap_bit);
+	bitmap_index     += bitmap_lv1_index << 3;
+	bitmap_bit        = g_hiprio_idx_tbl[g_hiprio_bitmap[bitmap_index]];
+	hiprio           += HIPRIO_OF(0, 0, 0, bitmap_bit);
 
 	return hiprio;
 }
@@ -210,7 +209,6 @@ void *pl_callee_update_context(void)
 	struct tcb *next_tcb = get_next_rdy_tcb();
 	g_task_core_blk.curr_tcb = next_tcb;
 
-	//pl_early_syslog_info("pl_callee_update_context, sp:0x%x\r\n", next_tcb->context_sp);
 	return next_tcb->context_sp;
 }
 
@@ -379,25 +377,6 @@ void pl_disable_schedule(void)
 }
 
 /*************************************************************************************
- * Function Name: pl_switch_to_next_same_prio_task
- * Description: Switch to the next task of same priority.
- *
- * Parameters:
- *   void
- *
- * Return:
- *   void
- ************************************************************************************/
-void pl_switch_to_next_same_prio_task(void);
-void pl_switch_to_next_same_prio_task(void)
-{
-	struct tcb *curr_tcb = g_task_core_blk.curr_tcb;
-
-	g_task_core_blk.curr_tcb = list_next_entry(curr_tcb, struct tcb, node);
-	pl_port_task_switch();
-}
-
-/*************************************************************************************
  * Function Name: pl_task_create_with_stack
  * Description: create a task with stack that must be provided.
  *
@@ -441,7 +420,7 @@ tid_t pl_task_create_with_stack(const char *name, task_t task, u16_t prio,
 	insert_tcb_to_rdylist(tcb);
 	pl_port_irq_restore(irqstate);
 	pl_enable_schedule();
-	//pl_port_task_switch();
+	pl_port_context_switch();
 
 	return tcb;
 }
@@ -467,55 +446,9 @@ void pl_callee_systick_expiration(void)
 	if (g_task_core_blk.systicks.lo32 == 0)
 		++g_task_core_blk.systicks.hi32;
 
-	//pl_early_syslog_info("systick:%d\r\n", g_task_core_blk.systicks.lo32);
-	pl_port_task_switch();
+	pl_port_context_switch();
 }
 
-extern int RTS_PORT_SystickInit(void);
-static int idle_task(int argc, char *argv[])
-{
-	USED(argc);
-	USED(argv);
-
-	RTS_PORT_SystickInit();
-
-	while(1) {
-		pl_early_syslog_info("idle task++++++++++++++++++++++\r\n");
-		for (volatile int i = 0; i < 2000000; i++)
-			;
-		pl_early_syslog_info("systick:%d\r\n", g_task_core_blk.systicks.lo32);
-
-		for (int j = 0; j < g_task_core_blk.ready_list[10].num; j++)
-			pl_early_syslog_info("node[%d]\r\n", j);
-	}
-
-	return 0;
-}
-
-static int idle1_task(int argc, char *argv[])
-{
-	USED(argc);
-	USED(argv);
-
-	//RTS_PORT_SystickInit();
-
-	while(1) {
-		pl_early_syslog_info("idle task==========\r\n");
-		pl_early_syslog_info("systick:%d\r\n", g_task_core_blk.systicks.lo32);
-		for (volatile int i = 0; i < 2000000; i++)
-			;
-
-		struct tcb *tcb = g_task_core_blk.ready_list[10].head;
-		for (int j=0; j < g_task_core_blk.ready_list[10].num;j++) {
-			pl_early_syslog_info("tcb[%d].name:%s\r\n", j, tcb->name);
-			tcb = list_next_entry(tcb, struct tcb, node);
-		}
-	}
-
-	return 0;
-}
-
-struct tcb g_idle1_task;
 /*************************************************************************************
  * Function Name: pl_task_core_blk_init
  * Description: initialize task core block.
@@ -534,13 +467,7 @@ static int pl_task_core_blk_init(void)
 	g_task_core_blk.systicks.lo32 = 0;
 	g_task_core_blk.sched_enable = false;
 
-
-	pl_task_create_with_stack("fegeg", idle_task, 10, &g_task_core_blk.idle_task,
-	                           g_idle_task_stack, 256, 0, NULL);
-	pl_task_create_with_stack("ewrett", idle1_task, 10, &g_idle1_task,
-	                           g_idle1_task_stack, 256, 0, NULL);
 	pl_early_syslog_info("task core init successfully\r\n");
-	pl_port_task_switch();
 	return OK;
 }
 core_initcall(pl_task_core_blk_init);

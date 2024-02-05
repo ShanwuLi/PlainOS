@@ -201,10 +201,10 @@ irqstate_t pl_port_irq_save(void);
 void pl_port_irq_restore(irqstate_t irqstate);
 
 /*************************************************************************************
- * Function Name: pl_port_first_task_switch
+ * Function Name: pl_port_first_context_switch
  *
  * Description:
- *   The function is used to switch task.
+ *   The function is used to switch context.
  *
  * Parameters:
  *   none.
@@ -212,13 +212,13 @@ void pl_port_irq_restore(irqstate_t irqstate);
  * Return:
  *  none.
  ************************************************************************************/
-void pl_port_first_task_switch(void);
+void pl_port_first_context_switch(void);
 
 /*************************************************************************************
- * Function Name: pl_port_task_switch
+ * Function Name: pl_port_context_switch
  *
  * Description:
- *   The function is used to switch task.
+ *   The function is used to switch context.
  *
  * Parameters:
  *   none.
@@ -226,7 +226,7 @@ void pl_port_first_task_switch(void);
  * Return:
  *  none.
  ************************************************************************************/
-void pl_port_task_switch(void);
+void pl_port_context_switch(void);
 
 /*************************************************************************************
  * Function Name: pl_port_task_stack_init
