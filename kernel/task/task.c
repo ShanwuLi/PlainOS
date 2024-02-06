@@ -35,17 +35,9 @@ SOFTWARE.
 /*************************************************************************************
  * Description: Definitions of highest priority of task.
  ************************************************************************************/
-#if (PL_CFG_PRIORITIES_MAX >= 4096)
-	#error PL_CFG_PRIORITIES_MAX must less 4096
+#if (PL_CFG_PRIORITIES_MAX >= 512)
+	#error "PL_CFG_PRIORITIES_MAX must less 4096"
 #endif
-
-#define HIPRIO_BITMAP_SIZE                      ((PL_CFG_PRIORITIES_MAX + 7) / 8)
-#define HIPRIO_LEV1_BITMAP_SIZE                 ((PL_CFG_PRIORITIES_MAX + 63) / 64)
-#define HIPRIO_LEV2_BITMAP_SIZE                 ((PL_CFG_PRIORITIES_MAX + 511) / 512)
-#define HIPRIO_OF(lv2_idx, lv1_idx, idx, bit)   ( ((lv2_idx) << 9) \
-                                                | ((lv1_idx) << 6) \
-                                                | ((idx) << 3) \
-                                                | ((bit) << 0));
 
 /*************************************************************************************
  * structure Name: task_list
@@ -109,16 +101,39 @@ static u8_t __const g_hiprio_idx_tbl[256] = {
  * Description: Obtain the highest priority through the priority index table.
  *              Supports up to 4096 priority levels.
  ************************************************************************************/
-static u8_t g_hiprio_bitmap[HIPRIO_BITMAP_SIZE];
-static u8_t g_hiprio_bitmap_lv1[HIPRIO_LEV1_BITMAP_SIZE];
-static u8_t g_hiprio_bitmap_lv2[HIPRIO_LEV2_BITMAP_SIZE];
-static u8_t g_hiprio_bitmap_lv3;
+static u32_t g_hiprio_bitmap[(PL_CFG_PRIORITIES_MAX + 31) / 32];
 
 /*************************************************************************************
  * Global Variable Name: g_task_core_blk
  * Description:  task core block.
  ************************************************************************************/
 static struct task_core_blk g_task_core_blk;
+
+/*************************************************************************************
+ * Function Name: get_lead_zero
+ * Description: Get leading zero of bitmap.
+ *
+ * Parameters:
+ *   void
+ *
+ * Return:
+ *   @leadzero: leadzero
+ ************************************************************************************/
+static u8_t get_lead_zero(u32_t bitmap)
+{
+	u8_t i;
+	u8_t lead_zero;
+	u8_t *p = (u8_t *)&bitmap;
+
+	for (i = 0; i < 4; i++) {
+		if (*p != 0)
+			break;
+		p++;
+	}
+
+	lead_zero = pl_port_rodata_read8(g_hiprio_idx_tbl + (*p));
+	return lead_zero;
+}
 
 /*************************************************************************************
  * Function Name: get_hiprio
@@ -132,26 +147,17 @@ static struct task_core_blk g_task_core_blk;
  ************************************************************************************/
 static u16_t get_hiprio(void)
 {
+	u16_t i;
 	u16_t hiprio;
-	u16_t bitmap_bit;
-	u16_t bitmap_index;
-	u16_t bitmap_lv1_index;
-	u16_t bitmap_lv2_index;
 
-	bitmap_lv2_index  = g_hiprio_idx_tbl[g_hiprio_bitmap_lv3];
-	hiprio            = HIPRIO_OF(bitmap_lv2_index, 0, 0, 0);
+	for (i = 0; i < ARRAY_SIZE(g_hiprio_bitmap); i++) {
+		if (g_hiprio_bitmap[i] != 0)
+			break;
+	}
 
-	bitmap_lv1_index  = g_hiprio_idx_tbl[g_hiprio_bitmap_lv2[bitmap_lv2_index]];
-	hiprio           += HIPRIO_OF(0, bitmap_lv1_index, 0, 0);
+	hiprio = (i << 5) + get_lead_zero(g_hiprio_bitmap[i]);
 
-	bitmap_lv1_index += bitmap_lv2_index << 3;
-	bitmap_index      = g_hiprio_idx_tbl[g_hiprio_bitmap_lv1[bitmap_lv1_index]];
-	hiprio           += HIPRIO_OF(0, 0, bitmap_index, 0);
-
-	bitmap_index     += bitmap_lv1_index << 3;
-	bitmap_bit        = g_hiprio_idx_tbl[g_hiprio_bitmap[bitmap_index]];
-	hiprio           += HIPRIO_OF(0, 0, 0, bitmap_bit);
-
+	pl_early_syslog_info("hipority:%d\r\n", hiprio);
 	return hiprio;
 }
 
@@ -239,19 +245,10 @@ struct tcb *pl_get_curr_tcb(void)
  ************************************************************************************/
 static void clear_bit_of_hiprio_bitmap(u16_t prio)
 {
-	g_hiprio_bitmap[prio >> 3] &= (u8_t)(~(1 << (prio & 0x7)));
-	if (g_hiprio_bitmap[prio >> 3] != 0)
-		return;
+	u16_t idx = prio >> 5;
+	u16_t offset = prio & (u16_t)0x1f;
 
-	g_hiprio_bitmap_lv1[prio >> 6] &= (u8_t)(~(1 << ((prio & 0x3f) >> 3)));
-	if (g_hiprio_bitmap_lv1[prio >> 6] != 0)
-		return;
-
-	g_hiprio_bitmap_lv2[prio >> 9] &= (u8_t)(~(1 << ((prio & 0x1ff) >> 6)));
-	if (g_hiprio_bitmap_lv2[prio >> 9] != 0)
-		return;
-
-	g_hiprio_bitmap_lv3 &= (u8_t)(~(1 << ((prio & 0x1000) >> 9)));
+	g_hiprio_bitmap[idx] &= ~((u32_t)1 << offset);
 }
 
 /*************************************************************************************
@@ -266,10 +263,10 @@ static void clear_bit_of_hiprio_bitmap(u16_t prio)
  ************************************************************************************/
 static void set_bit_of_hiprio_bitmap(u16_t prio)
 {
-	g_hiprio_bitmap[prio >> 3]     |= (u8_t)(1 << ((prio & 0x7) >> 0));
-	g_hiprio_bitmap_lv1[prio >> 6] |= (u8_t)(1 << ((prio & 0x3f) >> 3));
-	g_hiprio_bitmap_lv2[prio >> 9] |= (u8_t)(1 << ((prio & 0x1ff) >> 6));
-	g_hiprio_bitmap_lv3            |= (u8_t)(1 << ((prio & 0x1000) >> 9));
+	u16_t idx = prio >> 5;
+	u16_t offset = prio & (u16_t)0x1f;
+
+	g_hiprio_bitmap[idx] |= ((u32_t)1 << offset);
 }
 
 /*************************************************************************************
