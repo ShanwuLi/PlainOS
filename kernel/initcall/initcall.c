@@ -66,7 +66,7 @@ static initcall_t *initcall_levels[] = {
  *   @init_fns_end: init_fns array end.
  *
  * Return:
- *  Greater than or equal to 0 on success, less than 0 with failure.
+ *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
 static int call_initcall_level(initcall_t *init_fns_start,
                                initcall_t *init_fns_end)

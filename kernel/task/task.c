@@ -31,12 +31,11 @@ SOFTWARE.
 #include <kernel/syslog.h>
 #include <kernel/initcall.h>
 
-#define TASK_TCB_MAGIC                         0xDeadBeef
 /*************************************************************************************
  * Description: Definitions of highest priority of task.
  ************************************************************************************/
 #if (PL_CFG_PRIORITIES_MAX >= 512)
-	#error "PL_CFG_PRIORITIES_MAX must less 4096"
+	#error "PL_CFG_PRIORITIES_MAX must less 512"
 #endif
 
 /*************************************************************************************
@@ -47,6 +46,18 @@ struct task_list {
 	struct tcb *head;
 	u16_t num;
 };
+
+static int count_cmp(struct count *c1, struct count *c2)
+{
+	if (c1->hi32 > c2->hi32)
+		return 1;
+	
+	if (c1->hi32 < c2->hi32)
+		return -1;
+	
+	return c1->lo32 - c2->lo32;
+}
+
 
 /*************************************************************************************
  * Structure Name: task_core_blk
@@ -156,8 +167,6 @@ static u16_t get_hiprio(void)
 	}
 
 	hiprio = (i << 5) + get_lead_zero(g_hiprio_bitmap[i]);
-
-	pl_early_syslog_info("hipority:%d\r\n", hiprio);
 	return hiprio;
 }
 
@@ -315,6 +324,52 @@ static void insert_tcb_to_rdylist(struct tcb *tcb)
 }
 
 /*************************************************************************************
+ * Function Name: insert_tcb_to_delaylist
+ * Description: Insert a tcb to list of ready task.
+ *
+ * Param:
+ *   @tcb: task control block.
+ * Return:
+ *   void
+ ************************************************************************************/
+void insert_tcb_to_delaylist(struct tcb *tcb);
+void insert_tcb_to_delaylist(struct tcb *tcb)
+{
+	USED(tcb);
+
+	struct tcb *pos;
+	struct task_list *delaylist = &g_task_core_blk.delay_list;
+
+	list_for_each_entry(pos, &delaylist->head->node, struct tcb, node) {
+		if (count_cmp(&tcb->delay_ticks, &pos->delay_ticks) > 0)
+			break;
+	}
+
+	pos = delaylist->head;//     list_prev_entry(pos, struct tcb, node);
+	++delaylist->num;
+	list_add_node_at_tail(&delaylist->head->node, &tcb->node);
+}
+
+/*************************************************************************************
+ * Function Name: remove_tcb_from_delaylist
+ * Description: Insert a tcb to list of ready task.
+ *
+ * Param:
+ *   @tcb: task control block.
+ * Return:
+ *   void
+ ************************************************************************************/
+void remove_tcb_from_delaylist(struct tcb *tcb);
+void remove_tcb_from_delaylist(struct tcb *tcb)
+{
+	struct task_list *delaylist = &g_task_core_blk.delay_list;
+
+	--delaylist->num;
+	list_del_node(&tcb->node);
+}
+
+
+/*************************************************************************************
  * Function Name: remove_tcb_from_rdylist
  * Description:  remove a tcb form list of ready task.
  *
@@ -323,7 +378,7 @@ static void insert_tcb_to_rdylist(struct tcb *tcb)
  * Return:
  *   void
  ************************************************************************************/
-static void __used remove_tcb_from_rdylist(struct tcb *tcb)
+static void remove_tcb_from_rdylist(struct tcb *tcb)
 {
 	u16_t prio = tcb->prio;
 	struct task_list *rdylist = &g_task_core_blk.ready_list[prio];
@@ -344,7 +399,7 @@ static void __used remove_tcb_from_rdylist(struct tcb *tcb)
 }
 
 /*************************************************************************************
- * Function Name: pl_enable_schedule
+ * Function Name: pl_schedule_unlock
  * Description: enable scheduler.
  *
  * Parameters:
@@ -353,13 +408,13 @@ static void __used remove_tcb_from_rdylist(struct tcb *tcb)
  * Return:
  *   none
  ************************************************************************************/
-void pl_enable_schedule(void)
+void pl_schedule_unlock(void)
 {
 	g_task_core_blk.sched_enable = true;
 }
 
 /*************************************************************************************
- * Function Name: pl_disable_schedule
+ * Function Name: pl_schedule_lock
  * Description: disable scheduler.
  *
  * Parameters:
@@ -368,7 +423,7 @@ void pl_enable_schedule(void)
  * Return:
  *   none
  ************************************************************************************/
-void pl_disable_schedule(void)
+void pl_schedule_lock(void)
 {
 	g_task_core_blk.sched_enable = false;
 }
@@ -410,18 +465,58 @@ tid_t pl_task_create_with_stack(const char *name, task_t task, u16_t prio,
 	tcb->curr_state = PL_TASK_STATE_READY;
 	tcb->past_state = PL_TASK_STATE_EXIT;
 	tcb->context_sp = stack;
-	tcb->magic = TASK_TCB_MAGIC;
 	tcb->task = task;
+	tcb->delay_ticks.hi32 = 0;
+	tcb->delay_ticks.lo32 = 0;
 
 	irqstate = pl_port_irq_save();
 	insert_tcb_to_rdylist(tcb);
 	pl_port_irq_restore(irqstate);
-	pl_enable_schedule();
 	pl_port_context_switch();
 
 	return tcb;
 }
 
+/*************************************************************************************
+ * Function Name: pl_delay_ticks
+ *
+ * Description:
+ *   Delay ticks function.
+ * 
+ * Parameters:
+ *  @ticks: delay ticks;
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+void pl_delay_ticks(u32_t ticks)
+{
+	u32_t end_ticks_lo32;
+	u32_t end_ticks_hi32;
+
+	if (ticks == 0)
+		return;
+
+	end_ticks_lo32 = g_task_core_blk.systicks.lo32;
+	end_ticks_hi32 = g_task_core_blk.systicks.hi32;
+
+	ticks += end_ticks_lo32;
+	if (ticks < end_ticks_lo32)
+		++end_ticks_hi32;
+
+	g_task_core_blk.curr_tcb->delay_ticks.hi32 = end_ticks_hi32;
+	g_task_core_blk.curr_tcb->delay_ticks.lo32 = ticks;
+
+	pl_schedule_lock();
+	remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
+	insert_tcb_to_delaylist(g_task_core_blk.curr_tcb);
+
+	pl_early_syslog_info("rdy_node_num:%d\r\n", g_task_core_blk.ready_list[99].num);
+	pl_schedule_unlock();
+
+
+	pl_port_context_switch();
+}
 
 /*************************************************************************************
  * Function Name: pl_callee_systick_expiration
@@ -438,12 +533,30 @@ tid_t pl_task_create_with_stack(const char *name, task_t task, u16_t prio,
  ************************************************************************************/
 void pl_callee_systick_expiration(void)
 {
+	//struct tcb *pos;
+	//struct tcb *tmp;
+
 	/* update systick */
 	++g_task_core_blk.systicks.lo32;
 	if (g_task_core_blk.systicks.lo32 == 0)
 		++g_task_core_blk.systicks.hi32;
 
-	pl_port_context_switch();
+#if 0
+	list_for_each_entry_safe(pos, tmp, &g_task_core_blk.delay_list.head->node,
+		struct tcb, node) {
+		if (count_cmp(&pos->delay_ticks, &g_task_core_blk.systicks) <= 0) {
+			remove_tcb_from_delaylist(pos);
+			insert_tcb_to_rdylist(pos);
+		} else {
+			break;
+		}
+	}
+#endif
+
+	//pl_early_syslog_info("pl_callee_systick_expiration\r\n");
+	//pl_early_syslog_info("======rdylist_num:%d\r\n", g_task_core_blk.ready_list[99].num);
+	if (g_task_core_blk.sched_enable)
+		pl_port_context_switch();
 }
 
 /*************************************************************************************
@@ -458,11 +571,20 @@ void pl_callee_systick_expiration(void)
  ************************************************************************************/
 static int pl_task_core_blk_init(void)
 {
+	static struct tcb delay_dummy_tcb;
+
 	rdytask_list_init();
+	list_init(&delay_dummy_tcb.node);
+	delay_dummy_tcb.delay_ticks.hi32 = UINT32_MAX;
+	delay_dummy_tcb.delay_ticks.lo32 = UINT32_MAX;
+	delay_dummy_tcb.name = "delay_dummy";
+
 	g_task_core_blk.curr_tcb = NULL;
 	g_task_core_blk.systicks.hi32 = 0;
 	g_task_core_blk.systicks.lo32 = 0;
 	g_task_core_blk.sched_enable = false;
+	g_task_core_blk.delay_list.num = 0;
+	g_task_core_blk.delay_list.head = &delay_dummy_tcb;
 
 	pl_early_syslog_info("task core init successfully\r\n");
 	return OK;

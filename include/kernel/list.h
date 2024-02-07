@@ -119,6 +119,11 @@ struct list_node {
 	     &pos->member != (list_head); \
 	     pos = temp, temp = list_next_entry(temp, entry_type, member))
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*************************************************************************************
  * Function Name: list_init
  * Description: inititialize a list.
@@ -128,11 +133,7 @@ struct list_node {
  * Return:
  *   void
  ************************************************************************************/
-static void __used list_init(struct list_node *node)
-{
-	node->next = node;
-	node->prev = node;
-}
+void list_init(struct list_node *node);
 
 /*************************************************************************************
  * Function Name: list_add_node_at_tail
@@ -144,16 +145,7 @@ static void __used list_init(struct list_node *node)
  * Return:
  *   void
  ************************************************************************************/
-static void __used list_add_node_at_tail(struct list_node *head, struct list_node *node)
-{
-	struct list_node *tail = head->prev;
-
-	node->prev = tail;
-	node->next = head;
-	tail->next = node;
-	head->prev = node;
-}
-
+void list_add_node_at_tail(struct list_node *head, struct list_node *node);
 /*************************************************************************************
  * Function Name: list_add_node_at_front
  * Description: Add a node to the list front.
@@ -164,15 +156,7 @@ static void __used list_add_node_at_tail(struct list_node *head, struct list_nod
  * Return:
  *   void
  ************************************************************************************/
-static void __used list_add_node_at_front(struct list_node *head, struct list_node *node)
-{
-	struct list_node *front = head->next;
-
-	node->prev = head;
-	node->next = front;
-	front->prev = node;
-	head->next = node;
-}
+void list_add_node_at_front(struct list_node *head, struct list_node *node);
 
 /*************************************************************************************
  * Function Name: list_del_tail_node
@@ -183,13 +167,7 @@ static void __used list_add_node_at_front(struct list_node *head, struct list_no
  * Return:
  *   void
  ************************************************************************************/
-static void __used list_del_tail_node(struct list_node *head)
-{
-	struct list_node *tail_prev = head->prev->prev;
-
-	tail_prev->next = head;
-	head->prev = tail_prev;
-}
+void list_del_tail_node(struct list_node *head);
 
 /*************************************************************************************
  * Function Name: list_del_front_node
@@ -200,13 +178,7 @@ static void __used list_del_tail_node(struct list_node *head)
  * Return:
  *   void
  ************************************************************************************/
-static void __used list_del_front_node(struct list_node *head)
-{
-	struct list_node *front_next = head->next->next;
-
-	front_next->prev = head;
-	head->next = front_next;
-}
+void list_del_front_node(struct list_node *head);
 
 /*************************************************************************************
  * Function Name: list_del_node
@@ -217,11 +189,7 @@ static void __used list_del_front_node(struct list_node *head)
  * Return:
  *   void
  ************************************************************************************/
-static void __used list_del_node(struct list_node *node)
-{
-	node->prev->next = node->next;
-	node->next->prev = node->prev;
-}
+void list_del_node(struct list_node *node);
 
 /*************************************************************************************
  * Function Name: list_is_empty
@@ -232,10 +200,7 @@ static void __used list_del_node(struct list_node *node)
  * Return:
  *   @bool: is empty.
  ************************************************************************************/
-static bool __used list_is_empty(struct list_node *head)
-{
-	return head->next == head;
-}
+bool list_is_empty(struct list_node *head);
 
 /*************************************************************************************
  * Function Name: list_next_node
@@ -246,10 +211,7 @@ static bool __used list_is_empty(struct list_node *head)
  * Return:
  *   @list_node*: next node of specific node.
  ************************************************************************************/
-static struct list_node* __used list_next_node(struct list_node *node)
-{
-	return node->next;
-}
+struct list_node* list_next_node(struct list_node *node);
 
 /*************************************************************************************
  * Function Name: list_prev_node
@@ -260,15 +222,7 @@ static struct list_node* __used list_next_node(struct list_node *node)
  * Return:
  *   @list_node*: previous node of specific node.
  ************************************************************************************/
-static struct list_node* __used list_prev_node(struct list_node *node)
-{
-	return node->prev;
-}
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
+struct list_node* list_prev_node(struct list_node *node);
 
 #ifdef __cplusplus
 }

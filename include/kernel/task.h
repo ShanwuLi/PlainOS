@@ -70,12 +70,7 @@ struct tcb {
 	u8_t curr_state;
 	u16_t prio;
 	uint_t signal;
-
-#ifdef PLAINOS_CFG_TASK_DLY
 	struct count delay_ticks;
-#endif
-
-	uintptr_t magic;
 };
 
 typedef struct tcb* tid_t;
@@ -97,19 +92,7 @@ extern "C" {
 struct tcb *pl_get_curr_tcb(void);
 
 /*************************************************************************************
- * Function Name: pl_enable_schedule
- * Description: enable scheduler.
- *
- * Parameters:
- *   none
- *
- * Return:
- *   none
- ************************************************************************************/
-void pl_enable_schedule(void);
-
-/*************************************************************************************
- * Function Name: pl_disable_schedule
+ * Function Name: pl_schedule_lock
  * Description: disable scheduler.
  *
  * Parameters:
@@ -118,7 +101,19 @@ void pl_enable_schedule(void);
  * Return:
  *   none
  ************************************************************************************/
-void pl_disable_schedule(void);
+void pl_schedule_lock(void);
+
+/*************************************************************************************
+ * Function Name: pl_schedule_unlock
+ * Description: enable scheduler.
+ *
+ * Parameters:
+ *   none
+ *
+ * Return:
+ *   none
+ ************************************************************************************/
+void pl_schedule_unlock(void);
 
 /*************************************************************************************
  * Function Name: pl_task_create_with_stack
@@ -140,6 +135,20 @@ void pl_disable_schedule(void);
 tid_t pl_task_create_with_stack(const char *name, task_t task, u16_t prio,
                                 struct tcb *tcb, void *stack, size_t stack_size,
                                 int argc, char *argv[]);
+
+/*************************************************************************************
+ * Function Name: pl_delay_ticks
+ *
+ * Description:
+ *   Delay ticks function.
+ * 
+ * Parameters:
+ *  @ticks: delay ticks;
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+void pl_delay_ticks(u32_t ticks);
 
 #ifdef __cplusplus
 }
