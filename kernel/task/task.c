@@ -54,8 +54,14 @@ static int count_cmp(struct count *c1, struct count *c2)
 	
 	if (c1->hi32 < c2->hi32)
 		return -1;
+
+	if (c1->lo32 > c2->lo32)
+		return 1;
 	
-	return c1->lo32 - c2->lo32;
+	if (c1->lo32 < c2->lo32)
+		return -1;
+
+	return 0;
 }
 
 /*************************************************************************************
@@ -517,11 +523,13 @@ void pl_delay_ticks(u32_t ticks)
 	if (ticks < end_ticks_lo32)
 		++end_ticks_hi32;
 
+	pl_schedule_lock();
 	g_task_core_blk.curr_tcb->delay_ticks.hi32 = end_ticks_hi32;
 	g_task_core_blk.curr_tcb->delay_ticks.lo32 = ticks;
-
 	g_task_core_blk.curr_tcb->curr_state = PL_TASK_STATE_DELAY;
 	g_task_core_blk.curr_tcb->past_state = PL_TASK_STATE_READY;
+	pl_schedule_unlock();
+
 	pl_port_context_switch();
 }
 
@@ -547,6 +555,8 @@ void pl_callee_systick_expiration(void)
 	++g_task_core_blk.systicks.lo32;
 	if (g_task_core_blk.systicks.lo32 == 0)
 		++g_task_core_blk.systicks.hi32;
+
+	//pl_early_syslog_info("systick:%d\r\n", g_task_core_blk.systicks.lo32);
 
 	list_for_each_entry_safe(pos, tmp, &g_task_core_blk.delay_list.head->node,
 		struct tcb, node) {
