@@ -55,6 +55,7 @@ once_entry:
 .type PendSV_Handler, %function
 
 PendSV_Handler:
+	cpsid i
 	/* clear pending bit of PendSV */
 	ldr   r1, =SCB_ICSR_REG
 	ldr   r2, [r1]

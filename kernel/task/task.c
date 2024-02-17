@@ -58,7 +58,6 @@ static int count_cmp(struct count *c1, struct count *c2)
 	return c1->lo32 - c2->lo32;
 }
 
-
 /*************************************************************************************
  * Structure Name: task_core_blk
  * Description: task core block.
@@ -180,16 +179,14 @@ static u16_t get_hiprio(void)
  * Return:
  *   void
  ************************************************************************************/
-static struct tcb *get_next_rdy_tcb(void)
+static struct tcb *get_next_rdy_tcb(struct tcb *next_tcb)
 {
-	struct tcb *next_tcb;
 	u16_t hiprio = get_hiprio();
-	struct tcb *curr_tcb = g_task_core_blk.curr_tcb;
 
-	if (curr_tcb != NULL && hiprio >= curr_tcb->prio)
-		next_tcb = list_next_entry(curr_tcb, struct tcb, node);
-	else
+	if (next_tcb == NULL || hiprio < next_tcb->prio) {
 		next_tcb = g_task_core_blk.ready_list[hiprio].head;
+		pl_early_syslog_info("list_hight\r\n");
+	}
 
 	return next_tcb;
 }
@@ -219,12 +216,26 @@ void pl_callee_save_curr_context_sp(void *context_sp)
  * Return:
  *    void *context sp;
  ************************************************************************************/
+static void remove_tcb_from_rdylist(struct tcb *tcb);
+void insert_tcb_to_delaylist(struct tcb *tcb);
+
 void *pl_callee_update_context(void)
 {
-	struct tcb *next_tcb = get_next_rdy_tcb();
-	g_task_core_blk.curr_tcb = next_tcb;
+	struct tcb *next_ready_tcb;
+	struct tcb *next_tcb = NULL;
 
-	return next_tcb->context_sp;
+	if (g_task_core_blk.curr_tcb != NULL)
+		next_tcb = list_next_entry(g_task_core_blk.curr_tcb, struct tcb, node);
+
+	if (g_task_core_blk.curr_tcb->curr_state == PL_TASK_STATE_DELAY) {
+		remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
+		insert_tcb_to_delaylist(g_task_core_blk.curr_tcb);
+	}
+
+	next_ready_tcb = get_next_rdy_tcb(next_tcb);
+	g_task_core_blk.curr_tcb = next_ready_tcb;
+
+	return next_ready_tcb->context_sp;
 }
 
 /*************************************************************************************
@@ -332,22 +343,20 @@ static void insert_tcb_to_rdylist(struct tcb *tcb)
  * Return:
  *   void
  ************************************************************************************/
-void insert_tcb_to_delaylist(struct tcb *tcb);
 void insert_tcb_to_delaylist(struct tcb *tcb)
 {
-	USED(tcb);
 
-	struct tcb *pos;
 	struct task_list *delaylist = &g_task_core_blk.delay_list;
+	struct tcb *pos = delaylist->head;
 
 	list_for_each_entry(pos, &delaylist->head->node, struct tcb, node) {
 		if (count_cmp(&tcb->delay_ticks, &pos->delay_ticks) > 0)
 			break;
 	}
 
-	pos = delaylist->head;//     list_prev_entry(pos, struct tcb, node);
+	pos = list_prev_entry(pos, struct tcb, node);
 	++delaylist->num;
-	list_add_node_at_tail(&delaylist->head->node, &tcb->node);
+	list_add_node_behind(&pos->node, &tcb->node);
 }
 
 /*************************************************************************************
@@ -410,7 +419,9 @@ static void remove_tcb_from_rdylist(struct tcb *tcb)
  ************************************************************************************/
 void pl_schedule_unlock(void)
 {
+	__asm__ volatile("cpsid	i\n\t");     /*< 关中断 */
 	g_task_core_blk.sched_enable = true;
+	__asm__ volatile("cpsie	i\n\t");     /*< 关中断 */
 }
 
 /*************************************************************************************
@@ -425,7 +436,9 @@ void pl_schedule_unlock(void)
  ************************************************************************************/
 void pl_schedule_lock(void)
 {
+	__asm__ volatile("cpsid	i\n\t");     /*< 关中断 */
 	g_task_core_blk.sched_enable = false;
+	__asm__ volatile("cpsie	i\n\t");     /*< 关中断 */
 }
 
 /*************************************************************************************
@@ -507,14 +520,8 @@ void pl_delay_ticks(u32_t ticks)
 	g_task_core_blk.curr_tcb->delay_ticks.hi32 = end_ticks_hi32;
 	g_task_core_blk.curr_tcb->delay_ticks.lo32 = ticks;
 
-	pl_schedule_lock();
-	remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
-	insert_tcb_to_delaylist(g_task_core_blk.curr_tcb);
-
-	pl_early_syslog_info("rdy_node_num:%d\r\n", g_task_core_blk.ready_list[99].num);
-	pl_schedule_unlock();
-
-
+	g_task_core_blk.curr_tcb->curr_state = PL_TASK_STATE_DELAY;
+	g_task_core_blk.curr_tcb->past_state = PL_TASK_STATE_READY;
 	pl_port_context_switch();
 }
 
@@ -533,15 +540,14 @@ void pl_delay_ticks(u32_t ticks)
  ************************************************************************************/
 void pl_callee_systick_expiration(void)
 {
-	//struct tcb *pos;
-	//struct tcb *tmp;
+	struct tcb *pos;
+	struct tcb *tmp;
 
 	/* update systick */
 	++g_task_core_blk.systicks.lo32;
 	if (g_task_core_blk.systicks.lo32 == 0)
 		++g_task_core_blk.systicks.hi32;
 
-#if 0
 	list_for_each_entry_safe(pos, tmp, &g_task_core_blk.delay_list.head->node,
 		struct tcb, node) {
 		if (count_cmp(&pos->delay_ticks, &g_task_core_blk.systicks) <= 0) {
@@ -551,10 +557,7 @@ void pl_callee_systick_expiration(void)
 			break;
 		}
 	}
-#endif
 
-	//pl_early_syslog_info("pl_callee_systick_expiration\r\n");
-	//pl_early_syslog_info("======rdylist_num:%d\r\n", g_task_core_blk.ready_list[99].num);
 	if (g_task_core_blk.sched_enable)
 		pl_port_context_switch();
 }
@@ -582,7 +585,7 @@ static int pl_task_core_blk_init(void)
 	g_task_core_blk.curr_tcb = NULL;
 	g_task_core_blk.systicks.hi32 = 0;
 	g_task_core_blk.systicks.lo32 = 0;
-	g_task_core_blk.sched_enable = false;
+	g_task_core_blk.sched_enable = true;
 	g_task_core_blk.delay_list.num = 0;
 	g_task_core_blk.delay_list.head = &delay_dummy_tcb;
 

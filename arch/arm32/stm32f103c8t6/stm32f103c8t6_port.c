@@ -21,11 +21,13 @@ int pl_early_port_putc(char c)
 irqstate_t pl_port_irq_save(void)
 {
 	irqstate_t irqstate = 0;
+	__asm__ volatile("cpsid	i\n\t");     /*< 关中断 */
 	return irqstate;
 }
 
 void pl_port_irq_restore(irqstate_t irqstate)
 {
+	__asm__ volatile("cpsie	i\n\t");     /*< 关中断 */
 	(void)irqstate;
 }
 
@@ -34,8 +36,8 @@ int RTS_PORT_SystickInit(void);
 int RTS_PORT_SystickInit(void)
 {
     /** 填写你的OS滴答定时器初始化代码 **/
-    SysTick_Config(3600); //50us   1ms
 	__asm__ volatile("cpsid	i\n\t");     /*< 关中断 */
+    SysTick_Config(3600); //50us   1ms
 	NVIC_EnableIRQ(PendSV_IRQn);
 	__asm__ volatile("cpsie	i\n\t");     /*< 关中断 */
 	return 0;
