@@ -123,7 +123,7 @@ static u32_t g_hiprio_bitmap[(PL_CFG_PRIORITIES_MAX + 31) / 32];
  * Global Variable Name: g_task_core_blk
  * Description:  task core block.
  ************************************************************************************/
-static struct task_core_blk g_task_core_blk;
+struct task_core_blk g_task_core_blk;
 
 /*************************************************************************************
  * Function Name: get_lead_zero
@@ -189,9 +189,9 @@ static struct tcb *get_next_rdy_tcb(struct tcb *next_tcb)
 {
 	u16_t hiprio = get_hiprio();
 
-	if (next_tcb == NULL || hiprio < next_tcb->prio) {
+	if (next_tcb == NULL || hiprio != next_tcb->prio) {
 		next_tcb = g_task_core_blk.ready_list[hiprio].head;
-		pl_early_syslog_info("list_hight\r\n");
+		//pl_early_syslog_info("list_hight_tcb:%s\r\n", next_tcb->name);
 	}
 
 	return next_tcb;
@@ -234,12 +234,14 @@ void *pl_callee_update_context(void)
 		next_tcb = list_next_entry(g_task_core_blk.curr_tcb, struct tcb, node);
 
 	if (g_task_core_blk.curr_tcb->curr_state == PL_TASK_STATE_DELAY) {
+		//pl_early_syslog_info("delay_curr_tcb_name:%s\r\n", g_task_core_blk.curr_tcb->name);
 		remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
 		insert_tcb_to_delaylist(g_task_core_blk.curr_tcb);
 	}
 
 	next_ready_tcb = get_next_rdy_tcb(next_tcb);
 	g_task_core_blk.curr_tcb = next_ready_tcb;
+
 
 	return next_ready_tcb->context_sp;
 }
@@ -356,7 +358,7 @@ void insert_tcb_to_delaylist(struct tcb *tcb)
 	struct tcb *pos = delaylist->head;
 
 	list_for_each_entry(pos, &delaylist->head->node, struct tcb, node) {
-		if (count_cmp(&tcb->delay_ticks, &pos->delay_ticks) > 0)
+		if (count_cmp(&tcb->delay_ticks, &pos->delay_ticks) < 0)
 			break;
 	}
 
@@ -556,13 +558,15 @@ void pl_callee_systick_expiration(void)
 	if (g_task_core_blk.systicks.lo32 == 0)
 		++g_task_core_blk.systicks.hi32;
 
-	//pl_early_syslog_info("systick:%d\r\n", g_task_core_blk.systicks.lo32);
+	//pl_early_syslog_info("prio:%d\r\n", g_task_core_blk.curr_tcb->prio);
 
 	list_for_each_entry_safe(pos, tmp, &g_task_core_blk.delay_list.head->node,
 		struct tcb, node) {
 		if (count_cmp(&pos->delay_ticks, &g_task_core_blk.systicks) <= 0) {
 			remove_tcb_from_delaylist(pos);
 			insert_tcb_to_rdylist(pos);
+			pos->curr_state = PL_TASK_STATE_READY;
+			pos->past_state = PL_TASK_STATE_DELAY;
 		} else {
 			break;
 		}
