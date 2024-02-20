@@ -41,6 +41,9 @@ SOFTWARE.
 void pl_put_format_log(int (*putc)(const char c), const char *front,
                        const char *rear, const char *fmt, ...);
 
+#define pl_early_syslog(fmt, ...)  \
+	pl_put_format_log(pl_early_port_putc, NULL, NULL, fmt, ## __VA_ARGS__)
+
 #define pl_early_syslog_info(fmt, ...)  \
 	pl_put_format_log(pl_early_port_putc, "[info]", "", fmt, ## __VA_ARGS__)
 

@@ -21,20 +21,11 @@ static struct tcb g_pl_idle_task_tcb2;
 
 extern int RTS_PORT_SystickInit(void);
 
-static int idle_task1(int argc, char *argv[])
-{
-	USED(argc);
-	USED(argv);
+volatile u32_t idle_task2_run_count;
+volatile u32_t idle_task1_run_count;
 
-	while(1) {
-		//pl_schedule_lock();
-		pl_early_syslog_info("+++++++++++++++++++++++++++++\r\n");
-		//pl_schedule_unlock();
-		pl_delay_ticks(200);
-	}
 
-	return 0;
-}
+
 
 static int idle_task2(int argc, char *argv[])
 {
@@ -43,9 +34,30 @@ static int idle_task2(int argc, char *argv[])
 
 	while(1) {
 		//pl_schedule_lock();
-		pl_early_syslog_info("////////////////////////////\r\n");
+		//pl_early_syslog("+");
+		idle_task2_run_count++;
 		//pl_schedule_unlock();
-		pl_delay_ticks(400);
+		pl_delay_ticks(20);
+	}
+
+	return 0;
+}
+
+static int idle_task1(int argc, char *argv[])
+{
+	USED(argc);
+	USED(argv);
+
+	pl_task_create_with_stack("idle_task2", idle_task2, PL_CFG_PRIORITIES_MAX,
+	                           &g_pl_idle_task_tcb2, g_pl_idle_task_stack2,
+	                           sizeof(g_pl_idle_task_stack2), 0, NULL);
+
+	while(1) {
+		//pl_schedule_lock();
+		//pl_early_syslog("/");
+		idle_task1_run_count++;
+		//pl_schedule_unlock();
+		pl_delay_ticks(20);
 	}
 
 	return 0;
@@ -59,20 +71,20 @@ static int idle_task(int argc, char *argv[])
 
 	RTS_PORT_SystickInit();
 	pl_early_syslog_info("=\r\n");
-	pl_task_create_with_stack("idle_task1", idle_task1, PL_CFG_PRIORITIES_MAX - 1,
+	pl_task_create_with_stack("idle_task1", idle_task1, PL_CFG_PRIORITIES_MAX,
 	                           &g_pl_idle_task_tcb1, g_pl_idle_task_stack1,
 	                           sizeof(g_pl_idle_task_stack1), 0, NULL);
 
-	pl_task_create_with_stack("idle_task2", idle_task2, PL_CFG_PRIORITIES_MAX - 1,
-	                           &g_pl_idle_task_tcb2, g_pl_idle_task_stack2,
-	                           sizeof(g_pl_idle_task_stack2), 0, NULL);
-
 	while(1) {
 		//pl_schedule_lock();
-		pl_early_syslog_info("========================\r\n");
+		//pl_early_syslog_info("========================\r\n");
 		//pl_schedule_unlock();
-		for (volatile int i = 0; i < 100; i++)
+		for (volatile int i = 0; i < 10000; i++)
 		;
+		pl_schedule_lock();
+		pl_early_syslog_info("\r\n idle_task1_run_count:%d, idle_task2_run_count:%d\r\n",
+		idle_task1_run_count, idle_task2_run_count);
+		pl_schedule_unlock();
 	}
 
 	return 0;
