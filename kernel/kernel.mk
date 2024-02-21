@@ -22,11 +22,9 @@
 
 KERNEL_DIR := $(TOPDIR)/kernel
 
-C_SRCS += $(KERNEL_DIR)/pl_entry.c
-
--include $(KERNEL_DIR)/common/common.mk
--include $(KERNEL_DIR)/mm/mm.mk
--include $(KERNEL_DIR)/syslog/syslog.mk
--include $(KERNEL_DIR)/task/task.mk
--include $(KERNEL_DIR)/initcall/initcall.mk
--include $(KERNEL_DIR)/list/list.mk
+C_SRCS += $(KERNEL_DIR)/entry.c
+C_SRCS += $(KERNEL_DIR)/initcall.c
+C_SRCS += $(KERNEL_DIR)/list.c
+C_SRCS += $(KERNEL_DIR)/mem_pool.c
+C_SRCS += $(KERNEL_DIR)/syslog.c
+C_SRCS += $(KERNEL_DIR)/task.c
