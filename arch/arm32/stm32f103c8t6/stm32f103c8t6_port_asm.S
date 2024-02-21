@@ -7,7 +7,7 @@
 
 ===============================================================================================*/
 #define SCB_ICSR_REG   0xE000ED04
-.extern pl_callee_update_context
+.extern pl_callee_get_next_context
 
 .global PendSV_Handler
 .global pl_port_context_switch
@@ -81,8 +81,8 @@ switch_top:
 switch_bottom:
 
 	push {lr}
-	/* r0 = pl_callee_update_context() */
-	bl   pl_callee_update_context
+	/* r0 = pl_callee_get_next_context() */
+	bl   pl_callee_get_next_context
 	pop  {lr}
 	/* restore context */
 	ldmia r0!, {r4-r11}

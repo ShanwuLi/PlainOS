@@ -73,7 +73,7 @@ void pl_callee_systick_expiration(void);
 void pl_callee_save_curr_context_sp(void *context_sp);
 
 /*************************************************************************************
- * Function Name: pl_callee_update_context
+ * Function Name: pl_callee_get_next_context
  * Description: update context and return context_sp of the current task.
  *
  * Parameters:
@@ -82,7 +82,7 @@ void pl_callee_save_curr_context_sp(void *context_sp);
  * Return:
  *    void *context sp;
  ************************************************************************************/
-void *pl_callee_update_context(void);
+void *pl_callee_get_next_context(void);
 
 
 /////////////////////////////////// rodata ports /////////////////////////////////////

@@ -213,7 +213,7 @@ void pl_callee_save_curr_context_sp(void *context_sp)
 }
 
 /*************************************************************************************
- * Function Name: pl_callee_update_context
+ * Function Name: pl_callee_get_next_context
  * Description: update context and return context_sp of the current task.
  *
  * Parameters:
@@ -223,9 +223,9 @@ void pl_callee_save_curr_context_sp(void *context_sp)
  *    void *context sp;
  ************************************************************************************/
 static void remove_tcb_from_rdylist(struct tcb *tcb);
-void insert_tcb_to_delaylist(struct tcb *tcb);
+static void insert_tcb_to_delaylist(struct tcb *tcb);
 
-void *pl_callee_update_context(void)
+void *pl_callee_get_next_context(void)
 {
 	struct tcb *next_ready_tcb;
 	struct tcb *next_tcb = NULL;
@@ -351,9 +351,8 @@ static void insert_tcb_to_rdylist(struct tcb *tcb)
  * Return:
  *   void
  ************************************************************************************/
-void insert_tcb_to_delaylist(struct tcb *tcb)
+static void insert_tcb_to_delaylist(struct tcb *tcb)
 {
-
 	struct task_list *delaylist = &g_task_core_blk.delay_list;
 	struct tcb *pos = delaylist->head;
 
@@ -376,8 +375,7 @@ void insert_tcb_to_delaylist(struct tcb *tcb)
  * Return:
  *   void
  ************************************************************************************/
-void remove_tcb_from_delaylist(struct tcb *tcb);
-void remove_tcb_from_delaylist(struct tcb *tcb)
+static void remove_tcb_from_delaylist(struct tcb *tcb)
 {
 	struct task_list *delaylist = &g_task_core_blk.delay_list;
 
