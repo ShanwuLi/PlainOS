@@ -21,35 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef __KERNEL_KERNEL_H__
-#define __KERNEL_KERNEL_H__
-
-#include "types.h"
-#include <pl_cfg.h>
-
-#define __used                          __attribute__((used))
-#define __const                         __attribute__((section("__const")))
-#define USED(sym)                       ((void)(sym))
-#define ARRAY_SIZE(a)                   (sizeof(a) / sizeof(a[0]))
-
-/*************************************************************************************
- * Function Name: container_of
- * Description: Get the address of the structure instance.
- *
- * Param:
- *   @ptr: address of the structure member.
- *   @struct_type: type of the structure.
- *   @member: member name of the ptr in structure.
- * Return:
- *   void
- ************************************************************************************/
-#define container_of(ptr, struct_type, member) \
-	((struct_type *)((char *)ptr - (char *)(&(((struct_type *)0)->member))))
-
-struct count {
-	u32_t hi32;
-	u32_t lo32;
-};
+#include <kernel/kernel.h>
 
 /*************************************************************************************
  * Function Name: count_cmp
@@ -64,6 +36,10 @@ struct count {
  *   if c1  < c2: return < 0;
  *   if c1 == c2: return 0.
  ************************************************************************************/
-s32_t count_cmp(struct count *c1, struct count *c2);
+s32_t count_cmp(struct count *c1, struct count *c2)
+{
+	s32_t hi_diff = c1->hi32 - c2->hi32;
+	s32_t lo_diff = c1->lo32 - c2->lo32;
 
-#endif /* __KERNEL_KERNEL_H__ */
+	return hi_diff == 0 ? lo_diff : hi_diff;
+}

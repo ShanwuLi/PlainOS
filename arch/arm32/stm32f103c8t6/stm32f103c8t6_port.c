@@ -32,12 +32,11 @@ void pl_port_irq_restore(irqstate_t irqstate)
 }
 
 //RTS OS滴答定时器初始化，移植时需要用户自己实现
-int RTS_PORT_SystickInit(void);
-int RTS_PORT_SystickInit(void)
+int pl_port_systick_init(void)
 {
     /** 填写你的OS滴答定时器初始化代码 **/
 	__asm__ volatile("cpsid	i\n\t");     /*< 关中断 */
-    SysTick_Config(7200); //50us   1ms
+    SysTick_Config(36000); //3600:50us,   72000:1ms
 	NVIC_EnableIRQ(PendSV_IRQn);
 	__asm__ volatile("cpsie	i\n\t");     /*< 关中断 */
 	return 0;

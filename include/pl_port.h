@@ -46,6 +46,21 @@ SOFTWARE.
 void pl_callee_entry(void);
 
 /*************************************************************************************
+ * Function Name: pl_port_systick_init
+ *
+ * Description:
+ *   The function is used to initialize systick.
+ *   on systick system.
+ * 
+ * Parameters:
+ *  none
+ *
+ * Return:
+ *  none
+ ************************************************************************************/
+int pl_port_systick_init(void);
+
+/*************************************************************************************
  * Function Name: pl_callee_systick_expiration
  *
  * Description:

@@ -47,23 +47,6 @@ struct task_list {
 	u16_t num;
 };
 
-static int count_cmp(struct count *c1, struct count *c2)
-{
-	if (c1->hi32 > c2->hi32)
-		return 1;
-	
-	if (c1->hi32 < c2->hi32)
-		return -1;
-
-	if (c1->lo32 > c2->lo32)
-		return 1;
-	
-	if (c1->lo32 < c2->lo32)
-		return -1;
-
-	return 0;
-}
-
 /*************************************************************************************
  * Structure Name: task_core_blk
  * Description: task core block.
@@ -208,46 +191,6 @@ static struct tcb *get_next_rdy_tcb(struct tcb *next_tcb)
 void pl_callee_save_curr_context_sp(void *context_sp)
 {
 	g_task_core_blk.curr_tcb->context_sp = context_sp;
-}
-
-/*************************************************************************************
- * Function Name: pl_callee_get_next_context
- * Description: update context and return context_sp of the current task.
- *
- * Parameters:
- *  none
- *
- * Return:
- *    void *context sp;
- ************************************************************************************/
-static void remove_tcb_from_rdylist(struct tcb *tcb);
-static void insert_tcb_to_delaylist(struct tcb *tcb);
-
-void *pl_callee_get_next_context(void)
-{
-	u16_t prio;
-	struct tcb *next_ready_tcb;
-	struct tcb *next_tcb = NULL;
-
-	if (g_task_core_blk.curr_tcb != NULL) {
-		next_tcb = list_next_entry(g_task_core_blk.curr_tcb, struct tcb, node);
-
-		if (g_task_core_blk.curr_tcb->curr_state == PL_TASK_STATE_READY) {
-			prio = g_task_core_blk.curr_tcb->prio;
-			g_task_core_blk.ready_list[prio].head = next_tcb;
-		}
-
-		if (g_task_core_blk.curr_tcb->curr_state == PL_TASK_STATE_DELAY) {
-			remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
-			insert_tcb_to_delaylist(g_task_core_blk.curr_tcb);
-		}
-	}
-
-	next_ready_tcb = get_next_rdy_tcb(next_tcb);
-	g_task_core_blk.curr_tcb = next_ready_tcb;
-
-
-	return next_ready_tcb->context_sp;
 }
 
 /*************************************************************************************
@@ -418,6 +361,41 @@ static void remove_tcb_from_rdylist(struct tcb *tcb)
 }
 
 /*************************************************************************************
+ * Function Name: pl_callee_get_next_context
+ * Description: update context and return context_sp of the current task.
+ *
+ * Parameters:
+ *  none
+ *
+ * Return:
+ *    void *context sp;
+ ************************************************************************************/
+void *pl_callee_get_next_context(void)
+{
+	u16_t prio;
+	struct tcb *next_ready_tcb;
+	struct tcb *next_tcb = NULL;
+
+	if (g_task_core_blk.curr_tcb != NULL) {
+		next_tcb = list_next_entry(g_task_core_blk.curr_tcb, struct tcb, node);
+
+		if (g_task_core_blk.curr_tcb->curr_state == PL_TASK_STATE_READY) {
+			prio = g_task_core_blk.curr_tcb->prio;
+			g_task_core_blk.ready_list[prio].head = next_tcb;
+		}
+
+		if (g_task_core_blk.curr_tcb->curr_state == PL_TASK_STATE_DELAY) {
+			remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
+			insert_tcb_to_delaylist(g_task_core_blk.curr_tcb);
+		}
+	}
+
+	next_ready_tcb = get_next_rdy_tcb(next_tcb);
+	g_task_core_blk.curr_tcb = next_ready_tcb;
+	return next_ready_tcb->context_sp;
+}
+
+/*************************************************************************************
  * Function Name: pl_schedule_unlock
  * Description: enable scheduler.
  *
@@ -525,6 +503,7 @@ void pl_delay_ticks(u32_t ticks)
 	if (ticks == 0)
 		return;
 
+	irqstate = pl_port_irq_save();
 	end_ticks_lo32 = g_task_core_blk.systicks.lo32;
 	end_ticks_hi32 = g_task_core_blk.systicks.hi32;
 
@@ -532,7 +511,6 @@ void pl_delay_ticks(u32_t ticks)
 	if (ticks < end_ticks_lo32)
 		++end_ticks_hi32;
 
-	irqstate = pl_port_irq_save();
 	g_task_core_blk.curr_tcb->delay_ticks.hi32 = end_ticks_hi32;
 	g_task_core_blk.curr_tcb->delay_ticks.lo32 = ticks;
 	g_task_core_blk.curr_tcb->curr_state = PL_TASK_STATE_DELAY;

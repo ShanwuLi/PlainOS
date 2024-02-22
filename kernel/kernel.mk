@@ -22,6 +22,7 @@
 
 KERNEL_DIR := $(TOPDIR)/kernel
 
+C_SRCS += $(KERNEL_DIR)/common.c
 C_SRCS += $(KERNEL_DIR)/entry.c
 C_SRCS += $(KERNEL_DIR)/initcall.c
 C_SRCS += $(KERNEL_DIR)/list.c

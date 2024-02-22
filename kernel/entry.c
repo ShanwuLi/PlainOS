@@ -18,9 +18,6 @@ static struct tcb g_pl_idle_task_tcb1;
 static u32_t g_pl_idle_task_stack2[128];
 static struct tcb g_pl_idle_task_tcb2;
 
-
-extern int RTS_PORT_SystickInit(void);
-
 volatile u32_t idle_task2_run_count;
 volatile u32_t idle_task1_run_count;
 
@@ -37,7 +34,7 @@ static int idle_task2(int argc, char *argv[])
 		pl_early_syslog("+");
 		idle_task2_run_count++;
 		//pl_schedule_unlock();
-		//pl_delay_ticks(20);
+		pl_delay_ticks(1);
 	}
 
 	return 0;
@@ -57,19 +54,18 @@ static int idle_task1(int argc, char *argv[])
 		pl_early_syslog("/");
 		idle_task1_run_count++;
 		//pl_schedule_unlock();
-		//pl_delay_ticks(20);
+		pl_delay_ticks(5);
 	}
 
 	return 0;
 }
-
 
 static int idle_task(int argc, char *argv[])
 {
 	USED(argc);
 	USED(argv);
 
-	RTS_PORT_SystickInit();
+	pl_port_systick_init();
 	pl_early_syslog_info("=\r\n");
 	pl_task_create_with_stack("idle_task1", idle_task1, PL_CFG_PRIORITIES_MAX,
 	                           &g_pl_idle_task_tcb1, g_pl_idle_task_stack1,

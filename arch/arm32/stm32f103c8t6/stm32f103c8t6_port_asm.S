@@ -55,7 +55,7 @@ is_first_switch:
 .type PendSV_Handler, %function
 
 PendSV_Handler:
-	cpsid i
+	cpsid i /* disbale interrupt */
 	/* clear pending bit of PendSV */
 	ldr   r1, =SCB_ICSR_REG
 	ldr   r2, [r1]
@@ -80,15 +80,18 @@ switch_top:
 
 switch_bottom:
 
+	cpsie i  /* enable interrupt */
 	push {lr}
 	/* r0 = pl_callee_get_next_context() */
 	bl   pl_callee_get_next_context
 	pop  {lr}
+
+	cpsid i  /* disable interrupt */
 	/* restore context */
 	ldmia r0!, {r4-r11}
 	msr   psp, r0
 	orr   lr, lr, #0x04
-	cpsie i
+	cpsie i  /* enable interrupt */
 	bx    lr
 
 .section .text.GetReturnValue
