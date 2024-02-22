@@ -48,7 +48,7 @@ pl_port_context_switch:
 
 
 .section .data
-once_entry:
+is_first_switch:
 	.word 0x0
 
 .section .text.PendSV_Handler
@@ -62,7 +62,7 @@ PendSV_Handler:
 	orr   r2, r2, #0x80000000
 	str   r2, [r1]
 
-	ldr   r1, =once_entry
+	ldr   r1, =is_first_switch
 	ldr   r2, [r1]
 	ldr   r3, =0xff
 	str   r3, [r1]

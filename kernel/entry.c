@@ -34,10 +34,10 @@ static int idle_task2(int argc, char *argv[])
 
 	while(1) {
 		//pl_schedule_lock();
-		//pl_early_syslog("+");
+		pl_early_syslog("+");
 		idle_task2_run_count++;
 		//pl_schedule_unlock();
-		pl_delay_ticks(20);
+		//pl_delay_ticks(20);
 	}
 
 	return 0;
@@ -54,10 +54,10 @@ static int idle_task1(int argc, char *argv[])
 
 	while(1) {
 		//pl_schedule_lock();
-		//pl_early_syslog("/");
+		pl_early_syslog("/");
 		idle_task1_run_count++;
 		//pl_schedule_unlock();
-		pl_delay_ticks(20);
+		//pl_delay_ticks(20);
 	}
 
 	return 0;

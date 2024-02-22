@@ -37,7 +37,7 @@ int RTS_PORT_SystickInit(void)
 {
     /** 填写你的OS滴答定时器初始化代码 **/
 	__asm__ volatile("cpsid	i\n\t");     /*< 关中断 */
-    SysTick_Config(1800); //50us   1ms
+    SysTick_Config(7200); //50us   1ms
 	NVIC_EnableIRQ(PendSV_IRQn);
 	__asm__ volatile("cpsie	i\n\t");     /*< 关中断 */
 	return 0;
