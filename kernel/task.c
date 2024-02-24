@@ -341,11 +341,6 @@ void *pl_callee_get_next_context(void)
 
 	g_task_core_blk.curr_tcb = next_rdy_tcb;
 	return next_rdy_tcb->context_sp;
-	u16_t hiprio = get_hiprio();
-	struct tcb *next_rdy_tcb = g_task_core_blk.ready_list[hiprio].head;
-
-	g_task_core_blk.curr_tcb = next_rdy_tcb;
-	return next_rdy_tcb->context_sp;
 }
 
 /*************************************************************************************
@@ -520,10 +515,8 @@ void pl_delay_ticks(u32_t ticks)
 void pl_callee_systick_expiration(void)
 {
 	u16_t prio;
-	u16_t prio;
 	struct tcb *pos;
 	struct tcb *tmp;
-	struct tcb *curr_tcb = g_task_core_blk.curr_tcb;
 	struct tcb *curr_tcb = g_task_core_blk.curr_tcb;
 
 	/* update systick */
@@ -547,7 +540,6 @@ void pl_callee_systick_expiration(void)
 	}
 
 	if (g_task_core_blk.sched_enable)
-		pl_context_switch();
 		pl_context_switch();
 }
 
