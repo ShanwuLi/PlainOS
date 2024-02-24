@@ -319,7 +319,6 @@ static void remove_tcb_from_rdylist(struct tcb *tcb)
 	}
 
 	rdylist->head = list_next_entry(tcb, struct tcb, node);
-	rdylist->head = list_next_entry(tcb, struct tcb, node);
 	list_del_node(&tcb->node);
 	--rdylist->num;
 }
@@ -492,10 +491,7 @@ void pl_delay_ticks(u32_t ticks)
 	g_task_core_blk.curr_tcb->past_state = PL_TASK_STATE_READY;
 	remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
 	insert_tcb_to_delaylist(g_task_core_blk.curr_tcb);
-	remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
-	insert_tcb_to_delaylist(g_task_core_blk.curr_tcb);
 	pl_port_irq_restore(irqstate);
-	pl_context_switch();
 	pl_context_switch();
 }
 

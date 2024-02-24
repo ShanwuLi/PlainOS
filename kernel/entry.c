@@ -90,7 +90,7 @@ static int idle_task(int argc, char *argv[])
 static int pl_idle_task_init(void)
 {
 	pl_early_syslog_info("g_pl_idle_task_stack:0x%x\r\n", g_pl_idle_task_stack);
-	pl_task_create_with_stack("idle_task", idle_task, PL_CFG_PRIORITIES_MAX - 1,
+	pl_task_create_with_stack("idle_task", idle_task, PL_CFG_PRIORITIES_MAX,
 	                           &g_pl_idle_task_tcb, g_pl_idle_task_stack,
 	                           sizeof(g_pl_idle_task_stack), 0, NULL);
 
