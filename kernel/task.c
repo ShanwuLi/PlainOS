@@ -319,6 +319,7 @@ static void remove_tcb_from_rdylist(struct tcb *tcb)
 	}
 
 	rdylist->head = list_next_entry(tcb, struct tcb, node);
+	rdylist->head = list_next_entry(tcb, struct tcb, node);
 	list_del_node(&tcb->node);
 	--rdylist->num;
 }
@@ -335,6 +336,11 @@ static void remove_tcb_from_rdylist(struct tcb *tcb)
  ************************************************************************************/
 void *pl_callee_get_next_context(void)
 {
+	u16_t hiprio = get_hiprio();
+	struct tcb *next_rdy_tcb = g_task_core_blk.ready_list[hiprio].head;
+
+	g_task_core_blk.curr_tcb = next_rdy_tcb;
+	return next_rdy_tcb->context_sp;
 	u16_t hiprio = get_hiprio();
 	struct tcb *next_rdy_tcb = g_task_core_blk.ready_list[hiprio].head;
 
@@ -491,7 +497,10 @@ void pl_delay_ticks(u32_t ticks)
 	g_task_core_blk.curr_tcb->past_state = PL_TASK_STATE_READY;
 	remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
 	insert_tcb_to_delaylist(g_task_core_blk.curr_tcb);
+	remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
+	insert_tcb_to_delaylist(g_task_core_blk.curr_tcb);
 	pl_port_irq_restore(irqstate);
+	pl_context_switch();
 	pl_context_switch();
 }
 
@@ -511,8 +520,10 @@ void pl_delay_ticks(u32_t ticks)
 void pl_callee_systick_expiration(void)
 {
 	u16_t prio;
+	u16_t prio;
 	struct tcb *pos;
 	struct tcb *tmp;
+	struct tcb *curr_tcb = g_task_core_blk.curr_tcb;
 	struct tcb *curr_tcb = g_task_core_blk.curr_tcb;
 
 	/* update systick */
@@ -536,6 +547,7 @@ void pl_callee_systick_expiration(void)
 	}
 
 	if (g_task_core_blk.sched_enable)
+		pl_context_switch();
 		pl_context_switch();
 }
 
