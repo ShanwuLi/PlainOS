@@ -109,7 +109,7 @@ static u32_t g_hiprio_bitmap[(PL_CFG_PRIORITIES_MAX + 31) / 32];
 struct task_core_blk g_task_core_blk;
 
 /*************************************************************************************
- * Function Name: get_lead_zero
+ * Function Name: get_last_bit
  * Description: Get leading zero of bitmap.
  *
  * Parameters:
@@ -118,10 +118,10 @@ struct task_core_blk g_task_core_blk;
  * Return:
  *   @leadzero: leadzero
  ************************************************************************************/
-static u8_t get_lead_zero(u32_t bitmap)
+static u8_t get_last_bit(u32_t bitmap)
 {
 	u8_t i;
-	u8_t lead_zero;
+	u8_t last_bit;
 	u8_t *p = (u8_t *)&bitmap;
 
 	for (i = 0; i < 4; i++) {
@@ -130,8 +130,8 @@ static u8_t get_lead_zero(u32_t bitmap)
 		p++;
 	}
 
-	lead_zero = pl_port_rodata_read8(g_hiprio_idx_tbl + (*p));
-	return lead_zero;
+	last_bit = pl_port_rodata_read8(g_hiprio_idx_tbl + (*p));
+	return last_bit;
 }
 
 /*************************************************************************************
@@ -154,7 +154,7 @@ static u16_t get_hiprio(void)
 			break;
 	}
 
-	hiprio = (i << 5) + get_lead_zero(g_hiprio_bitmap[i]);
+	hiprio = (i << 5) + get_last_bit(g_hiprio_bitmap[i]);
 	return hiprio;
 }
 
