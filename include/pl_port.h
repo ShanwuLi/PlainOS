@@ -230,7 +230,7 @@ void pl_port_irq_restore(irqstate_t irqstate);
 void pl_port_first_context_switch(void);
 
 /*************************************************************************************
- * Function Name: pl_port_context_switch
+ * Function Name: pl_port_switch_context
  *
  * Description:
  *   The function is used to switch context.
@@ -241,7 +241,7 @@ void pl_port_first_context_switch(void);
  * Return:
  *  none.
  ************************************************************************************/
-void pl_port_context_switch(void);
+void pl_port_switch_context(void);
 
 /*************************************************************************************
  * Function Name: pl_port_task_stack_init

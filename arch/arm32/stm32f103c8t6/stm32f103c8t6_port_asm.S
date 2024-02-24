@@ -10,7 +10,7 @@
 .extern pl_callee_get_next_context
 
 .global PendSV_Handler
-.global pl_port_context_switch
+.global pl_port_switch_context
 .global pl_port_first_task_switch
 .global GetReturnValue
 
@@ -34,10 +34,10 @@ arm-none-eabi-gcc -c(gcc -mthumb对于汇编来说似乎无关紧要，只是编
 .thumb
 
 
-.section .text.pl_port_context_switch
-.type pl_port_context_switch, %function
+.section .text.pl_port_switch_context
+.type pl_port_switch_context, %function
 
-pl_port_context_switch:
+pl_port_switch_context:
 
 	ldr   r1, =SCB_ICSR_REG
 	ldr   r2, [r1,#0]

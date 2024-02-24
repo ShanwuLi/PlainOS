@@ -80,16 +80,16 @@ extern "C" {
 #endif
 
 /*************************************************************************************
- * Function Name: pl_get_curr_tcb
- * Description: get current tcb.
+ * Function Name: pl_context_switch
+ * Description: switch task.
  *
  * Parameters:
- *  none
+ *   none
  *
  * Return:
- *    struct tcb *;
+ *   none
  ************************************************************************************/
-struct tcb *pl_get_curr_tcb(void);
+void pl_context_switch(void);
 
 /*************************************************************************************
  * Function Name: pl_schedule_lock
