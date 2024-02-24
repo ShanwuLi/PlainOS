@@ -36,7 +36,7 @@ int pl_port_systick_init(void)
 {
     /** 填写你的OS滴答定时器初始化代码 **/
 	__asm__ volatile("cpsid	i\n\t");     /*< 关中断 */
-    SysTick_Config(36000); //3600:50us,   72000:1ms
+    SysTick_Config(3600); //3600:50us,   72000:1ms
 	NVIC_EnableIRQ(PendSV_IRQn);
 	__asm__ volatile("cpsie	i\n\t");     /*< 关中断 */
 	return 0;

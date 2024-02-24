@@ -159,26 +159,6 @@ static u16_t get_hiprio(void)
 }
 
 /*************************************************************************************
- * Function Name: pl_switch_to_hiprio_task
- * Description: Switch to the task of highest priority.
- *
- * Parameters:
- *   void
- *
- * Return:
- *   void
- ************************************************************************************/
-static struct tcb *get_next_rdy_tcb(struct tcb *next_tcb)
-{
-	u16_t hiprio = get_hiprio();
-
-	if (next_tcb == NULL || hiprio != next_tcb->prio)
-		next_tcb = g_task_core_blk.ready_list[hiprio].head;
-
-	return next_tcb;
-}
-
-/*************************************************************************************
  * Function Name: pl_callee_save_curr_context_sp
  * Description: update context and return context_sp of the current task.
  *
@@ -191,21 +171,6 @@ static struct tcb *get_next_rdy_tcb(struct tcb *next_tcb)
 void pl_callee_save_curr_context_sp(void *context_sp)
 {
 	g_task_core_blk.curr_tcb->context_sp = context_sp;
-}
-
-/*************************************************************************************
- * Function Name: pl_get_curr_tcb
- * Description: get current tcb.
- *
- * Parameters:
- *  none
- *
- * Return:
- *    struct tcb *;
- ************************************************************************************/
-struct tcb *pl_get_curr_tcb(void)
-{
-	return g_task_core_blk.curr_tcb;
 }
 
 /*************************************************************************************
@@ -353,10 +318,8 @@ static void remove_tcb_from_rdylist(struct tcb *tcb)
 		return;
 	}
 
+	rdylist->head = list_next_entry(tcb, struct tcb, node);
 	list_del_node(&tcb->node);
-	if (rdylist->head == tcb)
-		rdylist->head = list_next_entry(tcb, struct tcb, node);
-
 	--rdylist->num;
 }
 
@@ -372,27 +335,11 @@ static void remove_tcb_from_rdylist(struct tcb *tcb)
  ************************************************************************************/
 void *pl_callee_get_next_context(void)
 {
-	u16_t prio;
-	struct tcb *next_ready_tcb;
-	struct tcb *next_tcb = NULL;
+	u16_t hiprio = get_hiprio();
+	struct tcb *next_rdy_tcb = g_task_core_blk.ready_list[hiprio].head;
 
-	if (g_task_core_blk.curr_tcb != NULL) {
-		next_tcb = list_next_entry(g_task_core_blk.curr_tcb, struct tcb, node);
-
-		if (g_task_core_blk.curr_tcb->curr_state == PL_TASK_STATE_READY) {
-			prio = g_task_core_blk.curr_tcb->prio;
-			g_task_core_blk.ready_list[prio].head = next_tcb;
-		}
-
-		if (g_task_core_blk.curr_tcb->curr_state == PL_TASK_STATE_DELAY) {
-			remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
-			insert_tcb_to_delaylist(g_task_core_blk.curr_tcb);
-		}
-	}
-
-	next_ready_tcb = get_next_rdy_tcb(next_tcb);
-	g_task_core_blk.curr_tcb = next_ready_tcb;
-	return next_ready_tcb->context_sp;
+	g_task_core_blk.curr_tcb = next_rdy_tcb;
+	return next_rdy_tcb->context_sp;
 }
 
 /*************************************************************************************
@@ -431,6 +378,33 @@ void pl_schedule_lock(void)
 	irqstate = pl_port_irq_save();
 	g_task_core_blk.sched_enable = false;
 	pl_port_irq_restore(irqstate);
+}
+
+/*************************************************************************************
+ * Function Name: pl_context_switch
+ * Description: switch task.
+ *
+ * Parameters:
+ *   none
+ *
+ * Return:
+ *   none
+ ************************************************************************************/
+void pl_context_switch(void)
+{
+	u16_t hiprio;
+	irqstate_t irqstate;
+	struct tcb *curr_tcb;
+	struct tcb *next_tcb;
+	
+	irqstate = pl_port_irq_save();
+	hiprio = get_hiprio();
+	curr_tcb = g_task_core_blk.curr_tcb;
+	next_tcb = g_task_core_blk.ready_list[hiprio].head;
+	pl_port_irq_restore(irqstate);
+
+	if (curr_tcb != next_tcb)
+		pl_port_switch_context();
 }
 
 /*************************************************************************************
@@ -477,7 +451,7 @@ tid_t pl_task_create_with_stack(const char *name, task_t task, u16_t prio,
 	irqstate = pl_port_irq_save();
 	insert_tcb_to_rdylist(tcb);
 	pl_port_irq_restore(irqstate);
-	pl_port_context_switch();
+	pl_context_switch();
 
 	return tcb;
 }
@@ -515,8 +489,10 @@ void pl_delay_ticks(u32_t ticks)
 	g_task_core_blk.curr_tcb->delay_ticks.lo32 = ticks;
 	g_task_core_blk.curr_tcb->curr_state = PL_TASK_STATE_DELAY;
 	g_task_core_blk.curr_tcb->past_state = PL_TASK_STATE_READY;
+	remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
+	insert_tcb_to_delaylist(g_task_core_blk.curr_tcb);
 	pl_port_irq_restore(irqstate);
-	pl_port_context_switch();
+	pl_context_switch();
 }
 
 /*************************************************************************************
@@ -534,30 +510,33 @@ void pl_delay_ticks(u32_t ticks)
  ************************************************************************************/
 void pl_callee_systick_expiration(void)
 {
+	u16_t prio;
 	struct tcb *pos;
 	struct tcb *tmp;
+	struct tcb *curr_tcb = g_task_core_blk.curr_tcb;
 
 	/* update systick */
 	++g_task_core_blk.systicks.lo32;
 	if (g_task_core_blk.systicks.lo32 == 0)
 		++g_task_core_blk.systicks.hi32;
 
-	//pl_early_syslog_info("prio:%d\r\n", g_task_core_blk.curr_tcb->prio);
+	prio = curr_tcb->prio;
+	g_task_core_blk.ready_list[prio].head = list_next_entry(curr_tcb, struct tcb, node);
 
 	list_for_each_entry_safe(pos, tmp, &g_task_core_blk.delay_list.head->node,
 		struct tcb, node) {
-		if (count_cmp(&pos->delay_ticks, &g_task_core_blk.systicks) <= 0) {
-			remove_tcb_from_delaylist(pos);
-			insert_tcb_to_rdylist(pos);
-			pos->curr_state = PL_TASK_STATE_READY;
-			pos->past_state = PL_TASK_STATE_DELAY;
-		} else {
+
+		if (count_cmp(&pos->delay_ticks, &g_task_core_blk.systicks) > 0)
 			break;
-		}
+
+		remove_tcb_from_delaylist(pos);
+		insert_tcb_to_rdylist(pos);
+		pos->curr_state = PL_TASK_STATE_READY;
+		pos->past_state = PL_TASK_STATE_DELAY;
 	}
 
 	if (g_task_core_blk.sched_enable)
-		pl_port_context_switch();
+		pl_context_switch();
 }
 
 /*************************************************************************************
