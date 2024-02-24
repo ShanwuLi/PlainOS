@@ -113,10 +113,10 @@ struct task_core_blk g_task_core_blk;
  * Description: Get leading zero of bitmap.
  *
  * Parameters:
- *   void
+ *   @bitmap: bit map of priority.
  *
  * Return:
- *   @leadzero: leadzero
+ *   @last_bit: leadzero
  ************************************************************************************/
 static u8_t get_last_bit(u32_t bitmap)
 {
