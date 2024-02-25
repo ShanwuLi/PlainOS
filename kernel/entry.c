@@ -78,7 +78,7 @@ static int idle_task(int argc, char *argv[])
 		for (volatile int i = 0; i < 10000; i++)
 		;
 		//pl_schedule_lock();
-		pl_early_syslog_info("\r\n idle_task1_run_count:%d, idle_task2_run_count:%d\r\n",
+		pl_early_syslog_err("\r\n idle_task1_run_count:%d, idle_task2_run_count:%d\r\n",
 		idle_task1_run_count, idle_task2_run_count);
 		//pl_schedule_unlock();
 	}
@@ -89,7 +89,7 @@ static int idle_task(int argc, char *argv[])
 
 static int pl_idle_task_init(void)
 {
-	pl_early_syslog_info("g_pl_idle_task_stack:0x%x\r\n", g_pl_idle_task_stack);
+	pl_early_syslog_err("g_pl_idle_task_stack:0x%x\r\n", g_pl_idle_task_stack);
 	pl_task_create_with_stack("idle_task", idle_task, PL_CFG_PRIORITIES_MAX,
 	                           &g_pl_idle_task_tcb, g_pl_idle_task_stack,
 	                           sizeof(g_pl_idle_task_stack), 0, NULL);

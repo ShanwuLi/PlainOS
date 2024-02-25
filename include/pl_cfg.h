@@ -30,6 +30,6 @@ SOFTWARE.
 /* maximum priority of plainos */
 #define PL_CFG_MAX_TASKS_NUM       (10u)
 #define PL_CFG_PRIORITIES_MAX      (99u)
-//#define PL_CFG_SYSLOG_ANSI_COLOR
+#define PL_CFG_SYSLOG_ANSI_COLOR
 
 #endif /* __CONFIG_H__ */

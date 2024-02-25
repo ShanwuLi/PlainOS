@@ -374,8 +374,7 @@ static void update_blk_bits(struct mem_pool* mp, size_t blk_idx)
 		if (blk_bitmap & ((uintptr_t)1 << i)) {
 			fbits += fbits_inc;
 			++bits;
-		}
-		else {
+		} else {
 			fbits_inc = 0;
 			mbits = bits > mbits ? bits : mbits;
 			bits = 0;
