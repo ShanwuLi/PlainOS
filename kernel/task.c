@@ -422,10 +422,9 @@ static void task_end(void)
 
 	irqstate = pl_port_irq_save();
 	remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
-
-	pl_early_syslog_info("task_end:%s\r\n", g_task_core_blk.curr_tcb->name);
 	pl_port_irq_restore(irqstate);
 	pl_context_switch();
+	/* will be never come here */
 	while(1);
 }
 
@@ -542,9 +541,11 @@ void pl_callee_systick_expiration(void)
 	if (g_task_core_blk.systicks.lo32 == 0)
 		++g_task_core_blk.systicks.hi32;
 
+	/* round robin */
 	prio = curr_tcb->prio;
 	g_task_core_blk.ready_list[prio].head = list_next_entry(curr_tcb, struct tcb, node);
 
+	/* update ready list */
 	list_for_each_entry_safe(pos, tmp, &g_task_core_blk.delay_list.head->node,
 		struct tcb, node) {
 
@@ -557,6 +558,7 @@ void pl_callee_systick_expiration(void)
 		pos->past_state = PL_TASK_STATE_DELAY;
 	}
 
+	/* switch task */
 	if (g_task_core_blk.sched_enable)
 		pl_context_switch();
 }
