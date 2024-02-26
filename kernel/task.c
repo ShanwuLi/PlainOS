@@ -129,7 +129,6 @@ static u8_t get_last_bit(u32_t bitmap)
 			break;
 		p++;
 	}
-
 	last_bit = pl_port_rodata_read8(g_hiprio_idx_tbl + (*p));
 	return last_bit;
 }
@@ -408,6 +407,29 @@ void pl_context_switch(void)
 }
 
 /*************************************************************************************
+ * Function Name: task_end
+ * Description: routine of task ending.
+ *
+ * Parameters:
+ *   none.
+ *
+ * Return:
+ *   void.
+ ************************************************************************************/
+static void task_end(void)
+{
+	irqstate_t irqstate;
+
+	irqstate = pl_port_irq_save();
+	remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
+
+	pl_early_syslog_info("task_end:%s\r\n", g_task_core_blk.curr_tcb->name);
+	pl_port_irq_restore(irqstate);
+	pl_context_switch();
+	while(1);
+}
+
+/*************************************************************************************
  * Function Name: pl_task_create_with_stack
  * Description: create a task with stack that must be provided.
  *
@@ -435,7 +457,7 @@ tid_t pl_task_create_with_stack(const char *name, task_t task, u16_t prio,
 		return (tid_t)ERR_TO_PTR(-EFAULT);
 	}
 
-	stack = pl_port_task_stack_init(task, stack, stack_size, argc, argv);
+	stack = pl_port_task_stack_init(task, stack, stack_size, argc, argv, task_end);
 
 	tcb->name = name;
 	tcb->parent = g_task_core_blk.curr_tcb;

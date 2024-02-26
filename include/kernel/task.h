@@ -43,6 +43,7 @@ enum task_state {
 };
 
 typedef int (*task_t)(int argc, char *argv[]);
+typedef void (*task_end_t)(void);
 
 /*************************************************************************************
  * Structure Name: tcb

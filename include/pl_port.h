@@ -261,12 +261,13 @@ void pl_port_switch_context(void);
  *  @stack_size: stack size.
  *  @argc: the count of argv.
  *  @argv: argv[].
+ *  @task_end: routine of task ending.
  *
  * Return:
  *  pointer to the task_stack + regs.
  ************************************************************************************/
 void *pl_port_task_stack_init(task_t task, void *task_stack, size_t stack_size,
-                              int argc, char *argv[]);
+                              int argc, char *argv[], task_end_t task_end);
 
 
 #endif /* __PLAINOS_PORT_H__ */

@@ -21,21 +21,18 @@ static struct tcb g_pl_idle_task_tcb2;
 volatile u32_t idle_task2_run_count = 0;
 volatile u32_t idle_task1_run_count = 0;
 
-
-
-
 static int idle_task2(int argc, char *argv[])
 {
 	USED(argc);
 	USED(argv);
 
-	while(1) {
+	//while(1) {
 		//pl_schedule_lock();
-		//pl_early_syslog("+");
+		pl_early_syslog("+++++++++++++++++++++++++++++");
 		idle_task2_run_count++;
 		//pl_schedule_unlock();
 		pl_delay_ticks(10);
-	}
+	//}
 
 	return 0;
 }
@@ -49,13 +46,14 @@ static int idle_task1(int argc, char *argv[])
 	                           &g_pl_idle_task_tcb2, g_pl_idle_task_stack2,
 	                           sizeof(g_pl_idle_task_stack2), 0, NULL);
 
-	while(1) {
+
+	//while(1) {
 		//pl_schedule_lock();
-		//pl_early_syslog("/");
+		pl_early_syslog("//////////////////////////////");
 		idle_task1_run_count++;
 		//pl_schedule_unlock();
 		pl_delay_ticks(50);
-	}
+	//}
 
 	return 0;
 }
@@ -85,7 +83,6 @@ static int idle_task(int argc, char *argv[])
 
 	return 0;
 }
-
 
 static int pl_idle_task_init(void)
 {
