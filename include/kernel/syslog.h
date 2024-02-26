@@ -33,9 +33,9 @@ SOFTWARE.
 #define PL_EARLY_SYSLOG_ERR_ANSI_COLOR    ANSI_COLOR_FORE_RED
 #define PL_EARLY_SYSLOG_ANSI_COLOR_RESET  ANSI_COLOR_FORE_RESET
 #else
-#define PL_EARLY_SYSLOG_WARN_ANSI_COLOR  ""
-#define PL_EARLY_SYSLOG_ERR_ANSI_COLOR   ""
-#define PL_EARLY_SYSLOG_ANSI_COLOR_RESET ""
+#define PL_EARLY_SYSLOG_WARN_ANSI_COLOR
+#define PL_EARLY_SYSLOG_ERR_ANSI_COLOR
+#define PL_EARLY_SYSLOG_ANSI_COLOR_RESET NULL
 #endif
 
 void pl_put_format_log(int (*putc)(const char c), const char *front,
@@ -45,7 +45,7 @@ void pl_put_format_log(int (*putc)(const char c), const char *front,
 	pl_put_format_log(pl_port_early_putc, NULL, NULL, fmt, ## __VA_ARGS__)
 
 #define pl_early_syslog_info(fmt, ...)  \
-	pl_put_format_log(pl_port_early_putc, "[info]", "", fmt, ## __VA_ARGS__)
+	pl_put_format_log(pl_port_early_putc, "[info]", NULL, fmt, ## __VA_ARGS__)
 
 #define pl_early_syslog_warn(fmt, ...)  \
 	pl_put_format_log(pl_port_early_putc, PL_EARLY_SYSLOG_WARN_ANSI_COLOR"[warn]", \

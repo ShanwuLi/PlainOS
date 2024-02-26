@@ -41,16 +41,15 @@ static int idle_task1(int argc, char *argv[])
 {
 	USED(argc);
 	USED(argv);
-	int ret;
-	struct tcb *tcb;
+	//int ret;
+	//struct tcb *tcb;
 
-	tcb = pl_task_create_with_stack("idle_task2", idle_task2, PL_CFG_PRIORITIES_MAX,
+	pl_task_create_with_stack("idle_task2", idle_task2, PL_CFG_PRIORITIES_MAX,
 	                           &g_pl_idle_task_tcb2, g_pl_idle_task_stack2,
 	                           sizeof(g_pl_idle_task_stack2), 0, NULL);
 
-	pl_task_wait_for_exit(tcb, &ret);
-
-	pl_early_syslog_info("%s: ret:%d\r\n", "idle_task1", ret);
+	//pl_task_wait_for_exit(tcb, &ret);
+	//pl_early_syslog_info("%s: ret:%d\r\n", "idle_task1", ret);
 	//while(1) {
 		//pl_schedule_lock();
 		pl_early_syslog("//////////////////////////////");
@@ -90,7 +89,7 @@ static int idle_task(int argc, char *argv[])
 
 static int pl_idle_task_init(void)
 {
-	pl_early_syslog_err("g_pl_idle_task_stack:0x%x\r\n", g_pl_idle_task_stack);
+	pl_early_syslog_info("g_pl_idle_task_stack:0x%x\r\n", g_pl_idle_task_stack);
 	pl_task_create_with_stack("idle_task", idle_task, PL_CFG_PRIORITIES_MAX,
 	                           &g_pl_idle_task_tcb, g_pl_idle_task_stack,
 	                           sizeof(g_pl_idle_task_stack), 0, NULL);

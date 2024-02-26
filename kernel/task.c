@@ -417,16 +417,18 @@ void pl_context_switch(void)
  ************************************************************************************/
 static void task_entry(struct tcb *tcb)
 {
-	struct tcb *pos;
-	struct tcb *tmp;
+	//struct tcb *pos;
+	//struct tcb *tmp;
 	irqstate_t irqstate;
 	int exit_val = tcb->task(tcb->argc, tcb->argv);
 
+	USED(exit_val);
 	/* task exit and clean up resources of current tcb */
 	irqstate = pl_port_irq_save();
-	tcb->curr_state = PL_TASK_STATE_EXIT;
+	//tcb->curr_state = PL_TASK_STATE_EXIT;
 	remove_tcb_from_rdylist(tcb);
 
+#if 0
 	/* recover waitting tasks */
 	list_for_each_entry_safe(pos, tmp, &tcb->wait_head, struct tcb, node) {
 		list_del_node(&pos->node);
@@ -435,6 +437,7 @@ static void task_entry(struct tcb *tcb)
 		pos->past_state = PL_TASK_STATE_WAIT;
 		pos->wait_for_task_ret = exit_val;
 	}
+#endif
 
 	pl_port_irq_restore(irqstate);
 	pl_context_switch();
