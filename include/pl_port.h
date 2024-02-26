@@ -160,7 +160,7 @@ uintptr_t pl_port_rodata_read(void *addr);
 
 ///////////////////////////////////// early ports ////////////////////////////////////
 /*************************************************************************************
- * Function Name: pl_early_port_putc
+ * Function Name: pl_port_early_putc
  *
  * Description:
  *   The function is used to put char in early stage before the first task setup.
@@ -171,7 +171,7 @@ uintptr_t pl_port_rodata_read(void *addr);
  * Return:
  *  Greater than or equal to 0 on success, less than 0 with failure.
  ************************************************************************************/
-int pl_early_port_putc(const char c);
+int pl_port_early_putc(const char c);
 
 
 
@@ -256,18 +256,16 @@ void pl_port_switch_context(void);
  *       task_stack       task_stack + regs                task_stack + stack_size
  
  * Parameters:
- *  @task: the task of initialization, prototype is "int task(int argc, char *argv[])"
+ *  @task_entry: the task entry of initialization, prototype is task_entry_t.
  *  @task_stack: task stack.
  *  @stack_size: stack size.
- *  @argc: the count of argv.
- *  @argv: argv[].
- *  @task_end: routine of task ending.
+ *  @tcb: routine of task ending.
  *
  * Return:
  *  pointer to the task_stack + regs.
  ************************************************************************************/
-void *pl_port_task_stack_init(task_t task, void *task_stack, size_t stack_size,
-                              int argc, char *argv[], task_end_t task_end);
+void *pl_port_task_stack_init(task_entry_t task_entry, void *task_stack,
+                                     size_t stack_size, struct tcb *tcb);
 
 
 #endif /* __PLAINOS_PORT_H__ */

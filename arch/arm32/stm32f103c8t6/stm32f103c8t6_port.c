@@ -7,12 +7,12 @@ static int putc_init(void)
 {
 	NVIC_EnableIRQ(PendSV_IRQn);
 	USART1_Init(115200);
-	pl_early_port_putc(' ');
+	USART1_PrintChar(' ');
 	return 0;
 }
 early_initcall(putc_init);
 
-int pl_early_port_putc(char c)
+int pl_port_early_putc(char c)
 {
 	int ret = USART1_PrintChar(c);
 	return ret;
@@ -49,20 +49,20 @@ void SysTick_Handler(void)
 	pl_callee_systick_expiration();
 }
 
-void *pl_port_task_stack_init(task_t task, void *task_stack, size_t stack_size,
-                              int argc, char *argv[], task_end_t task_end)
+void *pl_port_task_stack_init(task_entry_t task, void *task_stack,
+                               size_t stack_size, struct tcb *tcb)
 {
 	u32_t *stack = (u32_t *)task_stack;
 
 	stack       +=  stack_size / sizeof(u32_t);
 	*(--stack)  = (u32_t)(1<<24);  /* XPSR */
 	*(--stack)  = (u32_t)task;     /* PC */
-	*(--stack)  = (u32_t)task_end; /* LR - task_return_entry */
+	*(--stack)  = (u32_t)0;        /* LR - task_return_entry */
 	*(--stack)  = (u32_t)0;        /* R12 */
 	*(--stack)  = (u32_t)0;        /* R3 */
 	*(--stack)  = (u32_t)0;        /* R2 */
-	*(--stack)  = (u32_t)argv;     /* R1 */
-	*(--stack)  = (u32_t)argc;     /* R0 */
+	*(--stack)  = (u32_t)0;        /* R1 */
+	*(--stack)  = (u32_t)tcb;      /* R0 */
 
 	*(--stack)  = (u32_t)0;        /* R4 */
 	*(--stack)  = (u32_t)0;        /* R5 */

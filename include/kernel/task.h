@@ -36,14 +36,16 @@ SOFTWARE.
  ************************************************************************************/
 enum task_state {
 	PL_TASK_STATE_READY = 0,
-	PL_TASK_STATE_DELAY = 1,
-	PL_TASK_STATE_PEND = 2,
-	PL_TASK_STATE_EXIT = 3,
-	PL_TASK_STATE_FATAL = 4,
+	PL_TASK_STATE_DELAY,
+	PL_TASK_STATE_WAIT,
+	PL_TASK_STATE_PEND,
+	PL_TASK_STATE_EXIT,
+	PL_TASK_STATE_FATAL,
 };
 
-typedef int (*task_t)(int argc, char *argv[]);
-typedef void (*task_end_t)(void);
+struct tcb;
+typedef void (*task_entry_t)(struct tcb *tcb);
+typedef int  (*task_t)(int argc, char *argv[]);
 
 /*************************************************************************************
  * Structure Name: tcb
@@ -53,6 +55,9 @@ typedef void (*task_end_t)(void);
  *   @context_sp: task stack pointer.
  *   @name: task name.
  *   @parent: pointer to parent task.
+ *   @task: task routine.
+ *   @argc: count of argv.
+ *   @argv: arguments vector.
  *   @node: list node of the same priority tcb.
  *   @past_state: past state of system.
  *   @curr_state: current state of system.
@@ -63,9 +68,13 @@ typedef void (*task_end_t)(void);
  ************************************************************************************/
 struct tcb {
 	void *context_sp;
-	task_t task;
 	const char *name;
 	struct tcb *parent;
+	task_t task;
+	int argc;
+	char **argv;
+	int wait_for_task_ret;
+	struct list_node wait_head;
 	struct list_node node;
 	u8_t past_state;
 	u8_t curr_state;
@@ -138,7 +147,7 @@ tid_t pl_task_create_with_stack(const char *name, task_t task, u16_t prio,
                                 int argc, char *argv[]);
 
 /*************************************************************************************
- * Function Name: pl_delay_ticks
+ * Function Name: pl_task_delay_ticks
  *
  * Description:
  *   Delay ticks function.
@@ -149,7 +158,22 @@ tid_t pl_task_create_with_stack(const char *name, task_t task, u16_t prio,
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-void pl_delay_ticks(u32_t ticks);
+void pl_task_delay_ticks(u32_t ticks);
+
+/*************************************************************************************
+ * Function Name: pl_task_wait_for_exit
+ *
+ * Description:
+ *   wait for task exit.
+ * 
+ * Parameters:
+ *  @tcb: task control block;
+ *  @ret: return value of waitting task.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_task_wait_for_exit(struct tcb *tcb, int *ret);
 
 #ifdef __cplusplus
 }

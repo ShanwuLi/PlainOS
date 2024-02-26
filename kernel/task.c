@@ -294,7 +294,6 @@ static void remove_tcb_from_delaylist(struct tcb *tcb)
 	list_del_node(&tcb->node);
 }
 
-
 /*************************************************************************************
  * Function Name: remove_tcb_from_rdylist
  * Description:  remove a tcb form list of ready task.
@@ -416,16 +415,64 @@ void pl_context_switch(void)
  * Return:
  *   void.
  ************************************************************************************/
-static void task_end(void)
+static void task_entry(struct tcb *tcb)
 {
+	struct tcb *pos;
+	struct tcb *tmp;
 	irqstate_t irqstate;
+	int exit_val = tcb->task(tcb->argc, tcb->argv);
 
+	/* task exit and clean up resources of current tcb */
 	irqstate = pl_port_irq_save();
-	remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
+	tcb->curr_state = PL_TASK_STATE_EXIT;
+	remove_tcb_from_rdylist(tcb);
+
+	/* recover waitting tasks */
+	list_for_each_entry_safe(pos, tmp, &tcb->wait_head, struct tcb, node) {
+		list_del_node(&pos->node);
+		insert_tcb_to_rdylist(pos);
+		pos->curr_state = PL_TASK_STATE_READY;
+		pos->past_state = PL_TASK_STATE_WAIT;
+		pos->wait_for_task_ret = exit_val;
+	}
+
 	pl_port_irq_restore(irqstate);
 	pl_context_switch();
 	/* will be never come here */
 	while(1);
+}
+
+/*************************************************************************************
+ * Function Name: task_init_tcb
+ * Description: initialize tcb.
+ *
+ * Parameters:
+ *   @name: name of the task (optional).
+ *   @task: task, prototype is "int task(int argc, char *argv[])"
+ *   @prio: priority of the task, if is 0, it will be its parent's priority (optional).
+ *   @tcb: tcb of the task (must provide).
+ *   @stack: stack of the task (must provide).
+ *   @argc: the count of argv (optional).
+ *   @argv: argv[] (optional).
+ *
+ * Return:
+ *   none.
+ ************************************************************************************/
+static void task_init_tcb(const char *name, task_t task, u16_t prio,
+               struct tcb *tcb, void *stack, int argc, char *argv[])
+{
+	tcb->name = name;
+	tcb->parent = g_task_core_blk.curr_tcb;
+	tcb->prio = (prio > 0) ? prio : tcb->parent->prio;
+	tcb->context_sp = stack;
+	tcb->task = task;
+	tcb->argc = argc;
+	tcb->argv = argv;
+	tcb->signal = 0;
+	tcb->curr_state = PL_TASK_STATE_READY;
+	tcb->past_state = PL_TASK_STATE_EXIT;
+	tcb->delay_ticks.hi32 = 0;
+	tcb->delay_ticks.lo32 = 0;
 }
 
 /*************************************************************************************
@@ -456,18 +503,9 @@ tid_t pl_task_create_with_stack(const char *name, task_t task, u16_t prio,
 		return (tid_t)ERR_TO_PTR(-EFAULT);
 	}
 
-	stack = pl_port_task_stack_init(task, stack, stack_size, argc, argv, task_end);
-
-	tcb->name = name;
-	tcb->parent = g_task_core_blk.curr_tcb;
-	tcb->signal = 0;
-	tcb->prio = (prio > 0) ? prio : tcb->parent->prio;
-	tcb->curr_state = PL_TASK_STATE_READY;
-	tcb->past_state = PL_TASK_STATE_EXIT;
-	tcb->context_sp = stack;
-	tcb->task = task;
-	tcb->delay_ticks.hi32 = 0;
-	tcb->delay_ticks.lo32 = 0;
+	stack = pl_port_task_stack_init(task_entry, stack, stack_size, tcb);
+	task_init_tcb(name, task, prio, tcb, stack, argc, argv);
+	list_init(&tcb->wait_head);
 
 	irqstate = pl_port_irq_save();
 	insert_tcb_to_rdylist(tcb);
@@ -478,7 +516,43 @@ tid_t pl_task_create_with_stack(const char *name, task_t task, u16_t prio,
 }
 
 /*************************************************************************************
- * Function Name: pl_delay_ticks
+ * Function Name: pl_task_wait_for_exit
+ *
+ * Description:
+ *   wait for task exit.
+ * 
+ * Parameters:
+ *  @tcb: task control block;
+ *  @ret: return value of waitting task.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_task_wait_for_exit(struct tcb *tcb, int *ret)
+{
+	irqstate_t irqstate;
+
+	if (tcb == NULL)
+		return -EFAULT;
+
+	if (tcb->curr_state == PL_TASK_STATE_EXIT)
+		return OK;
+
+	irqstate = pl_port_irq_save();
+	g_task_core_blk.curr_tcb->curr_state = PL_TASK_STATE_WAIT;
+	g_task_core_blk.curr_tcb->past_state = PL_TASK_STATE_READY;
+
+	remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
+	list_add_node_at_tail(&tcb->wait_head, &g_task_core_blk.curr_tcb->node);
+	pl_port_irq_restore(irqstate);
+	pl_context_switch();
+
+	*ret = g_task_core_blk.curr_tcb->wait_for_task_ret;
+	return OK;
+}
+
+/*************************************************************************************
+ * Function Name: pl_task_delay_ticks
  *
  * Description:
  *   Delay ticks function.
@@ -489,7 +563,7 @@ tid_t pl_task_create_with_stack(const char *name, task_t task, u16_t prio,
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-void pl_delay_ticks(u32_t ticks)
+void pl_task_delay_ticks(u32_t ticks)
 {
 	irqstate_t irqstate;
 	u32_t end_ticks_lo32;
@@ -510,6 +584,7 @@ void pl_delay_ticks(u32_t ticks)
 	g_task_core_blk.curr_tcb->delay_ticks.lo32 = ticks;
 	g_task_core_blk.curr_tcb->curr_state = PL_TASK_STATE_DELAY;
 	g_task_core_blk.curr_tcb->past_state = PL_TASK_STATE_READY;
+
 	remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
 	insert_tcb_to_delaylist(g_task_core_blk.curr_tcb);
 	pl_port_irq_restore(irqstate);
