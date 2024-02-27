@@ -31,7 +31,7 @@ static int idle_task2(int argc, char *argv[])
 		pl_early_syslog("+++++++++++++++++++++++++++++");
 		idle_task2_run_count++;
 		//pl_schedule_unlock();
-		pl_task_delay_ticks(10);
+		pl_task_delay_ticks(1000);
 	//}
 
 	return -200;
@@ -41,22 +41,22 @@ static int idle_task1(int argc, char *argv[])
 {
 	USED(argc);
 	USED(argv);
-	//int ret;
-	//struct tcb *tcb;
+	int ret;
+	struct tcb *tcb;
 
-	pl_task_create_with_stack("idle_task2", idle_task2, PL_CFG_PRIORITIES_MAX,
+	tcb = pl_task_create_with_stack("idle_task2", idle_task2, PL_CFG_PRIORITIES_MAX,
 	                           &g_pl_idle_task_tcb2, g_pl_idle_task_stack2,
 	                           sizeof(g_pl_idle_task_stack2), 0, NULL);
 
-	//pl_task_wait_for_exit(tcb, &ret);
-	//pl_early_syslog_info("%s: ret:%d\r\n", "idle_task1", ret);
-	//while(1) {
+	pl_task_wait_for_exit(tcb, &ret);
+	pl_early_syslog_info("%s: ret:%d\r\n", "idle_task1", ret);
+	while(1) {
 		//pl_schedule_lock();
 		pl_early_syslog("//////////////////////////////");
 		idle_task1_run_count++;
 		//pl_schedule_unlock();
-		pl_task_delay_ticks(50);
-	//}
+		//pl_task_delay_ticks(50);
+	}
 
 	return 900;
 }
@@ -65,6 +65,7 @@ static int idle_task(int argc, char *argv[])
 {
 	USED(argc);
 	USED(argv);
+	
 
 	pl_port_systick_init();
 	pl_early_syslog_info("=\r\n");
