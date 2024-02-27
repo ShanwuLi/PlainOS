@@ -26,12 +26,12 @@ int main(void)
 static int pl_early_port_putc_init(void)
 {
 	usart_init(&USART1);
-	pl_early_port_putc('A');
+	pl_port_putc('A');
 	return 0;
 }
 early_initcall(pl_early_port_putc_init);
 
-int pl_early_port_putc(const char c)
+int pl_port_putc(const char c)
 {
 	USART1.transmit_data(&USART1, c);
 	return 0;

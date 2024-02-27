@@ -100,6 +100,11 @@ static int pl_idle_task_init(void)
 
 void pl_callee_entry(void)
 {
+	int ret;
+	ret = pl_port_putc_init();
+	if (ret < 0)
+		while(1);
+
 	pl_do_early_initcalls();
 	pl_do_initcalls();
 	pl_idle_task_init();

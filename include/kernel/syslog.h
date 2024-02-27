@@ -42,17 +42,17 @@ void pl_put_format_log(int (*putc)(const char c), const char *front,
                        const char *rear, const char *fmt, ...);
 
 #define pl_early_syslog(fmt, ...)  \
-	pl_put_format_log(pl_port_early_putc, NULL, NULL, fmt, ## __VA_ARGS__)
+	pl_put_format_log(pl_port_putc, NULL, NULL, fmt, ## __VA_ARGS__)
 
 #define pl_early_syslog_info(fmt, ...)  \
-	pl_put_format_log(pl_port_early_putc, "[info]", NULL, fmt, ## __VA_ARGS__)
+	pl_put_format_log(pl_port_putc, "[info]", NULL, fmt, ## __VA_ARGS__)
 
 #define pl_early_syslog_warn(fmt, ...)  \
-	pl_put_format_log(pl_port_early_putc, PL_EARLY_SYSLOG_WARN_ANSI_COLOR"[warn]", \
+	pl_put_format_log(pl_port_putc, PL_EARLY_SYSLOG_WARN_ANSI_COLOR"[warn]", \
 	PL_EARLY_SYSLOG_ANSI_COLOR_RESET, fmt, ## __VA_ARGS__)
 
 #define pl_early_syslog_err(fmt, ...)  \
-	pl_put_format_log(pl_port_early_putc, PL_EARLY_SYSLOG_ERR_ANSI_COLOR"[erro]", \
+	pl_put_format_log(pl_port_putc, PL_EARLY_SYSLOG_ERR_ANSI_COLOR"[erro]", \
 	PL_EARLY_SYSLOG_ANSI_COLOR_RESET, fmt, ## __VA_ARGS__)
 
 #endif /* __KERNEL_SYSLOG_H__ */

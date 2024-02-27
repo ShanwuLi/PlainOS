@@ -29,7 +29,35 @@ SOFTWARE.
 #include <kernel/kernel.h>
 #include <kernel/task.h>
 
-/////////////////////////////////// system callee ////////////////////////////////////
+//////////////////////////////////// extern  ports ///////////////////////////////////
+/*************************************************************************************
+ * Function Name: pl_port_putc_init
+ *
+ * Description:
+ *   The function is used to initialize put char function.
+ *
+ * Parameters:
+ *   none.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 with failure.
+ ************************************************************************************/
+int pl_port_putc_init(void);
+
+/*************************************************************************************
+ * Function Name: pl_port_putc
+ *
+ * Description:
+ *   The function is used to put char.
+ *
+ * Parameters:
+ *   @c: the char we want to put.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 with failure.
+ ************************************************************************************/
+int pl_port_putc(const char c);
+
 /*************************************************************************************
  * Function Name: pl_callee_entry
  *
@@ -158,22 +186,6 @@ u32_t pl_port_rodata_read32(void *addr);
 uintptr_t pl_port_rodata_read(void *addr);
 
 
-///////////////////////////////////// early ports ////////////////////////////////////
-/*************************************************************************************
- * Function Name: pl_port_early_putc
- *
- * Description:
- *   The function is used to put char in early stage before the first task setup.
- *
- * Parameters:
- *   @c: the char we want to put.
- *
- * Return:
- *  Greater than or equal to 0 on success, less than 0 with failure.
- ************************************************************************************/
-int pl_port_early_putc(const char c);
-
-
 
 ////////////////////////////////////  task ports /////////////////////////////////////
 typedef uintptr_t irqstate_t;
@@ -259,13 +271,13 @@ void pl_port_switch_context(void);
  *  @task_entry: the task entry of initialization, prototype is task_entry_t.
  *  @task_stack: task stack.
  *  @stack_size: stack size.
- *  @tcb: routine of task ending.
+ *  @param: parameter passed.
  *
  * Return:
  *  pointer to the task_stack + regs.
  ************************************************************************************/
 void *pl_port_task_stack_init(task_entry_t task_entry, void *task_stack,
-                                     size_t stack_size, struct tcb *tcb);
+                                     size_t stack_size, void *param);
 
 
 #endif /* __PLAINOS_PORT_H__ */
