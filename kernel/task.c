@@ -66,7 +66,7 @@ struct task_core_blk {
 	struct task_list delay_list;
 	struct tcb *curr_tcb;
 	struct count systicks;
-	bool sched_enable;
+	uint_t sched_lock_ref;
 };
 
 /*************************************************************************************
@@ -333,30 +333,14 @@ static void remove_tcb_from_rdylist(struct tcb *tcb)
  ************************************************************************************/
 void *pl_callee_get_next_context(void)
 {
-	u16_t hiprio = get_hiprio();
-	struct tcb *next_rdy_tcb = g_task_core_blk.ready_list[hiprio].head;
+	u16_t hiprio;
+	struct tcb *next_rdy_tcb;
 
+	/* get highest priority task and switch to it */
+	hiprio = get_hiprio();
+	next_rdy_tcb = g_task_core_blk.ready_list[hiprio].head;
 	g_task_core_blk.curr_tcb = next_rdy_tcb;
 	return next_rdy_tcb->context_sp;
-}
-
-/*************************************************************************************
- * Function Name: pl_schedule_unlock
- * Description: enable scheduler.
- *
- * Parameters:
- *   none
- *
- * Return:
- *   none
- ************************************************************************************/
-void pl_schedule_unlock(void)
-{
-	irqstate_t irqstate;
-
-	irqstate = pl_port_irq_save();
-	g_task_core_blk.sched_enable = true;
-	pl_port_irq_restore(irqstate);
 }
 
 /*************************************************************************************
@@ -374,7 +358,26 @@ void pl_schedule_lock(void)
 	irqstate_t irqstate;
 
 	irqstate = pl_port_irq_save();
-	g_task_core_blk.sched_enable = false;
+	++g_task_core_blk.sched_lock_ref;
+	pl_port_irq_restore(irqstate);
+}
+
+/*************************************************************************************
+ * Function Name: pl_schedule_unlock
+ * Description: enable scheduler.
+ *
+ * Parameters:
+ *   none
+ *
+ * Return:
+ *   none
+ ************************************************************************************/
+void pl_schedule_unlock(void)
+{
+	irqstate_t irqstate;
+
+	irqstate = pl_port_irq_save();
+	--g_task_core_blk.sched_lock_ref;
 	pl_port_irq_restore(irqstate);
 }
 
@@ -425,7 +428,7 @@ static void task_entry(struct tcb *tcb)
 	USED(exit_val);
 	/* task exit and clean up resources of current tcb */
 	irqstate = pl_port_irq_save();
-	//tcb->curr_state = PL_TASK_STATE_EXIT;
+	tcb->curr_state = PL_TASK_STATE_EXIT;
 	remove_tcb_from_rdylist(tcb);
 
 	/* recover waitting tasks */
@@ -610,7 +613,6 @@ void pl_callee_systick_expiration(void)
 	u16_t prio;
 	struct tcb *pos;
 	struct tcb *tmp;
-	irqstate_t irqstate;
 	struct tcb *curr_tcb;
 
 	/* update systick */
@@ -619,7 +621,6 @@ void pl_callee_systick_expiration(void)
 		++g_task_core_blk.systicks.hi32;
 
 	/* round robin */
-	irqstate = pl_port_irq_save();
 	curr_tcb = g_task_core_blk.curr_tcb;
 	prio = curr_tcb->prio;
 	g_task_core_blk.ready_list[prio].head = list_next_entry(curr_tcb, struct tcb, node);
@@ -637,23 +638,22 @@ void pl_callee_systick_expiration(void)
 		pos->past_state = PL_TASK_STATE_DELAY;
 	}
 
-	pl_port_irq_restore(irqstate);
 	/* switch task */
-	if (g_task_core_blk.sched_enable)
+	if (g_task_core_blk.sched_lock_ref == 0)
 		pl_context_switch();
 }
 
 /*************************************************************************************
- * Function Name: pl_task_core_blk_init
- * Description: initialize task core block.
+ * Function Name: pl_task_core_init
+ * Description: initialize task component.
  *
  * Parameters:
  *   void
  *
  * Return:
- *   none
+ *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-static int pl_task_core_blk_init(void)
+static int pl_task_core_init(void)
 {
 	static struct tcb delay_dummy_tcb;
 
@@ -661,16 +661,16 @@ static int pl_task_core_blk_init(void)
 	list_init(&delay_dummy_tcb.node);
 	delay_dummy_tcb.delay_ticks.hi32 = UINT32_MAX;
 	delay_dummy_tcb.delay_ticks.lo32 = UINT32_MAX;
-	delay_dummy_tcb.name = "delay_dummy";
+	delay_dummy_tcb.name = "delay_head";
 
 	g_task_core_blk.curr_tcb = NULL;
 	g_task_core_blk.systicks.hi32 = 0;
 	g_task_core_blk.systicks.lo32 = 0;
-	g_task_core_blk.sched_enable = true;
+	g_task_core_blk.sched_lock_ref = 0;
 	g_task_core_blk.delay_list.num = 0;
 	g_task_core_blk.delay_list.head = &delay_dummy_tcb;
 
 	pl_early_syslog_info("task core init successfully\r\n");
 	return OK;
 }
-core_initcall(pl_task_core_blk_init);
+core_initcall(pl_task_core_init);

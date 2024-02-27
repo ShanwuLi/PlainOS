@@ -11,8 +11,6 @@
 
 .global PendSV_Handler
 .global pl_port_switch_context
-.global pl_port_first_task_switch
-.global GetReturnValue
 
 /*
 在Thumb模式下，push/pop是单独的指令，具有自己的助记符和操作码。e.g. b500 push {lr}。
@@ -94,8 +92,3 @@ switch_bottom:
 	cpsie i  /* enable interrupt */
 	bx    lr
 
-.section .text.GetReturnValue
-.weak GetReturnValue
-.type GetReturnValue, %function
-GetReturnValue:
-	bx  lr

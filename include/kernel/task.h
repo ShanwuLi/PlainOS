@@ -178,4 +178,5 @@ int pl_task_wait_for_exit(struct tcb *tcb, int *ret);
 #ifdef __cplusplus
 }
 #endif
+
 #endif /* __KERNEL_TASK_H__ */

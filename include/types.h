@@ -62,8 +62,24 @@ typedef signed long int                  int_t;
 typedef long int                         l_t;
 typedef signed long long                 ll_t;
 
+#ifndef UINTPTR_T_MAX
 #define UINTPTR_T_MAX                    (~((uintptr_t)0))
-#define UINTPTR_T_BITS                   (sizeof(uintptr_t) << 3)
+#endif
 
+#ifndef UINTPTR_T_BITS
+#define UINTPTR_T_BITS                   (sizeof(uintptr_t) << 3)
+#endif
+
+#ifndef UINT16_MAX
+#define UINT16_MAX                       ((u16_t)0xffff)
+#endif
+
+#ifndef UINT32_MAX
+#define UINT32_MAX                       ((u32_t)0xffffffff)
+#endif
+
+#ifndef UINT64_MAX
+#define UINT64_MAX                       ((u64_t)0xffffffffffffffff)
+#endif
 
 #endif /* __TYPES_H__ */
