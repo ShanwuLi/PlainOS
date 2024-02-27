@@ -3,7 +3,7 @@
 #### 介绍
 ![logo](logo.png)
 
-This project is Plain OS, aimed at developing a universal operating system with a plain and minimalist philosophy.
+This project is ![logo](logo.svg), aimed at developing a universal operating system with a plain and minimalist philosophy.
 
 #### 软件架构    
 
