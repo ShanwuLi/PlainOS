@@ -610,7 +610,8 @@ void pl_callee_systick_expiration(void)
 	u16_t prio;
 	struct tcb *pos;
 	struct tcb *tmp;
-	struct tcb *curr_tcb = g_task_core_blk.curr_tcb;
+	irqstate_t irqstate;
+	struct tcb *curr_tcb;
 
 	/* update systick */
 	++g_task_core_blk.systicks.lo32;
@@ -618,6 +619,8 @@ void pl_callee_systick_expiration(void)
 		++g_task_core_blk.systicks.hi32;
 
 	/* round robin */
+	irqstate = pl_port_irq_save();
+	curr_tcb = g_task_core_blk.curr_tcb;
 	prio = curr_tcb->prio;
 	g_task_core_blk.ready_list[prio].head = list_next_entry(curr_tcb, struct tcb, node);
 
@@ -634,6 +637,7 @@ void pl_callee_systick_expiration(void)
 		pos->past_state = PL_TASK_STATE_DELAY;
 	}
 
+	pl_port_irq_restore(irqstate);
 	/* switch task */
 	if (g_task_core_blk.sched_enable)
 		pl_context_switch();

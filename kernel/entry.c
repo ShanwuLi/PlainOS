@@ -66,7 +66,6 @@ static int idle_task(int argc, char *argv[])
 	USED(argc);
 	USED(argv);
 	
-
 	pl_port_systick_init();
 	pl_early_syslog_info("=\r\n");
 	pl_task_create_with_stack("idle_task1", idle_task1, PL_CFG_PRIORITIES_MAX,
