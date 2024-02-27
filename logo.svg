@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="21.366049mm"
+   height="5.1245499mm"
+   viewBox="0 0 21.366049 5.1245499"
+   version="1.1"
+   id="svg1"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="true">
+    <inkscape:grid
+       id="grid1"
+       units="px"
+       originx="-190.34549"
+       originy="-275.37046"
+       spacingx="0.26458333"
+       spacingy="0.26458334"
+       empcolor="#0099e5"
+       empopacity="0.30196078"
+       color="#0099e5"
+       opacity="0.14901961"
+       empspacing="5"
+       dotted="false"
+       gridanglex="30"
+       gridanglez="30"
+       visible="true" />
+  </sodipodi:namedview>
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="图层 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-50.362245,-72.858435)">
+    <path
+       style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 51.525884,72.990931 12.649481,0.02442 -1.074472,4.835131 -12.576223,-0.02442 z"
+       id="path1"
+       sodipodi:nodetypes="ccccc"
+       inkscape:export-filename="path1.svg"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <text
+       xml:space="preserve"
+       style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444px;line-height:1.25;font-family:Corbel;-inkscape-font-specification:'Corbel, Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:#ffffff;stroke-width:0.265;stroke-dasharray:none;stroke-opacity:1"
+       x="51.387909"
+       y="77.358139"
+       id="text1"><tspan
+         sodipodi:role="line"
+         id="tspan1"
+         style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444px;font-family:Corbel;-inkscape-font-specification:'Corbel, Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:#ffffff;stroke-width:0.265;stroke-dasharray:none;stroke-opacity:1"
+         x="51.387909"
+         y="77.358139"><tspan
+           style="fill:#f9f9f9;fill-opacity:1;stroke:#ffffff;stroke-width:0.265;stroke-dasharray:none;stroke-opacity:1"
+           id="tspan2">Plain </tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.31973px;line-height:1.25;font-family:Corbel;-inkscape-font-specification:'Corbel, Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:#000000;stroke-width:0.296704;stroke-dasharray:none;stroke-opacity:1"
+       x="63.428707"
+       y="78.092598"
+       id="text1-2"
+       transform="scale(1.0059641,0.99407127)"><tspan
+         sodipodi:role="line"
+         id="tspan1-0"
+         style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.31973px;font-family:Corbel;-inkscape-font-specification:'Corbel, Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:#000000;stroke-width:0.296704;stroke-dasharray:none;stroke-opacity:1"
+         x="63.428707"
+         y="78.092598">OS</tspan></text>
+  </g>
+</svg>
