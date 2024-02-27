@@ -1,8 +1,7 @@
 # PlainOS
 
 #### 介绍
-![logo](logo.svg)
-
+![logo](logo.png)
 
 This project is Plain OS, aimed at developing a universal operating system with a plain and minimalist philosophy.
 
