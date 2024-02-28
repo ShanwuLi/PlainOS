@@ -161,7 +161,7 @@ tid_t pl_task_create_with_stack(const char *name, task_t task, u16_t prio,
 void pl_task_delay_ticks(u32_t ticks);
 
 /*************************************************************************************
- * Function Name: pl_task_wait_for_exit
+ * Function Name: pl_task_join
  *
  * Description:
  *   wait for task exit.
@@ -173,7 +173,7 @@ void pl_task_delay_ticks(u32_t ticks);
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_task_wait_for_exit(struct tcb *tcb, int *ret);
+int pl_task_join(struct tcb *tcb, int *ret);
 
 #ifdef __cplusplus
 }

@@ -94,10 +94,9 @@ static u8_t __const g_hiprio_idx_tbl[256] = {
 };
 
 /*************************************************************************************
- * Global Variable Name: g_hiprio_bitmap, g_hiprio_bitmap_lv1, g_hiprio_bitmap_lv2,
- *                       g_hiprio_bitmap_lv3
+ * Global Variable Name: g_hiprio_bitmap
  *
- * Description: Obtain the highest priority through the priority index table.
+ * Description: Obtain the highest priority through the priority bit map.
  *              Supports up to 4096 priority levels.
  ************************************************************************************/
 static u32_t g_hiprio_bitmap[(PL_CFG_PRIORITIES_MAX + 31) / 32];
@@ -520,7 +519,7 @@ tid_t pl_task_create_with_stack(const char *name, task_t task, u16_t prio,
 }
 
 /*************************************************************************************
- * Function Name: pl_task_wait_for_exit
+ * Function Name: pl_task_join
  *
  * Description:
  *   wait for task exit.
@@ -532,7 +531,7 @@ tid_t pl_task_create_with_stack(const char *name, task_t task, u16_t prio,
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_task_wait_for_exit(struct tcb *tcb, int *ret)
+int pl_task_join(struct tcb *tcb, int *ret)
 {
 	irqstate_t irqstate;
 
@@ -551,7 +550,9 @@ int pl_task_wait_for_exit(struct tcb *tcb, int *ret)
 	pl_port_irq_restore(irqstate);
 	pl_context_switch();
 
-	*ret = g_task_core_blk.curr_tcb->wait_for_task_ret;
+	if (ret != NULL)
+		*ret = g_task_core_blk.curr_tcb->wait_for_task_ret;
+
 	return OK;
 }
 
