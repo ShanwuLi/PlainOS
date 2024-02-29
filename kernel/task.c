@@ -401,11 +401,10 @@ void pl_context_switch(void)
 	hiprio = get_hiprio();
 	curr_tcb = g_task_core_blk.curr_tcb;
 	next_tcb = g_task_core_blk.ready_list[hiprio].head;
+	pl_port_irq_restore(irqstate);
 
 	if (curr_tcb != next_tcb)
 		pl_port_switch_context();
-
-	pl_port_irq_restore(irqstate);
 }
 
 /*************************************************************************************
@@ -593,8 +592,8 @@ void pl_task_delay_ticks(u32_t ticks)
 
 	remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
 	insert_tcb_to_delaylist(g_task_core_blk.curr_tcb);
-	pl_context_switch();
 	pl_port_irq_restore(irqstate);
+	pl_context_switch();
 }
 
 /*************************************************************************************
@@ -622,8 +621,12 @@ void pl_callee_systick_expiration(void)
 	if (g_task_core_blk.systicks.lo32 == 0)
 		++g_task_core_blk.systicks.hi32;
 
-	/* round robin */
+	/* do not to switch task when state of curr_tcb is not ready. */
 	curr_tcb = g_task_core_blk.curr_tcb;
+	if (curr_tcb == NULL || curr_tcb->curr_state != PL_TASK_STATE_READY)
+		return;
+
+	/* round robin */
 	prio = curr_tcb->prio;
 	g_task_core_blk.ready_list[prio].head = list_next_entry(curr_tcb, struct tcb, node);
 
