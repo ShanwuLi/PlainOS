@@ -615,20 +615,12 @@ void pl_callee_systick_expiration(void)
 	struct tcb *pos;
 	struct tcb *tmp;
 	struct tcb *curr_tcb;
+	struct task_list *rdy_list;
 
 	/* update systick */
 	++g_task_core_blk.systicks.lo32;
 	if (g_task_core_blk.systicks.lo32 == 0)
 		++g_task_core_blk.systicks.hi32;
-
-	/* do not to switch task when state of curr_tcb is not ready. */
-	curr_tcb = g_task_core_blk.curr_tcb;
-	if (curr_tcb == NULL || curr_tcb->curr_state != PL_TASK_STATE_READY)
-		return;
-
-	/* round robin */
-	prio = curr_tcb->prio;
-	g_task_core_blk.ready_list[prio].head = list_next_entry(curr_tcb, struct tcb, node);
 
 	/* update ready list */
 	list_for_each_entry_safe(pos, tmp, &g_task_core_blk.delay_list.head->node,
@@ -643,9 +635,18 @@ void pl_callee_systick_expiration(void)
 		pos->past_state = PL_TASK_STATE_DELAY;
 	}
 
-	/* switch task */
-	if (g_task_core_blk.sched_lock_ref == 0)
+	/* do not to switch task when state of curr_tcb is not ready. */
+	curr_tcb = g_task_core_blk.curr_tcb;
+	if (curr_tcb != NULL && g_task_core_blk.sched_lock_ref == 0 &&
+	    curr_tcb->curr_state == PL_TASK_STATE_READY) {
+		/* round robin */
+		prio = curr_tcb->prio;
+		rdy_list = &g_task_core_blk.ready_list[prio];
+		rdy_list->head = list_next_entry(curr_tcb, struct tcb, node);
+
+		/* switch task */
 		pl_context_switch();
+	}
 }
 
 /*************************************************************************************
