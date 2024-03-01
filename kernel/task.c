@@ -57,7 +57,7 @@ struct task_list {
  *   @delay_list: list head of delay tasks.
  *   @curr_tcb: current context tcb.
  *   @systicks: systicks.
- *   @sched_enable: schedule state, true: enable schedule, false: disable schedule.
+ *   @sched_lock_ref: schedule reference counter.
  *
  ************************************************************************************/
 struct task_core_blk {
@@ -396,7 +396,7 @@ void pl_context_switch(void)
 	irqstate_t irqstate;
 	struct tcb *curr_tcb;
 	struct tcb *next_tcb;
-	
+
 	irqstate = pl_port_irq_save();
 	hiprio = get_hiprio();
 	curr_tcb = g_task_core_blk.curr_tcb;
