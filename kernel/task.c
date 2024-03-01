@@ -547,8 +547,8 @@ int pl_task_join(struct tcb *tcb, int *ret)
 
 	remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
 	list_add_node_at_tail(&tcb->wait_head, &g_task_core_blk.curr_tcb->node);
-	pl_context_switch();
 	pl_port_irq_restore(irqstate);
+	pl_context_switch();
 
 	if (ret != NULL)
 		*ret = g_task_core_blk.curr_tcb->wait_for_task_ret;
