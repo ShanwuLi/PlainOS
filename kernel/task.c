@@ -430,7 +430,7 @@ static void task_entry(struct tcb *tcb)
 	tcb->curr_state = PL_TASK_STATE_EXIT;
 	remove_tcb_from_rdylist(tcb);
 
-	/* recover waitting tasks */
+	/* recover waiting tasks */
 	list_for_each_entry_safe(pos, tmp, &tcb->wait_head, struct tcb, node) {
 		list_del_node(&pos->node);
 		insert_tcb_to_rdylist(pos);
