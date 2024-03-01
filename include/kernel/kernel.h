@@ -79,20 +79,20 @@ s32_t pl_count_cmp(struct count *c1, struct count *c2);
 #ifdef PL_CFG_ASSERT
 #define pl_assert(assertion)    \
 	    do { \
-	    irqstate_t irqstate; \
+	        irqstate_t irqstate; \
 	        if (assertion) { \
-	        irqstate = pl_port_irq_save(); \
-	        pl_early_syslog(PL_EARLY_SYSLOG_ERR_ANSI_COLOR\
-	                       "[ASSERT]:func:%s, line:%d\r\n" \
-	                       PL_EARLY_SYSLOG_ANSI_COLOR_RESET, \
-	                         __func__, __LINE__); \
-	        pl_schedule_lock(); \
-	        while(1); \
-	        pl_port_irq_restore(irqstate); \
+	            irqstate = pl_port_irq_save(); \
+	            pl_early_syslog(PL_EARLY_SYSLOG_ERR_ANSI_COLOR\
+	                           "[ASSERT]:func:%s, line:%d\r\n" \
+	                           PL_EARLY_SYSLOG_ANSI_COLOR_RESET, \
+	                            __func__, __LINE__); \
+	            pl_schedule_lock(); \
+	            while(1); \
+	            pl_port_irq_restore(irqstate); \
 	        } \
 	    } while (false)
 #else
-#define pl_assert(assertion)   (void)assertion
+#define pl_assert(assertion)   ((void)assertion)
 #endif /* PL_CFG_ASSERT */
 
 
