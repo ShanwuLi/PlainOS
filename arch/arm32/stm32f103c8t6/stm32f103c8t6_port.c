@@ -41,7 +41,6 @@ int pl_port_systick_init(void)
 	return 0;
 }
 
-
 void SysTick_Handler(void);
 void SysTick_Handler(void)
 {
