@@ -267,7 +267,7 @@ static void insert_tcb_to_delaylist(struct tcb *tcb)
 	struct tcb *pos = delaylist->head;
 
 	list_for_each_entry(pos, &delaylist->head->node, struct tcb, node) {
-		if (count_cmp(&tcb->delay_ticks, &pos->delay_ticks) < 0)
+		if (pl_count_cmp(&tcb->delay_ticks, &pos->delay_ticks) < 0)
 			break;
 	}
 
@@ -626,7 +626,7 @@ void pl_callee_systick_expiration(void)
 	list_for_each_entry_safe(pos, tmp, &g_task_core_blk.delay_list.head->node,
 		struct tcb, node) {
 
-		if (count_cmp(&pos->delay_ticks, &g_task_core_blk.systicks) > 0)
+		if (pl_count_cmp(&pos->delay_ticks, &g_task_core_blk.systicks) > 0)
 			break;
 
 		remove_tcb_from_delaylist(pos);

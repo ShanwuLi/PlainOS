@@ -22,9 +22,13 @@ SOFTWARE.
 */
 
 #include <kernel/kernel.h>
+#include <kernel/syslog.h>
+#include <kernel/task.h>
+#include <pl_port.h>
+#include <types.h>
 
 /*************************************************************************************
- * Function Name: count_cmp
+ * Function Name: pl_count_cmp
  * Description: compare count1 with count2.
  *
  * Parameters:
@@ -36,7 +40,7 @@ SOFTWARE.
  *   if c1  < c2: return < 0;
  *   if c1 == c2: return 0.
  ************************************************************************************/
-s32_t count_cmp(struct count *c1, struct count *c2)
+s32_t pl_count_cmp(struct count *c1, struct count *c2)
 {
 	s32_t hi_diff = c1->hi32 - c2->hi32;
 	s32_t lo_diff = c1->lo32 - c2->lo32;

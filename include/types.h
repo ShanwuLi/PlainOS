@@ -62,6 +62,14 @@ typedef signed long int                  int_t;
 typedef long int                         l_t;
 typedef signed long long                 ll_t;
 
+#ifndef true
+#define true                             1
+#endif
+
+#ifndef false
+#define false                            0
+#endif
+
 #ifndef UINTPTR_T_MAX
 #define UINTPTR_T_MAX                    (~((uintptr_t)0))
 #endif

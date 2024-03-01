@@ -7,6 +7,8 @@
 #include "internal_initcall.h"
 #include <kernel/task.h>
 #include <pl_port.h>
+#include <kernel/kernel.h>
+#include <types.h>
 
 
 static u32_t g_pl_idle_task_stack[128];
@@ -23,16 +25,19 @@ volatile u32_t idle_task1_run_count = 0;
 
 static int idle_task2(int argc, char *argv[])
 {
-	USED(argc);
+	argc = 0;
 	USED(argv);
 
-	while(1) {
+	while(argc < 100) {
 		//pl_schedule_lock();
 		pl_early_syslog("+");
 		idle_task2_run_count++;
 		//pl_schedule_unlock();
 		pl_task_delay_ticks(1000);
+		argc++;
 	}
+
+	pl_assert(true);
 
 	return -200;
 }
