@@ -408,8 +408,8 @@ void pl_context_switch(void)
 }
 
 /*************************************************************************************
- * Function Name: task_end
- * Description: routine of task ending.
+ * Function Name: task_entry
+ * Description: routine of task entry.
  *
  * Parameters:
  *   none.
