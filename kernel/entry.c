@@ -37,7 +37,7 @@ static int idle_task2(int argc, char *argv[])
 		argc++;
 	}
 
-	pl_assert(true);
+	//pl_assert(true);
 
 	return -200;
 }
