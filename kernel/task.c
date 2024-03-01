@@ -408,8 +408,8 @@ void pl_context_switch(void)
 }
 
 /*************************************************************************************
- * Function Name: task_end
- * Description: routine of task ending.
+ * Function Name: task_entry
+ * Description: routine of task entry.
  *
  * Parameters:
  *   none.
@@ -424,7 +424,6 @@ static void task_entry(struct tcb *tcb)
 	irqstate_t irqstate;
 	int exit_val = tcb->task(tcb->argc, tcb->argv);
 
-	USED(exit_val);
 	/* task exit and clean up resources of current tcb */
 	irqstate = pl_port_irq_save();
 	tcb->curr_state = PL_TASK_STATE_EXIT;
