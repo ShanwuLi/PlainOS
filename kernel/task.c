@@ -21,15 +21,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include <errno.h>
 #include <pl_cfg.h>
+#include <errno.h>
+#include <pl_port.h>
 #include <kernel/task.h>
 #include <kernel/list.h>
 #include <kernel/kernel.h>
-#include <pl_port.h>
-#include <kernel/initcall.h>
 #include <kernel/syslog.h>
-#include <kernel/initcall.h>
+#include <kernel/mem_pool.h>
+#include "internal_task.h"
 
 /*************************************************************************************
  * Description: Definitions of highest priority of task.
@@ -105,7 +105,22 @@ static u32_t g_hiprio_bitmap[(PL_CFG_PRIORITIES_MAX + 31) / 32];
  * Global Variable Name: g_task_core_blk
  * Description:  task core block.
  ************************************************************************************/
-struct task_core_blk g_task_core_blk;
+static struct task_core_blk g_task_core_blk;
+
+/*************************************************************************************
+ * Function Name: pl_task_get_curr_tcb
+ * Description: Get current tcb.
+ *
+ * Parameters:
+ *   none.
+ *
+ * Return:
+ *   @struct tcb: current tcb.
+ ************************************************************************************/
+struct tcb *pl_task_get_curr_tcb(void)
+{
+	return g_task_core_blk.curr_tcb;
+}
 
 /*************************************************************************************
  * Function Name: get_last_bit
@@ -128,6 +143,7 @@ static u8_t get_last_bit(u32_t bitmap)
 			break;
 		p++;
 	}
+
 	last_bit = pl_port_rodata_read8(g_hiprio_idx_tbl + (*p));
 	return last_bit;
 }
@@ -228,7 +244,7 @@ static void rdytask_list_init(void)
 }
 
 /*************************************************************************************
- * Function Name: insert_tcb_to_rdylist
+ * Function Name: pl_task_insert_tcb_to_rdylist
  * Description: Insert a tcb to list of ready task.
  *
  * Param:
@@ -236,7 +252,7 @@ static void rdytask_list_init(void)
  * Return:
  *   void
  ************************************************************************************/
-static void insert_tcb_to_rdylist(struct tcb *tcb)
+void pl_task_insert_tcb_to_rdylist(struct tcb *tcb)
 {
 	u16_t prio = tcb->prio;
 	struct task_list *rdylist = &g_task_core_blk.ready_list[prio];
@@ -253,7 +269,7 @@ static void insert_tcb_to_rdylist(struct tcb *tcb)
 }
 
 /*************************************************************************************
- * Function Name: insert_tcb_to_delaylist
+ * Function Name: pl_task_insert_tcb_to_delaylist
  * Description: Insert a tcb to list of ready task.
  *
  * Param:
@@ -261,7 +277,7 @@ static void insert_tcb_to_rdylist(struct tcb *tcb)
  * Return:
  *   void
  ************************************************************************************/
-static void insert_tcb_to_delaylist(struct tcb *tcb)
+void pl_task_insert_tcb_to_delaylist(struct tcb *tcb)
 {
 	struct task_list *delaylist = &g_task_core_blk.delay_list;
 	struct tcb *pos = delaylist->head;
@@ -277,7 +293,7 @@ static void insert_tcb_to_delaylist(struct tcb *tcb)
 }
 
 /*************************************************************************************
- * Function Name: remove_tcb_from_delaylist
+ * Function Name: pl_task_remove_tcb_from_delaylist
  * Description: Insert a tcb to list of ready task.
  *
  * Param:
@@ -285,7 +301,7 @@ static void insert_tcb_to_delaylist(struct tcb *tcb)
  * Return:
  *   void
  ************************************************************************************/
-static void remove_tcb_from_delaylist(struct tcb *tcb)
+void pl_task_remove_tcb_from_delaylist(struct tcb *tcb)
 {
 	struct task_list *delaylist = &g_task_core_blk.delay_list;
 
@@ -294,7 +310,7 @@ static void remove_tcb_from_delaylist(struct tcb *tcb)
 }
 
 /*************************************************************************************
- * Function Name: remove_tcb_from_rdylist
+ * Function Name: pl_task_remove_tcb_from_rdylist
  * Description:  remove a tcb form list of ready task.
  *
  * Param:
@@ -302,7 +318,7 @@ static void remove_tcb_from_delaylist(struct tcb *tcb)
  * Return:
  *   void
  ************************************************************************************/
-static void remove_tcb_from_rdylist(struct tcb *tcb)
+void pl_task_remove_tcb_from_rdylist(struct tcb *tcb)
 {
 	u16_t prio = tcb->prio;
 	struct task_list *rdylist = &g_task_core_blk.ready_list[prio];
@@ -343,7 +359,7 @@ void *pl_callee_get_next_context(void)
 }
 
 /*************************************************************************************
- * Function Name: pl_schedule_lock
+ * Function Name: pl_task_schedule_lock
  * Description: disable scheduler.
  *
  * Parameters:
@@ -352,7 +368,7 @@ void *pl_callee_get_next_context(void)
  * Return:
  *   none
  ************************************************************************************/
-void pl_schedule_lock(void)
+void pl_task_schedule_lock(void)
 {
 	irqstate_t irqstate;
 
@@ -362,7 +378,7 @@ void pl_schedule_lock(void)
 }
 
 /*************************************************************************************
- * Function Name: pl_schedule_unlock
+ * Function Name: pl_task_schedule_unlock
  * Description: enable scheduler.
  *
  * Parameters:
@@ -371,7 +387,7 @@ void pl_schedule_lock(void)
  * Return:
  *   none
  ************************************************************************************/
-void pl_schedule_unlock(void)
+void pl_task_schedule_unlock(void)
 {
 	irqstate_t irqstate;
 
@@ -427,14 +443,14 @@ static void task_entry(struct tcb *tcb)
 	/* task exit and clean up resources of current tcb */
 	irqstate = pl_port_irq_save();
 	tcb->curr_state = PL_TASK_STATE_EXIT;
-	remove_tcb_from_rdylist(tcb);
+	pl_task_remove_tcb_from_rdylist(tcb);
 
 	/* recover waiting tasks */
 	list_for_each_entry_safe(pos, tmp, &tcb->wait_head, struct tcb, node) {
 		list_del_node(&pos->node);
-		insert_tcb_to_rdylist(pos);
+		pl_task_insert_tcb_to_rdylist(pos);
 		pos->curr_state = PL_TASK_STATE_READY;
-		pos->past_state = PL_TASK_STATE_WAIT;
+		pos->past_state = PL_TASK_STATE_WAITING;
 		pos->wait_for_task_ret = exit_val;
 	}
 
@@ -460,7 +476,7 @@ static void task_entry(struct tcb *tcb)
  * Return:
  *   none.
  ************************************************************************************/
-static void task_init_tcb(const char *name, task_t task, u16_t prio,
+static void task_init_tcb(const char *name, main_t task, u16_t prio,
                struct tcb *tcb, void *stack, int argc, char *argv[])
 {
 	tcb->name = name;
@@ -485,7 +501,6 @@ static void task_init_tcb(const char *name, task_t task, u16_t prio,
  *   @name: name of the task (optional).
  *   @task: task, prototype is "int task(int argc, char *argv[])"
  *   @prio: priority of the task, if is 0, it will be its parent's priority (optional).
- *   @tcb: tcb of the task (must provide).
  *   @stack: stack of the task (must provide).
  *   @stack_size: size of the stack (must specify).
  *   @argc: the count of argv (optional).
@@ -494,15 +509,22 @@ static void task_init_tcb(const char *name, task_t task, u16_t prio,
  * Return:
  *   task handle.
  ************************************************************************************/
-tid_t pl_task_create_with_stack(const char *name, task_t task, u16_t prio,
-                                struct tcb *tcb, void *stack, size_t stack_size,
+tid_t pl_task_create_with_stack(const char *name, main_t task, u16_t prio,
+                                void *stack, size_t stack_size,
                                 int argc, char *argv[])
 {
+	struct tcb *tcb;
 	irqstate_t irqstate;
 
-	if (task == NULL || tcb == NULL || stack == NULL) {
-		pl_early_syslog_err("task, tcb or stack is NULL\n");
+	if (task == NULL || stack == NULL) {
+		pl_early_syslog_err("task or stack is NULL\n");
 		return (tid_t)ERR_TO_PTR(-EFAULT);
+	}
+
+	tcb = (struct tcb *)pl_mem_pool_alloc(g_pl_default_mempool, sizeof(struct tcb));
+	if (tcb == NULL) {
+		pl_early_syslog_err("no mem to alloc\r\n");
+		return (tid_t)ERR_TO_PTR(-ENOMEM);
 	}
 
 	stack = pl_port_task_stack_init(task_entry, stack, stack_size, tcb);
@@ -510,7 +532,7 @@ tid_t pl_task_create_with_stack(const char *name, task_t task, u16_t prio,
 	list_init(&tcb->wait_head);
 
 	irqstate = pl_port_irq_save();
-	insert_tcb_to_rdylist(tcb);
+	pl_task_insert_tcb_to_rdylist(tcb);
 	pl_port_irq_restore(irqstate);
 	pl_context_switch();
 
@@ -524,15 +546,16 @@ tid_t pl_task_create_with_stack(const char *name, task_t task, u16_t prio,
  *   wait for task exit.
  * 
  * Parameters:
- *  @tcb: task control block;
+ *  @tid: task id;
  *  @ret: return value of waitting task.
  *
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_task_join(struct tcb *tcb, int *ret)
+int pl_task_join(tid_t tid, int *ret)
 {
 	irqstate_t irqstate;
+	struct tcb *tcb = (struct tcb *)tid;
 
 	if (tcb == NULL)
 		return -EFAULT;
@@ -541,10 +564,10 @@ int pl_task_join(struct tcb *tcb, int *ret)
 		return OK;
 
 	irqstate = pl_port_irq_save();
-	g_task_core_blk.curr_tcb->curr_state = PL_TASK_STATE_WAIT;
+	g_task_core_blk.curr_tcb->curr_state = PL_TASK_STATE_WAITING;
 	g_task_core_blk.curr_tcb->past_state = PL_TASK_STATE_READY;
 
-	remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
+	pl_task_remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
 	list_add_node_at_tail(&tcb->wait_head, &g_task_core_blk.curr_tcb->node);
 	pl_port_irq_restore(irqstate);
 	pl_context_switch();
@@ -589,8 +612,8 @@ void pl_task_delay_ticks(u32_t ticks)
 	g_task_core_blk.curr_tcb->curr_state = PL_TASK_STATE_DELAY;
 	g_task_core_blk.curr_tcb->past_state = PL_TASK_STATE_READY;
 
-	remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
-	insert_tcb_to_delaylist(g_task_core_blk.curr_tcb);
+	pl_task_remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
+	pl_task_insert_tcb_to_delaylist(g_task_core_blk.curr_tcb);
 	pl_port_irq_restore(irqstate);
 	pl_context_switch();
 }
@@ -628,8 +651,8 @@ void pl_callee_systick_expiration(void)
 		if (pl_count_cmp(&pos->delay_ticks, &g_task_core_blk.systicks) > 0)
 			break;
 
-		remove_tcb_from_delaylist(pos);
-		insert_tcb_to_rdylist(pos);
+		pl_task_remove_tcb_from_delaylist(pos);
+		pl_task_insert_tcb_to_rdylist(pos);
 		pos->curr_state = PL_TASK_STATE_READY;
 		pos->past_state = PL_TASK_STATE_DELAY;
 	}
@@ -658,7 +681,7 @@ void pl_callee_systick_expiration(void)
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-static int pl_task_core_init(void)
+int pl_task_core_init(void)
 {
 	static struct tcb delay_dummy_tcb;
 
@@ -678,4 +701,3 @@ static int pl_task_core_init(void)
 	pl_early_syslog_info("task core init successfully\r\n");
 	return OK;
 }
-core_initcall(pl_task_core_init);

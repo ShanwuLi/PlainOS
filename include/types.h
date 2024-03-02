@@ -29,11 +29,11 @@ SOFTWARE.
 #include <stddef.h>
 
 #ifndef NULL
-#define NULL                            ((void*)0)
+#define NULL                            ((void *)0)
 #endif
 
 #ifndef nullptr
-#define nullptr                         ((void*)0)
+#define nullptr                         ((void *)0)
 #endif
 
 /*************************************************************************************

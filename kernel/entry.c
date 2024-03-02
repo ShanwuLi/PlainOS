@@ -9,16 +9,21 @@
 #include <pl_port.h>
 #include <kernel/kernel.h>
 #include <types.h>
+#include <kernel/mem_pool.h>
+#include "internal_task.h"
 
+
+static u8_t pl_default_mempool_data[PL_CFG_MEMPOOL_SIZE];
+pl_mem_pool_t g_pl_default_mempool;
 
 static u32_t g_pl_idle_task_stack[128];
-static struct tcb g_pl_idle_task_tcb;
+
 
 static u32_t g_pl_idle_task_stack1[128];
-static struct tcb g_pl_idle_task_tcb1;
+
 
 static u32_t g_pl_idle_task_stack2[128];
-static struct tcb g_pl_idle_task_tcb2;
+
 
 volatile u32_t idle_task2_run_count = 0;
 volatile u32_t idle_task1_run_count = 0;
@@ -50,7 +55,7 @@ static int idle_task1(int argc, char *argv[])
 	//struct tcb *tcb;
 
 	pl_task_create_with_stack("idle_task2", idle_task2, PL_CFG_PRIORITIES_MAX,
-	                           &g_pl_idle_task_tcb2, g_pl_idle_task_stack2,
+	                           g_pl_idle_task_stack2,
 	                           sizeof(g_pl_idle_task_stack2), 0, NULL);
 
 	//pl_task_join(tcb, &ret);
@@ -74,7 +79,7 @@ static int idle_task(int argc, char *argv[])
 	pl_port_systick_init();
 	pl_early_syslog("=\r\n");
 	pl_task_create_with_stack("idle_task1", idle_task1, PL_CFG_PRIORITIES_MAX,
-	                           &g_pl_idle_task_tcb1, g_pl_idle_task_stack1,
+	                           g_pl_idle_task_stack1,
 	                           sizeof(g_pl_idle_task_stack1), 0, NULL);
 
 	while(1) {
@@ -95,7 +100,7 @@ static int pl_idle_task_init(void)
 {
 	pl_early_syslog_info("g_pl_idle_task_stack:0x%x\r\n", g_pl_idle_task_stack);
 	pl_task_create_with_stack("idle_task", idle_task, PL_CFG_PRIORITIES_MAX,
-	                           &g_pl_idle_task_tcb, g_pl_idle_task_stack,
+	                            g_pl_idle_task_stack,
 	                           sizeof(g_pl_idle_task_stack), 0, NULL);
 
 	return 0;
@@ -109,8 +114,13 @@ void pl_callee_entry(void)
 	if (ret < 0)
 		while(1);
 
+	g_pl_default_mempool = pl_mem_pool_init(pl_default_mempool_data,
+	                                        12, PL_CFG_MEMPOOL_SIZE, 3);
+	pl_assert(g_pl_default_mempool != nullptr);
+
 	pl_do_early_initcalls();
 	pl_do_initcalls();
+	pl_task_core_init();
 	pl_idle_task_init();
 	while(1);
 }

@@ -254,7 +254,7 @@ void pl_port_switch_context(void);
  *       task_stack       task_stack + regs                task_stack + stack_size
  
  * Parameters:
- *  @task_entry: the task entry of initialization, prototype is task_entry_t.
+ *  @task_entry: the task entry of initialization.
  *  @task_stack: task stack.
  *  @stack_size: stack size.
  *  @param: parameter passed.
@@ -262,8 +262,8 @@ void pl_port_switch_context(void);
  * Return:
  *  pointer to the task_stack + regs.
  ************************************************************************************/
-void *pl_port_task_stack_init(task_entry_t task_entry, void *task_stack,
-                                     size_t stack_size, void *param);
+void *pl_port_task_stack_init(void *task_entry, void *task_stack,
+                              size_t stack_size, void *param);
 
 
 #endif /* __PLAINOS_PORT_H__ */

@@ -29,6 +29,7 @@ SOFTWARE.
 
 /* maximum priority of plainos */
 #define PL_CFG_ASSERT
+#define PL_CFG_MEMPOOL_SIZE        (16 * 1024)
 #define PL_CFG_MAX_TASKS_NUM       (900u)
 #define PL_CFG_PRIORITIES_MAX      (99u)
 #define PL_CFG_SYSLOG_ANSI_COLOR

@@ -26,83 +26,16 @@ SOFTWARE.
 
 #include <pl_cfg.h>
 #include <kernel/kernel.h>
-#include <kernel/list.h>
 #include <types.h>
 
-/*************************************************************************************
- * Type Name: task_schedule_t
- * Description: task schedule of plain os port.
- *
- ************************************************************************************/
-enum task_state {
-	PL_TASK_STATE_READY = 0,
-	PL_TASK_STATE_DELAY,
-	PL_TASK_STATE_WAIT,
-	PL_TASK_STATE_PEND,
-	PL_TASK_STATE_EXIT,
-	PL_TASK_STATE_FATAL,
-};
-
-struct tcb;
-typedef void (*task_entry_t)(struct tcb *tcb);
-typedef int  (*task_t)(int argc, char *argv[]);
-
-/*************************************************************************************
- * Structure Name: tcb
- * Description: task controller block.
- *
- * Members:
- *   @context_sp: task stack pointer.
- *   @name: task name.
- *   @parent: pointer to parent task.
- *   @task: task routine.
- *   @argc: count of argv.
- *   @argv: arguments vector.
- *   @node: list node of the same priority tcb.
- *   @past_state: past state of system.
- *   @curr_state: current state of system.
- *   @prio: priority of the task, support priority up to 4096.
- *   @signal: signal of the task received.
- *   @delay_ticks: high/low 32bit ticks of delay.
- *
- ************************************************************************************/
-struct tcb {
-	void *context_sp;
-	const char *name;
-	struct tcb *parent;
-	task_t task;
-	int argc;
-	char **argv;
-	int wait_for_task_ret;
-	struct list_node wait_head;
-	struct list_node node;
-	u8_t past_state;
-	u8_t curr_state;
-	u16_t prio;
-	uint_t signal;
-	struct count delay_ticks;
-};
-
-typedef struct tcb* tid_t;
+typedef void *tid_t;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /*************************************************************************************
- * Function Name: pl_context_switch
- * Description: switch task.
- *
- * Parameters:
- *   none
- *
- * Return:
- *   none
- ************************************************************************************/
-void pl_context_switch(void);
-
-/*************************************************************************************
- * Function Name: pl_schedule_lock
+ * Function Name: pl_task_schedule_lock
  * Description: disable scheduler.
  *
  * Parameters:
@@ -111,10 +44,10 @@ void pl_context_switch(void);
  * Return:
  *   none
  ************************************************************************************/
-void pl_schedule_lock(void);
+void pl_task_schedule_lock(void);
 
 /*************************************************************************************
- * Function Name: pl_schedule_unlock
+ * Function Name: pl_task_schedule_unlock
  * Description: enable scheduler.
  *
  * Parameters:
@@ -123,7 +56,7 @@ void pl_schedule_lock(void);
  * Return:
  *   none
  ************************************************************************************/
-void pl_schedule_unlock(void);
+void pl_task_schedule_unlock(void);
 
 /*************************************************************************************
  * Function Name: pl_task_create_with_stack
@@ -133,7 +66,6 @@ void pl_schedule_unlock(void);
  *   @name: name of the task (optional).
  *   @task: task, prototype is "int task(int argc, char *argv[])"
  *   @prio: priority of the task, if is 0, it will be its parent's priority (optional).
- *   @tcb: tcb of the task (must provide).
  *   @stack: stack of the task (must provide).
  *   @stack_size: size of the stack (must specify).
  *   @argc: the count of argv (optional).
@@ -142,8 +74,8 @@ void pl_schedule_unlock(void);
  * Return:
  *   task handle.
  ************************************************************************************/
-tid_t pl_task_create_with_stack(const char *name, task_t task, u16_t prio,
-                                struct tcb *tcb, void *stack, size_t stack_size,
+tid_t pl_task_create_with_stack(const char *name, main_t task, u16_t prio,
+                                void *stack, size_t stack_size,
                                 int argc, char *argv[]);
 
 /*************************************************************************************
@@ -167,13 +99,13 @@ void pl_task_delay_ticks(u32_t ticks);
  *   wait for task exit.
  * 
  * Parameters:
- *  @tcb: task control block;
+ *  @tid: task id;
  *  @ret: return value of waitting task.
  *
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_task_join(struct tcb *tcb, int *ret);
+int pl_task_join(tid_t tid, int *ret);
 
 #ifdef __cplusplus
 }
