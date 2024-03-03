@@ -21,11 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include <kernel/kernel.h>
-#include <kernel/syslog.h>
-#include <kernel/task.h>
-#include <pl_port.h>
 #include <types.h>
+#include <kernel/kernel.h>
 
 /*************************************************************************************
  * Function Name: pl_count_cmp

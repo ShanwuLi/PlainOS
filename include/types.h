@@ -32,10 +32,6 @@ SOFTWARE.
 #define NULL                            ((void *)0)
 #endif
 
-#ifndef nullptr
-#define nullptr                         ((void *)0)
-#endif
-
 /*************************************************************************************
  * Type Name: type
  * Description: define a lots of  variable type.

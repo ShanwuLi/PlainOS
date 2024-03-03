@@ -21,22 +21,37 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef __KERNEL_MEM_POOL_H__
-#define __KERNEL_MEM_POOL_H__
+#ifndef __KERNEL_MEMPOOL_H__
+#define __KERNEL_MEMPOOL_H__
 
-#include <pl_cfg.h>
+#include <config.h>
 #include <types.h>
 #include <stddef.h>
 
-typedef void *pl_mem_pool_t;
-extern pl_mem_pool_t g_pl_default_mempool;
+typedef void *pl_mempool_t;
+extern pl_mempool_t g_pl_default_mempool;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /*************************************************************************************
- * Function Name: pl_mem_pool_init
+ * Function Name: pl_mempool_calloc
+ *
+ * Description:
+ *   Alloca memory interface of array method.
+ *   The value of memory will set to zero.
+ *
+ * Param:
+ *   none
+ *
+ * Return:
+ *   Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_default_mempool_init(void);
+
+/*************************************************************************************
+ * Function Name: pl_mempool_init
  * 
  * Description:
  *    Memory pool initialization interface.
@@ -51,11 +66,11 @@ extern "C" {
  * Return:
  *   handle of memory pool.
  ************************************************************************************/
-pl_mem_pool_t pl_mem_pool_init(void *pool, ushrt_t id,
+pl_mempool_t pl_mempool_init(void *pool, ushrt_t id,
                                size_t pool_size, uchar_t grain_order);
 
 /*************************************************************************************
- * Function Name: pl_mem_pool_alloc
+ * Function Name: pl_mempool_malloc
  *
  * Description:
  *   Update bitmap when memory is allocated or free.
@@ -67,10 +82,10 @@ pl_mem_pool_t pl_mem_pool_init(void *pool, ushrt_t id,
  * Return:
  *   address of memory.
  ************************************************************************************/
-void *pl_mem_pool_alloc(pl_mem_pool_t mempool, size_t size);
+void *pl_mempool_malloc(pl_mempool_t mempool, size_t size);
 
 /*************************************************************************************
- * Function Name: pl_mem_pool_free
+ * Function Name: pl_mempool_free
  *
  * Description:
  *   Free memory interface.
@@ -82,10 +97,10 @@ void *pl_mem_pool_alloc(pl_mem_pool_t mempool, size_t size);
  * Return:
  *   void.
  ************************************************************************************/
-void pl_mem_pool_free(pl_mem_pool_t mempool, void *p);
+void pl_mempool_free(pl_mempool_t mempool, void *p);
 
 /*************************************************************************************
- * Function Name: pl_mem_pool_get_free_bytes
+ * Function Name: pl_mempool_get_free_bytes
  *
  * Description:
  *   Get the remaining memory of the memory block interface.
@@ -96,11 +111,11 @@ void pl_mem_pool_free(pl_mem_pool_t mempool, void *p);
  * Return:
  *   remaining size of memory pool.
  ************************************************************************************/
-size_t pl_mem_pool_get_free_bytes(pl_mem_pool_t mempool);
+size_t pl_mempool_get_free_bytes(pl_mempool_t mempool);
 
 
 /*************************************************************************************
- * Function Name: pl_mem_pool_set
+ * Function Name: pl_mempool_set
  *
  * Description:
  *   set value of memory block.
@@ -114,10 +129,10 @@ size_t pl_mem_pool_get_free_bytes(pl_mem_pool_t mempool);
  * Return:
  *   the end of setting value address.
  ************************************************************************************/
-void *pl_mem_pool_set(pl_mem_pool_t mempool, void *p, uint8_t val, size_t size);
+void *pl_mempool_set(pl_mempool_t mempool, void *p, uint8_t val, size_t size);
 
 /*************************************************************************************
- * Function Name: pl_mem_pool_zalloc
+ * Function Name: pl_mempool_zalloc
  *
  * Description:
  *   Alloca memory interface of zero value.
@@ -130,10 +145,10 @@ void *pl_mem_pool_set(pl_mem_pool_t mempool, void *p, uint8_t val, size_t size);
  * Return:
  *   memory address.
  ************************************************************************************/
-void *pl_mem_pool_zalloc(pl_mem_pool_t mempool, size_t size);
+void *pl_mempool_zalloc(pl_mempool_t mempool, size_t size);
 
 /*************************************************************************************
- * Function Name: pl_mem_pool_calloc
+ * Function Name: pl_mempool_calloc
  *
  * Description:
  *   Alloca memory interface of array method.
@@ -147,10 +162,10 @@ void *pl_mem_pool_zalloc(pl_mem_pool_t mempool, size_t size);
  * Return:
  *   memory address.
  ************************************************************************************/
-void *pl_mem_pool_calloc(pl_mem_pool_t mempool, size_t num, size_t size);
+void *pl_mempool_calloc(pl_mempool_t mempool, size_t num, size_t size);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __KERNEL_MEM_POOL_H__ */
+#endif /* __KERNEL_MEMPOOL_H__ */

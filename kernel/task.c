@@ -21,15 +21,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include <pl_cfg.h>
+#include <config.h>
 #include <errno.h>
-#include <pl_port.h>
+#include <port.h>
 #include <kernel/task.h>
 #include <kernel/list.h>
 #include <kernel/kernel.h>
 #include <kernel/syslog.h>
-#include <kernel/mem_pool.h>
-#include "internal_task.h"
+#include <kernel/mempool.h>
+#include "task_private.h"
 
 /*************************************************************************************
  * Description: Definitions of highest priority of task.
@@ -521,7 +521,7 @@ tid_t pl_task_create_with_stack(const char *name, main_t task, u16_t prio,
 		return (tid_t)ERR_TO_PTR(-EFAULT);
 	}
 
-	tcb = (struct tcb *)pl_mem_pool_alloc(g_pl_default_mempool, sizeof(struct tcb));
+	tcb = (struct tcb *)pl_mempool_malloc(g_pl_default_mempool, sizeof(struct tcb));
 	if (tcb == NULL) {
 		pl_early_syslog_err("no mem to alloc\r\n");
 		return (tid_t)ERR_TO_PTR(-ENOMEM);

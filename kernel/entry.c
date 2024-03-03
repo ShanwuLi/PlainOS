@@ -1,29 +1,21 @@
 
 #include <kernel/initcall.h>
 #include "errno.h"
-#include <pl_port.h>
+#include <port.h>
+#include <types.h>
 #include <kernel/syslog.h>
 #include "common/ansi_color.h"
-#include "internal_initcall.h"
+#include "initcall_private.h"
 #include <kernel/task.h>
-#include <pl_port.h>
 #include <kernel/kernel.h>
-#include <types.h>
-#include <kernel/mem_pool.h>
-#include "internal_task.h"
-
-
-static u8_t pl_default_mempool_data[PL_CFG_MEMPOOL_SIZE];
-pl_mem_pool_t g_pl_default_mempool;
+#include "task_private.h"
+#include <kernel/mempool.h>
 
 static u32_t g_pl_idle_task_stack[128];
 
-
 static u32_t g_pl_idle_task_stack1[128];
 
-
 static u32_t g_pl_idle_task_stack2[128];
-
 
 volatile u32_t idle_task2_run_count = 0;
 volatile u32_t idle_task1_run_count = 0;
@@ -114,10 +106,7 @@ void pl_callee_entry(void)
 	if (ret < 0)
 		while(1);
 
-	g_pl_default_mempool = pl_mem_pool_init(pl_default_mempool_data,
-	                                        12, PL_CFG_MEMPOOL_SIZE, 3);
-	pl_assert(g_pl_default_mempool != nullptr);
-
+	pl_default_mempool_init();
 	pl_do_early_initcalls();
 	pl_do_initcalls();
 	pl_task_core_init();

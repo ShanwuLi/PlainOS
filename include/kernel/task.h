@@ -24,9 +24,9 @@ SOFTWARE.
 #ifndef __KERNEL_TASK_H__
 #define __KERNEL_TASK_H__
 
-#include <pl_cfg.h>
-#include <kernel/kernel.h>
+#include <config.h>
 #include <types.h>
+#include "kernel.h"
 
 typedef void *tid_t;
 

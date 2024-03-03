@@ -22,7 +22,7 @@ SOFTWARE.
 */
 
 #include <errno.h>
-#include <lib/pl_string.h>
+#include <lib/string.h>
 
 int pl_ull2str(char *str, unsigned long long n, unsigned char base)
 {

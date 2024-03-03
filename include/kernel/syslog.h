@@ -24,8 +24,9 @@ SOFTWARE.
 #ifndef __KERNEL_SYSLOG_H__
 #define __KERNEL_SYSLOG_H__
 
-#include <pl_cfg.h>
+#include <config.h>
 #include <stdarg.h>
+#include <port.h>
 #include "../common/ansi_color.h"
 
 #ifdef PL_CFG_SYSLOG_ANSI_COLOR

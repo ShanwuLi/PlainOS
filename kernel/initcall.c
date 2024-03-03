@@ -22,10 +22,10 @@ SOFTWARE.
 */
 
 #include <errno.h>
-#include <pl_port.h>
+#include <port.h>
 #include <kernel/initcall.h>
-#include "internal_initcall.h"
-#include <kernel/syslog.h>
+#include <kernel/assert.h>
+#include "initcall_private.h"
 
 extern initcall_t __early_initcall_start[];
 extern initcall_t __early_initcall_end[];
@@ -107,10 +107,7 @@ void pl_do_early_initcalls(void)
 	     init_fn++) {
 		init_f = (initcall_t)pl_port_rodata_read(init_fn);
 		ret = init_f();
-		if (ret < 0) {
-			pl_early_syslog_err("early init call return error:%d\r\n", ret);
-			while(1);
-		}
+		pl_assert(ret >= 0);
 	}
 }
 
@@ -134,9 +131,6 @@ void pl_do_initcalls(void)
 	for (init_fns = &initcall_levels[0]; init_fns < &initcall_levels[10];
 	     init_fns++) {
 		ret = call_initcall_level(*init_fns, *(init_fns + 1));
-		if (ret < 0) {
-			pl_early_syslog_err("init call return error:%d\r\n", ret);
-			while(1);
-		}
+		pl_assert(ret >= 0);
 	}
 }

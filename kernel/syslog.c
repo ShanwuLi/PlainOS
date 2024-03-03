@@ -24,7 +24,7 @@ SOFTWARE.
 
 #include <errno.h>
 #include <types.h>
-#include <lib/pl_string.h>
+#include <lib/string.h>
 #include <kernel/syslog.h>
 
 /*************************************************************************************
