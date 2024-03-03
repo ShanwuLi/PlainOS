@@ -21,8 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef __TYPES_H__
-#define __TYPES_H__
+#ifndef __PLAINOS_TYPES_H__
+#define __PLAINOS_TYPES_H__
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -86,4 +86,4 @@ typedef signed long long                 ll_t;
 #define UINT64_MAX                       ((u64_t)0xffffffffffffffff)
 #endif
 
-#endif /* __TYPES_H__ */
+#endif /* __PLAINOS_TYPES_H__ */

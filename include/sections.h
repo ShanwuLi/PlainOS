@@ -20,8 +20,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#ifndef __SECTIONS_H__
-#define __SECTIONS_H__
+#ifndef __PLAINOS_SECTIONS_H__
+#define __PLAINOS_SECTIONS_H__
 
 #include "errno.h"
 
@@ -103,4 +103,4 @@ SOFTWARE.
 	                                LONG(ERROR  ) \
 	                                __errno_end = .;
 
-#endif /* __SECTIONS_H__ */
+#endif /* __PLAINOS_SECTIONS_H__ */

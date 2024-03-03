@@ -21,8 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef __ERRNO_H__
-#define __ERRNO_H__
+#ifndef __PLAINOS_ERRNO_H__
+#define __PLAINOS_ERRNO_H__
 
 #define OK                 0     /* OK */
 #define	EPERM              1     /* Operation not permitted */
@@ -89,4 +89,4 @@ SOFTWARE.
 	                               is_err_or_null = true; \
 	                           is_err_or_null;})
 
-#endif /* __ERRNO_H__ */
+#endif /* __PLAINOS_ERRNO_H__ */
