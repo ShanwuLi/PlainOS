@@ -20,8 +20,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#ifndef __APPCALL_H__
-#define __APPCALL_H__
+#ifndef __PLAINOS_APPCALL_H__
+#define __PLAINOS_APPCALL_H__
 
 typedef int (*plainos_app_call_t)(int argc, char *argv[]);
 
@@ -36,4 +36,4 @@ typedef int (*plainos_app_call_t)(int argc, char *argv[]);
 #define test_app_register(app)        __define_appcall(app, 4)
 #define user_app_register(app)        __define_appcall(app, 5)
 
-#endif /* __APPCALL_H__ */
+#endif /* __PLAINOS_APPCALL_H__ */

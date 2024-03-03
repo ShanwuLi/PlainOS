@@ -73,31 +73,12 @@ static void put_chars(int (*putc)(const char c),
 		putc(*ch);
 }
 
-/*************************************************************************************
- * Function Name: pl_put_format_log
- *
- * Description:
- *   put format log using putc. It will put [front][fmt][rear] string using putc.
- *
- * Param:
- *   @putc: putc function.
- *   @front: the front of fmt.
- *   @rear: the rear of fmt .
- *   @fmt: format string.
- * 
- * Return:
- *   none.
- ************************************************************************************/
-void pl_put_format_log(int (*putc)(const char c), const char *front,
-                             const char *rear, const char *fmt, ...)
+static void vformat_log(int (*putc)(const char c), const char *fmt, va_list valist)
 {
 	char str[24];
 	int state = 0;
-	va_list valist;
 	const char *ch = fmt;
 
-	put_string(putc, front);
-	va_start(valist, fmt);
 	for (; *fmt != '\0'; fmt++) {
 		state += *fmt;
 		switch (state) {
@@ -111,47 +92,47 @@ void pl_put_format_log(int (*putc)(const char c), const char *front,
 			break;
 
 		case '%' + 'd':
-			pl_ll2str(str, va_arg(valist, int_t), 10);
+			pl_lib_ll2str(str, va_arg(valist, int_t), 10);
 			put_string(putc, str);
 			break;
 
 		case '%' + 'x':
-			pl_ull2str(str, va_arg(valist, uint_t), 16);
+			pl_lib_ull2str(str, va_arg(valist, uint_t), 16);
 			put_string(putc, str);
 			break;
 
 		case '%' + 'u':
-			pl_ull2str(str, va_arg(valist, uint_t), 10);
+			pl_lib_ull2str(str, va_arg(valist, uint_t), 10);
 			put_string(putc, str);
 			break;
 
 		case '%' + 'l' + 'd':
-			pl_ll2str(str, va_arg(valist, l_t), 10);
+			pl_lib_ll2str(str, va_arg(valist, l_t), 10);
 			put_string(putc, str);
 			break;
 
 		case '%' + 'l' + 'x':
-			pl_ull2str(str, va_arg(valist, ul_t), 16);
+			pl_lib_ull2str(str, va_arg(valist, ul_t), 16);
 			put_string(putc, str);
 			break;
 
 		case '%' + 'l' + 'u':
-			pl_ull2str(str, va_arg(valist, ul_t), 10);
+			pl_lib_ull2str(str, va_arg(valist, ul_t), 10);
 			put_string(putc, str);
 			break;
 
 		case '%' + 'l' + 'l' + 'd':
-			pl_ll2str(str, va_arg(valist, ll_t), 10);
+			pl_lib_ll2str(str, va_arg(valist, ll_t), 10);
 			put_string(putc, str);
 			break;
 
 		case '%' + 'l' + 'l' + 'x':
-			pl_ull2str(str, va_arg(valist, ull_t), 16);
+			pl_lib_ull2str(str, va_arg(valist, ull_t), 16);
 			put_string(putc, str);
 			break;
 
 		case '%' + 'l' + 'l' + 'u':
-			pl_ull2str(str, va_arg(valist, ull_t), 10);
+			pl_lib_ull2str(str, va_arg(valist, ull_t), 10);
 			put_string(putc, str);
 			break;
 
@@ -163,7 +144,31 @@ void pl_put_format_log(int (*putc)(const char c), const char *front,
 		state = 0;
 		ch = fmt + 1;
 	}
+}
 
+/*************************************************************************************
+ * Function Name: pl_put_early_format_log
+ *
+ * Description:
+ *   put format log using putc. It will put [front][fmt][rear] string using putc.
+ *
+ * Param:
+ *   @putc: putc function.
+ *   @front: the front of fmt.
+ *   @rear: the rear of fmt .
+ *   @fmt: format string.
+ * 
+ * Return:
+ *   none.
+ ************************************************************************************/
+void pl_put_early_format_log(int (*putc)(const char c), const char *front,
+                             const char *rear, const char *fmt, ...)
+{
+	va_list valist;
+
+	put_string(putc, front);
+	va_start(valist, fmt);
+	vformat_log(putc, fmt, valist);
 	va_end(valist);
 	put_string(putc, rear);
 }
@@ -187,25 +192,26 @@ int pl_syslog_init(void)
 }
 
 /*************************************************************************************
- * Function Name: pl_syslog
+ * Function Name: pl_put_format_log
  *
  * Description:
- *   syslog.
- * 
+ *   put format log (PlainOS has started).
+ *
  * Parameters:
+ *  @putc: function of putting char.
  *  @fmt: format string.
  *  @...: variable parameters.
  *
  * Return:
  *  void.
  ************************************************************************************/
-void pl_syslog(const char *fmt, ...)
+void pl_put_format_log(int (*putc)(const char c), const char *fmt, ...)
 {
 	va_list valist;
 
 	pl_semaplore_take(&syslog_semaphore);
 	va_start(valist, fmt);
-	pl_early_syslog(fmt, valist);
+	vformat_log(putc, fmt, valist);
 	va_end(valist);
 	pl_semaplore_give(&syslog_semaphore);
 }

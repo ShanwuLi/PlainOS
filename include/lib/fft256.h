@@ -22,8 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef  __PL_LIB_FFT256_H__
-#define  __PL_LIB_FFT256_H__
+#ifndef  __LIB_FFT256_H__
+#define  __LIB_FFT256_H__
 
 #include <types.h>
 
@@ -33,11 +33,28 @@ typedef struct {
 } complex_num_t;
 
 /*************************************************************************************
- * Function Name: pl_fft256
+ * Function Name: pl_lib_fft256
  *
  * Description:
  *   FFT-256 forward transformation.
  * 
+ * NOTE:
+ *  use example:
+ *
+ * step1:
+ * for (i = 0; i < 256; i++) {
+ *   xi[i].real = f(i);
+ *   xi[i].imag = 0;
+ * }
+ * 
+ * step2:
+ * pl_lib_fft256(xi, xo);
+ * 
+ * step3:
+ * for (i = 0; i < 256; i++) {
+ *    amplitude[i] = sqrt(xo[i].imag * xo[i].imag + xo[i].real * xo[i].real);
+ * }
+ *
  * Parameters:
  *  @xi: input xi1.
  *  @xo: input xi2.
@@ -45,14 +62,28 @@ typedef struct {
  * Return:
  *  void.
  ************************************************************************************/
-int pl_fft256(complex_num_t xi[256], complex_num_t xo[256]);
+int pl_lib_fft256(complex_num_t xi[256], complex_num_t xo[256]);
 
 /*************************************************************************************
  * Function Name: pl_ifft256
  *
  * Description:
  *   FFT-256 inverse transformation.
+ *
+ * NOTE:
+ *  use example:
+ *
+ * step1:
+ * pl_lib_ifft256(xi, xo);
+ *
+ * step2:
+ * for (i = 0; i < 256; i++) {
+ *    amplitude[i] = sqrt(xo[i].imag * xo[i].imag + xo[i].real * xo[i].real);
+ * }
  * 
+ * step3:
+ * 	Happy PlainOS!
+ *
  * Parameters:
  *  @xi: input xi1.
  *  @xo: input xi2.
@@ -60,6 +91,6 @@ int pl_fft256(complex_num_t xi[256], complex_num_t xo[256]);
  * Return:
  *  void.
  ************************************************************************************/
-int pl_ifft256(complex_num_t xi[256], complex_num_t xo[256]);
+int pl_lib_ifft256(complex_num_t xi[256], complex_num_t xo[256]);
 
-#endif /* __PL_LIB_FFT256_H__ */
+#endif /* __LIB_FFT256_H__ */

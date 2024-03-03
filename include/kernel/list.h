@@ -36,13 +36,13 @@ struct list_node {
 };
 
 #define LIST_HEAD(name) struct list_node name = { \
-		.next = &name, \
-		.prev = &name  \
+		.next = &(name), \
+		.prev = &(name)  \
 	}
 
 #define LIST_INIT_VAL(name)  { \
-		.prev = &name, \
-		.next = &name  \
+		.prev = &(name), \
+		.next = &(name)  \
 	}
 
 /*************************************************************************************

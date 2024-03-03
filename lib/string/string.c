@@ -24,7 +24,7 @@ SOFTWARE.
 #include <errno.h>
 #include <lib/string.h>
 
-int pl_ull2str(char *str, unsigned long long n, unsigned char base)
+int pl_lib_ull2str(char *str, unsigned long long n, unsigned char base)
 {
 	int ret;
 	int val;
@@ -50,7 +50,7 @@ int pl_ull2str(char *str, unsigned long long n, unsigned char base)
 	return ret;
 }
 
-int pl_ll2str(char *str, long long n, unsigned char base)
+int pl_lib_ll2str(char *str, long long n, unsigned char base)
 {
 	int ret;
 	int i = 0;
@@ -61,7 +61,7 @@ int pl_ll2str(char *str, long long n, unsigned char base)
 		n = (~(unsigned long long)n) + 1;
 	}
 
-	ret = pl_ull2str(&str[i], n, base);
+	ret = pl_lib_ull2str(&str[i], n, base);
 	return ret;
 }
 

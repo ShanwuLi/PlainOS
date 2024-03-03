@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "fft256.h"
+#include <lib/fft256.h>
 #include <errno.h>
 
 /*************************************************************************************
@@ -112,7 +112,7 @@ static void butterfly_calculate(complex_num_t *xi1, complex_num_t *xi2,
 }
 
 /*************************************************************************************
- * Function Name: pl_fft256
+ * Function Name: pl_lib_fft256
  *
  * Description:
  *   FFT-256 forward transformation.
@@ -124,7 +124,7 @@ static void butterfly_calculate(complex_num_t *xi1, complex_num_t *xi2,
  * Return:
  *  void.
  ************************************************************************************/
-int pl_fft256(complex_num_t xi[256], complex_num_t xo[256])
+int pl_lib_fft256(complex_num_t xi[256], complex_num_t xo[256])
 {
 	int i;
 	int j;
@@ -155,7 +155,7 @@ int pl_fft256(complex_num_t xi[256], complex_num_t xo[256])
 }
 
 /*************************************************************************************
- * Function Name: pl_ifft256
+ * Function Name: pl_lib_ifft256
  *
  * Description:
  *   FFT-256 inverse transformation.
@@ -167,7 +167,7 @@ int pl_fft256(complex_num_t xi[256], complex_num_t xo[256])
  * Return:
  *  void.
  ************************************************************************************/
-int pl_ifft256(complex_num_t xi[256], complex_num_t xo[256])
+int pl_lib_ifft256(complex_num_t xi[256], complex_num_t xo[256])
 {
 	int i;
 	s64_t k;
@@ -182,7 +182,7 @@ int pl_ifft256(complex_num_t xi[256], complex_num_t xo[256])
 		(xi + i)->imag = k;
 	}
 
-	ret = pl_fft256(xi, xo);
+	ret = pl_lib_fft256(xi, xo);
 	return ret;
 }
 

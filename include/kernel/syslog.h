@@ -47,7 +47,7 @@ SOFTWARE.
 #endif
 
 /*************************************************************************************
- * Function Name: pl_put_format_log
+ * Function Name: pl_put_early_format_log
  *
  * Description:
  *   format string output (PlainOS has not start).
@@ -64,8 +64,8 @@ SOFTWARE.
  * Return:
  *  void.
  ************************************************************************************/
-void pl_put_format_log(int (*putc)(const char c), const char *front,
-                       const char *rear, const char *fmt, ...);
+void pl_put_early_format_log(int (*putc)(const char c), const char *front,
+                             const char *rear, const char *fmt, ...);
 
 /*************************************************************************************
  * Function Name: pl_early_syslog
@@ -84,7 +84,7 @@ void pl_put_format_log(int (*putc)(const char c), const char *front,
  *  void.
  ************************************************************************************/
 #define pl_early_syslog(fmt, ...)  \
-	pl_put_format_log(pl_port_putc, NULL, NULL, fmt, ## __VA_ARGS__)
+	pl_put_early_format_log(pl_port_putc, NULL, NULL, fmt, ## __VA_ARGS__)
 
 /*************************************************************************************
  * Function Name: pl_early_syslog_info
@@ -103,7 +103,7 @@ void pl_put_format_log(int (*putc)(const char c), const char *front,
  *  void.
  ************************************************************************************/
 #define pl_early_syslog_info(fmt, ...)  \
-	pl_put_format_log(pl_port_putc, "[info]", NULL, fmt, ## __VA_ARGS__)
+	pl_put_early_format_log(pl_port_putc, "[info]", NULL, fmt, ## __VA_ARGS__)
 
 /*************************************************************************************
  * Function Name: pl_early_syslog_warn
@@ -122,7 +122,7 @@ void pl_put_format_log(int (*putc)(const char c), const char *front,
  *  void.
  ************************************************************************************/
 #define pl_early_syslog_warn(fmt, ...)  \
-	pl_put_format_log(pl_port_putc, PL_EARLY_SYSLOG_WARN_ANSI_COLOR"[warn]", \
+	pl_put_early_format_log(pl_port_putc, PL_EARLY_SYSLOG_WARN_ANSI_COLOR"[warn]", \
 	PL_EARLY_SYSLOG_ANSI_COLOR_RESET, fmt, ## __VA_ARGS__)
 
 /*************************************************************************************
@@ -142,8 +142,24 @@ void pl_put_format_log(int (*putc)(const char c), const char *front,
  *  void.
  ************************************************************************************/
 #define pl_early_syslog_err(fmt, ...)  \
-	pl_put_format_log(pl_port_putc, PL_EARLY_SYSLOG_ERR_ANSI_COLOR"[erro]", \
+	pl_put_early_format_log(pl_port_putc, PL_EARLY_SYSLOG_ERR_ANSI_COLOR"[erro]", \
 	PL_EARLY_SYSLOG_ANSI_COLOR_RESET, fmt, ## __VA_ARGS__)
+
+/*************************************************************************************
+ * Function Name: pl_put_format_log
+ *
+ * Description:
+ *   put format log (PlainOS has started).
+ *
+ * Parameters:
+ *  @putc: function of putting char.
+ *  @fmt: format string.
+ *  @...: variable parameters.
+ *
+ * Return:
+ *  void.
+ ************************************************************************************/
+void pl_put_format_log(int (*putc)(const char c), const char *fmt, ...);
 
 /*************************************************************************************
  * Function Name: pl_syslog
@@ -161,7 +177,8 @@ void pl_put_format_log(int (*putc)(const char c), const char *front,
  * Return:
  *  void.
  ************************************************************************************/
-void pl_syslog(const char *fmt, ...);
+#define pl_syslog(fmt, ...)   \
+	pl_put_format_log(pl_port_putc, fmt, ## __VA_ARGS__)
 
 /*************************************************************************************
  * Function Name: pl_syslog_info
@@ -180,7 +197,7 @@ void pl_syslog(const char *fmt, ...);
  *  void.
  ************************************************************************************/
 #define pl_syslog_info(fmt, ...)   \
-	pl_syslog("[info]"fmt, ## __VA_ARGS__)
+	pl_put_format_log(pl_port_putc, "[info]"fmt, ## __VA_ARGS__)
 
 /*************************************************************************************
  * Function Name: pl_syslog_warn
@@ -199,7 +216,7 @@ void pl_syslog(const char *fmt, ...);
  *  void.
  ************************************************************************************/
 #define pl_syslog_warn(fmt, ...)   \
-	pl_syslog(PL_SYSLOG_WARN_ANSI_COLOR"[warn]"fmt \
+	pl_put_format_log(pl_port_putc, PL_SYSLOG_WARN_ANSI_COLOR"[warn]"fmt \
 	PL_SYSLOG_ANSI_COLOR_RESET, ## __VA_ARGS__)
 
 /*************************************************************************************
@@ -219,7 +236,7 @@ void pl_syslog(const char *fmt, ...);
  *  void.
  ************************************************************************************/
 #define pl_syslog_err(fmt, ...)   \
-	pl_syslog(PL_SYSLOG_ERR_ANSI_COLOR"[erro]"fmt \
+	pl_put_format_log(pl_port_putc, PL_SYSLOG_ERR_ANSI_COLOR"[erro]"fmt \
 	PL_SYSLOG_ANSI_COLOR_RESET, ## __VA_ARGS__)
 
 #endif /* __KERNEL_SYSLOG_H__ */

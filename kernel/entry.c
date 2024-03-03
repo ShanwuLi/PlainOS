@@ -12,11 +12,11 @@
 #include <kernel/mempool.h>
 #include "syslog_private.h"
 
-static u32_t g_pl_idle_task_stack[128];
+static u32_t g_pl_idle_task_stack[256];
 
-static u32_t g_pl_idle_task_stack1[128];
+static u32_t g_pl_idle_task_stack1[256];
 
-static u32_t g_pl_idle_task_stack2[128];
+static u32_t g_pl_idle_task_stack2[256];
 
 volatile u32_t idle_task2_run_count = 0;
 volatile u32_t idle_task1_run_count = 0;
@@ -28,7 +28,7 @@ static int idle_task2(int argc, char *argv[])
 
 	pl_syslog_info("+++++++++++8\r\n");
 
-	while(argc < 900) {
+	while(argc < 100) {
 		//pl_schedule_lock();
 		pl_syslog_err("+++++++++++++++++++++++++++++++++++++++++++++++\r\n");
 		idle_task2_run_count++;
@@ -37,6 +37,7 @@ static int idle_task2(int argc, char *argv[])
 		argc++;
 	}
 
+	pl_syslog_err("idle_task2 exit\r\n");
 	//pl_assert(true);
 
 	return -200;
@@ -46,16 +47,18 @@ static int idle_task1(int argc, char *argv[])
 {
 	USED(argc);
 	USED(argv);
-	//int ret;
-	//struct tcb *tcb;
+	int ret;
+	tid_t tcb;
 
-	pl_syslog("////////////////8\r\n");
-	pl_task_create_with_stack("idle_task2", idle_task2, PL_CFG_PRIORITIES_MAX,
+	pl_syslog_err("////////////////8\r\n");
+	tcb = pl_task_create_with_stack("idle_task2", idle_task2, PL_CFG_PRIORITIES_MAX,
 	                           g_pl_idle_task_stack2,
 	                           sizeof(g_pl_idle_task_stack2), 0, NULL);
 
-	//pl_task_join(tcb, &ret);
-	//pl_early_syslog_info("%s: ret:%d\r\n", "idle_task1", ret);
+	pl_task_join(tcb, &ret);
+	pl_syslog_info("%s: ret:%d\r\n", "idle_task1", ret);
+	pl_syslog_warn("%s: ret:%d\r\n", "idle_task1", 1000);
+	pl_syslog_err("%s: ret:%d\r\n", "idle_task1", 26358);
 	while(1) {
 		//pl_schedule_lock();
 		pl_syslog_err("////////////////////////////////////////////\r\n");
