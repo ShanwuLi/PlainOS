@@ -26,7 +26,7 @@ static int idle_task2(int argc, char *argv[])
 	argc = 0;
 	USED(argv);
 
-	pl_early_syslog("+++++++++++8\r\n");
+	pl_syslog("+++++++++++8\r\n");
 
 	while(1) {
 		//pl_schedule_lock();
@@ -49,7 +49,7 @@ static int idle_task1(int argc, char *argv[])
 	//int ret;
 	//struct tcb *tcb;
 
-	pl_early_syslog("////////////////8\r\n");
+	pl_syslog("////////////////8\r\n");
 	pl_task_create_with_stack("idle_task2", idle_task2, PL_CFG_PRIORITIES_MAX,
 	                           g_pl_idle_task_stack2,
 	                           sizeof(g_pl_idle_task_stack2), 0, NULL);
@@ -73,7 +73,7 @@ static int idle_task(int argc, char *argv[])
 	USED(argv);
 
 	pl_port_systick_init();
-	pl_early_syslog("============8\r\n");
+	pl_syslog("============8\r\n");
 	pl_task_create_with_stack("idle_task1", idle_task1, PL_CFG_PRIORITIES_MAX,
 	                           g_pl_idle_task_stack1,
 	                           sizeof(g_pl_idle_task_stack1), 0, NULL);
