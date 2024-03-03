@@ -168,19 +168,44 @@ void pl_put_format_log(int (*putc)(const char c), const char *front,
 	put_string(putc, rear);
 }
 
-void pl_syslog_init(void)
+/*************************************************************************************
+ * Function Name: pl_syslog_init
+ *
+ * Description:
+ *   syslog initialization.
+ * 
+ * Parameters:
+ *  none.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_syslog_init(void)
 {
 	pl_semaplore_init(&syslog_semaphore, 1);
+	return OK;
 }
 
-void pl_syslog_semaplore_take(void)
+/*************************************************************************************
+ * Function Name: pl_syslog
+ *
+ * Description:
+ *   syslog.
+ * 
+ * Parameters:
+ *  @fmt: format string.
+ *  @...: variable parameters.
+ *
+ * Return:
+ *  void.
+ ************************************************************************************/
+void pl_syslog(const char *fmt, ...)
 {
+	va_list valist;
+
 	pl_semaplore_take(&syslog_semaphore);
-}
-
-void pl_syslog_semaplore_give(void)
-{
+	va_start(valist, fmt);
+	pl_early_syslog(fmt, valist);
+	va_end(valist);
 	pl_semaplore_give(&syslog_semaphore);
 }
-
-

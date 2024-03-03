@@ -26,11 +26,11 @@ static int idle_task2(int argc, char *argv[])
 	argc = 0;
 	USED(argv);
 
-	pl_syslog("+++++++++++8\r\n");
+	pl_syslog_info("+++++++++++8\r\n");
 
 	while(1) {
 		//pl_schedule_lock();
-		pl_syslog("+++++++++++++++++++++++++++++++++++++++++++++++\r\n");
+		pl_syslog_err("+++++++++++++++++++++++++++++++++++++++++++++++\r\n");
 		idle_task2_run_count++;
 		//pl_schedule_unlock();
 		//pl_task_delay_ticks(1000);
@@ -58,7 +58,7 @@ static int idle_task1(int argc, char *argv[])
 	//pl_early_syslog_info("%s: ret:%d\r\n", "idle_task1", ret);
 	while(1) {
 		//pl_schedule_lock();
-		pl_syslog("////////////////////////////////////////////\r\n");
+		pl_syslog_err("////////////////////////////////////////////\r\n");
 		idle_task1_run_count++;
 		//pl_schedule_unlock();
 		//pl_task_delay_ticks(50);
@@ -73,7 +73,7 @@ static int idle_task(int argc, char *argv[])
 	USED(argv);
 
 	pl_port_systick_init();
-	pl_syslog("============8\r\n");
+	pl_syslog_info("============8\r\n");
 	pl_task_create_with_stack("idle_task1", idle_task1, PL_CFG_PRIORITIES_MAX,
 	                           g_pl_idle_task_stack1,
 	                           sizeof(g_pl_idle_task_stack1), 0, NULL);
@@ -85,7 +85,7 @@ static int idle_task(int argc, char *argv[])
 		for (volatile int i = 0; i < 10000; i++)
 		;
 		//pl_schedule_lock();
-		pl_syslog("====================================================\r\n");
+		pl_syslog_warn("====================================================\r\n");
 		//pl_schedule_unlock();
 	}
 

@@ -24,7 +24,6 @@ SOFTWARE.
 #ifndef __KERNEL_MEMPOOL_H__
 #define __KERNEL_MEMPOOL_H__
 
-#include <config.h>
 #include <types.h>
 #include <stddef.h>
 

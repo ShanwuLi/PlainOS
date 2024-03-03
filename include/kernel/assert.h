@@ -41,13 +41,13 @@ SOFTWARE.
  ************************************************************************************/
 #ifdef PL_CFG_ASSERT
 #define pl_assert(assertion)    \
-	    do { \
-	        if (!(assertion)) { \
-	            pl_enter_critical(); \
-	            pl_early_syslog(PL_EARLY_SYSLOG_ERR_ANSI_COLOR\
-	                           "[ASSERT]:func:%s, line:%d\r\n" \
-	                           PL_EARLY_SYSLOG_ANSI_COLOR_RESET, \
-	                            __func__, __LINE__); \
+		do { \
+			if (!(assertion)) { \
+				pl_enter_critical(); \
+				pl_early_syslog(PL_EARLY_SYSLOG_ERR_ANSI_COLOR\
+				               "[ASSERT]:func:%s, line:%d%s\r\n", \
+				                __func__, __LINE__, \
+				                PL_EARLY_SYSLOG_ANSI_COLOR_RESET); \
 	            while(1); \
 	            pl_exit_critical(); \
 	        } \
