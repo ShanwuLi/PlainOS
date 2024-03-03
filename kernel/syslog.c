@@ -177,11 +177,9 @@ void pl_put_early_format_log(int (*putc)(const char c), const char *fmt, ...)
 {
 	va_list valist;
 
-	//put_string(putc, front);
 	va_start(valist, fmt);
 	vformat_log(putc, fmt, valist);
 	va_end(valist);
-	//put_string(putc, rear);
 }
 
 /*************************************************************************************
