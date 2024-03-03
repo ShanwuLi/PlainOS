@@ -26,6 +26,7 @@ SOFTWARE.
 #include <kernel/kernel.h>
 #include <kernel/mempool.h>
 #include <kernel/assert.h>
+#include <kernel/semaphore.h>
 
 /*************************************************************************************
  * Description: mempool structure definition.
@@ -48,6 +49,11 @@ struct mempool_data {
 	uchar_t *data[0];
 };
 
+struct default_mempool {
+	struct semaphore sem;
+	u8_t pool_data[PL_CFG_DEFAULT_MEMPOOL_SIZE];
+};
+
 /*************************************************************************************
  * Description: definitions.
  ************************************************************************************/
@@ -57,7 +63,7 @@ typedef bool (*find_bit_condition_t)(struct mempool* mp, size_t iter,
 /*************************************************************************************
  * Description: default memory pool.
  ************************************************************************************/
-static u8_t pl_default_mempool_data[PL_CFG_MEMPOOL_SIZE];
+static struct default_mempool pl_default_mempool;
 pl_mempool_t g_pl_default_mempool;
 
 /*************************************************************************************
@@ -493,6 +499,7 @@ void* pl_mempool_malloc(pl_mempool_t mempool, size_t size)
 	if (mp == NULL)
 		return NULL;
 
+	pl_semaplore_take(&pl_default_mempool.sem);
 	/* get block index */
 	if (bit_num < UINTPTR_T_BITS)
 		found = get_blk_idx(mp, alloc_size, find_bit_condition, &blk_idx);
@@ -500,8 +507,10 @@ void* pl_mempool_malloc(pl_mempool_t mempool, size_t size)
 		found = get_blk_idx(mp, alloc_size, find_blk_condition, &blk_idx);
 
 	/* check block index */
-	if (!found || blk_idx >= mp->blk_num)
+	if (!found || blk_idx >= mp->blk_num) {
+		pl_semaplore_give(&pl_default_mempool.sem);
 		return NULL;
+	}
 
 	/* get bit offset */
 	bit_offset = get_bit_offset(mp, blk_idx, mp->grain_order, alloc_size);
@@ -515,6 +524,7 @@ void* pl_mempool_malloc(pl_mempool_t mempool, size_t size)
 
 	/* update bitmap */
 	update_bit_map(mp, blk_idx, bit_offset, bit_num, false);
+	pl_semaplore_give(&pl_default_mempool.sem);
 
 	return (void*)data_addr->data;
 }
@@ -581,9 +591,11 @@ void pl_mempool_free(pl_mempool_t mempool, void* p)
 	if (data_addr == NULL)
 		return;
 
+	pl_semaplore_take(&pl_default_mempool.sem);
 	blk_idx = data_addr->bit_idx / UINTPTR_T_BITS;
 	bit_offset = data_addr->bit_idx & (UINTPTR_T_BITS - 1);
 	update_bit_map(mp, blk_idx, bit_offset, data_addr->bit_num, true);
+	pl_semaplore_give(&pl_default_mempool.sem);
 }
 
 /*************************************************************************************
@@ -636,8 +648,10 @@ size_t pl_mempool_get_free_bytes(pl_mempool_t mempool)
 	if (mp == NULL)
 		return 0;
 
+	pl_semaplore_take(&pl_default_mempool.sem);
 	for (i = 0; i < mp->blk_num; i++)
 		rest_bytes += mempool_blk_get_free_bytes(mp, i, mp->grain_order);
+	pl_semaplore_give(&pl_default_mempool.sem);
 
 	return rest_bytes;
 }
@@ -743,18 +757,18 @@ void *pl_mempool_calloc(pl_mempool_t mempool, size_t num, size_t size)
  *   The value of memory will set to zero.
  *
  * Param:
- *   @mempool: memory pool.
- *   @num: number of memory.
- *   @size: size of each memory block.
+ *   none
  *
  * Return:
- *   memory address.
+ *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
 int pl_default_mempool_init(void)
 {
-	g_pl_default_mempool = pl_mempool_init(pl_default_mempool_data,
-	                                       0, PL_CFG_MEMPOOL_SIZE, 3);
-	pl_assert(g_pl_default_mempool != NULL);
+	int ret = pl_semaplore_init(&pl_default_mempool.sem, 1);
+	pl_assert(ret == OK);
 
+	g_pl_default_mempool = pl_mempool_init(pl_default_mempool.pool_data,
+	                                       0, PL_CFG_DEFAULT_MEMPOOL_SIZE, 3);
+	pl_assert(g_pl_default_mempool != NULL);
 	return OK;
 }

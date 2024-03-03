@@ -106,12 +106,13 @@ void list_add_node_behind(struct list_node *pos, struct list_node *node)
  * Return:
  *   void
  ************************************************************************************/
-void list_del_tail_node(struct list_node *head)
+struct list_node *list_del_tail_node(struct list_node *head)
 {
-	struct list_node *tail_prev = head->prev->prev;
+	struct list_node *tail = head->prev;
 
-	tail_prev->next = head;
-	head->prev = tail_prev;
+	tail->prev->next = head;
+	head->prev = tail->prev;
+	return tail;
 }
 
 /*************************************************************************************
@@ -123,12 +124,13 @@ void list_del_tail_node(struct list_node *head)
  * Return:
  *   void
  ************************************************************************************/
-void list_del_front_node(struct list_node *head)
+struct list_node *list_del_front_node(struct list_node *head)
 {
-	struct list_node *front_next = head->next->next;
+	struct list_node *front = head->next;
 
-	front_next->prev = head;
-	head->next = front_next;
+	front->next->prev = head;
+	head->next = front->next;
+	return front;
 }
 
 /*************************************************************************************

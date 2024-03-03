@@ -28,15 +28,61 @@ SOFTWARE.
 
 struct semaphore {
 	struct list_node wait_list;
-	uint_t semap_value;
+	int_t value;
 };
 
+#define PL_DEFINE_SEMAPHORE_AND_INIT(sem, val)  \
+	static struct semaphore sem = { \
+		.wait_list = LIST_INIT_VAL(wait_list), \
+		.value = (val) \
+	}
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int pl_semaplore_take(struct semaphore *semap, u32_t timeout_ticks);
+/*************************************************************************************
+ * Function Name: pl_semaplore_init
+ *
+ * Description:
+ *   initialize semaphore.
+ * 
+ * Parameters:
+ *  @semap: semaphore pointer;
+ *  @val: value of semaphore.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_semaplore_init(struct semaphore *semap, int val);
+
+/*************************************************************************************
+ * Function Name: pl_semaplore_take
+ *
+ * Description:
+ *    take semaphore.
+ * 
+ * Parameters:
+ *  @semap: semaphore pointer;
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_semaplore_take(struct semaphore *semap);
+
+/*************************************************************************************
+ * Function Name: pl_semaplore_give
+ *
+ * Description:
+ *    give semaphore.
+ * 
+ * Parameters:
+ *  @semap: semaphore pointer;
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_semaplore_give(struct semaphore *semap);
 
 #ifdef __cplusplus
 }

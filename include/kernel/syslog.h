@@ -29,6 +29,7 @@ SOFTWARE.
 #include <port.h>
 #include "../common/ansi_color.h"
 
+
 #ifdef PL_CFG_SYSLOG_ANSI_COLOR
 #define PL_EARLY_SYSLOG_WARN_ANSI_COLOR   ANSI_COLOR_FORE_YELLOW
 #define PL_EARLY_SYSLOG_ERR_ANSI_COLOR    ANSI_COLOR_FORE_RED
@@ -55,5 +56,16 @@ void pl_put_format_log(int (*putc)(const char c), const char *front,
 #define pl_early_syslog_err(fmt, ...)  \
 	pl_put_format_log(pl_port_putc, PL_EARLY_SYSLOG_ERR_ANSI_COLOR"[erro]", \
 	PL_EARLY_SYSLOG_ANSI_COLOR_RESET, fmt, ## __VA_ARGS__)
+
+#define pl_syslog(fmt, ...) \
+	do { \
+		pl_syslog_semaplore_take(); \
+		pl_early_syslog(fmt, ## __VA_ARGS__); \
+		pl_syslog_semaplore_give(); \
+	} while (false)
+
+void pl_syslog_semaplore_take(void);
+void pl_syslog_semaplore_give(void);
+
 
 #endif /* __KERNEL_SYSLOG_H__ */

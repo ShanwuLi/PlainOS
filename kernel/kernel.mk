@@ -29,4 +29,4 @@ C_SRCS += $(KERNEL_DIR)/list.c
 C_SRCS += $(KERNEL_DIR)/mempool.c
 C_SRCS += $(KERNEL_DIR)/syslog.c
 C_SRCS += $(KERNEL_DIR)/task.c
-#C_SRCS += $(KERNEL_DIR)/semaphore.c
+C_SRCS += $(KERNEL_DIR)/semaphore.c

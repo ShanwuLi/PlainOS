@@ -93,7 +93,7 @@ typedef void (*task_entry_t)(struct tcb *tcb);
 struct tcb *pl_task_get_curr_tcb(void);
 
 /*************************************************************************************
- * Function Name: pl_context_switch
+ * Function Name: pl_task_context_switch
  * Description: switch task.
  *
  * Parameters:
@@ -102,7 +102,7 @@ struct tcb *pl_task_get_curr_tcb(void);
  * Return:
  *   none
  ************************************************************************************/
-void pl_context_switch(void);
+void pl_task_context_switch(void);
 
 /*************************************************************************************
  * Function Name: pl_task_core_init

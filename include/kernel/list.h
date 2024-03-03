@@ -35,8 +35,15 @@ struct list_node {
 	struct list_node *next;
 };
 
-#define LIST_HEAD(name) \
-	struct list_node name = {.next = &(name), .prev = &(name)}
+#define LIST_HEAD(name) struct list_node name = { \
+		.next = &name, \
+		.prev = &name  \
+	}
+
+#define LIST_INIT_VAL(name)  { \
+		.prev = &name, \
+		.next = &name  \
+	}
 
 /*************************************************************************************
  * Function Name: list_for_each
@@ -177,9 +184,9 @@ void list_add_node_behind(struct list_node *pos, struct list_node *node);
  * Param:
  *   @head: head node of the list.
  * Return:
- *   void
+ *   @struct list_node: tail node;
  ************************************************************************************/
-void list_del_tail_node(struct list_node *head);
+struct list_node *list_del_tail_node(struct list_node *head);
 
 /*************************************************************************************
  * Function Name: list_del_front_node
@@ -188,9 +195,9 @@ void list_del_tail_node(struct list_node *head);
  * Param:
  *   @head: head node of the list.
  * Return:
- *   void
+ *   @struct list_node: front node;
  ************************************************************************************/
-void list_del_front_node(struct list_node *head);
+struct list_node *list_del_front_node(struct list_node *head);
 
 /*************************************************************************************
  * Function Name: list_del_node

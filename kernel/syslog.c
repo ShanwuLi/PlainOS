@@ -26,6 +26,10 @@ SOFTWARE.
 #include <types.h>
 #include <lib/string.h>
 #include <kernel/syslog.h>
+#include <kernel/semaphore.h>
+#include "syslog_private.h"
+
+static struct semaphore syslog_semaphore;
 
 /*************************************************************************************
  * Function Name: put_string
@@ -163,3 +167,20 @@ void pl_put_format_log(int (*putc)(const char c), const char *front,
 	va_end(valist);
 	put_string(putc, rear);
 }
+
+void pl_syslog_init(void)
+{
+	pl_semaplore_init(&syslog_semaphore, 1);
+}
+
+void pl_syslog_semaplore_take(void)
+{
+	pl_semaplore_take(&syslog_semaphore);
+}
+
+void pl_syslog_semaplore_give(void)
+{
+	pl_semaplore_give(&syslog_semaphore);
+}
+
+

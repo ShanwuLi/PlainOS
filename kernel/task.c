@@ -393,7 +393,7 @@ void pl_task_schedule_unlock(void)
 }
 
 /*************************************************************************************
- * Function Name: pl_context_switch
+ * Function Name: pl_task_context_switch
  * Description: switch task.
  *
  * Parameters:
@@ -402,7 +402,7 @@ void pl_task_schedule_unlock(void)
  * Return:
  *   none
  ************************************************************************************/
-void pl_context_switch(void)
+void pl_task_context_switch(void)
 {
 	u16_t hiprio;
 	struct tcb *curr_tcb;
@@ -449,7 +449,7 @@ static void task_entry(struct tcb *tcb)
 	}
 
 	pl_exit_critical();
-	pl_context_switch();
+	pl_task_context_switch();
 	/* will be never come here */
 	while(1);
 }
@@ -527,7 +527,7 @@ tid_t pl_task_create_with_stack(const char *name, main_t task, u16_t prio,
 	pl_enter_critical();
 	pl_task_insert_tcb_to_rdylist(tcb);
 	pl_exit_critical();
-	pl_context_switch();
+	pl_task_context_switch();
 
 	return tcb;
 }
@@ -562,7 +562,7 @@ int pl_task_join(tid_t tid, int *ret)
 	pl_task_remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
 	list_add_node_at_tail(&tcb->wait_head, &g_task_core_blk.curr_tcb->node);
 	pl_exit_critical();
-	pl_context_switch();
+	pl_task_context_switch();
 
 	if (ret != NULL)
 		*ret = g_task_core_blk.curr_tcb->wait_for_task_ret;
@@ -606,7 +606,7 @@ void pl_task_delay_ticks(u32_t ticks)
 	pl_task_remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
 	pl_task_insert_tcb_to_delaylist(g_task_core_blk.curr_tcb);
 	pl_exit_critical();
-	pl_context_switch();
+	pl_task_context_switch();
 }
 
 /*************************************************************************************
@@ -658,7 +658,7 @@ void pl_callee_systick_expiration(void)
 		rdy_list->head = list_next_entry(curr_tcb, struct tcb, node);
 
 		/* switch task */
-		pl_context_switch();
+		pl_task_context_switch();
 	}
 }
 
