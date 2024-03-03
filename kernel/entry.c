@@ -28,7 +28,7 @@ static int idle_task2(int argc, char *argv[])
 
 	pl_syslog_info("+++++++++++8\r\n");
 
-	while(1) {
+	while(argc < 900) {
 		//pl_schedule_lock();
 		pl_syslog_err("+++++++++++++++++++++++++++++++++++++++++++++++\r\n");
 		idle_task2_run_count++;

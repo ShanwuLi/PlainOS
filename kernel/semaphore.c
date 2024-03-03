@@ -105,7 +105,7 @@ int pl_semaplore_give(struct semaphore *semap)
 {
 	struct tcb *front_tcb;
 	struct list_node *front_node;
-	
+
 	if (semap == NULL)
 		return -EFAULT;
 
@@ -125,3 +125,46 @@ int pl_semaplore_give(struct semaphore *semap)
 	pl_exit_critical();
 	return OK;
 }
+
+/*************************************************************************************
+ * Function Name: pl_semaplore_give_from_isr
+ *
+ * Description:
+ *    give semaphore in interrupt context.
+ * 
+ * Parameters:
+ *  @semap: semaphore pointer;
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_semaplore_give_from_isr(struct semaphore *semap)
+{
+	/* TODO: */
+	USED(semap);
+	return OK;
+}
+
+/*************************************************************************************
+ * Function Name: pl_semaplore_trytake
+ *
+ * Description:
+ *    try taking semaphore with timeout.
+ * 
+ * Parameters:
+ *  @semap: semaphore pointer.
+ *  @timeout_ticks: ticks of timeout.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_semaplore_trytake(struct semaphore *semap, u32_t timeout_ticks)
+{
+	/* TODO: */
+	USED(semap);
+	USED(timeout_ticks);
+	for(;;) {
+
+	}
+}
+

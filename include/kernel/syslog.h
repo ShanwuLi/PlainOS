@@ -31,13 +31,19 @@ SOFTWARE.
 
 
 #ifdef PL_CFG_SYSLOG_ANSI_COLOR
-#define PL_EARLY_SYSLOG_WARN_ANSI_COLOR   ANSI_COLOR_FORE_YELLOW
-#define PL_EARLY_SYSLOG_ERR_ANSI_COLOR    ANSI_COLOR_FORE_RED
-#define PL_EARLY_SYSLOG_ANSI_COLOR_RESET  ANSI_COLOR_FORE_RESET
+	#define PL_EARLY_SYSLOG_WARN_ANSI_COLOR   ANSI_COLOR_FORE_YELLOW
+	#define PL_EARLY_SYSLOG_ERR_ANSI_COLOR    ANSI_COLOR_FORE_RED
+	#define PL_SYSLOG_WARN_ANSI_COLOR         ANSI_COLOR_FORE_YELLOW
+	#define PL_SYSLOG_ERR_ANSI_COLOR          ANSI_COLOR_FORE_RED
+	#define PL_EARLY_SYSLOG_ANSI_COLOR_RESET  ANSI_COLOR_FORE_RESET
+	#define PL_SYSLOG_ANSI_COLOR_RESET        ANSI_COLOR_FORE_RESET
 #else
-#define PL_EARLY_SYSLOG_WARN_ANSI_COLOR
-#define PL_EARLY_SYSLOG_ERR_ANSI_COLOR
-#define PL_EARLY_SYSLOG_ANSI_COLOR_RESET NULL
+	#define PL_EARLY_SYSLOG_WARN_ANSI_COLOR
+	#define PL_EARLY_SYSLOG_ERR_ANSI_COLOR
+	#define PL_SYSLOG_WARN_ANSI_COLOR
+	#define PL_SYSLOG_ERR_ANSI_COLOR
+	#define PL_EARLY_SYSLOG_ANSI_COLOR_RESET  NULL
+	#define PL_SYSLOG_ANSI_COLOR_RESET 
 #endif
 
 /*************************************************************************************
@@ -193,8 +199,8 @@ void pl_syslog(const char *fmt, ...);
  *  void.
  ************************************************************************************/
 #define pl_syslog_warn(fmt, ...)   \
-	pl_syslog(PL_EARLY_SYSLOG_WARN_ANSI_COLOR"[warn]"fmt"%s", \
-	          ## __VA_ARGS__, PL_EARLY_SYSLOG_ANSI_COLOR_RESET)
+	pl_syslog(PL_SYSLOG_WARN_ANSI_COLOR"[warn]"fmt \
+	PL_SYSLOG_ANSI_COLOR_RESET, ## __VA_ARGS__)
 
 /*************************************************************************************
  * Function Name: pl_syslog_err
@@ -213,7 +219,7 @@ void pl_syslog(const char *fmt, ...);
  *  void.
  ************************************************************************************/
 #define pl_syslog_err(fmt, ...)   \
-	pl_syslog(PL_EARLY_SYSLOG_ERR_ANSI_COLOR"[erro]"fmt"%s", \
-	          ## __VA_ARGS__, PL_EARLY_SYSLOG_ANSI_COLOR_RESET)
+	pl_syslog(PL_SYSLOG_ERR_ANSI_COLOR"[erro]"fmt \
+	PL_SYSLOG_ANSI_COLOR_RESET, ## __VA_ARGS__)
 
 #endif /* __KERNEL_SYSLOG_H__ */

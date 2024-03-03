@@ -84,6 +84,35 @@ int pl_semaplore_take(struct semaphore *semap);
  ************************************************************************************/
 int pl_semaplore_give(struct semaphore *semap);
 
+/*************************************************************************************
+ * Function Name: pl_semaplore_give_from_isr
+ *
+ * Description:
+ *    give semaphore in interrupt context.
+ * 
+ * Parameters:
+ *  @semap: semaphore pointer;
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_semaplore_give_from_isr(struct semaphore *semap);
+
+/*************************************************************************************
+ * Function Name: pl_semaplore_trytake
+ *
+ * Description:
+ *    try taking semaphore with timeout.
+ * 
+ * Parameters:
+ *  @semap: semaphore pointer.
+ *  @timeout_ticks: ticks of timeout.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_semaplore_trytake(struct semaphore *semap, u32_t timeout_ticks);
+
 #ifdef __cplusplus
 }
 #endif
