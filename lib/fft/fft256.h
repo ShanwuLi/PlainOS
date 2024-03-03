@@ -45,7 +45,7 @@ typedef struct {
  * Return:
  *  void.
  ************************************************************************************/
-int pl_fft256(complex_num_t *xi, complex_num_t *xo);
+int pl_fft256(complex_num_t xi[256], complex_num_t xo[256]);
 
 /*************************************************************************************
  * Function Name: pl_ifft256
@@ -60,6 +60,6 @@ int pl_fft256(complex_num_t *xi, complex_num_t *xo);
  * Return:
  *  void.
  ************************************************************************************/
-int pl_ifft256(complex_num_t *xi, complex_num_t *xo);
+int pl_ifft256(complex_num_t xi[256], complex_num_t xo[256]);
 
 #endif /* __PL_LIB_FFT256_H__ */

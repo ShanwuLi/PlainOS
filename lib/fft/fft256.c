@@ -124,7 +124,7 @@ static void butterfly_calculate(complex_num_t *xi1, complex_num_t *xi2,
  * Return:
  *  void.
  ************************************************************************************/
-int pl_fft256(complex_num_t *xi, complex_num_t *xo)
+int pl_fft256(complex_num_t xi[256], complex_num_t xo[256])
 {
 	int i;
 	int j;
@@ -167,7 +167,7 @@ int pl_fft256(complex_num_t *xi, complex_num_t *xo)
  * Return:
  *  void.
  ************************************************************************************/
-int pl_ifft256(complex_num_t *xi, complex_num_t *xo)
+int pl_ifft256(complex_num_t xi[256], complex_num_t xo[256])
 {
 	int i;
 	s64_t k;
