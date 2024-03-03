@@ -44,10 +44,8 @@ SOFTWARE.
 		do { \
 			if (!(assertion)) { \
 				pl_enter_critical(); \
-				pl_early_syslog(PL_EARLY_SYSLOG_ERR_ANSI_COLOR\
-				               "[ASSERT]:func:%s, line:%d%s\r\n", \
-				                __func__, __LINE__, \
-				                PL_EARLY_SYSLOG_ANSI_COLOR_RESET); \
+				pl_early_syslog_err("=>[ASSERT]:func:%s, line:%d\r\n", \
+				                   __func__, __LINE__); \
 	            while(1); \
 	            pl_exit_critical(); \
 	        } \

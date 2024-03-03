@@ -42,7 +42,7 @@ SOFTWARE.
 	#define PL_EARLY_SYSLOG_ERR_ANSI_COLOR
 	#define PL_SYSLOG_WARN_ANSI_COLOR
 	#define PL_SYSLOG_ERR_ANSI_COLOR
-	#define PL_EARLY_SYSLOG_ANSI_COLOR_RESET  NULL
+	#define PL_EARLY_SYSLOG_ANSI_COLOR_RESET
 	#define PL_SYSLOG_ANSI_COLOR_RESET 
 #endif
 
@@ -56,16 +56,13 @@ SOFTWARE.
  *   [$(front)][$(fmt)][$(rear)]
  *
  * Parameters:
- *  @putc: format string.
- *  @front: front string of fmt.
  *  @rear: rear string of fmt.
  *  @fmt: format string.
  *
  * Return:
  *  void.
  ************************************************************************************/
-void pl_put_early_format_log(int (*putc)(const char c), const char *front,
-                             const char *rear, const char *fmt, ...);
+void pl_put_early_format_log(int (*putc)(const char c), const char *fmt, ...);
 
 /*************************************************************************************
  * Function Name: pl_early_syslog
@@ -84,7 +81,7 @@ void pl_put_early_format_log(int (*putc)(const char c), const char *front,
  *  void.
  ************************************************************************************/
 #define pl_early_syslog(fmt, ...)  \
-	pl_put_early_format_log(pl_port_putc, NULL, NULL, fmt, ## __VA_ARGS__)
+	pl_put_early_format_log(pl_port_putc, fmt, ## __VA_ARGS__)
 
 /*************************************************************************************
  * Function Name: pl_early_syslog_info
@@ -103,7 +100,7 @@ void pl_put_early_format_log(int (*putc)(const char c), const char *front,
  *  void.
  ************************************************************************************/
 #define pl_early_syslog_info(fmt, ...)  \
-	pl_put_early_format_log(pl_port_putc, "[info]", NULL, fmt, ## __VA_ARGS__)
+	pl_put_early_format_log(pl_port_putc, "[info]"fmt, ## __VA_ARGS__)
 
 /*************************************************************************************
  * Function Name: pl_early_syslog_warn
@@ -122,8 +119,8 @@ void pl_put_early_format_log(int (*putc)(const char c), const char *front,
  *  void.
  ************************************************************************************/
 #define pl_early_syslog_warn(fmt, ...)  \
-	pl_put_early_format_log(pl_port_putc, PL_EARLY_SYSLOG_WARN_ANSI_COLOR"[warn]", \
-	PL_EARLY_SYSLOG_ANSI_COLOR_RESET, fmt, ## __VA_ARGS__)
+	pl_put_early_format_log(pl_port_putc, PL_EARLY_SYSLOG_WARN_ANSI_COLOR"[warn]"fmt \
+	PL_EARLY_SYSLOG_ANSI_COLOR_RESET, ## __VA_ARGS__)
 
 /*************************************************************************************
  * Function Name: pl_early_syslog_err
@@ -142,8 +139,8 @@ void pl_put_early_format_log(int (*putc)(const char c), const char *front,
  *  void.
  ************************************************************************************/
 #define pl_early_syslog_err(fmt, ...)  \
-	pl_put_early_format_log(pl_port_putc, PL_EARLY_SYSLOG_ERR_ANSI_COLOR"[erro]", \
-	PL_EARLY_SYSLOG_ANSI_COLOR_RESET, fmt, ## __VA_ARGS__)
+	pl_put_early_format_log(pl_port_putc, PL_EARLY_SYSLOG_ERR_ANSI_COLOR"[erro]"fmt \
+	PL_EARLY_SYSLOG_ANSI_COLOR_RESET, ## __VA_ARGS__)
 
 /*************************************************************************************
  * Function Name: pl_put_format_log

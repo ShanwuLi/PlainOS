@@ -73,6 +73,20 @@ static void put_chars(int (*putc)(const char c),
 		putc(*ch);
 }
 
+/*************************************************************************************
+ * Function Name: vformat_log
+ *
+ * Description:
+ *   put chars using puc with va_list.
+ *
+ * Param:
+ *   @putc: putc function.
+ *   @fmt: format string.
+ *   @valist: variable arguments list.
+ * 
+ * Return:
+ *   none.
+ ************************************************************************************/
 static void vformat_log(int (*putc)(const char c), const char *fmt, va_list valist)
 {
 	char str[24];
@@ -154,23 +168,20 @@ static void vformat_log(int (*putc)(const char c), const char *fmt, va_list vali
  *
  * Param:
  *   @putc: putc function.
- *   @front: the front of fmt.
- *   @rear: the rear of fmt .
  *   @fmt: format string.
  * 
  * Return:
  *   none.
  ************************************************************************************/
-void pl_put_early_format_log(int (*putc)(const char c), const char *front,
-                             const char *rear, const char *fmt, ...)
+void pl_put_early_format_log(int (*putc)(const char c), const char *fmt, ...)
 {
 	va_list valist;
 
-	put_string(putc, front);
+	//put_string(putc, front);
 	va_start(valist, fmt);
 	vformat_log(putc, fmt, valist);
 	va_end(valist);
-	put_string(putc, rear);
+	//put_string(putc, rear);
 }
 
 /*************************************************************************************
