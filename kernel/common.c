@@ -22,7 +22,10 @@ SOFTWARE.
 */
 
 #include <types.h>
+#include <port.h>
 #include <kernel/kernel.h>
+
+static volatile int pl_critical_ref = 0;
 
 /*************************************************************************************
  * Function Name: pl_count_cmp
@@ -43,4 +46,40 @@ s32_t pl_count_cmp(struct count *c1, struct count *c2)
 	s32_t lo_diff = c1->lo32 - c2->lo32;
 
 	return hi_diff == 0 ? lo_diff : hi_diff;
+}
+
+/*************************************************************************************
+ * Function Name: void pl_enter_critical(void)
+ * Description: enter critical area.
+ *
+ * Parameters:
+ *   none
+ *
+ * Return:
+ *   void.
+ ************************************************************************************/
+void pl_enter_critical(void)
+{
+	pl_port_mask_interrupts();
+	pl_port_cpu_isb();
+	++pl_critical_ref;
+}
+
+/*************************************************************************************
+ * Function Name: void pl_exit_critical(void)
+ * Description: exit critical area.
+ *
+ * Parameters:
+ *   none
+ *
+ * Return:
+ *   void.
+ ************************************************************************************/
+void pl_exit_critical(void)
+{
+	--pl_critical_ref;
+	if (pl_critical_ref == 0) {
+		pl_port_unmask_interrupts();
+		pl_port_cpu_isb();
+	}
 }

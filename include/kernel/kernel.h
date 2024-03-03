@@ -68,4 +68,29 @@ struct count {
  ************************************************************************************/
 s32_t pl_count_cmp(struct count *c1, struct count *c2);
 
+/*************************************************************************************
+ * Function Name: void pl_enter_critical(void)
+ * Description: enter critical area.
+ *
+ * Parameters:
+ *   none
+ *
+ * Return:
+ *   void.
+ ************************************************************************************/
+void pl_enter_critical(void);
+
+/*************************************************************************************
+ * Function Name: void pl_exit_critical(void)
+ * Description: exit critical area.
+ *
+ * Parameters:
+ *   none
+ *
+ * Return:
+ *   void.
+ ************************************************************************************/
+void pl_exit_critical(void);
+
+
 #endif /* __KERNEL_KERNEL_H__ */

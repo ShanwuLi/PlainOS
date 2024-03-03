@@ -32,9 +32,94 @@ SOFTWARE.
  * Description:
  *   type defitions.
  ************************************************************************************/
-typedef uintptr_t irqstate_t;
+
+////////////////////////////// macros need to implement //////////////////////////////
+/*************************************************************************************
+ * Function Name: pl_port_cpu_barrier
+ *
+ * Description:
+ *   compiler barrier.
+ *
+ * Parameters:
+ *   none.
+ *
+ * Return:
+ *   void.
+ ************************************************************************************/
+#define pl_port_cpu_barrier   asm volatile("": : :"memory")
 
 //////////////////////////////////// extern  ports ///////////////////////////////////
+/*************************************************************************************
+ * Function Name: pl_port_cpu_dmb
+ *
+ * Description:
+ *   The function is used to store data meory barrier (data memory barrier).
+ *
+ * Parameters:
+ *   none.
+ *
+ * Return:
+ *   void.
+ ************************************************************************************/
+void pl_port_cpu_dmb(void);
+
+/*************************************************************************************
+ * Function Name: pl_port_cpu_dsb
+ *
+ * Description:
+ *   The function is used to synchronise data (data synchronization barrier).
+ *
+ * Parameters:
+ *   none.
+ *
+ * Return:
+ *   void.
+ ************************************************************************************/
+void pl_port_cpu_dsb(void);
+
+/*************************************************************************************
+ * Function Name: pl_port_cpu_dsb
+ *
+ * Description:
+ *   The function is used to synchronise instruction
+ *   (instruction synchronization barrier).
+ *
+ * Parameters:
+ *   none.
+ *
+ * Return:
+ *   void.
+ ************************************************************************************/
+void pl_port_cpu_isb(void);
+
+/*************************************************************************************
+ * Function Name: pl_port_mask_interrupts
+ *
+ * Description:
+ *   The function is used to mask all interrupt.
+ *
+ * Parameters:
+ *   none.
+ *
+ * Return:
+ *   void.
+ ************************************************************************************/
+void pl_port_mask_interrupts(void);
+
+/*************************************************************************************
+ * Function Name: pl_port_mask_interrupts
+ *
+ * Description:
+ *   The function is used to unmask all interrupt.
+ *
+ * Parameters:
+ *   none.
+ *
+ * Return:
+ *   void.
+ ************************************************************************************/
+void pl_port_unmask_interrupts(void);
+
 /*************************************************************************************
  * Function Name: pl_port_putc_init
  *
@@ -189,43 +274,6 @@ u32_t pl_port_rodata_read32(void *addr);
  *   data of uintptr_t.
  ************************************************************************************/
 uintptr_t pl_port_rodata_read(void *addr);
-
-/*************************************************************************************
- * Function Name: pl_port_irq_save
- * for example in atmega128:
- *  irqstate_t pl_port_irq_save(void)
- *  {
- *     return SREG;
- *  }
- *
- * Description:
- *   The function is used to save interrupt mask status.
- *
- * Parameters:
- *   none.
- *
- * Return:
- *  The interrupt mask status we want to save.
- ************************************************************************************/
-irqstate_t pl_port_irq_save(void);
-
-/*************************************************************************************
- * Function Name: pl_port_irq_restore
- *
- * Description:
- *   The function is used to restore interrupt mask status.
- *   void pl_port_irq_restore(irqstate_t irqstate)
- *   {
- *      SREG = (u8_t)irqstate;
- *   }
- *
- * Parameters:
- *   none.
- *
- * Return:
- *  The interrupt status we want to restore.
- ************************************************************************************/
-void pl_port_irq_restore(irqstate_t irqstate);
 
 /*************************************************************************************
  * Function Name: pl_port_switch_context

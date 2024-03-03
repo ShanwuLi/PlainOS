@@ -11,6 +11,10 @@
 
 .global PendSV_Handler
 .global pl_port_switch_context
+.global pl_port_cpu_dmb
+.global pl_port_cpu_dsb
+.global pl_port_cpu_isb
+
 
 /*
 在Thumb模式下，push/pop是单独的指令，具有自己的助记符和操作码。e.g. b500 push {lr}。
@@ -92,3 +96,21 @@ switch_bottom:
 	cpsie i  /* enable interrupt */
 	bx    lr
 
+////////////// barrier implement //////////////////
+.section .text.pl_port_cpu_dmb
+.type pl_port_cpu_dmb, %function
+pl_port_cpu_dmb:
+	dmb 0xF
+	bx  lr
+
+.section .text.pl_port_cpu_dsb
+.type pl_port_cpu_dsb, %function
+pl_port_cpu_dsb:
+	dsb 0xF
+	bx  lr
+
+.section .text.pl_port_cpu_isb
+.type pl_port_cpu_isb, %function
+pl_port_cpu_isb:
+	isb 0xF
+	bx  lr

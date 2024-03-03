@@ -21,25 +21,25 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#include <config.h>
 #include <errno.h>
-#include <pl_port.h>
+#include <port.h>
 #include <kernel/list.h>
-#include <kernel/task.h>
 #include <kernel/semaphore.h>
+#include "task_private.h"
 
 int pl_semaplore_take(struct semaphore *semap)
 {
-	irqstate_t irqstate;
 	struct tcb *curr_tcb;
 
 	if (IS_ERR_OR_NULL(semap))
 		return -EFAULT;
 
-	irqstate = pl_port_irq_save();
+	pl_enter_critical();
 	curr_tcb = pl_task_get_curr_tcb;
 	
 
-	pl_port_irq_restore(irqstate);
+	pl_exit_critical();
 
 	return 0;
 }

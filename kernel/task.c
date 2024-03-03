@@ -370,11 +370,9 @@ void *pl_callee_get_next_context(void)
  ************************************************************************************/
 void pl_task_schedule_lock(void)
 {
-	irqstate_t irqstate;
-
-	irqstate = pl_port_irq_save();
+	pl_enter_critical();
 	++g_task_core_blk.sched_lock_ref;
-	pl_port_irq_restore(irqstate);
+	pl_exit_critical();
 }
 
 /*************************************************************************************
@@ -389,11 +387,9 @@ void pl_task_schedule_lock(void)
  ************************************************************************************/
 void pl_task_schedule_unlock(void)
 {
-	irqstate_t irqstate;
-
-	irqstate = pl_port_irq_save();
+	pl_enter_critical();
 	--g_task_core_blk.sched_lock_ref;
-	pl_port_irq_restore(irqstate);
+	pl_exit_critical();
 }
 
 /*************************************************************************************
@@ -409,15 +405,14 @@ void pl_task_schedule_unlock(void)
 void pl_context_switch(void)
 {
 	u16_t hiprio;
-	irqstate_t irqstate;
 	struct tcb *curr_tcb;
 	struct tcb *next_tcb;
 
-	irqstate = pl_port_irq_save();
+	pl_enter_critical();
 	hiprio = get_hiprio();
 	curr_tcb = g_task_core_blk.curr_tcb;
 	next_tcb = g_task_core_blk.ready_list[hiprio].head;
-	pl_port_irq_restore(irqstate);
+	pl_exit_critical();
 
 	if (curr_tcb != next_tcb)
 		pl_port_switch_context();
@@ -437,11 +432,10 @@ static void task_entry(struct tcb *tcb)
 {
 	struct tcb *pos;
 	struct tcb *tmp;
-	irqstate_t irqstate;
 	int exit_val = tcb->task(tcb->argc, tcb->argv);
 
 	/* task exit and clean up resources of current tcb */
-	irqstate = pl_port_irq_save();
+	pl_enter_critical();
 	tcb->curr_state = PL_TASK_STATE_EXIT;
 	pl_task_remove_tcb_from_rdylist(tcb);
 
@@ -454,7 +448,7 @@ static void task_entry(struct tcb *tcb)
 		pos->wait_for_task_ret = exit_val;
 	}
 
-	pl_port_irq_restore(irqstate);
+	pl_exit_critical();
 	pl_context_switch();
 	/* will be never come here */
 	while(1);
@@ -514,7 +508,6 @@ tid_t pl_task_create_with_stack(const char *name, main_t task, u16_t prio,
                                 int argc, char *argv[])
 {
 	struct tcb *tcb;
-	irqstate_t irqstate;
 
 	if (task == NULL || stack == NULL) {
 		pl_early_syslog_err("task or stack is NULL\n");
@@ -531,9 +524,9 @@ tid_t pl_task_create_with_stack(const char *name, main_t task, u16_t prio,
 	task_init_tcb(name, task, prio, tcb, stack, argc, argv);
 	list_init(&tcb->wait_head);
 
-	irqstate = pl_port_irq_save();
+	pl_enter_critical();
 	pl_task_insert_tcb_to_rdylist(tcb);
-	pl_port_irq_restore(irqstate);
+	pl_exit_critical();
 	pl_context_switch();
 
 	return tcb;
@@ -554,7 +547,6 @@ tid_t pl_task_create_with_stack(const char *name, main_t task, u16_t prio,
  ************************************************************************************/
 int pl_task_join(tid_t tid, int *ret)
 {
-	irqstate_t irqstate;
 	struct tcb *tcb = (struct tcb *)tid;
 
 	if (tcb == NULL)
@@ -563,13 +555,13 @@ int pl_task_join(tid_t tid, int *ret)
 	if (tcb->curr_state == PL_TASK_STATE_EXIT)
 		return OK;
 
-	irqstate = pl_port_irq_save();
+	pl_enter_critical();
 	g_task_core_blk.curr_tcb->curr_state = PL_TASK_STATE_WAITING;
 	g_task_core_blk.curr_tcb->past_state = PL_TASK_STATE_READY;
 
 	pl_task_remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
 	list_add_node_at_tail(&tcb->wait_head, &g_task_core_blk.curr_tcb->node);
-	pl_port_irq_restore(irqstate);
+	pl_exit_critical();
 	pl_context_switch();
 
 	if (ret != NULL)
@@ -592,14 +584,13 @@ int pl_task_join(tid_t tid, int *ret)
  ************************************************************************************/
 void pl_task_delay_ticks(u32_t ticks)
 {
-	irqstate_t irqstate;
 	u32_t end_ticks_lo32;
 	u32_t end_ticks_hi32;
 
 	if (ticks == 0)
 		return;
 
-	irqstate = pl_port_irq_save();
+	pl_enter_critical();
 	end_ticks_lo32 = g_task_core_blk.systicks.lo32;
 	end_ticks_hi32 = g_task_core_blk.systicks.hi32;
 
@@ -614,7 +605,7 @@ void pl_task_delay_ticks(u32_t ticks)
 
 	pl_task_remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
 	pl_task_insert_tcb_to_delaylist(g_task_core_blk.curr_tcb);
-	pl_port_irq_restore(irqstate);
+	pl_exit_critical();
 	pl_context_switch();
 }
 

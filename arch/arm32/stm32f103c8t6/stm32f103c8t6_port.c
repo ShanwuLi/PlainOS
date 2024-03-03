@@ -3,6 +3,7 @@
 #include "early_setup/early_uart.h"
 #include "stm32f10x.h"
 
+
 int pl_port_putc_init(void)
 {
 	NVIC_EnableIRQ(PendSV_IRQn);
@@ -17,17 +18,14 @@ int pl_port_putc(char c)
 	return ret;
 }
 
-irqstate_t pl_port_irq_save(void)
+void pl_port_mask_interrupts(void)
 {
-	irqstate_t irqstate = 0;
 	__asm__ volatile("cpsid	i\n\t");     /*< 关中断 */
-	return irqstate;
 }
 
-void pl_port_irq_restore(irqstate_t irqstate)
+void pl_port_unmask_interrupts(void)
 {
-	__asm__ volatile("cpsie	i\n\t");     /*< 关中断 */
-	(void)irqstate;
+	__asm__ volatile("cpsie	i\n\t");     /*< 开中断 */
 }
 
 //RTS OS滴答定时器初始化，移植时需要用户自己实现

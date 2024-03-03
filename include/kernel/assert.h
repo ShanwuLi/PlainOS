@@ -27,6 +27,7 @@ SOFTWARE.
 #include <config.h>
 #include <port.h>
 #include <kernel/syslog.h>
+#include <kernel/kernel.h>
 
 /*************************************************************************************
  * Function Name: pl_assert
@@ -41,15 +42,14 @@ SOFTWARE.
 #ifdef PL_CFG_ASSERT
 #define pl_assert(assertion)    \
 	    do { \
-	        irqstate_t irqstate; \
 	        if (!(assertion)) { \
-	            irqstate = pl_port_irq_save(); \
+	            pl_enter_critical(); \
 	            pl_early_syslog(PL_EARLY_SYSLOG_ERR_ANSI_COLOR\
 	                           "[ASSERT]:func:%s, line:%d\r\n" \
 	                           PL_EARLY_SYSLOG_ANSI_COLOR_RESET, \
 	                            __func__, __LINE__); \
 	            while(1); \
-	            pl_port_irq_restore(irqstate); \
+	            pl_exit_critical(); \
 	        } \
 	    } while (false)
 #else
