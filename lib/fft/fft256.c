@@ -173,6 +173,9 @@ int pl_ifft256(complex_num_t *xi, complex_num_t *xo)
 	s64_t k;
 	int ret;
 
+	if (xi == NULL || xo == NULL)
+		return -EFAULT;
+
 	for(i = 0; i < 256; i++) {
 		k = (xi + i)->imag;
 		k = -k ;
