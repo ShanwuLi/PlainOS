@@ -26,7 +26,6 @@ SOFTWARE.
 
 #include <types.h>
 #include <stddef.h>
-#include <kernel/kernel.h>
 
 /*************************************************************************************
  * Description:
@@ -36,7 +35,7 @@ SOFTWARE.
 ////////////////////////////// macros need to implement //////////////////////////////
 /*************************************************************************************
  * Function Name: pl_port_cpu_barrier
- *
+ * 
  * Description:
  *   compiler barrier.
  *
