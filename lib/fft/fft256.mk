@@ -20,7 +20,4 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-LIB_DIR := $(TOPDIR)/lib
-
--include $(LIB_DIR)/string/string.mk
--include $(LIB_DIR)/fft/fft256.mk
+C_SRCS += $(LIB_DIR)/fft/fft256.c
