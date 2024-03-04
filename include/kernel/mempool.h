@@ -27,8 +27,8 @@ SOFTWARE.
 #include <types.h>
 #include <stddef.h>
 
-typedef void *pl_mempool_t;
-extern pl_mempool_t g_pl_default_mempool;
+typedef void *pl_mempool_handle_t;
+extern pl_mempool_handle_t g_pl_default_mempool;
 
 #ifdef __cplusplus
 extern "C" {
@@ -65,8 +65,8 @@ int pl_default_mempool_init(void);
  * Return:
  *   handle of memory pool.
  ************************************************************************************/
-pl_mempool_t pl_mempool_init(void *pool, ushrt_t id,
-                               size_t pool_size, uchar_t grain_order);
+pl_mempool_handle_t pl_mempool_init(void *pool, ushrt_t id,
+                                  size_t pool_size, uchar_t grain_order);
 
 /*************************************************************************************
  * Function Name: pl_mempool_malloc
@@ -81,7 +81,7 @@ pl_mempool_t pl_mempool_init(void *pool, ushrt_t id,
  * Return:
  *   address of memory.
  ************************************************************************************/
-void *pl_mempool_malloc(pl_mempool_t mempool, size_t size);
+void *pl_mempool_malloc(pl_mempool_handle_t mempool, size_t size);
 
 /*************************************************************************************
  * Function Name: pl_mempool_free
@@ -96,7 +96,7 @@ void *pl_mempool_malloc(pl_mempool_t mempool, size_t size);
  * Return:
  *   void.
  ************************************************************************************/
-void pl_mempool_free(pl_mempool_t mempool, void *p);
+void pl_mempool_free(pl_mempool_handle_t mempool, void *p);
 
 /*************************************************************************************
  * Function Name: pl_mempool_get_free_bytes
@@ -110,7 +110,7 @@ void pl_mempool_free(pl_mempool_t mempool, void *p);
  * Return:
  *   remaining size of memory pool.
  ************************************************************************************/
-size_t pl_mempool_get_free_bytes(pl_mempool_t mempool);
+size_t pl_mempool_get_free_bytes(pl_mempool_handle_t mempool);
 
 
 /*************************************************************************************
@@ -128,7 +128,7 @@ size_t pl_mempool_get_free_bytes(pl_mempool_t mempool);
  * Return:
  *   the end of setting value address.
  ************************************************************************************/
-void *pl_mempool_set(pl_mempool_t mempool, void *p, uint8_t val, size_t size);
+void *pl_mempool_set(pl_mempool_handle_t mempool, void *p, uint8_t val, size_t size);
 
 /*************************************************************************************
  * Function Name: pl_mempool_zalloc
@@ -144,7 +144,7 @@ void *pl_mempool_set(pl_mempool_t mempool, void *p, uint8_t val, size_t size);
  * Return:
  *   memory address.
  ************************************************************************************/
-void *pl_mempool_zalloc(pl_mempool_t mempool, size_t size);
+void *pl_mempool_zalloc(pl_mempool_handle_t mempool, size_t size);
 
 /*************************************************************************************
  * Function Name: pl_mempool_calloc
@@ -161,7 +161,7 @@ void *pl_mempool_zalloc(pl_mempool_t mempool, size_t size);
  * Return:
  *   memory address.
  ************************************************************************************/
-void *pl_mempool_calloc(pl_mempool_t mempool, size_t num, size_t size);
+void *pl_mempool_calloc(pl_mempool_handle_t mempool, size_t num, size_t size);
 
 #ifdef __cplusplus
 }

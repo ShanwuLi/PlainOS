@@ -29,28 +29,59 @@ SOFTWARE.
 #include <kernel/semaphore.h>
 #include "task_private.h"
 #include <kernel/syslog.h>
+#include <kernel/mempool.h>
+#include "semaphore_private.h"
 
 /*************************************************************************************
  * Function Name: pl_semaplore_init
  *
  * Description:
- *   initialize semaphore.
+ *   request a semaphore.
  * 
  * Parameters:
- *  @semap: semaphore pointer;
+ *  @semap: semaphore.
  *  @val: value of semaphore.
  *
  * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
+ *  Greater than or equal to 0 on success, less than 0 on failure..
  ************************************************************************************/
 int pl_semaplore_init(struct semaphore *semap, int val)
 {
-	if (semap == NULL)
+	if (semap == NULL) {
+		pl_syslog_err("pl_sem alloc failed\r\n");
 		return -EFAULT;
+	}
 
 	semap->value = val;
 	list_init(&semap->wait_list);
 	return OK;
+}
+
+/*************************************************************************************
+ * Function Name: pl_semaplore_request
+ *
+ * Description:
+ *   request a semaphore.
+ * 
+ * Parameters:
+ *  @val: value of semaphore.
+ *
+ * Return:
+ *  @semaphore_handle.
+ ************************************************************************************/
+pl_semaphore_handle_t pl_semaplore_request(int val)
+{
+	struct semaphore *semap;
+
+	semap = pl_mempool_malloc(g_pl_default_mempool, sizeof(struct semaphore));
+	if (semap == NULL) {
+		pl_syslog_err("pl_sem alloc failed\r\n");
+		return ERR_TO_PTR(-EFAULT);
+	}
+
+	semap->value = val;
+	list_init(&semap->wait_list);
+	return semap;
 }
 
 /*************************************************************************************
@@ -60,26 +91,27 @@ int pl_semaplore_init(struct semaphore *semap, int val)
  *    take semaphore.
  * 
  * Parameters:
- *  @semap: semaphore pointer;
+ *  @semap: semaphore handle.
  *
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_semaplore_take(struct semaphore *semap)
+int pl_semaplore_take(pl_semaphore_handle_t semap)
 {
 	struct tcb *curr_tcb;
+	struct semaphore *sem = (struct semaphore *)semap;
 
 	if (semap == NULL)
 		return -EFAULT;
 
 	pl_enter_critical();
-	--semap->value;
-	if (semap->value < 0) {
+	--sem->value;
+	if (sem->value < 0) {
 		curr_tcb = pl_task_get_curr_tcb();
 		curr_tcb->curr_state = PL_TASK_STATE_WAITING;
 		curr_tcb->past_state = PL_TASK_STATE_READY;
 		pl_task_remove_tcb_from_rdylist(curr_tcb);
-		list_add_node_at_tail(&semap->wait_list, &curr_tcb->node);
+		list_add_node_at_tail(&sem->wait_list, &curr_tcb->node);
 		pl_exit_critical();
 		pl_task_context_switch();
 		return OK;
@@ -96,23 +128,24 @@ int pl_semaplore_take(struct semaphore *semap)
  *    give semaphore.
  * 
  * Parameters:
- *  @semap: semaphore pointer;
+ *  @semap: semaphore handle.
  *
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_semaplore_give(struct semaphore *semap)
+int pl_semaplore_give(pl_semaphore_handle_t semap)
 {
 	struct tcb *front_tcb;
 	struct list_node *front_node;
+	struct semaphore *sem = (struct semaphore *)semap;
 
 	if (semap == NULL)
 		return -EFAULT;
 
 	pl_enter_critical();
-	++semap->value;
-	if (semap->value <= 0) {
-		front_node = list_del_front_node(&semap->wait_list);
+	++sem->value;
+	if (sem->value <= 0) {
+		front_node = list_del_front_node(&sem->wait_list);
 		front_tcb = container_of(front_node, struct tcb, node);
 		front_tcb->curr_state = PL_TASK_STATE_READY;
 		front_tcb->past_state = PL_TASK_STATE_WAITING;
@@ -127,44 +160,24 @@ int pl_semaplore_give(struct semaphore *semap)
 }
 
 /*************************************************************************************
- * Function Name: pl_semaplore_give_from_isr
+ * Function Name: pl_semaplore_release
  *
  * Description:
- *    give semaphore in interrupt context.
+ *   release a semaphore.
  * 
  * Parameters:
- *  @semap: semaphore pointer;
+ *   @semap: semaphore handle;
  *
  * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
+ *   void.
  ************************************************************************************/
-int pl_semaplore_give_from_isr(struct semaphore *semap)
+void pl_semaplore_release(pl_semaphore_handle_t semap)
 {
-	/* TODO: */
-	USED(semap);
-	return OK;
+	struct semaphore *sem = (struct semaphore *)semap;
+
+	if (sem == NULL)
+		return;
+
+	sem->value = 0;
+	pl_mempool_free(g_pl_default_mempool, sem);
 }
-
-/*************************************************************************************
- * Function Name: pl_semaplore_trytake
- *
- * Description:
- *    try taking semaphore with timeout.
- * 
- * Parameters:
- *  @semap: semaphore pointer.
- *  @timeout_ticks: ticks of timeout.
- *
- * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
-int pl_semaplore_trytake(struct semaphore *semap, u32_t timeout_ticks)
-{
-	/* TODO: */
-	USED(semap);
-	USED(timeout_ticks);
-	for(;;) {
-
-	}
-}
-

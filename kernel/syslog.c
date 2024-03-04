@@ -28,6 +28,7 @@ SOFTWARE.
 #include <kernel/syslog.h>
 #include <kernel/semaphore.h>
 #include "syslog_private.h"
+#include "semaphore_private.h"
 
 static struct semaphore syslog_semaphore;
 

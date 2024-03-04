@@ -12,12 +12,6 @@
 #include <kernel/mempool.h>
 #include "syslog_private.h"
 
-static u32_t g_pl_idle_task_stack[256];
-
-static u32_t g_pl_idle_task_stack1[256];
-
-static u32_t g_pl_idle_task_stack2[256];
-
 volatile u32_t idle_task2_run_count = 0;
 volatile u32_t idle_task1_run_count = 0;
 
@@ -33,7 +27,7 @@ static int idle_task2(int argc, char *argv[])
 		pl_syslog_err("+++++++++++++++++++++++++++++++++++++++++++++++\r\n");
 		idle_task2_run_count++;
 		//pl_schedule_unlock();
-		//pl_task_delay_ticks(1000);
+		pl_task_delay_ticks(100);
 		argc++;
 	}
 
@@ -51,9 +45,7 @@ static int idle_task1(int argc, char *argv[])
 	tid_t tcb;
 
 	pl_syslog_err("////////////////8\r\n");
-	tcb = pl_task_create_with_stack("idle_task2", idle_task2, PL_CFG_PRIORITIES_MAX,
-	                           g_pl_idle_task_stack2,
-	                           sizeof(g_pl_idle_task_stack2), 0, NULL);
+	tcb = pl_task_create("idle_task2", idle_task2, PL_CFG_PRIORITIES_MAX, 512, 0, NULL);
 
 	pl_task_join(tcb, &ret);
 	pl_syslog_info("%s: ret:%d\r\n", "idle_task1", ret);
@@ -64,7 +56,7 @@ static int idle_task1(int argc, char *argv[])
 		pl_syslog_err("////////////////////////////////////////////\r\n");
 		idle_task1_run_count++;
 		//pl_schedule_unlock();
-		//pl_task_delay_ticks(50);
+		pl_task_delay_ticks(5000);
 	}
 
 	return 900;
@@ -77,9 +69,7 @@ static int idle_task(int argc, char *argv[])
 
 	pl_port_systick_init();
 	pl_syslog_info("============8\r\n");
-	pl_task_create_with_stack("idle_task1", idle_task1, PL_CFG_PRIORITIES_MAX,
-	                           g_pl_idle_task_stack1,
-	                           sizeof(g_pl_idle_task_stack1), 0, NULL);
+	pl_task_create("idle_task1", idle_task1, PL_CFG_PRIORITIES_MAX, 512, 0, NULL);
 
 	while(1) {
 		//pl_schedule_lock();
@@ -97,14 +87,10 @@ static int idle_task(int argc, char *argv[])
 
 static int pl_idle_task_init(void)
 {
-	pl_early_syslog_info("g_pl_idle_task_stack:0x%x\r\n", g_pl_idle_task_stack);
-	pl_task_create_with_stack("idle_task", idle_task, PL_CFG_PRIORITIES_MAX,
-	                            g_pl_idle_task_stack,
-	                           sizeof(g_pl_idle_task_stack), 0, NULL);
+	pl_task_create("idle_task", idle_task, PL_CFG_PRIORITIES_MAX, 512, 0, NULL);
 
 	return 0;
 }
-
 
 void pl_callee_entry(void)
 {

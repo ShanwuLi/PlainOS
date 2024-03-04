@@ -72,11 +72,29 @@ void pl_task_schedule_unlock(void);
  *   @argv: argv[] (optional).
  *
  * Return:
- *   task handle.
+ *   task id.
  ************************************************************************************/
 tid_t pl_task_create_with_stack(const char *name, main_t task, u16_t prio,
                                 void *stack, size_t stack_size,
                                 int argc, char *argv[]);
+
+/*************************************************************************************
+ * Function Name: pl_task_create
+ * Description: create a task.
+ *
+ * Parameters:
+ *   @name: name of the task (optional).
+ *   @task: task, prototype is "int task(int argc, char *argv[])"
+ *   @prio: priority of the task, if is 0, it will be its parent's priority (optional).
+ *   @stack_size: size of the stack (must specify).
+ *   @argc: the count of argv (optional).
+ *   @argv: argv[] (optional).
+ *
+ * Return:
+ *   task id.
+ ************************************************************************************/
+tid_t pl_task_create(const char *name, main_t task, u16_t prio,
+                     size_t stack_size, int argc, char *argv[]);
 
 /*************************************************************************************
  * Function Name: pl_task_delay_ticks

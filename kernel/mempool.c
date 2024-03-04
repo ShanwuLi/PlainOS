@@ -28,6 +28,7 @@ SOFTWARE.
 #include <kernel/mempool.h>
 #include <kernel/assert.h>
 #include <kernel/semaphore.h>
+#include "semaphore_private.h"
 
 /*************************************************************************************
  * Description: mempool structure definition.
@@ -65,7 +66,7 @@ typedef bool (*find_bit_condition_t)(struct mempool* mp, size_t iter,
  * Description: default memory pool.
  ************************************************************************************/
 static struct default_mempool pl_default_mempool;
-pl_mempool_t g_pl_default_mempool;
+pl_mempool_handle_t g_pl_default_mempool;
 
 /*************************************************************************************
  * Function Name: calculate_min_pool_size
@@ -128,24 +129,6 @@ static size_t calculate_blk_num(uchar_t grain_order, size_t pool_size)
 	blk_num = ((pool_size - gap_size) + blk_size - 1) / blk_size;
 
 	return blk_num;
-}
-
-/*************************************************************************************
- * Function Name: align_address
- * Description:
- *    Calculate the aligned address based on memory address and alignment coefficient.
- *
- * Param:
- *   @addr: the address of memory.
- *   @align: alignment coefficient.
- *
- * Return:
- *   Aligned address.
- ************************************************************************************/
-static void* align_address(void* addr, uchar_t align)
-{
-	size_t align_mask = (size_t)align - 1;
-	return (void*)(((uintptr_t)addr + align_mask) & (~align_mask));
 }
 
 /*************************************************************************************
@@ -213,7 +196,7 @@ static void mempool_blk_init(struct mempool* mp)
  *                                     |
  *                                pool_szie
  ************************************************************************************/
-pl_mempool_t pl_mempool_init(void* pool, ushrt_t id, size_t pool_size,
+pl_mempool_handle_t pl_mempool_init(void* pool, ushrt_t id, size_t pool_size,
                                 uchar_t grain_order)
 {
 	struct mempool* mp;
@@ -223,7 +206,7 @@ pl_mempool_t pl_mempool_init(void* pool, ushrt_t id, size_t pool_size,
 	if (pool == NULL)
 		return NULL;
 
-	mp = (struct mempool*)align_address(pool, sizeof(uintptr_t));
+	mp = (struct mempool*)pl_align_address(pool, sizeof(uintptr_t));
 	min_pool_size = calculate_min_pool_size(grain_order);
 	if ((uintptr_t)pool + pool_size < (uintptr_t)mp + min_pool_size)
 		return NULL;
@@ -242,7 +225,7 @@ pl_mempool_t pl_mempool_init(void* pool, ushrt_t id, size_t pool_size,
 	mp->blk_first_bits = (uchar_t*)(mp->blk_bitmaps + blk_num);
 	mp->blk_max_bits = mp->blk_first_bits + blk_num;
 	mp->data_pool = mp->blk_max_bits + blk_num;
-	mp->data_pool = (uchar_t*)align_address(mp->data_pool, sizeof(uintptr_t) << 2);
+	mp->data_pool = (uchar_t*)pl_align_address(mp->data_pool, sizeof(uintptr_t) << 2);
 	mp->data_pool_size = pool_size - ((size_t)mp->data_pool - (size_t)mp);
 	mp->data_pool_size &= (~(((size_t)1 << grain_order) - 1));
 
@@ -485,7 +468,7 @@ static void update_bit_map(struct mempool *mp, size_t blk_start_idx,
  * Return:
  *   address of memory.
  ************************************************************************************/
-void* pl_mempool_malloc(pl_mempool_t mempool, size_t size)
+void* pl_mempool_malloc(pl_mempool_handle_t mempool, size_t size)
 {
 	bool found;
 	size_t blk_idx;
@@ -581,7 +564,7 @@ static struct mempool_data* get_mempool_data(struct mempool *mp, void* p)
  * Return:
  *   void.
  ************************************************************************************/
-void pl_mempool_free(pl_mempool_t mempool, void* p)
+void pl_mempool_free(pl_mempool_handle_t mempool, void* p)
 {
 	size_t blk_idx;
 	size_t bit_offset;
@@ -640,7 +623,7 @@ static size_t mempool_blk_get_free_bytes(struct mempool *mp, size_t blk_idx,
  * Return:
  *   remaining size of memory pool.
  ************************************************************************************/
-size_t pl_mempool_get_free_bytes(pl_mempool_t mempool)
+size_t pl_mempool_get_free_bytes(pl_mempool_handle_t mempool)
 {
 	size_t i;
 	size_t rest_bytes = 0;
@@ -672,7 +655,7 @@ size_t pl_mempool_get_free_bytes(pl_mempool_t mempool)
  * Return:
  *   the end of setting value address.
  ************************************************************************************/
-void* pl_mempool_set(pl_mempool_t mempool, void* p, uint8_t val, size_t size)
+void* pl_mempool_set(pl_mempool_handle_t mempool, void* p, uint8_t val, size_t size)
 {
 	size_t i;
 	char* char_p;
@@ -712,7 +695,7 @@ void* pl_mempool_set(pl_mempool_t mempool, void* p, uint8_t val, size_t size)
  * Return:
  *   memory address.
  ************************************************************************************/
-void* pl_mempool_zalloc(pl_mempool_t mempool, size_t size)
+void* pl_mempool_zalloc(pl_mempool_handle_t mempool, size_t size)
 {
 	void* data;
 
@@ -738,7 +721,7 @@ void* pl_mempool_zalloc(pl_mempool_t mempool, size_t size)
  * Return:
  *   memory address.
  ************************************************************************************/
-void *pl_mempool_calloc(pl_mempool_t mempool, size_t num, size_t size)
+void *pl_mempool_calloc(pl_mempool_handle_t mempool, size_t num, size_t size)
 {
 	void* data;
 	size_t alloc_size = num * size;
@@ -769,7 +752,7 @@ int pl_default_mempool_init(void)
 	pl_assert(ret == OK);
 
 	g_pl_default_mempool = pl_mempool_init(pl_default_mempool.pool_data,
-	                                       0, PL_CFG_DEFAULT_MEMPOOL_SIZE, 3);
+		0, PL_CFG_DEFAULT_MEMPOOL_SIZE, PL_CFG_DEFAULT_MEMPOOL_GRAIN_ORDER);
 	pl_assert(g_pl_default_mempool != NULL);
 	return OK;
 }

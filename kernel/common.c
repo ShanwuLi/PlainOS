@@ -28,6 +28,42 @@ SOFTWARE.
 static volatile int pl_critical_ref = 0;
 
 /*************************************************************************************
+ * Function Name: pl_align_address
+ * Description:
+ *    Calculate the aligned address based on memory address and alignment coefficient.
+ *
+ * Param:
+ *   @addr: the address of memory.
+ *   @align: alignment coefficient.
+ *
+ * Return:
+ *   Aligned address.
+ ************************************************************************************/
+void* pl_align_address(void* addr, uchar_t align)
+{
+	size_t align_mask = (size_t)align - 1;
+	return (void*)(((uintptr_t)addr + align_mask) & (~align_mask));
+}
+
+/*************************************************************************************
+ * Function Name: pl_align_size
+ * Description:
+ *    Calculate the aligned size.
+ *
+ * Param:
+ *   @size: the size of need to align.
+ *   @align: alignment coefficient.
+ *
+ * Return:
+ *   Aligned size.
+ ************************************************************************************/
+size_t pl_align_size(size_t size, uchar_t align)
+{
+	size_t align_mask = (size_t)align - 1;
+	return (size + align_mask) & (~align_mask);
+}
+
+/*************************************************************************************
  * Function Name: pl_count_cmp
  * Description: compare count1 with count2.
  *
@@ -61,8 +97,9 @@ s32_t pl_count_cmp(struct count *c1, struct count *c2)
 void pl_enter_critical(void)
 {
 	pl_port_mask_interrupts();
-	pl_port_cpu_isb();
 	++pl_critical_ref;
+	pl_port_cpu_dsb();
+	pl_port_cpu_isb();
 }
 
 /*************************************************************************************
@@ -78,8 +115,9 @@ void pl_enter_critical(void)
 void pl_exit_critical(void)
 {
 	--pl_critical_ref;
-	if (pl_critical_ref == 0) {
+	if (pl_critical_ref == 0)
 		pl_port_unmask_interrupts();
-		pl_port_cpu_isb();
-	}
+
+	pl_port_cpu_isb();
+	pl_port_cpu_dsb();
 }

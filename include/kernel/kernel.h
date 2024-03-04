@@ -54,6 +54,34 @@ struct count {
 };
 
 /*************************************************************************************
+ * Function Name: pl_align_address
+ * Description:
+ *    Calculate the aligned address based on memory address and alignment coefficient.
+ *
+ * Param:
+ *   @addr: the address of memory.
+ *   @align: alignment coefficient.
+ *
+ * Return:
+ *   Aligned address.
+ ************************************************************************************/
+void* pl_align_address(void* addr, uchar_t align);
+
+/*************************************************************************************
+ * Function Name: pl_align_size
+ * Description:
+ *    Calculate the aligned size.
+ *
+ * Param:
+ *   @size: the size of need to align.
+ *   @align: alignment coefficient.
+ *
+ * Return:
+ *   Aligned size.
+ ************************************************************************************/
+size_t pl_align_size(size_t size, uchar_t align);
+
+/*************************************************************************************
  * Function Name: pl_count_cmp
  * Description: compare count1 with count2.
  *

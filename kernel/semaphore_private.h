@@ -21,21 +21,29 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef __KERNEL_SYSLOG_PRIVATE_H__
-#define __KERNEL_SYSLOG_PRIVATE_H__
+#ifndef __KERNEL_SEMAPHORE_PRIVATE_H__
+#define __KERNEL_SEMAPHORE_PRIVATE_H__
+
+#include <kernel/list.h>
+
+struct semaphore {
+	struct list_node wait_list;
+	int_t value;
+};
 
 /*************************************************************************************
- * Function Name: pl_syslog_init
+ * Function Name: pl_semaplore_init
  *
  * Description:
- *   syslog initialization.
+ *   request a semaphore.
  * 
  * Parameters:
- *  none.
+ *  @semap: semaphore.
+ *  @val: value of semaphore.
  *
  * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
+ *  Greater than or equal to 0 on success, less than 0 on failure..
  ************************************************************************************/
-int pl_syslog_init(void);
+int pl_semaplore_init(struct semaphore *semap, int val);
 
-#endif /* __KERNEL_SYSLOG_PRIVATE_H__ */
+#endif /* __KERNEL_SEMAPHORE_PRIVATE_H__ */

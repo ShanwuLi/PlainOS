@@ -485,6 +485,37 @@ static void task_init_tcb(const char *name, main_t task, u16_t prio,
 	tcb->past_state = PL_TASK_STATE_EXIT;
 	tcb->delay_ticks.hi32 = 0;
 	tcb->delay_ticks.lo32 = 0;
+	list_init(&tcb->wait_head);
+}
+
+/*************************************************************************************
+ * Function Name: task_init_and_create
+ * Description: init task and create it.
+ *
+ * Parameters:
+ *   @name: name of the task (optional).
+ *   @task: task, prototype is "int task(int argc, char *argv[])"
+ *   @prio: priority of the task, if is 0, it will be its parent's priority (optional).
+ *   @tcb: struct tcb.
+ *   @stack: stack of the task (must provide).
+ *   @stack_size: size of the stack (must specify).
+ *   @argc: the count of argv (optional).
+ *   @argv: argv[] (optional).
+ *
+ * Return:
+ *   void.
+ ************************************************************************************/
+static void task_init_and_create(const char *name, main_t task, u16_t prio,
+                                 struct tcb *tcb, void *stack, size_t stack_size,
+                                 int argc, char *argv[])
+{
+	stack = pl_port_task_stack_init(task_entry, stack, stack_size, tcb);
+	task_init_tcb(name, task, prio, tcb, stack, argc, argv);
+
+	pl_enter_critical();
+	pl_task_insert_tcb_to_rdylist(tcb);
+	pl_exit_critical();
+	pl_task_context_switch();
 }
 
 /*************************************************************************************
@@ -520,16 +551,39 @@ tid_t pl_task_create_with_stack(const char *name, main_t task, u16_t prio,
 		return (tid_t)ERR_TO_PTR(-ENOMEM);
 	}
 
-	stack = pl_port_task_stack_init(task_entry, stack, stack_size, tcb);
-	task_init_tcb(name, task, prio, tcb, stack, argc, argv);
-	list_init(&tcb->wait_head);
-
-	pl_enter_critical();
-	pl_task_insert_tcb_to_rdylist(tcb);
-	pl_exit_critical();
-	pl_task_context_switch();
-
+	task_init_and_create(name, task, prio, tcb, stack, stack_size, argc, argv);
 	return tcb;
+}
+
+/*************************************************************************************
+ * Function Name: pl_task_create
+ * Description: create a task.
+ *
+ * Parameters:
+ *   @name: name of the task (optional).
+ *   @task: task, prototype is "int task(int argc, char *argv[])"
+ *   @prio: priority of the task, if is 0, it will be its parent's priority (optional).
+ *   @stack_size: size of the stack (must specify).
+ *   @argc: the count of argv (optional).
+ *   @argv: argv[] (optional).
+ *
+ * Return:
+ *   task id.
+ ************************************************************************************/
+tid_t pl_task_create(const char *name, main_t task, u16_t prio,
+                     size_t stack_size, int argc, char *argv[])
+{
+	void *stack;
+	struct tcb *tcb_and_stack;
+	size_t tcb_actual_size = pl_align_size(sizeof(struct tcb), sizeof(uintptr_t) << 1);
+
+	tcb_and_stack = pl_mempool_malloc(g_pl_default_mempool, tcb_actual_size + stack_size);
+	if (tcb_and_stack == NULL)
+		return ERR_TO_PTR(-ENOMEM);
+
+	stack = (u8_t *)tcb_and_stack + tcb_actual_size;
+	task_init_and_create(name, task, prio, tcb_and_stack, stack, stack_size, argc, argv);
+	return tcb_and_stack;
 }
 
 /*************************************************************************************

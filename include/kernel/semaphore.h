@@ -24,37 +24,27 @@ SOFTWARE.
 #ifndef __KERNEL_SEMAPHORE_H__
 #define __KERNEL_SEMAPHORE_H__
 
-#include "list.h"
+#include <types.h>
 
-struct semaphore {
-	struct list_node wait_list;
-	int_t value;
-};
-
-#define PL_DEFINE_SEMAPHORE_AND_INIT(sem, val)  \
-	static struct semaphore sem = { \
-		.wait_list = LIST_INIT_VAL(wait_list), \
-		.value = (val) \
-	}
+typedef void *pl_semaphore_handle_t;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /*************************************************************************************
- * Function Name: pl_semaplore_init
+ * Function Name: pl_semaplore_request
  *
  * Description:
- *   initialize semaphore.
+ *   request a semaphore.
  * 
  * Parameters:
- *  @semap: semaphore pointer;
  *  @val: value of semaphore.
  *
  * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
+ *  @semaphore_handle.
  ************************************************************************************/
-int pl_semaplore_init(struct semaphore *semap, int val);
+pl_semaphore_handle_t pl_semaplore_request(int val);
 
 /*************************************************************************************
  * Function Name: pl_semaplore_take
@@ -63,12 +53,12 @@ int pl_semaplore_init(struct semaphore *semap, int val);
  *    take semaphore.
  * 
  * Parameters:
- *  @semap: semaphore pointer;
+ *  @semap: semaphore handle.
  *
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_semaplore_take(struct semaphore *semap);
+int pl_semaplore_take(pl_semaphore_handle_t semap);
 
 /*************************************************************************************
  * Function Name: pl_semaplore_give
@@ -77,41 +67,26 @@ int pl_semaplore_take(struct semaphore *semap);
  *    give semaphore.
  * 
  * Parameters:
- *  @semap: semaphore pointer;
+ *  @semap: semaphore handle.
  *
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_semaplore_give(struct semaphore *semap);
+int pl_semaplore_give(pl_semaphore_handle_t semap);
 
 /*************************************************************************************
- * Function Name: pl_semaplore_give_from_isr
+ * Function Name: pl_semaplore_release
  *
  * Description:
- *    give semaphore in interrupt context.
+ *   release a semaphore.
  * 
  * Parameters:
- *  @semap: semaphore pointer;
+ *   @semap: semaphore handle;
  *
  * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
+ *   void.
  ************************************************************************************/
-int pl_semaplore_give_from_isr(struct semaphore *semap);
-
-/*************************************************************************************
- * Function Name: pl_semaplore_trytake
- *
- * Description:
- *    try taking semaphore with timeout.
- * 
- * Parameters:
- *  @semap: semaphore pointer.
- *  @timeout_ticks: ticks of timeout.
- *
- * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
-int pl_semaplore_trytake(struct semaphore *semap, u32_t timeout_ticks);
+void pl_semaplore_release(pl_semaphore_handle_t semap);
 
 #ifdef __cplusplus
 }
