@@ -52,6 +52,7 @@ int pl_semaplore_init(struct semaphore *semap, int val)
 		return -EFAULT;
 	}
 
+	semap->valid = true;
 	semap->value = val;
 	list_init(&semap->wait_list);
 	return OK;
@@ -79,6 +80,7 @@ pl_semaphore_handle_t pl_semaplore_request(int val)
 		return ERR_TO_PTR(-EFAULT);
 	}
 
+	semap->valid = true;
 	semap->value = val;
 	list_init(&semap->wait_list);
 	return semap;
@@ -101,7 +103,7 @@ int pl_semaplore_take(pl_semaphore_handle_t semap)
 	struct tcb *curr_tcb;
 	struct semaphore *sem = (struct semaphore *)semap;
 
-	if (semap == NULL)
+	if (semap == NULL || (!sem->valid))
 		return -EFAULT;
 
 	pl_enter_critical();
@@ -139,7 +141,7 @@ int pl_semaplore_give(pl_semaphore_handle_t semap)
 	struct list_node *front_node;
 	struct semaphore *sem = (struct semaphore *)semap;
 
-	if (semap == NULL)
+	if (semap == NULL || (!sem->valid))
 		return -EFAULT;
 
 	pl_enter_critical();
@@ -175,9 +177,13 @@ void pl_semaplore_release(pl_semaphore_handle_t semap)
 {
 	struct semaphore *sem = (struct semaphore *)semap;
 
-	if (sem == NULL)
+	pl_enter_critical();
+	if (sem == NULL || (!sem->valid)) {
+		pl_exit_critical();
 		return;
+	}
 
-	sem->value = 0;
+	sem->valid = false;
+	pl_exit_critical();
 	pl_mempool_free(g_pl_default_mempool, sem);
 }

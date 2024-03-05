@@ -29,6 +29,7 @@ SOFTWARE.
 struct semaphore {
 	struct list_node wait_list;
 	int_t value;
+	bool valid;
 };
 
 /*************************************************************************************
