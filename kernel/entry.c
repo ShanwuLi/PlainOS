@@ -43,20 +43,24 @@ static int idle_task1(int argc, char *argv[])
 	USED(argv);
 	int ret;
 	tid_t tcb;
+	u32_t cpu_rate_base;
+	u32_t cpu_rate_idle;
 
 	pl_syslog_err("////////////////8\r\n");
-	tcb = pl_task_create("idle_task2", idle_task2, PL_CFG_PRIORITIES_MAX, 512, 0, NULL);
+	tcb = pl_task_create("idle_task2", idle_task2, PL_CFG_PRIORITIES_MAX - 1, 512, 0, NULL);
 
 	pl_task_join(tcb, &ret);
 	pl_syslog_info("%s: ret:%d\r\n", "idle_task1", ret);
 	pl_syslog_warn("%s: ret:%d\r\n", "idle_task1", 1000);
 	pl_syslog_err("%s: ret:%d\r\n", "idle_task1", 26358);
 	while(1) {
+		pl_task_get_cpu_rate(&cpu_rate_base, &cpu_rate_idle);
+		pl_syslog_info("cpu_rate_base:%u, cpu_rate_idle:%u\r\n", cpu_rate_base, cpu_rate_idle);
 		//pl_schedule_lock();
 		pl_syslog_err("////////////////////////////////////////////\r\n");
 		idle_task1_run_count++;
 		//pl_schedule_unlock();
-		pl_task_delay_ticks(5000);
+		//pl_task_delay_ticks(5000);
 	}
 
 	return 900;
@@ -66,10 +70,12 @@ static int idle_task(int argc, char *argv[])
 {
 	USED(argc);
 	USED(argv);
+	u32_t cpu_rate_base;
+	u32_t cpu_rate_idle;
 
 	pl_port_systick_init();
 	pl_syslog_info("============8\r\n");
-	pl_task_create("idle_task1", idle_task1, PL_CFG_PRIORITIES_MAX, 512, 0, NULL);
+	pl_task_create("idle_task1", idle_task1, PL_CFG_PRIORITIES_MAX - 1, 512, 0, NULL);
 
 	while(1) {
 		//pl_schedule_lock();
@@ -79,6 +85,8 @@ static int idle_task(int argc, char *argv[])
 		;
 		//pl_schedule_lock();
 		pl_syslog_warn("====================================================\r\n");
+		pl_task_get_cpu_rate(&cpu_rate_base, &cpu_rate_idle);
+		pl_syslog_info("cpu_rate_base:%u, cpu_rate_idle:%u\r\n", cpu_rate_base, cpu_rate_idle);
 		//pl_schedule_unlock();
 	}
 

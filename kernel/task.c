@@ -47,6 +47,8 @@ struct task_list {
 	u16_t num;
 };
 
+static u32_t cpu_rate_base;
+static u32_t cpu_rate_idle;
 /*************************************************************************************
  * Structure Name: task_core_blk
  * Description: task core block.
@@ -66,6 +68,8 @@ struct task_core_blk {
 	struct task_list delay_list;
 	struct tcb *curr_tcb;
 	struct count systicks;
+	u32_t cpu_rate_base;
+	u32_t cpu_rate_idle;
 	uint_t sched_lock_ref;
 };
 
@@ -407,12 +411,17 @@ void pl_task_context_switch(void)
 	u16_t hiprio;
 	struct tcb *curr_tcb;
 	struct tcb *next_tcb;
+	struct tcb *idle_tcb;
 
 	pl_enter_critical();
 	hiprio = get_hiprio();
 	curr_tcb = g_task_core_blk.curr_tcb;
 	next_tcb = g_task_core_blk.ready_list[hiprio].head;
 	pl_exit_critical();
+
+	idle_tcb = g_task_core_blk.ready_list[PL_CFG_PRIORITIES_MAX].head;
+	if (next_tcb == idle_tcb)
+		++cpu_rate_idle;
 
 	if (curr_tcb != next_tcb)
 		pl_port_switch_context();
@@ -684,6 +693,14 @@ void pl_callee_systick_expiration(void)
 	struct tcb *curr_tcb;
 	struct task_list *rdy_list;
 
+	++cpu_rate_base;
+	if (cpu_rate_base == PL_CFG_CPU_RATE_PER_TICKS) {
+		g_task_core_blk.cpu_rate_base = cpu_rate_base;
+		g_task_core_blk.cpu_rate_idle = cpu_rate_idle;
+		cpu_rate_base = 0;
+		cpu_rate_idle = 0;
+	}
+
 	/* update systick */
 	++g_task_core_blk.systicks.lo32;
 	if (g_task_core_blk.systicks.lo32 == 0)
@@ -717,6 +734,30 @@ void pl_callee_systick_expiration(void)
 }
 
 /*************************************************************************************
+ * Function Name: pl_task_get_cpu_rate
+ *
+ * Description:
+ *   The function is used to get cpu rate.
+ *   on systick system.
+ * 
+ * Parameters:
+ *  @cup_rate_base: base count of cpu rate.
+ *  @cpu_rate_idle: idle count of cpu rate.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_task_get_cpu_rate(u32_t *rate_base, u32_t *rate_idle)
+{
+	if (rate_base == NULL || rate_idle == NULL)
+		return -EFAULT;
+
+	*rate_base = g_task_core_blk.cpu_rate_base;
+	*rate_idle = g_task_core_blk.cpu_rate_idle;
+	return OK;
+}
+
+/*************************************************************************************
  * Function Name: pl_task_core_init
  * Description: initialize task component.
  *
@@ -739,6 +780,8 @@ int pl_task_core_init(void)
 	g_task_core_blk.curr_tcb = NULL;
 	g_task_core_blk.systicks.hi32 = 0;
 	g_task_core_blk.systicks.lo32 = 0;
+	g_task_core_blk.cpu_rate_base = 0;
+	g_task_core_blk.cpu_rate_idle = 0;
 	g_task_core_blk.sched_lock_ref = 0;
 	g_task_core_blk.delay_list.num = 0;
 	g_task_core_blk.delay_list.head = &delay_dummy_tcb;

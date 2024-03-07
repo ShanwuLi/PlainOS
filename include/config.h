@@ -33,6 +33,7 @@ SOFTWARE.
 #define PL_CFG_DEFAULT_MEMPOOL_GRAIN_ORDER      (3)
 #define PL_CFG_MAX_TASKS_NUM                    (900u)
 #define PL_CFG_PRIORITIES_MAX                   (99u)
+#define PL_CFG_CPU_RATE_PER_TICKS               (1024)
 //#define PL_CFG_SYSLOG_ANSI_COLOR
 
 #endif /* __PLAINOS_CONFIG_H__ */
