@@ -43,8 +43,8 @@ static int idle_task1(int argc, char *argv[])
 	USED(argv);
 	int ret;
 	tid_t tcb;
-	u32_t cpu_rate_base;
-	u32_t cpu_rate_idle;
+	u32_t int_part;
+	u32_t deci_part;
 
 	pl_syslog_err("////////////////8\r\n");
 	tcb = pl_task_create("idle_task2", idle_task2, PL_CFG_PRIORITIES_MAX - 1, 512, 0, NULL);
@@ -54,13 +54,14 @@ static int idle_task1(int argc, char *argv[])
 	pl_syslog_warn("%s: ret:%d\r\n", "idle_task1", 1000);
 	pl_syslog_err("%s: ret:%d\r\n", "idle_task1", 26358);
 	while(1) {
-		pl_task_get_cpu_rate(&cpu_rate_base, &cpu_rate_idle);
-		pl_syslog_info("cpu_rate_base:%u, cpu_rate_idle:%u\r\n", cpu_rate_base, cpu_rate_idle);
+		for (volatile int i = 0; i < 1000000; i++);
+		pl_task_get_cpu_rate(&int_part, &deci_part);
+		pl_syslog_info("cpu_rate:%u.%u%, \r\n", int_part, deci_part);
 		//pl_schedule_lock();
 		pl_syslog_err("////////////////////////////////////////////\r\n");
 		idle_task1_run_count++;
 		//pl_schedule_unlock();
-		//pl_task_delay_ticks(5000);
+		//pl_task_delay_ticks(1);
 	}
 
 	return 900;
@@ -70,23 +71,23 @@ static int idle_task(int argc, char *argv[])
 {
 	USED(argc);
 	USED(argv);
-	u32_t cpu_rate_base;
-	u32_t cpu_rate_idle;
+	//u32_t cpu_rate_base;
+	//u32_t cpu_rate_useful;
 
 	pl_port_systick_init();
 	pl_syslog_info("============8\r\n");
 	pl_task_create("idle_task1", idle_task1, PL_CFG_PRIORITIES_MAX - 1, 512, 0, NULL);
 
 	while(1) {
+		for (volatile int i = 0; i < 1000000; i++);
 		//pl_schedule_lock();
 		//pl_early_syslog_info("========================\r\n");
 		//pl_schedule_unlock();
-		for (volatile int i = 0; i < 10000; i++)
-		;
 		//pl_schedule_lock();
-		pl_syslog_warn("====================================================\r\n");
-		pl_task_get_cpu_rate(&cpu_rate_base, &cpu_rate_idle);
-		pl_syslog_info("cpu_rate_base:%u, cpu_rate_idle:%u\r\n", cpu_rate_base, cpu_rate_idle);
+		pl_syslog_warn("============================================================================\r\n");
+		//pl_task_get_cpu_rate(&cpu_rate_base, &cpu_rate_useful);
+		//pl_syslog_info("cpu_rate:%u.%u, \r\n", cpu_rate_useful * 100 / cpu_rate_base,
+		//     cpu_rate_useful * 10000 / cpu_rate_base - (cpu_rate_useful * 100 / cpu_rate_base) * 100);
 		//pl_schedule_unlock();
 	}
 

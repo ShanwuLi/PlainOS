@@ -126,20 +126,36 @@ void pl_task_delay_ticks(u32_t ticks);
 int pl_task_join(tid_t tid, int *ret);
 
 /*************************************************************************************
- * Function Name: pl_task_get_cpu_rate
+ * Function Name: pl_task_get_cpu_rate_count
  *
  * Description:
- *   The function is used to get cpu rate.
+ *   The function is used to get cpu utilization rate.
  *   on systick system.
  * 
  * Parameters:
- *  @cup_rate_base: base count of cpu rate.
- *  @cpu_rate_idle: idle count of cpu rate.
+ *  @cup_rate_base: base count of cpu utilization rate.
+ *  @rate_useful: useful count of cpu utilization rate.
  *
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_task_get_cpu_rate(u32_t *cup_rate_base, u32_t *cpu_rate_idle);
+int pl_task_get_cpu_rate_count(u32_t *rate_base, u32_t *rate_useful);
+
+/*************************************************************************************
+ * Function Name: pl_task_get_cpu_rate
+ *
+ * Description:
+ *   The function is used to get cpu utilization rate.
+ *   on systick system.
+ * 
+ * Parameters:
+ *  @int_part: integer part of cpu utilization rate.
+ *  @deci_part: decimal part of cpu utilization rate.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_task_get_cpu_rate(u32_t *int_part, u32_t *deci_part);
 
 #ifdef __cplusplus
 }

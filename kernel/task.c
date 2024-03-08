@@ -69,7 +69,7 @@ struct task_core_blk {
 	struct tcb *curr_tcb;
 	struct count systicks;
 	u32_t cpu_rate_base;
-	u32_t cpu_rate_idle;
+	u32_t cpu_rate_useful;
 	uint_t sched_lock_ref;
 };
 
@@ -672,6 +672,69 @@ void pl_task_delay_ticks(u32_t ticks)
 	pl_task_context_switch();
 }
 
+static void update_systick(void)
+{
+	/* update systick */
+	++g_task_core_blk.systicks.lo32;
+	if (g_task_core_blk.systicks.lo32 == 0)
+		++g_task_core_blk.systicks.hi32;
+}
+
+/*************************************************************************************
+ * Function Name: update_counter_of_cpu_rate
+ *
+ * Description:
+ *   update counter of utilization rate.
+ * 
+ * Parameters:
+ *  none
+ *
+ * Return:
+ *  void.
+ ************************************************************************************/
+static void update_counter_of_cpu_rate(void)
+{
+	/* update counter of utilization rate */
+	++cpu_rate_base;
+	if (cpu_rate_base == PL_CFG_CPU_RATE_INTERVAL_TICKS) {
+		g_task_core_blk.cpu_rate_base = cpu_rate_base;
+		g_task_core_blk.cpu_rate_useful = cpu_rate_base -  cpu_rate_idle;
+		cpu_rate_base = 0;
+		cpu_rate_idle = 0;
+	}
+}
+
+/*************************************************************************************
+ * Function Name: update_delay_task_list
+ *
+ * Description:
+ *   update delat task list.
+ * 
+ * Parameters:
+ *  none
+ *
+ * Return:
+ *  void.
+ ************************************************************************************/
+static void update_delay_task_list(void)
+{
+	struct tcb *pos;
+	struct tcb *tmp;
+
+	/* update delay list */
+	list_for_each_entry_safe(pos, tmp, &g_task_core_blk.delay_list.head->node,
+		struct tcb, node) {
+
+		if (pl_count_cmp(&pos->delay_ticks, &g_task_core_blk.systicks) > 0)
+			break;
+
+		pl_task_remove_tcb_from_delaylist(pos);
+		pl_task_insert_tcb_to_rdylist(pos);
+		pos->curr_state = PL_TASK_STATE_READY;
+		pos->past_state = PL_TASK_STATE_DELAY;
+	}
+}
+
 /*************************************************************************************
  * Function Name: pl_callee_systick_expiration
  *
@@ -688,36 +751,15 @@ void pl_task_delay_ticks(u32_t ticks)
 void pl_callee_systick_expiration(void)
 {
 	u16_t prio;
-	struct tcb *pos;
-	struct tcb *tmp;
 	struct tcb *curr_tcb;
 	struct task_list *rdy_list;
 
-	++cpu_rate_base;
-	if (cpu_rate_base == PL_CFG_CPU_RATE_PER_TICKS) {
-		g_task_core_blk.cpu_rate_base = cpu_rate_base;
-		g_task_core_blk.cpu_rate_idle = cpu_rate_idle;
-		cpu_rate_base = 0;
-		cpu_rate_idle = 0;
-	}
-
 	/* update systick */
-	++g_task_core_blk.systicks.lo32;
-	if (g_task_core_blk.systicks.lo32 == 0)
-		++g_task_core_blk.systicks.hi32;
-
+	update_systick();
 	/* update ready list */
-	list_for_each_entry_safe(pos, tmp, &g_task_core_blk.delay_list.head->node,
-		struct tcb, node) {
-
-		if (pl_count_cmp(&pos->delay_ticks, &g_task_core_blk.systicks) > 0)
-			break;
-
-		pl_task_remove_tcb_from_delaylist(pos);
-		pl_task_insert_tcb_to_rdylist(pos);
-		pos->curr_state = PL_TASK_STATE_READY;
-		pos->past_state = PL_TASK_STATE_DELAY;
-	}
+	update_delay_task_list();
+	/* update counter of utilization rate */
+	update_counter_of_cpu_rate();
 
 	/* do not to switch task when state of curr_tcb is not ready. */
 	curr_tcb = g_task_core_blk.curr_tcb;
@@ -734,26 +776,58 @@ void pl_callee_systick_expiration(void)
 }
 
 /*************************************************************************************
- * Function Name: pl_task_get_cpu_rate
+ * Function Name: pl_task_get_cpu_rate_count
  *
  * Description:
- *   The function is used to get cpu rate.
+ *   The function is used to get cpu utilization rate.
  *   on systick system.
  * 
  * Parameters:
  *  @cup_rate_base: base count of cpu rate.
- *  @cpu_rate_idle: idle count of cpu rate.
+ *  @rate_useful: useful count of cpu rate.
  *
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_task_get_cpu_rate(u32_t *rate_base, u32_t *rate_idle)
+int pl_task_get_cpu_rate_count(u32_t *rate_base, u32_t *rate_useful)
 {
-	if (rate_base == NULL || rate_idle == NULL)
+	if (rate_base == NULL || rate_useful == NULL)
 		return -EFAULT;
 
 	*rate_base = g_task_core_blk.cpu_rate_base;
-	*rate_idle = g_task_core_blk.cpu_rate_idle;
+	*rate_useful = g_task_core_blk.cpu_rate_useful;
+	return OK;
+}
+
+/*************************************************************************************
+ * Function Name: pl_task_get_cpu_rate_count
+ *
+ * Description:
+ *   The function is used to get cpu utilization rate.
+ *   on systick system.
+ * 
+ * Parameters:
+ *  @int_part: integer part of cpu utilization rate.
+ *  @deci_part: decimal part of cpu utilization rate.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_task_get_cpu_rate(u32_t *int_part, u32_t *deci_part)
+{
+	u32_t integer_part;
+	u32_t decimal_part;
+
+	if (int_part == NULL || deci_part == NULL)
+		return -EFAULT;
+
+	integer_part = (g_task_core_blk.cpu_rate_useful * 100) / g_task_core_blk.cpu_rate_base;
+	decimal_part = (g_task_core_blk.cpu_rate_useful * 10000) / g_task_core_blk.cpu_rate_base
+	               - integer_part * 100;
+
+	*int_part = integer_part;
+	*deci_part = decimal_part;
+
 	return OK;
 }
 
@@ -781,7 +855,7 @@ int pl_task_core_init(void)
 	g_task_core_blk.systicks.hi32 = 0;
 	g_task_core_blk.systicks.lo32 = 0;
 	g_task_core_blk.cpu_rate_base = 0;
-	g_task_core_blk.cpu_rate_idle = 0;
+	g_task_core_blk.cpu_rate_useful = 0;
 	g_task_core_blk.sched_lock_ref = 0;
 	g_task_core_blk.delay_list.num = 0;
 	g_task_core_blk.delay_list.head = &delay_dummy_tcb;
