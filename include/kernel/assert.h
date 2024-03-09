@@ -46,10 +46,10 @@ SOFTWARE.
 				pl_enter_critical(); \
 				pl_early_syslog_err("=>[ASSERT]:func:%s, line:%d\r\n", \
 				                   __func__, __LINE__); \
-	            while(1); \
-	            pl_exit_critical(); \
-	        } \
-	    } while (false)
+				while(1); \
+				pl_exit_critical(); \
+			} \
+		} while (false)
 #else
 #define pl_assert(assertion)   ((void)(assertion))
 #endif /* PL_CFG_ASSERT */
