@@ -817,14 +817,19 @@ int pl_task_get_cpu_rate(u32_t *int_part, u32_t *deci_part)
 {
 	u32_t integer_part;
 	u32_t decimal_part;
+	u32_t _cpu_rate_base;
+	u32_t _cpu_rate_useful;
 
 	if (int_part == NULL || deci_part == NULL)
 		return -EFAULT;
 
-	integer_part = (g_task_core_blk.cpu_rate_useful * 100) / g_task_core_blk.cpu_rate_base;
-	decimal_part = (g_task_core_blk.cpu_rate_useful * 10000) / g_task_core_blk.cpu_rate_base
-	               - integer_part * 100;
+	pl_enter_critical();
+	_cpu_rate_base = g_task_core_blk.cpu_rate_base;
+	_cpu_rate_useful = g_task_core_blk.cpu_rate_useful;
+	pl_exit_critical();
 
+	integer_part = (_cpu_rate_base * 100) / _cpu_rate_base;
+	decimal_part = (_cpu_rate_useful * 10000) / _cpu_rate_base - (integer_part * 100);
 	*int_part = integer_part;
 	*deci_part = decimal_part;
 
