@@ -828,8 +828,9 @@ int pl_task_get_cpu_rate(u32_t *int_part, u32_t *deci_part)
 	_cpu_rate_useful = g_task_core_blk.cpu_rate_useful;
 	pl_exit_critical();
 
-	integer_part = (_cpu_rate_base * 100) / _cpu_rate_base;
+	integer_part = (_cpu_rate_useful * 100) / _cpu_rate_base;
 	decimal_part = (_cpu_rate_useful * 10000) / _cpu_rate_base - (integer_part * 100);
+
 	*int_part = integer_part;
 	*deci_part = decimal_part;
 
@@ -850,6 +851,8 @@ int pl_task_core_init(void)
 {
 	static struct tcb delay_dummy_tcb;
 
+	cpu_rate_base = 0;
+	cpu_rate_idle = 0;
 	rdytask_list_init();
 	list_init(&delay_dummy_tcb.node);
 	delay_dummy_tcb.delay_ticks.hi32 = UINT32_MAX;
@@ -859,8 +862,8 @@ int pl_task_core_init(void)
 	g_task_core_blk.curr_tcb = NULL;
 	g_task_core_blk.systicks.hi32 = 0;
 	g_task_core_blk.systicks.lo32 = 0;
-	g_task_core_blk.cpu_rate_base = 0;
-	g_task_core_blk.cpu_rate_useful = 0;
+	g_task_core_blk.cpu_rate_base = PL_CFG_CPU_RATE_INTERVAL_TICKS;
+	g_task_core_blk.cpu_rate_useful = PL_CFG_CPU_RATE_INTERVAL_TICKS;
 	g_task_core_blk.sched_lock_ref = 0;
 	g_task_core_blk.delay_list.num = 0;
 	g_task_core_blk.delay_list.head = &delay_dummy_tcb;
