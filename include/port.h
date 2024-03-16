@@ -214,7 +214,7 @@ void pl_callee_save_curr_context_sp(void *context_sp);
  * Return:
  *    void *context sp;
  ************************************************************************************/
-void *pl_callee_get_next_context(void);
+void *pl_callee_get_next_context_sp(void);
 
 
 /////////////////////////////////// rodata ports /////////////////////////////////////

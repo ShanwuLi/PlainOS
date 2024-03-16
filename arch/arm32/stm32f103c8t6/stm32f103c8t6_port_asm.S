@@ -7,7 +7,7 @@
 
 ===============================================================================================*/
 #define SCB_ICSR_REG   0xE000ED04
-.extern pl_callee_get_next_context
+.extern pl_callee_get_next_context_sp
 
 .global PendSV_Handler
 .global pl_port_switch_context
@@ -85,7 +85,7 @@ switch_bottom:
 	cpsie i  /* enable interrupt */
 	push {lr}
 	/* r0 = pl_callee_get_next_context() */
-	bl   pl_callee_get_next_context
+	bl   pl_callee_get_next_context_sp
 	pop  {lr}
 
 	cpsid i  /* disable interrupt */

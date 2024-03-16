@@ -341,7 +341,7 @@ void pl_task_remove_tcb_from_rdylist(struct tcb *tcb)
 }
 
 /*************************************************************************************
- * Function Name: pl_callee_get_next_context
+ * Function Name: pl_callee_get_next_context_sp
  * Description: update context and return context_sp of the current task.
  *
  * Parameters:
@@ -350,7 +350,7 @@ void pl_task_remove_tcb_from_rdylist(struct tcb *tcb)
  * Return:
  *    void *context sp;
  ************************************************************************************/
-void *pl_callee_get_next_context(void)
+void *pl_callee_get_next_context_sp(void)
 {
 	u16_t hiprio;
 	struct tcb *next_rdy_tcb;
