@@ -1,5 +1,6 @@
 #include <types.h>
-#include <early_setup\early_uart.h>
+#include <early_setup/early_uart.h>
+#include <port.h>
 
 void pl_callee_entry(void);
 void pl_callee_entry(void)
@@ -8,4 +9,3 @@ void pl_callee_entry(void)
 		USART1_PrintChar('A');
 	};
 }
-

@@ -21,8 +21,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include <sections.h>
-
 /* Entry Point */
 ENTRY(Reset_Handler)
 
@@ -67,8 +65,6 @@ SECTIONS
     KEEP (*(.fini))
 
     . = ALIGN(4);
-    CONST_SECTION      /* add const section */
-    . = ALIGN(4);
     _etext = .;        /* define a global symbols at end of code */
   } >FLASH
 
@@ -87,34 +83,6 @@ SECTIONS
     PROVIDE_HIDDEN (__preinit_array_start = .);
     KEEP (*(.preinit_array*))
     PROVIDE_HIDDEN (__preinit_array_end = .);
-  } >FLASH
-
-  .pl_init.init :
-  {
-    . = ALIGN(4);
-    PL_INIT_SECTION
-    . = ALIGN(4);
-  } >FLASH
-
-  .initcall.init :
-  {
-    . = ALIGN(4);
-    INIT_CALLS_SECTION
-    . = ALIGN(4);
-  } >FLASH
-
-  .appcall.app :
-  {
-    . = ALIGN(4);
-    APPS_CALLS_SECTION
-    . = ALIGN(4);
-  } >FLASH
-
-  .errno :
-  {
-     . = ALIGN(4);
-     ERRNO_SECTION
-     . = ALIGN(4);
   } >FLASH
 
   .init_array :
