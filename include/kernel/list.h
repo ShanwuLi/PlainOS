@@ -254,6 +254,21 @@ struct list_node* list_next_node(struct list_node *node);
  ************************************************************************************/
 struct list_node* list_prev_node(struct list_node *node);
 
+/*************************************************************************************
+ * Function Name: list_move_chain_to_node_behind
+ * Description: move a chain to node behind.
+ *
+ * Param:
+ *   @dst_node: specific node.
+ *   @src_front: source chain front node.
+ *   @src_tail: source chain tail node.
+ *
+ * Return:
+ *   void.
+ ************************************************************************************/
+void list_move_chain_to_node_behind(struct list_node *dst_node,
+      struct list_node *src_front, struct list_node *src_tail);
+
 #ifdef __cplusplus
 }
 #endif

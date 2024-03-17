@@ -24,10 +24,14 @@ SOFTWARE.
 #include <port.h>
 #include <kernel/kernel.h>
 #include <kernel/task.h>
+#include <kernel/syslog.h>
 #include "initcall_private.h"
 #include "idletask_private.h"
-#include <kernel/syslog.h>
 
+/*************************************************************************************
+ * Function Name: idle_task
+ * Description: idle task for system.
+ ************************************************************************************/
 static int idle_task(int argc, char *argv[])
 {
 	USED(argc);
@@ -44,6 +48,15 @@ static int idle_task(int argc, char *argv[])
 	return 0;
 }
 
+/*************************************************************************************
+ * Function Name: pl_idle_task_init
+ * Description: idle task init.
+ *
+ * Param:
+ *   none.
+ * Return:
+ *   Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
 int pl_idle_task_init(void)
 {
 	pl_task_create("idle_task", idle_task, PL_CFG_PRIORITIES_MAX,

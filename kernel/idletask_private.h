@@ -24,6 +24,15 @@ SOFTWARE.
 #ifndef __KERNEL_IDLETASK_PRIVATE_H__
 #define __KERNEL_IDLETASK_PRIVATE_H__
 
+/*************************************************************************************
+ * Function Name: pl_idle_task_init
+ * Description: idle task init.
+ *
+ * Param:
+ *   none.
+ * Return:
+ *   Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
 int pl_idle_task_init(void);
 
 #endif /* __KERNEL_IDLETASK_PRIVATE_H__ */
