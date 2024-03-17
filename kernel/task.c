@@ -29,6 +29,7 @@ SOFTWARE.
 #include <kernel/kernel.h>
 #include <kernel/syslog.h>
 #include <kernel/mempool.h>
+#include <lib/string.h>
 #include "task_private.h"
 
 /*************************************************************************************
@@ -64,8 +65,9 @@ static u32_t cpu_rate_idle;
  ************************************************************************************/
 struct task_core_blk {
 	struct task_list ready_list[PL_CFG_PRIORITIES_MAX + 1];
-	struct task_list pend_list;
 	struct task_list delay_list;
+	struct list_node pend_list;
+	struct list_node exit_list;
 	struct tcb *curr_tcb;
 	struct count systicks;
 	u32_t cpu_rate_base;
@@ -443,10 +445,12 @@ static void task_entry(struct tcb *tcb)
 	struct tcb *tmp;
 	int exit_val = tcb->task(tcb->argc, tcb->argv);
 
-	/* task exit and clean up resources of current tcb */
+	/* insert current task to exit list */
 	pl_enter_critical();
 	tcb->curr_state = PL_TASK_STATE_EXIT;
+	tcb->past_state = PL_TASK_STATE_READY;
 	pl_task_remove_tcb_from_rdylist(tcb);
+	list_add_node_at_tail(&g_task_core_blk.exit_list, &tcb->node);
 
 	/* recover waiting tasks */
 	list_for_each_entry_safe(pos, tmp, &tcb->wait_head, struct tcb, node) {
@@ -458,6 +462,7 @@ static void task_entry(struct tcb *tcb)
 	}
 
 	pl_exit_critical();
+	/* switch task*/
 	pl_task_context_switch();
 	/* will be never come here */
 	while(1);
@@ -854,6 +859,9 @@ int pl_task_core_init(void)
 	cpu_rate_base = 0;
 	cpu_rate_idle = 0;
 	rdytask_list_init();
+	list_init(&g_task_core_blk.pend_list);
+	list_init(&g_task_core_blk.exit_list);
+
 	list_init(&delay_dummy_tcb.node);
 	delay_dummy_tcb.delay_ticks.hi32 = UINT32_MAX;
 	delay_dummy_tcb.delay_ticks.lo32 = UINT32_MAX;

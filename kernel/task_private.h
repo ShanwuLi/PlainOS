@@ -160,10 +160,4 @@ void pl_task_remove_tcb_from_delaylist(struct tcb *tcb);
  ************************************************************************************/
 void pl_task_remove_tcb_from_rdylist(struct tcb *tcb);
 
-
-
-
-
-
-
 #endif /* __KERNEL_INTERNAL_TASK_H__ */

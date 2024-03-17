@@ -21,6 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#include <types.h>
 #include <errno.h>
 #include <lib/string.h>
 
@@ -65,3 +66,27 @@ int pl_lib_ll2str(char *str, long long n, unsigned char base)
 	return ret;
 }
 
+void *pl_memmove(void *dest, const void *src, size_t len)
+{
+	char *d;
+	const char *s;
+	const char *lasts;
+	char *lastd;
+
+	if (dest == NULL || src == NULL || len == 0)
+		return NULL;
+
+	d = dest;
+	s = src;
+	if (d < s) {
+		while (len--)
+			*d++ = *s++;
+	} else {
+		lasts = s + (len - 1);
+		lastd = d + (len - 1);
+		while (len--)
+			*lastd-- = *lasts--;
+	}
+
+	return dest;
+}

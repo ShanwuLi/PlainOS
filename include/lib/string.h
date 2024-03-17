@@ -26,5 +26,6 @@ SOFTWARE.
 
 int pl_lib_ull2str(char *str, unsigned long long n, unsigned char base);
 int pl_lib_ll2str(char *str, long long n, unsigned char base);
+void *pl_memmove(void *dest, const void *src, size_t len);
 
 #endif /* __LIB_STRING_H__ */
