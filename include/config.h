@@ -33,6 +33,7 @@ SOFTWARE.
 #define PL_CFG_DEFAULT_MEMPOOL_GRAIN_ORDER      (3)
 #define PL_CFG_MAX_TASKS_NUM                    (900u)
 #define PL_CFG_PRIORITIES_MAX                   (99u)
+#define PL_CFG_IDLE_TASK_STACK_SIZE             (512)
 #define PL_CFG_CPU_RATE_INTERVAL_TICKS          (102400)
 //#define PL_CFG_SYSLOG_ANSI_COLOR
 

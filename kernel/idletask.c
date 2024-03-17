@@ -21,5 +21,32 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#include <port.h>
+#include <kernel/kernel.h>
+#include <kernel/task.h>
+#include "initcall_private.h"
+#include "idletask_private.h"
+#include <kernel/syslog.h>
 
+static int idle_task(int argc, char *argv[])
+{
+	USED(argc);
+	USED(argv);
+	pl_port_systick_init();
+	pl_do_early_initcalls();
+	pl_do_initcalls();
 
+	while(1) {
+		pl_syslog_info("idletask===============================================\r\n");
+		for (volatile int i = 0; i < 10000; i++);
+	}
+
+	return 0;
+}
+
+int pl_idle_task_init(void)
+{
+	pl_task_create("idle_task", idle_task, PL_CFG_PRIORITIES_MAX,
+	                PL_CFG_IDLE_TASK_STACK_SIZE, 0, NULL);
+	return 0;
+}

@@ -40,6 +40,27 @@ void list_init(struct list_node *node)
 }
 
 /*************************************************************************************
+ * Function Name: list_get_node_num
+ * Description: get the number of list node.
+ *
+ * Param:
+ *   @head: head node of the list.
+ * Return:
+ *   int: the number of list node.
+ ************************************************************************************/
+int list_get_node_num(struct list_node *head)
+{
+	int num = 0;
+	struct list_node *pos;
+
+	list_for_each(pos, head) {
+		num++;
+	}
+
+	return num;
+}
+
+/*************************************************************************************
  * Function Name: list_add_node_at_tail
  * Description: Add a node to the list tail.
  *

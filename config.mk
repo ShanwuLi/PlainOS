@@ -20,14 +20,5 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-KERNEL_DIR := $(TOPDIR)/kernel
-
-C_SRCS += $(KERNEL_DIR)/common.c
-C_SRCS += $(KERNEL_DIR)/entry.c
-C_SRCS += $(KERNEL_DIR)/idletask.c
-C_SRCS += $(KERNEL_DIR)/initcall.c
-C_SRCS += $(KERNEL_DIR)/list.c
-C_SRCS += $(KERNEL_DIR)/mempool.c
-C_SRCS += $(KERNEL_DIR)/syslog.c
-C_SRCS += $(KERNEL_DIR)/task.c
-C_SRCS += $(KERNEL_DIR)/semaphore.c
+PL_MK_CFG_OS_TEST = y
+PL_MK_CFG_OS_TASK_TEST = y

@@ -57,6 +57,7 @@ RM := rm -rf
 -include $(TOPDIR)/drivers/drivers.mk
 -include $(TOPDIR)/lib/lib.mk
 -include $(TOPDIR)/apps/apps.mk
+-include $(TOPDIR)/os_test/os_test.mk
 
 # compiler flags
 C_FLAGS   += $(MCU) $(INC) $(OPTIMIZE) $(DEBUG)

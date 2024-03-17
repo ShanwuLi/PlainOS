@@ -499,6 +499,7 @@ static void task_init_tcb(const char *name, main_t task, u16_t prio,
 	tcb->past_state = PL_TASK_STATE_EXIT;
 	tcb->delay_ticks.hi32 = 0;
 	tcb->delay_ticks.lo32 = 0;
+	tcb->wait_for_task_ret = ERROR;
 	list_init(&tcb->wait_head);
 }
 
@@ -621,7 +622,7 @@ int pl_task_join(tid_t tid, int *ret)
 		return -EFAULT;
 
 	if (tcb->curr_state == PL_TASK_STATE_EXIT)
-		return OK;
+		return ERROR;
 
 	pl_enter_critical();
 	g_task_core_blk.curr_tcb->curr_state = PL_TASK_STATE_WAITING;
