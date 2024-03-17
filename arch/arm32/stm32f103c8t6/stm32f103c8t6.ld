@@ -24,7 +24,7 @@ SOFTWARE.
 /* Entry Point */
 ENTRY(Reset_Handler)
 
-/* Highest address of the user mode stack */
+/* Highest address of the user mode stack */      //_estack是变量
 _estack = 0x20005000;    /* end of 20K RAM */
 
 /* Generate a link error if heap and stack don't fit into RAM */
@@ -54,19 +54,19 @@ SECTIONS
   .text :
   {
     . = ALIGN(4);
-    *(.text)           /* .text sections (code) */
+    *(.text)           /* .text sections (code) ，所有的.text顺序摆放*/
     *(.text*)          /* .text* sections (code) */
     *(.rodata)         /* .rodata sections (constants, strings, etc.) */
     *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
     *(.glue_7)         /* glue arm to thumb code */
     *(.glue_7t)        /* glue thumb to arm code */
 
-    KEEP (*(.init))
+    KEEP (*(.init))   //.init glue_7 在lib库里面不用过于关心不用lib库的话
     KEEP (*(.fini))
 
     . = ALIGN(4);
     _etext = .;        /* define a global symbols at end of code */
-  } >FLASH
+  } >FLASH             //可以使用 ‘ > region ’ 将一个 section 分配给前面定义的内存区域
 
 
    .ARM.extab   : { *(.ARM.extab* .gnu.linkonce.armextab.*) } >FLASH
@@ -80,7 +80,7 @@ SECTIONS
 
   .preinit_array     :
   {
-    PROVIDE_HIDDEN (__preinit_array_start = .);
+    PROVIDE_HIDDEN (__preinit_array_start = .); //https://ftp.gnu.org/old-gnu/Manuals/ld-2.9.1/html_chapter/ld_3.html#SEC6
     KEEP (*(.preinit_array*))
     PROVIDE_HIDDEN (__preinit_array_end = .);
   } >FLASH
@@ -104,7 +104,7 @@ SECTIONS
   _sidata = .;
 
   /* Initialized data sections goes into RAM, load LMA copy after code */
-  .data : AT ( _sidata )
+  .data : AT ( _sidata )     //VMA，LMA
   {
     . = ALIGN(4);
     _sdata = .;        /* create a global symbol at data start */

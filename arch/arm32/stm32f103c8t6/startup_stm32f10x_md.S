@@ -27,20 +27,23 @@
   * <h2><center>&copy; COPYRIGHT 2011 STMicroelectronics</center></h2>
   ******************************************************************************
   */
-  .syntax unified
-	.cpu cortex-m3
-	.fpu softvfp
-	.thumb
+  //汇编程序中以.开头的名称并不是指令的助记符，不会被翻译成机器指令，而是给汇编器一些特殊指示，称为汇编指示（Assembler Directive）或伪操作（Pseudo-operation），由于它不是真正的指令所以加个“伪”字.
+  //.section指示把代码划分成若干个段（Section），程序被操作系统加载执行时，每个段被加载到不同的地址，操作系统对不同的页面设置不同的读、写、执行权限。.data段保存程序的数据，是可读可写的，相当于C程序的全局变量。
+  //.text段保存代码，是只读和可执行的，后面那些指令都属于.text段。
+  .syntax unified      //.syntax unified 指示使用了统一汇编语言语法。
+	.cpu cortex-m3	   //https://sourceware.org/binutils/docs/as/ARM-Directives.html
+	.fpu softvfp       //Select the floating-point unit to assemble for. Valid values for name are the same as for the -mfpu command-line option.
+	.thumb			   //This performs the same action as .code 16,https://sourceware.org/binutils/docs/as/ARM-Directives.html
 
-.global	g_pfnVectors
+.global	g_pfnVectors  //.global关键字用来让一个符号对链接器可见，可以供其他链接对象模块使用。
 .global	Default_Handler
-.extern SystemInit
+.extern SystemInit    //.extern XXXX 说明xxxx为外部函数，调用的时候可以遍访所有文件找到该函数并且使用它。
 .extern pl_callee_entry
 
 
 /* start address for the initialization values of the .data section.
 defined in linker script */
-.word	_sidata
+.word	_sidata    //_sidata为一个word的变量记录起始地址
 /* start address for the .data section. defined in linker script */
 .word	_sdata
 /* end address for the .data section. defined in linker script */
@@ -60,16 +63,16 @@ defined in linker script */
  * @retval : None
 */
 
-  .section	.text.Reset_Handler
-	.weak	Reset_Handler
-	.type	Reset_Handler, %function
+  .section	.text.Reset_Handler //.text.Reset_Handlers是一个名称，.text又是一个伪指令，Reset_Handler才是真正的name
+	.weak	Reset_Handler		// 弱符号定义可以强符号代替，默认强符号
+	.type	Reset_Handler, %function //Mark the symbol as being a function name，将Reset_Handler设置为函数名称，https://sourceware.org/binutils/docs/as/Type.html
 Reset_Handler:
 
 /* Copy the data segment initializers from flash to SRAM */
   movs	r1, #0
   b	LoopCopyDataInit
 
-CopyDataInit:
+CopyDataInit: 					//只是一个标号不需要定义直接使用
 	ldr	r3, =_sidata
 	ldr	r3, [r3, r1]
 	str	r3, [r0, r1]
@@ -100,7 +103,8 @@ LoopFillZerobss:
 /* Call the application's entry point.*/
 	bl	pl_callee_entry
 	bx	lr
-  .size	 Reset_Handler, .-Reset_Handler
+  .size	 Reset_Handler, . - Reset_Handler//This directive sets the size associated with a symbol name. The size in bytes is computed from expression which can make use of label arithmetic. This directive is typically used to set the size of function symbols.
+						//当前的.地址减去Reset_Handler数值成为表达式并变为SIZE
 
 /**
  * @brief  This is the code that gets called when the processor receives an
@@ -110,7 +114,8 @@ LoopFillZerobss:
  * @param  None
  * @retval : None
 */
-  .section	.text.Default_Handler,"ax",%progbits
+  .section	.text.Default_Handler,"ax",%progbits //Only %S is supported at the moment, and substitutes the current section name. 
+											     @Note on targets where the @ character is the start of a comment (eg ARM) then another character is used instead. For example the ARM port uses the % character.
 Default_Handler:
 Infinite_Loop:
 	b	Infinite_Loop
@@ -187,7 +192,7 @@ g_pfnVectors:
 	.word	EXTI15_10_IRQHandler
 	.word	RTCAlarm_IRQHandler
 	.word	USBWakeUp_IRQHandler
-  .word	0
+  	.word	0
 	.word	0
 	.word	0
 	.word	0
@@ -206,7 +211,7 @@ g_pfnVectors:
 *******************************************************************************/
 
   .weak	NMI_Handler
-	.thumb_set NMI_Handler,Default_Handler
+	.thumb_set NMI_Handler,Default_Handler //https://sourceware.org/binutils/docs/as/ARM-Directives.html,取别名
 
   .weak	HardFault_Handler
 	.thumb_set HardFault_Handler,Default_Handler
