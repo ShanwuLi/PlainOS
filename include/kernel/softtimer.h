@@ -20,23 +20,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#ifndef __PLAINOS_CONFIG_H__
-#define __PLAINOS_CONFIG_H__
 
-/*************************************************************************************
- * kernel definitions
- *************************************************************************************/
+#ifndef __KERNEL_SOFTTIMER_H__
+#define __KERNEL_SOFTTIMER_H__
 
-/* maximum priority of plainos */
-#define PL_CFG_ASSERT
-#define PL_CFG_DEFAULT_MEMPOOL_SIZE             (10 * 1024)
-#define PL_CFG_DEFAULT_MEMPOOL_GRAIN_ORDER      (3)
-#define PL_CFG_MAX_TASKS_NUM                    (900u)
-#define PL_CFG_PRIORITIES_MAX                   (99u)
-#define PL_CFG_IDLE_TASK_STACK_SIZE             (512)
-#define PL_CFG_CPU_RATE_INTERVAL_TICKS          (102400)
-//#define PL_CFG_SYSLOG_ANSI_COLOR
-#define PL_CFG_SOFTTIMER_DAEMON_TASK_STACK_SIZE (512)
+typedef void *stimer_handle_t;
+typedef void (*stimer_fun_t)(stimer_handle_t *timer);
 
-
-#endif /* __PLAINOS_CONFIG_H__ */
+#endif /* __KERNEL_SOFTTIMER_H__ */
