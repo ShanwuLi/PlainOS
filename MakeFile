@@ -38,6 +38,7 @@ CHIP     := stm32f103c8t6#atmega128
 
 TOPDIR   := ./chapter01
 OUTDIR   := $(TOPDIR)/out
+
 INC      := -I$(TOPDIR)/include 
 LIBDIR   :=
 LIBS     :=
@@ -57,6 +58,7 @@ RM := rm -rf
 
 #////////////////////////////// Modify following code when you need it ///////////////////////////#
 
+
 # compiler flags
 C_FLAGS   += $(MCU) $(INC) $(OPTIMIZE) $(DEBUG)
 CXX_FLAGS += $(MCU) $(INC) $(OPTIMIZE) $(DEBUG)
@@ -72,6 +74,7 @@ C_OBJS := $(addprefix $(OUTDIR)/,$(C_OBJS_TMP))
 
 ASM_OBJS_TMP += $(patsubst %.S,%.o,$(ASM_SRCS))
 ASM_OBJS := $(addprefix $(OUTDIR)/,$(ASM_OBJS_TMP))
+
 
 OBJS := $(C_OBJS) $(ASM_OBJS) $(CXX_OBJS)
 
