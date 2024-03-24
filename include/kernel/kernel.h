@@ -97,6 +97,20 @@ size_t pl_align_size(size_t size, uchar_t align);
 s32_t pl_count_cmp(struct count *c1, struct count *c2);
 
 /*************************************************************************************
+ * Function Name: pl_count_add
+ * Description: add count1 and count2 to return.
+ *
+ * Parameters:
+ *   @c: result = c1 + c2.
+ *   @c1: count1.
+ *   @c2: count2.
+ *
+ * Return:
+ *   count added.
+ ************************************************************************************/
+int pl_count_add(struct count *c, struct count *c1, struct count *c2);
+
+/*************************************************************************************
  * Function Name: void pl_enter_critical(void)
  * Description: enter critical area.
  *

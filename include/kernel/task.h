@@ -126,6 +126,49 @@ void pl_task_delay_ticks(u32_t ticks);
 int pl_task_join(tid_t tid, int *ret);
 
 /*************************************************************************************
+ * Function Name: pl_task_pend
+ *
+ * Description:
+ *   pend task.
+ * 
+ * Parameters:
+ *  @tid: task id;
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_task_pend(tid_t tid);
+
+/*************************************************************************************
+ * Function Name: pl_task_resume
+ *
+ * Description:
+ *   resume task.
+ * 
+ * Parameters:
+ *  @tid: task id;
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_task_resume(tid_t tid);
+
+/*************************************************************************************
+ * Function Name: pl_task_get_syscount
+ *
+ * Description:
+ *   The function is used to get syscount.
+ *   on systick system.
+ * 
+ * Parameters:
+ *  @c: count wanted to get.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_task_get_syscount(struct count *c);
+
+/*************************************************************************************
  * Function Name: pl_task_get_cpu_rate_count
  *
  * Description:

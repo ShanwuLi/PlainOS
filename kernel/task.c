@@ -31,6 +31,7 @@ SOFTWARE.
 #include <kernel/mempool.h>
 #include <lib/string.h>
 #include "task_private.h"
+#include "softtimer_private.h"
 
 /*************************************************************************************
  * Description: Definitions of highest priority of task.
@@ -67,6 +68,7 @@ struct task_core_blk {
 	struct task_list ready_list[PL_CFG_PRIORITIES_MAX + 1];
 	struct task_list delay_list;
 	struct list_node pend_list;
+	struct list_node timer_list;
 	struct list_node exit_list;
 	struct tcb *curr_tcb;
 	struct count systicks;
@@ -640,6 +642,56 @@ int pl_task_join(tid_t tid, int *ret)
 }
 
 /*************************************************************************************
+ * Function Name: pl_task_pend
+ *
+ * Description:
+ *   pend task.
+ * 
+ * Parameters:
+ *  @tid: task id;
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_task_pend(tid_t tid)
+{
+	if (tid == NULL)
+		return -EFAULT;
+
+	pl_enter_critical();
+	pl_task_remove_tcb_from_rdylist((struct tcb *)tid);
+	pl_exit_critical();
+	pl_task_context_switch();
+
+	return OK;
+}
+
+/*************************************************************************************
+ * Function Name: pl_task_resume
+ *
+ * Description:
+ *   resume task.
+ * 
+ * Parameters:
+ *  @tid: task id;
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_task_resume(tid_t tid)
+{
+	if (tid == NULL)
+		return -EFAULT;
+
+	pl_enter_critical();
+	pl_task_insert_tcb_to_rdylist((struct tcb *)tid);
+	pl_exit_critical();
+	pl_task_context_switch();
+
+	return OK;
+}
+
+/*************************************************************************************
  * Function Name: pl_task_delay_ticks
  *
  * Description:
@@ -742,6 +794,42 @@ static void update_delay_task_list(void)
 }
 
 /*************************************************************************************
+ * Function Name: update_softtimer_list
+ *
+ * Description:
+ *   update soft timer list.
+ * 
+ * Parameters:
+ *  none
+ *
+ * Return:
+ *  void.
+ ************************************************************************************/
+static void update_softtimer_list(void)
+{
+#if 0
+	struct softtimer *pos;
+	struct softtimer *tmp;
+	struct list_node *first;
+	struct softtimer_ctrl *timer_ctrl;
+
+	/* update delay list */
+	list_for_each_entry_safe(pos, tmp, &g_task_core_blk.timer_list,
+	    struct softtimer, node) {
+
+		if (pl_count_cmp(&pos->reach_cnt, &g_task_core_blk.systicks) > 0)
+			return;
+	}
+
+	/* move timer list timing reached to softtimer_ctrlblock list */
+	first = g_task_core_blk.timer_list.next;
+	timer_ctrl = pl_softtimer_get_ctrl();
+	list_move_chain_to_node_behind(&timer_ctrl->head, first, &pos->node);
+	pl_task_insert_tcb_to_rdylist((struct tcb *)timer_ctrl->daemon);
+#endif
+}
+
+/*************************************************************************************
  * Function Name: pl_callee_systick_expiration
  *
  * Description:
@@ -764,6 +852,8 @@ void pl_callee_systick_expiration(void)
 	update_systick();
 	/* update ready list */
 	update_delay_task_list();
+	/* update soft timer list */
+	update_softtimer_list();
 	/* update counter of utilization rate */
 	update_counter_of_cpu_rate();
 
@@ -779,6 +869,30 @@ void pl_callee_systick_expiration(void)
 		/* switch task */
 		pl_task_context_switch();
 	}
+}
+
+/*************************************************************************************
+ * Function Name: pl_task_get_syscount
+ *
+ * Description:
+ *   The function is used to get syscount.
+ *   on systick system.
+ * 
+ * Parameters:
+ *  @c: count wanted to get.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_task_get_syscount(struct count *c)
+{
+	if (c == NULL)
+		return -EFAULT;
+
+	c->hi32 = g_task_core_blk.systicks.hi32;
+	c->lo32 = g_task_core_blk.systicks.lo32;
+
+	return OK;
 }
 
 /*************************************************************************************

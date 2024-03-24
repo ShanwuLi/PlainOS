@@ -21,14 +21,29 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef __KERNEL_SOFTTIMER_H__
-#define __KERNEL_SOFTTIMER_H__
+#ifndef __KERNEL_SOFTTIMER_PRIVATE_H__
+#define __KERNEL_SOFTTIMER_PRIVATE_H__
 
 #include <kernel/kernel.h>
+#include <kernel/task.h>
+#include <kernel/list.h>
+#include <kernel/semaphore.h>
+#include <kernel/softtimer.h>
+#include "semaphore_private.h"
 
-typedef void *stimer_handle_t;
-typedef void (*stimer_fun_t)(stimer_handle_t *timer);
+struct softtimer_ctrl {
+	tid_t daemon;
+	struct list_node head;
+	struct semaphore sem;
+};
 
-int pl_softtimer_add(stimer_handle_t timer, stimer_fun_t *fun,
-                     struct count *timing_cnt, bool auto_load, void *priv_data);
-#endif /* __KERNEL_SOFTTIMER_H__ */
+struct softtimer {
+	struct list_node node;
+	stimer_fun_t fun;
+	void *priv_data;
+	struct count reach_cnt;
+	bool auto_load;
+};
+
+struct softtimer_ctrl *pl_softtimer_get_ctrl(void);
+#endif /* __KERNEL_SOFTTIMER_PRIVATE_H__ */

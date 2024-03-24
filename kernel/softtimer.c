@@ -23,32 +23,16 @@ SOFTWARE.
 
 #include <errno.h>
 #include <types.h>
-#include <kernel/task.h>
-#include <kernel/list.h>
-#include <kernel/semaphore.h>
-#include <kernel/softtimer.h>
 #include <kernel/mempool.h>
-#include <kernel/semaphore_private.h>
+#include "softtimer_private.h"
 
-struct softtimer_ctrlblock {
-	tid_t daemon_task;
-	struct list_node head;
-	struct semaphore sem;
-};
 
-struct softtimer {
-	struct list_node node;
-	stimer_fun_t fun;
-	void *priv_data;
-	u32_t timing_ticks;
-	bool auto_load;
-};
-
-static struct softtimer_ctrlblock softtimer_ctrlblock;
+static struct softtimer_ctrl softtimer_ctrl;
 
 static int softtimer_daemon_task(int argc, char **argv)
 {
 	return 0;
+
 }
 
 
@@ -64,32 +48,40 @@ stimer_handle_t pl_softtimer_request(void)
 	return (stimer_handle_t)timer;
 }
 
-int pl_softtimer_add(stimer_handle_t timer, stimer_fun_t *fun, u32_t timing_ticks,
-                     bool auto_load, void *priv_data)
+int pl_softtimer_add(stimer_handle_t timer, stimer_fun_t *fun,
+                     struct count *timing_cnt, bool auto_load, void *priv_data)
 {
+	struct count syscount;
 	struct softtimer *stimer = (struct softtimer *)timer;
 
-	if (stimer == NULL || fun == NULL || timing_ticks == 0) {
+	if (stimer == NULL || fun == NULL || timing_cnt == 0) {
 		return -EFAULT;
 	}
 
 	stimer->fun = fun;
 	stimer->priv_data = priv_data;
-	stimer->timing_ticks = timing_ticks;
 	stimer->auto_load = auto_load;
+	pl_task_get_syscount(&syscount);
+	pl_count_add(&stimer->reach_cnt, &syscount, timing_cnt);
 
-	pl_semaplore_take(&softtimer_ctrlblock.sem);
-	list_add_node_at_tail(&softtimer_ctrlblock.head, &stimer->node);
-	pl_semaplore_give(&softtimer_ctrlblock.sem);
+	pl_semaplore_take(&softtimer_ctrl.sem);
+	list_add_node_at_tail(&softtimer_ctrl.head, &stimer->node);
+	pl_semaplore_give(&softtimer_ctrl.sem);
 
 	return OK;
 }
 
 int pl_softtimer_core_init(void)
 {
-	list_init(&softtimer_ctrlblock.head);
-	pl_semaplore_init(&softtimer_ctrlblock.sem, 0);
+	list_init(&softtimer_ctrl.head);
+	pl_semaplore_init(&softtimer_ctrl.sem, 0);
 	pl_task_create("softtimer_daemon", softtimer_daemon_task, 0,
 	               PL_CFG_SOFTTIMER_DAEMON_TASK_STACK_SIZE, 0, NULL);
 	return 0;
 }
+
+struct softtimer_ctrl *pl_softtimer_get_ctrl(void)
+{
+	return &softtimer_ctrl;
+}
+

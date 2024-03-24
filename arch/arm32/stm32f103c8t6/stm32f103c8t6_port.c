@@ -3,7 +3,6 @@
 #include "early_setup/early_uart.h"
 #include "stm32f10x.h"
 
-
 int pl_port_putc_init(void)
 {
 	NVIC_EnableIRQ(PendSV_IRQn);
@@ -34,7 +33,7 @@ int pl_port_systick_init(void)
 	/** 填写你的OS滴答定时器初始化代码 **/
 	__asm__ volatile("cpsid	i\n\t");     /*< 关中断 */
 	SysTick_Config(900); //900: 12.5us,  1800:25us,   3600:50us,   72000:1ms
-	NVIC_EnableIRQ(PendSV_IRQn);
+	NVIC_EnableIRQ(SysTick_IRQn);
 	__asm__ volatile("cpsie	i\n\t");     /*< 开中断 */
 	return 0;
 }
