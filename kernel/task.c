@@ -116,6 +116,21 @@ static u32_t g_hiprio_bitmap[(PL_CFG_PRIORITIES_MAX + 31) / 32];
 static struct task_core_blk g_task_core_blk;
 
 /*************************************************************************************
+ * Function Name: pl_task_get_timer_list
+ * Description: Get timer list tcb.
+ *
+ * Parameters:
+ *   none.
+ *
+ * Return:
+ *   @struct list_node: timer list.
+ ************************************************************************************/
+struct list_node *pl_task_get_timer_list(void)
+{
+	return &g_task_core_blk.timer_list;
+}
+
+/*************************************************************************************
  * Function Name: pl_task_get_curr_tcb
  * Description: Get current tcb.
  *
@@ -655,11 +670,16 @@ int pl_task_join(tid_t tid, int *ret)
  ************************************************************************************/
 int pl_task_pend(tid_t tid)
 {
-	if (tid == NULL)
+	struct tcb *tcb = (struct tcb *)tid;
+
+	if (tcb == NULL)
 		return -EFAULT;
 
 	pl_enter_critical();
-	pl_task_remove_tcb_from_rdylist((struct tcb *)tid);
+	pl_task_remove_tcb_from_rdylist(tcb);
+	list_add_node_at_tail(&g_task_core_blk.pend_list, &tcb->node);
+	tcb->curr_state = PL_TASK_STATE_PENDING;
+	tcb->past_state = PL_TASK_STATE_READY;
 	pl_exit_critical();
 	pl_task_context_switch();
 
@@ -680,11 +700,16 @@ int pl_task_pend(tid_t tid)
  ************************************************************************************/
 int pl_task_resume(tid_t tid)
 {
-	if (tid == NULL)
+	struct tcb *tcb = (struct tcb *)tid;
+
+	if (tcb == NULL)
 		return -EFAULT;
 
 	pl_enter_critical();
-	pl_task_insert_tcb_to_rdylist((struct tcb *)tid);
+	list_del_node(&tcb->node);
+	pl_task_insert_tcb_to_rdylist(tcb);
+	tcb->curr_state = PL_TASK_STATE_READY;
+	tcb->past_state = PL_TASK_STATE_PENDING;
 	pl_exit_critical();
 	pl_task_context_switch();
 
@@ -807,26 +832,35 @@ static void update_delay_task_list(void)
  ************************************************************************************/
 static void update_softtimer_list(void)
 {
-#if 0
+	bool list_empty;
 	struct softtimer *pos;
 	struct softtimer *tmp;
-	struct list_node *first;
+	struct softtimer *first;
 	struct softtimer_ctrl *timer_ctrl;
 
-	/* update delay list */
+	timer_ctrl = pl_softtimer_get_ctrl();
+	/* if timer list is empty, we skip it */
+	list_empty = list_is_empty(&g_task_core_blk.timer_list);
+	if (list_empty || timer_ctrl->daemon == NULL)
+		return;
+
+	first = list_first_entry(&g_task_core_blk.timer_list, struct softtimer, node);
+	if (pl_count_cmp(&first->reach_cnt, &g_task_core_blk.systicks) > 0) {
+		return;
+	}
+
+	/* update soft timer list */
 	list_for_each_entry_safe(pos, tmp, &g_task_core_blk.timer_list,
 	    struct softtimer, node) {
 
 		if (pl_count_cmp(&pos->reach_cnt, &g_task_core_blk.systicks) > 0)
-			return;
+			break;
+
+		list_del_node(&pos->node);
+		list_add_node_at_tail(&timer_ctrl->head, &pos->node);
 	}
 
-	/* move timer list timing reached to softtimer_ctrlblock list */
-	first = g_task_core_blk.timer_list.next;
-	timer_ctrl = pl_softtimer_get_ctrl();
-	list_move_chain_to_node_behind(&timer_ctrl->head, first, &pos->node);
-	pl_task_insert_tcb_to_rdylist((struct tcb *)timer_ctrl->daemon);
-#endif
+	pl_task_insert_tcb_to_rdylist((struct tcb *)(timer_ctrl->daemon));
 }
 
 /*************************************************************************************
@@ -889,8 +923,10 @@ int pl_task_get_syscount(struct count *c)
 	if (c == NULL)
 		return -EFAULT;
 
+	pl_enter_critical();
 	c->hi32 = g_task_core_blk.systicks.hi32;
 	c->lo32 = g_task_core_blk.systicks.lo32;
+	pl_exit_critical();
 
 	return OK;
 }
@@ -975,6 +1011,7 @@ int pl_task_core_init(void)
 	cpu_rate_idle = 0;
 	rdytask_list_init();
 	list_init(&g_task_core_blk.pend_list);
+	list_init(&g_task_core_blk.timer_list);
 	list_init(&g_task_core_blk.exit_list);
 
 	list_init(&delay_dummy_tcb.node);

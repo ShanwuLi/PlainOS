@@ -53,7 +53,6 @@ static int idle_task1(int argc, char *argv[])
 	else
 		pl_syslog_err("pl_task_join tcb2 failed\r\n");
 
-
 	r = pl_task_join(tcb3, &ret);
 	if (r == OK)
 		pl_syslog_info("%s: ret:%d\r\n", "idle_task3", ret);

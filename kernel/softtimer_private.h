@@ -41,9 +41,10 @@ struct softtimer {
 	struct list_node node;
 	stimer_fun_t fun;
 	void *priv_data;
+	struct count timing_cnt;
 	struct count reach_cnt;
-	bool auto_load;
 };
 
+int pl_softtimer_core_init(void);
 struct softtimer_ctrl *pl_softtimer_get_ctrl(void);
 #endif /* __KERNEL_SOFTTIMER_PRIVATE_H__ */

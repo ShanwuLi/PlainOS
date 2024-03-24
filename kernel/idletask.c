@@ -27,6 +27,7 @@ SOFTWARE.
 #include <kernel/syslog.h>
 #include "initcall_private.h"
 #include "idletask_private.h"
+#include "softtimer_private.h"
 
 /*************************************************************************************
  * Function Name: idle_task
@@ -37,11 +38,12 @@ static int idle_task(int argc, char *argv[])
 	USED(argc);
 	USED(argv);
 	pl_port_systick_init();
+	pl_softtimer_core_init();
 	pl_do_early_initcalls();
 	pl_do_initcalls();
 
 	while(1) {
-		pl_syslog_info("idletask===============================================\r\n");
+		//pl_syslog_info("idletask===============================================\r\n");
 		for (volatile int i = 0; i < 10000; i++);
 	}
 

@@ -93,6 +93,18 @@ typedef void (*task_entry_t)(struct tcb *tcb);
 struct tcb *pl_task_get_curr_tcb(void);
 
 /*************************************************************************************
+ * Function Name: pl_task_get_timer_list
+ * Description: Get timer list tcb.
+ *
+ * Parameters:
+ *   none.
+ *
+ * Return:
+ *   @struct list_node: timer list.
+ ************************************************************************************/
+struct list_node *pl_task_get_timer_list(void);
+
+/*************************************************************************************
  * Function Name: pl_task_context_switch
  * Description: switch task.
  *

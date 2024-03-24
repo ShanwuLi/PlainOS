@@ -27,8 +27,11 @@ SOFTWARE.
 #include <kernel/kernel.h>
 
 typedef void *stimer_handle_t;
-typedef void (*stimer_fun_t)(stimer_handle_t *timer);
+typedef void (*stimer_fun_t)(stimer_handle_t timer);
 
-int pl_softtimer_add(stimer_handle_t timer, stimer_fun_t *fun,
-                     struct count *timing_cnt, bool auto_load, void *priv_data);
+stimer_handle_t pl_softtimer_request(void);
+int pl_softtimer_set_private_data(stimer_handle_t timer, void *data);
+int pl_softtimer_get_private_data(stimer_handle_t timer, void **data);
+int pl_softtimer_start(stimer_handle_t timer, stimer_fun_t fun,
+                       struct count *timing_cnt, void *priv_data);
 #endif /* __KERNEL_SOFTTIMER_H__ */

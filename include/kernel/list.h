@@ -56,7 +56,7 @@ struct list_node {
  *   void
  ************************************************************************************/
 #define list_for_each(pos, list_head) \
-	for (pos = (list_head)->next; pos != (list_head); pos = pos->next)
+	for ((pos) = (list_head)->next; (pos) != (list_head); (pos) = (pos)->next)
 
 /*************************************************************************************
  * Function Name: list_next_entry
@@ -71,7 +71,22 @@ struct list_node {
  *   @entry_type: next entry of specific entry.
  ************************************************************************************/
 #define list_next_entry(entry, entry_type, member) \
-	container_of(entry->member.next, entry_type, member)
+	container_of((entry)->member.next, entry_type, member)
+
+/*************************************************************************************
+ * Function Name: list_first_entry
+ * Description: Return the first entry of specific list.
+ *
+ * Param:
+ *   @head: list head.
+ *   @entry_type: the type of entry.
+ *   @member: the name of the list_head within the struct.
+ *
+ * Return:
+ *   @entry_type: first entry of specific list.
+ ************************************************************************************/
+#define list_first_entry(head, entry_type, member) \
+	container_of((head)->next, entry_type, member)
 
 /*************************************************************************************
  * Function Name: list_next_entry
@@ -86,7 +101,7 @@ struct list_node {
  *   @entry_type: next entry of specific entry.
  ************************************************************************************/
 #define list_prev_entry(entry, entry_type, member) \
-	container_of(entry->member.prev, entry_type, member)
+	container_of((entry)->member.prev, entry_type, member)
 
 /*************************************************************************************
  * Function Name: list_for_each_entry
