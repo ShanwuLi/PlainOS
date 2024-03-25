@@ -2,6 +2,7 @@
     "files.associations": {
         "port.h": "c",
         "early_uart.h": "c",
-        "stm32f10x.h": "c"
+        "stm32f10x.h": "c",
+        "types.h": "c"
     }
 }
