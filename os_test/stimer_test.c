@@ -3,70 +3,81 @@
 #include <kernel/syslog.h>
 #include <kernel/task.h>
 
+static int times = 0;
+static stimer_handle_t stimer;
+static stimer_handle_t stimer2;
 
 static void stimer_callback(stimer_handle_t timer)
 {
 	int ret;
+	void *data;
 	USED(timer);
-	struct count c = {.hi32 = 0, .lo32 = 2000};
+	struct count c = {.hi32 = 0, .lo32 = 2};
 
-	//pl_softtimer_get_private_data(timer, &data);
-	pl_syslog_info("stimer_callback1111111111111111111\r\n");
-	ret = pl_softtimer_start(timer, stimer_callback, &c, NULL);
+	pl_softtimer_get_private_data(timer, &data);
+	pl_early_syslog_info("stimer_callback %s\r\n", (char *)data);
+	ret = pl_softtimer_start(timer, stimer_callback, &c, data);
 	if (ret < 0) {
 		pl_syslog_err("pl_softtimer_add failed, ret:%d\r\n", ret);
 	}
 }
+
 
 static void stimer_callback2(stimer_handle_t timer)
 {
 	int ret;
-	USED(timer);
-	struct count c = {.hi32 = 0, .lo32 = 1000};
+	void *data;
+	struct count c = {.hi32 = 0, .lo32 = 1};
 
-	//pl_softtimer_get_private_data(timer, &data);
-	pl_syslog_info("stimer2_callback2222222222222222\r\n");
-	ret = pl_softtimer_start(timer, stimer_callback2, &c, NULL);
+	pl_softtimer_get_private_data(timer, &data);
+	pl_early_syslog_info("stimer2_callback %s\r\n", (char *)data);
+	ret = pl_softtimer_start(timer, stimer_callback2, &c, data);
 	if (ret < 0) {
 		pl_syslog_err("pl_softtimer_add failed, ret:%d\r\n", ret);
+		return;
 	}
+
+	if (times++ < 1000) {
+		return;
+	}
+
+	ret = pl_softtimer_cancel(stimer);
+	if (ret < 0) {
+		pl_syslog_err("pl_softtimer_cancel failed, ret:%d\r\n", ret);
+	}
+
+	pl_early_syslog_info("timer1 canceled!!!!!\r\n");
+
 }
+
 
 static int stimer_test(void)
 {
 	int ret;
-	struct count c = {.hi32 = 0, .lo32 = 2000};
-	stimer_handle_t stimer;
-	stimer_handle_t stimer2;
+	struct count c = {.hi32 = 0, .lo32 = 9000};
 
 	pl_syslog_info("stimer_test\r\n");
-	stimer = pl_softtimer_request();
+	stimer = pl_softtimer_request("timer1");
 	if (stimer == NULL) {
 		pl_syslog_err("pl_softtimer_request failed\r\n");
 		return -1;
 	}
 
-	pl_syslog_info("pl_softtimer_set_private_data\r\n");
-	//(void)pl_softtimer_set_private_data(stimer, (char *)"soft timer test");
-
 	pl_syslog_info("pl_softtimer_add\r\n");
-	ret = pl_softtimer_start(stimer, stimer_callback, &c, NULL);
+	ret = pl_softtimer_start(stimer, stimer_callback, &c, (void *)"111111111111111111111");
 	if (ret < 0) {
 		pl_syslog_err("pl_softtimer_add failed, ret:%d\r\n", ret);
 		return -1;
 	}
 
-	stimer2 = pl_softtimer_request();
+	stimer2 = pl_softtimer_request("timer2");
 	if (stimer2 == NULL) {
 		pl_syslog_err("pl_softtimer_request failed\r\n");
 		return -1;
 	}
 
-	pl_syslog_info("pl_softtimer_set_private_data\r\n");
-	//(void)pl_softtimer_set_private_data(stimer, (char *)"soft timer test");
-
 	pl_syslog_info("pl_softtimer_add\r\n");
-	ret = pl_softtimer_start(stimer2, stimer_callback2, &c, NULL);
+	ret = pl_softtimer_start(stimer2, stimer_callback2, &c, (void *)"222222222222222222222");
 	if (ret < 0) {
 		pl_syslog_err("pl_softtimer_add failed, ret:%d\r\n", ret);
 		return -1;
@@ -86,7 +97,7 @@ static int softtimer_test_task(int argc, char *argv[])
 
 static int softtimer_test(void)
 {
-	pl_task_create("softtimer_task", softtimer_test_task, PL_CFG_PRIORITIES_MAX - 1, 512, 0, NULL);
+	pl_task_create("softtimer_task", softtimer_test_task, PL_CFG_TASK_PRIORITIES_MAX - 1, 512, 0, NULL);
 
 	return 0;
 }

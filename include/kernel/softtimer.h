@@ -29,9 +29,79 @@ SOFTWARE.
 typedef void *stimer_handle_t;
 typedef void (*stimer_fun_t)(stimer_handle_t timer);
 
-stimer_handle_t pl_softtimer_request(void);
-int pl_softtimer_set_private_data(stimer_handle_t timer, void *data);
+/*************************************************************************************
+ * Function Name: pl_softtimer_request
+ *
+ * Description:
+ *   request a soft timer.
+ * 
+ * Parameters:
+ *  @name: timer name.
+ *
+ * Return:
+ *  @stimer_handle_t: handle of soft timer requested.
+ ************************************************************************************/
+stimer_handle_t pl_softtimer_request(const char *name);
+
+/*************************************************************************************
+ * Function Name: pl_softtimer_get_private_data
+ *
+ * Description:
+ *   get private data of soft timer.
+ * 
+ * Parameters:
+ *  @timer: handle of soft timer requested.
+ *  @data: private data addr.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
 int pl_softtimer_get_private_data(stimer_handle_t timer, void **data);
+
+/*************************************************************************************
+ * Function Name: pl_softtimer_start
+ *
+ * Description:
+ *   start soft timer.
+ * 
+ * Parameters:
+ *  @timer: handle of soft timer requested.
+ *  @fun: callback function.
+ *  @timing_cnt: the count of timing.
+ *  @priv_data: private data.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
 int pl_softtimer_start(stimer_handle_t timer, stimer_fun_t fun,
                        struct count *timing_cnt, void *priv_data);
+
+/*************************************************************************************
+ * Function Name: pl_softtimer_cancel
+ *
+ * Description:
+ *   cancel soft timer.
+ * 
+ * Parameters:
+ *  @timer: handle of soft timer requested.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_softtimer_cancel(stimer_handle_t timer);
+
+/*************************************************************************************
+ * Function Name: pl_softtimer_cancel
+ *
+ * Description:
+ *   cancel soft timer.
+ * 
+ * Parameters:
+ *  @timer: handle of soft timer requested.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+void pl_softtimer_release(stimer_handle_t timer);
+
 #endif /* __KERNEL_SOFTTIMER_H__ */

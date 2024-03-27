@@ -28,7 +28,7 @@ SOFTWARE.
 #include <kernel/mempool.h>
 #include <kernel/assert.h>
 #include <kernel/semaphore.h>
-#include "semaphore_private.h"
+#include "semaphore.h"
 
 /*************************************************************************************
  * Description: mempool structure definition.

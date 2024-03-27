@@ -1,8 +1,8 @@
 #include <port.h>
 #include <kernel/mempool.h>
 #include "syslog_private.h"
-#include "task_private.h"
-#include "idletask_private.h"
+#include "task.h"
+#include "idletask.h"
 
 void pl_callee_entry(void)
 {

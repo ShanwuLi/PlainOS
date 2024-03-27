@@ -27,10 +27,10 @@ SOFTWARE.
 #include <kernel/list.h>
 #include <kernel/kernel.h>
 #include <kernel/semaphore.h>
-#include "task_private.h"
+#include "task.h"
 #include <kernel/syslog.h>
 #include <kernel/mempool.h>
-#include "semaphore_private.h"
+#include "semaphore.h"
 
 /*************************************************************************************
  * Function Name: pl_semaplore_init
@@ -43,7 +43,7 @@ SOFTWARE.
  *  @val: value of semaphore.
  *
  * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure..
+ *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
 int pl_semaplore_init(struct semaphore *semap, int val)
 {

@@ -29,22 +29,47 @@ SOFTWARE.
 #include <kernel/list.h>
 #include <kernel/semaphore.h>
 #include <kernel/softtimer.h>
-#include "semaphore_private.h"
+#include "semaphore.h"
 
 struct softtimer_ctrl {
 	tid_t daemon;
 	struct list_node head;
-	struct semaphore sem;
 };
 
 struct softtimer {
 	struct list_node node;
+	const char *name;
 	stimer_fun_t fun;
 	void *priv_data;
 	struct count timing_cnt;
 	struct count reach_cnt;
 };
 
+/*************************************************************************************
+ * Function Name: pl_softtimer_core_init
+ *
+ * Description:
+ *   init soft timer system.
+ * 
+ * Parameters:
+ *  none.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
 int pl_softtimer_core_init(void);
+
+/*************************************************************************************
+ * Function Name: pl_softtimer_get_ctrl
+ *
+ * Description:
+ *   get timer controller.
+ * 
+ * Parameters:
+ *  none.
+ *
+ * Return:
+ *  @softtimer_ctrl: timer system controller.
+ ************************************************************************************/
 struct softtimer_ctrl *pl_softtimer_get_ctrl(void);
 #endif /* __KERNEL_SOFTTIMER_PRIVATE_H__ */

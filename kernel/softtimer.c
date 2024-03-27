@@ -23,65 +23,117 @@ SOFTWARE.
 
 #include <errno.h>
 #include <types.h>
+#include <config.h>
 #include <kernel/mempool.h>
-#include "softtimer_private.h"
-#include "task_private.h"
 #include <kernel/syslog.h>
+#include "softtimer.h"
+#include "task.h"
 
 static struct softtimer_ctrl softtimer_ctrl;
 
+/*************************************************************************************
+ * Function Name: softtimer_daemon_task
+ *
+ * Description:
+ *   daemon task of soft timer.
+ * 
+ * Parameters:
+ *  none.
+ *
+ * Return:
+ *  none.
+ ************************************************************************************/
 static int softtimer_daemon_task(int argc, char **argv)
 {
 	USED(argc);
 	USED(argv);
-	struct softtimer *pos;
-	struct softtimer *tmp;
+	struct softtimer *first;
+	stimer_fun_t stimer_fun;
 
-	/* FIXME! [BUGS] We must use message queue to implement here */
 	while (true) {
-		list_for_each_entry_safe(pos, tmp, &softtimer_ctrl.head, struct softtimer, node) {
-			if (pos->fun != NULL)
-				pos->fun((stimer_handle_t)pos);
-		}
+		if (list_is_empty(&softtimer_ctrl.head)) {
+			pl_task_pend(softtimer_ctrl.daemon);
+		} else {
 
-		list_init(&softtimer_ctrl.head);
-		pl_task_pend(softtimer_ctrl.daemon);
+		pl_enter_critical();
+		first = list_first_entry(&softtimer_ctrl.head, struct softtimer, node);
+		list_del_node(&first->node);
+		pl_exit_critical();
+
+		stimer_fun = first->fun;
+		first->fun = NULL;
+		if (stimer_fun != NULL)
+			stimer_fun(first);
+		}
 	}
 
 	return 0;
 }
 
-stimer_handle_t pl_softtimer_request(void)
+/*************************************************************************************
+ * Function Name: pl_softtimer_request
+ *
+ * Description:
+ *   request a soft timer.
+ * 
+ * Parameters:
+ *  @name: timer name.
+ *
+ * Return:
+ *  @stimer_handle_t: handle of soft timer requested.
+ ************************************************************************************/
+stimer_handle_t pl_softtimer_request(const char *name)
 {
 	struct softtimer *timer;
-	
+
 	timer = pl_mempool_malloc(g_pl_default_mempool, sizeof(struct softtimer));
 	if (timer == NULL) {
 		return NULL;
 	}
 
+	timer->name = name;
+	list_init(&timer->node);
+
 	return (stimer_handle_t)timer;
 }
 
-int pl_softtimer_set_private_data(stimer_handle_t timer, void *data)
-{
-	if (timer == NULL)
-		return -EFAULT;
-
-	((struct softtimer *)timer)->priv_data = data;
-	return OK;
-}
-
+/*************************************************************************************
+ * Function Name: pl_softtimer_get_private_data
+ *
+ * Description:
+ *   get private data of soft timer.
+ * 
+ * Parameters:
+ *  @timer: handle of soft timer requested.
+ *  @data: private data addr.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
 int pl_softtimer_get_private_data(stimer_handle_t timer, void **data)
 {
-	if (timer == NULL)
+	if (timer == NULL || data == NULL)
 		return -EFAULT;
 
 	*data = ((struct softtimer *)timer)->priv_data;
 	return OK;
 }
 
-
+/*************************************************************************************
+ * Function Name: pl_softtimer_start
+ *
+ * Description:
+ *   start soft timer.
+ * 
+ * Parameters:
+ *  @timer: handle of soft timer requested.
+ *  @fun: callback function.
+ *  @timing_cnt: the count of timing.
+ *  @priv_data: private data.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
 int pl_softtimer_start(stimer_handle_t timer, stimer_fun_t fun,
                        struct count *timing_cnt, void *priv_data)
 {
@@ -90,7 +142,7 @@ int pl_softtimer_start(stimer_handle_t timer, stimer_fun_t fun,
 	struct softtimer *stimer = (struct softtimer *)timer;
 	struct list_node *timer_list = pl_task_get_timer_list();
 
-	if (stimer == NULL || fun == NULL || timing_cnt == 0) {
+	if (stimer == NULL || fun == NULL || timing_cnt == NULL) {
 		return -EFAULT;
 	}
 
@@ -98,35 +150,112 @@ int pl_softtimer_start(stimer_handle_t timer, stimer_fun_t fun,
 	stimer->priv_data = priv_data;
 	stimer->timing_cnt.hi32 = timing_cnt->hi32;
 	stimer->timing_cnt.lo32 = timing_cnt->lo32;
-
 	pl_task_get_syscount(&syscount);
 	pl_count_add(&stimer->reach_cnt, &syscount, timing_cnt);
 
 	pl_enter_critical();
+	if (list_is_empty(timer_list)) {
+		list_add_node_at_tail(timer_list, &stimer->node);
+		goto out;
+	}
+
 	list_for_each_entry(pos, timer_list, struct softtimer, node) {
 		if (pl_count_cmp(&stimer->reach_cnt, &pos->reach_cnt) < 0)
 			break;
 	}
 
-	pos = list_prev_entry(pos, struct softtimer, node);
-	list_add_node_behind(&pos->node, &stimer->node);
+	list_add_node_ahead(&pos->node, &stimer->node);
+
+out:
 	pl_exit_critical();
+	return OK;
+}
+
+/*************************************************************************************
+ * Function Name: pl_softtimer_cancel
+ *
+ * Description:
+ *   cancel soft timer.
+ * 
+ * Parameters:
+ *  @timer: handle of soft timer requested.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_softtimer_cancel(stimer_handle_t timer)
+{
+	struct softtimer *stimer = (struct softtimer *)timer;
+
+	if (stimer == NULL || stimer->fun == NULL)
+		return ERROR;
+
+	if (list_is_empty(&stimer->node))
+		return ERROR;
+
+	pl_enter_critical();
+	list_del_node(&stimer->node);
+	stimer->fun = NULL;
+	pl_exit_critical();
+	list_init(&stimer->node);
 
 	return OK;
 }
 
-int pl_softtimer_core_init(void)
+/*************************************************************************************
+ * Function Name: pl_softtimer_cancel
+ *
+ * Description:
+ *   cancel soft timer.
+ * 
+ * Parameters:
+ *  @timer: handle of soft timer requested.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+void pl_softtimer_release(stimer_handle_t timer)
 {
-	list_init(&softtimer_ctrl.head);
-	pl_semaplore_init(&softtimer_ctrl.sem, 1);
-	softtimer_ctrl.daemon = pl_task_create("softtimer_daemon",
-	                softtimer_daemon_task, 0,
-	               	PL_CFG_SOFTTIMER_DAEMON_TASK_STACK_SIZE, 0, NULL);
-	return 0;
+	if (timer == NULL)
+		return;
+
+	pl_mempool_free(g_pl_default_mempool, timer);
 }
 
+/*************************************************************************************
+ * Function Name: pl_softtimer_get_ctrl
+ *
+ * Description:
+ *   get timer controller.
+ * 
+ * Parameters:
+ *  none.
+ *
+ * Return:
+ *  @softtimer_ctrl: timer system controller.
+ ************************************************************************************/
 struct softtimer_ctrl *pl_softtimer_get_ctrl(void)
 {
 	return &softtimer_ctrl;
 }
 
+/*************************************************************************************
+ * Function Name: pl_softtimer_core_init
+ *
+ * Description:
+ *   init soft timer system.
+ * 
+ * Parameters:
+ *  none.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_softtimer_core_init(void)
+{
+	list_init(&softtimer_ctrl.head);
+	softtimer_ctrl.daemon = pl_task_create("softtimer_daemon",
+	                softtimer_daemon_task, 0,
+	               	PL_CFG_SOFTTIMER_DAEMON_TASK_STACK_SIZE, PL_CFG_TASK_PRIORITIES_MAX, NULL);
+	return 0;
+}

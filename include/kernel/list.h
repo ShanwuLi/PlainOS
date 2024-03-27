@@ -192,8 +192,8 @@ void list_add_node_at_tail(struct list_node *head, struct list_node *node);
 void list_add_node_at_front(struct list_node *head, struct list_node *node);
 
 /*************************************************************************************
- * Function Name: list_add_node_at_front
- * Description: Add a node to the list front.
+ * Function Name: list_add_node_behind
+ * Description: Add a node to the list behind.
  *
  * Param:
  *   @head: head node of the list.
@@ -202,6 +202,18 @@ void list_add_node_at_front(struct list_node *head, struct list_node *node);
  *   void
  ************************************************************************************/
 void list_add_node_behind(struct list_node *pos, struct list_node *node);
+
+/*************************************************************************************
+ * Function Name: list_add_node_ahead
+ * Description: Add a node to the list ahead.
+ *
+ * Param:
+ *   @head: head node of the list.
+ *   @node: inserted node.
+ * Return:
+ *   void
+ ************************************************************************************/
+void list_add_node_ahead(struct list_node *pos, struct list_node *node);
 
 /*************************************************************************************
  * Function Name: list_del_tail_node

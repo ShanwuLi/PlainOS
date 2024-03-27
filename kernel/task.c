@@ -30,14 +30,14 @@ SOFTWARE.
 #include <kernel/syslog.h>
 #include <kernel/mempool.h>
 #include <lib/string.h>
-#include "task_private.h"
-#include "softtimer_private.h"
+#include "task.h"
+#include "softtimer.h"
 
 /*************************************************************************************
  * Description: Definitions of highest priority of task.
  ************************************************************************************/
-#if (PL_CFG_PRIORITIES_MAX >= 512)
-	#error "PL_CFG_PRIORITIES_MAX must less 512"
+#if (PL_CFG_TASK_PRIORITIES_MAX >= 512)
+	#error "PL_CFG_TASK_PRIORITIES_MAX must less 512"
 #endif
 
 /*************************************************************************************
@@ -65,7 +65,7 @@ static u32_t cpu_rate_idle;
  *
  ************************************************************************************/
 struct task_core_blk {
-	struct task_list ready_list[PL_CFG_PRIORITIES_MAX + 1];
+	struct task_list ready_list[PL_CFG_TASK_PRIORITIES_MAX + 1];
 	struct task_list delay_list;
 	struct list_node pend_list;
 	struct list_node timer_list;
@@ -107,7 +107,7 @@ static u8_t __const g_hiprio_idx_tbl[256] = {
  * Description: Obtain the highest priority through the priority bit map.
  *              Supports up to 4096 priority levels.
  ************************************************************************************/
-static u32_t g_hiprio_bitmap[(PL_CFG_PRIORITIES_MAX + 31) / 32];
+static u32_t g_hiprio_bitmap[(PL_CFG_TASK_PRIORITIES_MAX + 31) / 32];
 
 /*************************************************************************************
  * Global Variable Name: g_task_core_blk
@@ -260,7 +260,7 @@ static void rdytask_list_init(void)
 {
 	u16_t i;
 
-	for (i = 0; i < PL_CFG_PRIORITIES_MAX + 1; i++) {
+	for (i = 0; i < PL_CFG_TASK_PRIORITIES_MAX + 1; i++) {
 		g_task_core_blk.ready_list[i].head = NULL;
 		g_task_core_blk.ready_list[i].num = 0;
 	}
@@ -280,6 +280,9 @@ void pl_task_insert_tcb_to_rdylist(struct tcb *tcb)
 	u16_t prio = tcb->prio;
 	struct task_list *rdylist = &g_task_core_blk.ready_list[prio];
 
+	if (tcb->curr_state == PL_TASK_STATE_DELAY)
+		return;
+
 	if (rdylist->head == NULL) {
 		list_init(&tcb->node);
 		rdylist->head = tcb;
@@ -289,6 +292,7 @@ void pl_task_insert_tcb_to_rdylist(struct tcb *tcb)
 
 	++rdylist->num;
 	set_bit_of_hiprio_bitmap(prio);
+	tcb->curr_state = PL_TASK_STATE_READY;
 }
 
 /*************************************************************************************
@@ -313,6 +317,7 @@ void pl_task_insert_tcb_to_delaylist(struct tcb *tcb)
 	pos = list_prev_entry(pos, struct tcb, node);
 	++delaylist->num;
 	list_add_node_behind(&pos->node, &tcb->node);
+	tcb->curr_state = PL_TASK_STATE_DELAY;
 }
 
 /*************************************************************************************
@@ -438,7 +443,7 @@ void pl_task_context_switch(void)
 	next_tcb = g_task_core_blk.ready_list[hiprio].head;
 	pl_exit_critical();
 
-	idle_tcb = g_task_core_blk.ready_list[PL_CFG_PRIORITIES_MAX].head;
+	idle_tcb = g_task_core_blk.ready_list[PL_CFG_TASK_PRIORITIES_MAX].head;
 	if (next_tcb == idle_tcb)
 		++cpu_rate_idle;
 
@@ -834,9 +839,9 @@ static void update_softtimer_list(void)
 {
 	bool list_empty;
 	struct softtimer *pos;
-	struct softtimer *tmp;
 	struct softtimer *first;
 	struct softtimer_ctrl *timer_ctrl;
+	struct tcb *timer_tcb;
 
 	timer_ctrl = pl_softtimer_get_ctrl();
 	/* if timer list is empty, we skip it */
@@ -850,17 +855,20 @@ static void update_softtimer_list(void)
 	}
 
 	/* update soft timer list */
-	list_for_each_entry_safe(pos, tmp, &g_task_core_blk.timer_list,
+	list_for_each_entry(pos, &g_task_core_blk.timer_list,
 	    struct softtimer, node) {
 
 		if (pl_count_cmp(&pos->reach_cnt, &g_task_core_blk.systicks) > 0)
 			break;
 
-		list_del_node(&pos->node);
-		list_add_node_at_tail(&timer_ctrl->head, &pos->node);
+		//list_del_node(&pos->node);
+		//list_add_node_at_tail(&timer_ctrl->head, &pos->node);
 	}
 
-	pl_task_insert_tcb_to_rdylist((struct tcb *)(timer_ctrl->daemon));
+	list_move_chain_to_node_behind(&timer_ctrl->head, g_task_core_blk.timer_list.next, pos->node.prev);
+	timer_tcb = (struct tcb *)(timer_ctrl->daemon);
+	list_del_node(&timer_tcb->node);
+	pl_task_insert_tcb_to_rdylist(timer_tcb);
 }
 
 /*************************************************************************************

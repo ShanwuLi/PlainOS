@@ -44,8 +44,8 @@ static int idle_task1(int argc, char *argv[])
 	char *argvs2[2] = {(char *)"+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\r\n", NULL};
 	char *argvs3[2] = {(char *)"-----------------------------------------------------------\r\n", NULL};
 
-	tcb2 = pl_task_create("idle_task2", idle_task2, PL_CFG_PRIORITIES_MAX - 1, 512, 1, argvs2);
-	tcb3 = pl_task_create("idle_task3", idle_task2, PL_CFG_PRIORITIES_MAX - 2, 512, 1, argvs3);
+	tcb2 = pl_task_create("idle_task2", idle_task2, PL_CFG_TASK_PRIORITIES_MAX - 1, 512, 1, argvs2);
+	tcb3 = pl_task_create("idle_task3", idle_task2, PL_CFG_TASK_PRIORITIES_MAX - 2, 512, 1, argvs3);
 
 	r = pl_task_join(tcb2, &ret);
 	if (r == OK)
@@ -76,7 +76,7 @@ static int idle_task1(int argc, char *argv[])
 static int task_test(void)
 {
 	pl_syslog_info("============8\r\n");
-	pl_task_create("idle_task1", idle_task1, PL_CFG_PRIORITIES_MAX - 1, 512, 0, NULL);
+	pl_task_create("idle_task1", idle_task1, PL_CFG_TASK_PRIORITIES_MAX - 1, 512, 0, NULL);
 
 	return 0;
 }

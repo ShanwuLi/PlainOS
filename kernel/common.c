@@ -124,7 +124,6 @@ void pl_enter_critical(void)
 {
 	pl_port_mask_interrupts();
 	++pl_critical_ref;
-	pl_port_cpu_dsb();
 	pl_port_cpu_isb();
 }
 
@@ -143,7 +142,5 @@ void pl_exit_critical(void)
 	--pl_critical_ref;
 	if (pl_critical_ref == 0)
 		pl_port_unmask_interrupts();
-
 	pl_port_cpu_isb();
-	pl_port_cpu_dsb();
 }

@@ -25,7 +25,7 @@ SOFTWARE.
 #include <port.h>
 #include <kernel/initcall.h>
 #include <kernel/assert.h>
-#include "initcall_private.h"
+#include "initcall.h"
 
 extern initcall_t __early_initcall_start[];
 extern initcall_t __early_initcall_end[];

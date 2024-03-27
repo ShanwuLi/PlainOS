@@ -21,8 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef __KERNEL_INTERNAL_TASK_H__
-#define __KERNEL_INTERNAL_TASK_H__
+#ifndef __KERNEL_TASK_PRIVATE_H__
+#define __KERNEL_TASK_PRIVATE_H__
 
 #include <types.h>
 #include <kernel/kernel.h>
@@ -172,4 +172,4 @@ void pl_task_remove_tcb_from_delaylist(struct tcb *tcb);
  ************************************************************************************/
 void pl_task_remove_tcb_from_rdylist(struct tcb *tcb);
 
-#endif /* __KERNEL_INTERNAL_TASK_H__ */
+#endif /* __KERNEL_TASK_PRIVATE_H__ */
