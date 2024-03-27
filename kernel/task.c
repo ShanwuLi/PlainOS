@@ -893,7 +893,8 @@ static void update_softtimer_list(void)
 	list_move_chain_to_node_behind(&timer_ctrl->head, g_task_core_blk.timer_list.next, pos->node.prev);
 	timer_tcb = (struct tcb *)(timer_ctrl->daemon);
 	list_del_node(&timer_tcb->node);
-	pl_task_insert_tcb_to_rdylist(timer_tcb);
+	if (timer_tcb->curr_state != PL_TASK_STATE_READY)
+		pl_task_insert_tcb_to_rdylist(timer_tcb);
 }
 
 /*************************************************************************************

@@ -58,10 +58,10 @@ static int softtimer_daemon_task(int argc, char **argv)
 		pl_enter_critical();
 		first = list_first_entry(&softtimer_ctrl.head, struct softtimer, node);
 		list_del_node(&first->node);
-		pl_exit_critical();
-
 		stimer_fun = first->fun;
 		first->fun = NULL;
+		pl_exit_critical();
+
 		if (stimer_fun != NULL)
 			stimer_fun(first);
 		}

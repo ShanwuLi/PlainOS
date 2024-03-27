@@ -12,7 +12,7 @@ static void stimer_callback(stimer_handle_t timer)
 	int ret;
 	void *data;
 	USED(timer);
-	struct count c = {.hi32 = 0, .lo32 = 2};
+	struct count c = {.hi32 = 0, .lo32 = 2000};
 
 	pl_softtimer_get_private_data(timer, &data);
 	pl_early_syslog_info("stimer_callback %s\r\n", (char *)data);
@@ -27,7 +27,7 @@ static void stimer_callback2(stimer_handle_t timer)
 {
 	int ret;
 	void *data;
-	struct count c = {.hi32 = 0, .lo32 = 1};
+	struct count c = {.hi32 = 0, .lo32 = 10000};
 
 	pl_softtimer_get_private_data(timer, &data);
 	pl_early_syslog_info("stimer2_callback %s\r\n", (char *)data);
