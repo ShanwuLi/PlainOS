@@ -54,7 +54,6 @@ enum task_state {
  *   @argc: count of argv.
  *   @argv: arguments vector.
  *   @node: list node of the same priority tcb.
- *   @past_state: past state of system.
  *   @curr_state: current state of system.
  *   @prio: priority of the task, support priority up to 4096.
  *   @signal: signal of the task received.
@@ -71,7 +70,6 @@ struct tcb {
 	int wait_for_task_ret;
 	struct list_node wait_head;
 	struct list_node node;
-	u8_t past_state;
 	u8_t curr_state;
 	u16_t prio;
 	uint_t signal;
@@ -149,6 +147,39 @@ void pl_task_insert_tcb_to_rdylist(struct tcb *tcb);
  *   void
  ************************************************************************************/
 void pl_task_insert_tcb_to_delaylist(struct tcb *tcb);
+
+/*************************************************************************************
+ * Function Name: pl_task_insert_tcb_to_exitlist
+ * Description: Insert a tcb to list of exit task.
+ *
+ * Param:
+ *   @tcb: task control block.
+ * Return:
+ *   void
+ ************************************************************************************/
+void pl_task_insert_tcb_to_exitlist(struct tcb *tcb);
+
+/*************************************************************************************
+ * Function Name: pl_task_insert_tcb_to_waitlist
+ * Description: Insert a tcb to list of wait task.
+ *
+ * Param:
+ *   @tcb: task control block.
+ * Return:
+ *   void
+ ************************************************************************************/
+void pl_task_insert_tcb_to_waitlist(struct list_node *wait_list, struct tcb *tcb);
+
+/*************************************************************************************
+ * Function Name: pl_task_insert_tcb_to_pendlist
+ * Description: Insert a tcb to list of pending task.
+ *
+ * Param:
+ *   @tcb: task control block.
+ * Return:
+ *   void
+ ************************************************************************************/
+void pl_task_insert_tcb_to_pendlist(struct tcb *tcb);
 
 /*************************************************************************************
  * Function Name: pl_task_remove_tcb_from_delaylist

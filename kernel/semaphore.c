@@ -110,10 +110,8 @@ int pl_semaplore_take(pl_semaphore_handle_t semap)
 	--sem->value;
 	if (sem->value < 0) {
 		curr_tcb = pl_task_get_curr_tcb();
-		curr_tcb->curr_state = PL_TASK_STATE_WAITING;
-		curr_tcb->past_state = PL_TASK_STATE_READY;
 		pl_task_remove_tcb_from_rdylist(curr_tcb);
-		list_add_node_at_tail(&sem->wait_list, &curr_tcb->node);
+		pl_task_insert_tcb_to_waitlist(&sem->wait_list, curr_tcb);
 		pl_exit_critical();
 		pl_task_context_switch();
 		return OK;
@@ -149,8 +147,6 @@ int pl_semaplore_give(pl_semaphore_handle_t semap)
 	if (sem->value <= 0) {
 		front_node = list_del_front_node(&sem->wait_list);
 		front_tcb = container_of(front_node, struct tcb, node);
-		front_tcb->curr_state = PL_TASK_STATE_READY;
-		front_tcb->past_state = PL_TASK_STATE_WAITING;
 		pl_task_insert_tcb_to_rdylist(front_tcb);
 		pl_exit_critical();
 		pl_task_context_switch();

@@ -280,9 +280,6 @@ void pl_task_insert_tcb_to_rdylist(struct tcb *tcb)
 	u16_t prio = tcb->prio;
 	struct task_list *rdylist = &g_task_core_blk.ready_list[prio];
 
-	if (tcb->curr_state == PL_TASK_STATE_DELAY)
-		return;
-
 	if (rdylist->head == NULL) {
 		list_init(&tcb->node);
 		rdylist->head = tcb;
@@ -321,8 +318,53 @@ void pl_task_insert_tcb_to_delaylist(struct tcb *tcb)
 }
 
 /*************************************************************************************
+ * Function Name: pl_task_insert_tcb_to_exitlist
+ * Description: Insert a tcb to list of exit task.
+ *
+ * Param:
+ *   @tcb: task control block.
+ * Return:
+ *   void
+ ************************************************************************************/
+void pl_task_insert_tcb_to_exitlist(struct tcb *tcb)
+{
+	list_add_node_at_tail(&g_task_core_blk.exit_list, &tcb->node);
+	tcb->curr_state = PL_TASK_STATE_EXIT;
+}
+
+/*************************************************************************************
+ * Function Name: pl_task_insert_tcb_to_waitlist
+ * Description: Insert a tcb to list of wait task.
+ *
+ * Param:
+ *   @tcb: task control block.
+ * Return:
+ *   void
+ ************************************************************************************/
+void pl_task_insert_tcb_to_waitlist(struct list_node *wait_list, struct tcb *tcb)
+{
+	list_add_node_at_tail(wait_list, &tcb->node);
+	tcb->curr_state = PL_TASK_STATE_WAITING;
+}
+
+/*************************************************************************************
+ * Function Name: pl_task_insert_tcb_to_pendlist
+ * Description: Insert a tcb to list of pending task.
+ *
+ * Param:
+ *   @tcb: task control block.
+ * Return:
+ *   void
+ ************************************************************************************/
+void pl_task_insert_tcb_to_pendlist(struct tcb *tcb)
+{
+	list_add_node_at_tail(&g_task_core_blk.pend_list, &tcb->node);
+	tcb->curr_state = PL_TASK_STATE_PENDING;
+}
+
+/*************************************************************************************
  * Function Name: pl_task_remove_tcb_from_delaylist
- * Description: Insert a tcb to list of ready task.
+ * Description: remove a tcb to list of ready task.
  *
  * Param:
  *   @tcb: task control block.
@@ -469,17 +511,13 @@ static void task_entry(struct tcb *tcb)
 
 	/* insert current task to exit list */
 	pl_enter_critical();
-	tcb->curr_state = PL_TASK_STATE_EXIT;
-	tcb->past_state = PL_TASK_STATE_READY;
 	pl_task_remove_tcb_from_rdylist(tcb);
-	list_add_node_at_tail(&g_task_core_blk.exit_list, &tcb->node);
+	pl_task_insert_tcb_to_exitlist(tcb);
 
 	/* recover waiting tasks */
 	list_for_each_entry_safe(pos, tmp, &tcb->wait_head, struct tcb, node) {
 		list_del_node(&pos->node);
 		pl_task_insert_tcb_to_rdylist(pos);
-		pos->curr_state = PL_TASK_STATE_READY;
-		pos->past_state = PL_TASK_STATE_WAITING;
 		pos->wait_for_task_ret = exit_val;
 	}
 
@@ -517,8 +555,6 @@ static void task_init_tcb(const char *name, main_t task, u16_t prio,
 	tcb->argc = argc;
 	tcb->argv = argv;
 	tcb->signal = 0;
-	tcb->curr_state = PL_TASK_STATE_READY;
-	tcb->past_state = PL_TASK_STATE_EXIT;
 	tcb->delay_ticks.hi32 = 0;
 	tcb->delay_ticks.lo32 = 0;
 	tcb->wait_for_task_ret = ERROR;
@@ -647,11 +683,8 @@ int pl_task_join(tid_t tid, int *ret)
 		return ERROR;
 
 	pl_enter_critical();
-	g_task_core_blk.curr_tcb->curr_state = PL_TASK_STATE_WAITING;
-	g_task_core_blk.curr_tcb->past_state = PL_TASK_STATE_READY;
-
 	pl_task_remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
-	list_add_node_at_tail(&tcb->wait_head, &g_task_core_blk.curr_tcb->node);
+	pl_task_insert_tcb_to_waitlist(&tcb->wait_head, g_task_core_blk.curr_tcb);
 	pl_exit_critical();
 	pl_task_context_switch();
 
@@ -682,9 +715,7 @@ int pl_task_pend(tid_t tid)
 
 	pl_enter_critical();
 	pl_task_remove_tcb_from_rdylist(tcb);
-	list_add_node_at_tail(&g_task_core_blk.pend_list, &tcb->node);
-	tcb->curr_state = PL_TASK_STATE_PENDING;
-	tcb->past_state = PL_TASK_STATE_READY;
+	pl_task_insert_tcb_to_pendlist(tcb);
 	pl_exit_critical();
 	pl_task_context_switch();
 
@@ -713,8 +744,6 @@ int pl_task_resume(tid_t tid)
 	pl_enter_critical();
 	list_del_node(&tcb->node);
 	pl_task_insert_tcb_to_rdylist(tcb);
-	tcb->curr_state = PL_TASK_STATE_READY;
-	tcb->past_state = PL_TASK_STATE_PENDING;
 	pl_exit_critical();
 	pl_task_context_switch();
 
@@ -751,9 +780,6 @@ void pl_task_delay_ticks(u32_t ticks)
 
 	g_task_core_blk.curr_tcb->delay_ticks.hi32 = end_ticks_hi32;
 	g_task_core_blk.curr_tcb->delay_ticks.lo32 = ticks;
-	g_task_core_blk.curr_tcb->curr_state = PL_TASK_STATE_DELAY;
-	g_task_core_blk.curr_tcb->past_state = PL_TASK_STATE_READY;
-
 	pl_task_remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
 	pl_task_insert_tcb_to_delaylist(g_task_core_blk.curr_tcb);
 	pl_exit_critical();
@@ -818,8 +844,6 @@ static void update_delay_task_list(void)
 
 		pl_task_remove_tcb_from_delaylist(pos);
 		pl_task_insert_tcb_to_rdylist(pos);
-		pos->curr_state = PL_TASK_STATE_READY;
-		pos->past_state = PL_TASK_STATE_DELAY;
 	}
 }
 
@@ -861,6 +885,7 @@ static void update_softtimer_list(void)
 		if (pl_count_cmp(&pos->reach_cnt, &g_task_core_blk.systicks) > 0)
 			break;
 
+		/* replaced by list_move_chain_to_node_behind */
 		//list_del_node(&pos->node);
 		//list_add_node_at_tail(&timer_ctrl->head, &pos->node);
 	}
