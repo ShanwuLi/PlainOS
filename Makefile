@@ -20,7 +20,7 @@
 # SOFTWARE.
 
 #=================================================================================================#
-# please replace to your toolchain.
+# please replace the toolchain to your own.
 CROSS_COMPILE := arm-none-eabi-#avr
 CC       := $(CROSS_COMPILE)gcc
 OBJDUMP  := $(CROSS_COMPILE)objdump
