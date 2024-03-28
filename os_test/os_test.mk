@@ -25,11 +25,17 @@ OSTEST_DIR := $(TOPDIR)/os_test
 
 ifeq ($(PL_MK_CFG_OS_TEST), y)
 
+# mempool test
+ifeq ($(PL_MK_CFG_OS_MEMPOOL_TEST), y)
+C_SRCS += $(OSTEST_DIR)/mempool_test.c
+endif
+
 # task test
 ifeq ($(PL_MK_CFG_OS_TASK_TEST), y)
 C_SRCS += $(OSTEST_DIR)/task_test.c
 endif
-# task test
+
+# soft timer test
 ifeq ($(PL_MK_CFG_OS_SOFTTIMER_TEST), y)
 C_SRCS += $(OSTEST_DIR)/stimer_test.c
 endif

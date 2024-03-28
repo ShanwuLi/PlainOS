@@ -37,9 +37,9 @@ static int idle_task(int argc, char *argv[])
 {
 	USED(argc);
 	USED(argv);
-	pl_softtimer_core_init();
-	pl_port_systick_init();
 	pl_do_early_initcalls();
+	pl_port_systick_init();
+	pl_softtimer_core_init();
 	pl_do_initcalls();
 
 	while(1) {

@@ -30,7 +30,7 @@ SOFTWARE.
 /* maximum priority of plainos */
 #define PL_CFG_ASSERT
 #define PL_CFG_DEFAULT_MEMPOOL_SIZE             (10 * 1024)
-#define PL_CFG_DEFAULT_MEMPOOL_GRAIN_ORDER      (3)
+#define PL_CFG_DEFAULT_MEMPOOL_GRAIN_ORDER      (4)
 #define PL_CFG_MAX_TASKS_NUM                    (900u)
 #define PL_CFG_TASK_PRIORITIES_MAX              (99u)
 #define PL_CFG_IDLE_TASK_STACK_SIZE             (512)
