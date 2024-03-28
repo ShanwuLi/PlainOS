@@ -873,6 +873,7 @@ static void update_softtimer_list(void)
 	if (list_empty || timer_ctrl->daemon == NULL)
 		return;
 
+	/* Get the first entry of timer list node, We can know if the timer has timed out */
 	first = list_first_entry(&g_task_core_blk.timer_list, struct softtimer, node);
 	if (pl_count_cmp(&first->reach_cnt, &g_task_core_blk.systicks) > 0) {
 		return;
@@ -890,6 +891,7 @@ static void update_softtimer_list(void)
 		//list_add_node_at_tail(&timer_ctrl->head, &pos->node);
 	}
 
+	/* insert timer node to daemon list and wakeup the daemon task */
 	list_move_chain_to_node_behind(&timer_ctrl->head, g_task_core_blk.timer_list.next, pos->node.prev);
 	timer_tcb = (struct tcb *)(timer_ctrl->daemon);
 	if (timer_tcb->curr_state == PL_TASK_STATE_PENDING) {
