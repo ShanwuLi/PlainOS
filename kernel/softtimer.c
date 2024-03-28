@@ -115,7 +115,10 @@ int pl_softtimer_get_private_data(stimer_handle_t timer, void **data)
 	if (timer == NULL || data == NULL)
 		return -EFAULT;
 
+	pl_enter_critical();
 	*data = ((struct softtimer *)timer)->priv_data;
+	pl_exit_critical();
+
 	return OK;
 }
 
@@ -165,7 +168,6 @@ int pl_softtimer_start(stimer_handle_t timer, stimer_fun_t fun,
 	}
 
 	list_add_node_ahead(&pos->node, &stimer->node);
-
 out:
 	pl_exit_critical();
 	return OK;
