@@ -52,7 +52,7 @@ static int mempool_test(void)
 
 	pl_mempool_free(g_pl_default_mempool, p);
 	mempool_size = pl_mempool_get_free_bytes(g_pl_default_mempool);
-	pl_syslog_info("alloc 200 after - mempool_size:%d\r\n", mempool_size);
+	pl_syslog_info("free 200 after - mempool_size:%d\r\n", mempool_size);
 	dump_mempool();
 
 	return 0;
