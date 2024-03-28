@@ -214,7 +214,7 @@ int pl_softtimer_cancel(stimer_handle_t timer)
  *  @timer: handle of soft timer requested.
  *
  * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
+ *  void.
  ************************************************************************************/
 void pl_softtimer_release(stimer_handle_t timer)
 {
@@ -257,7 +257,7 @@ int pl_softtimer_core_init(void)
 {
 	list_init(&softtimer_ctrl.head);
 	softtimer_ctrl.daemon = pl_task_create("softtimer_daemon",
-	                softtimer_daemon_task, 0,
-	               	PL_CFG_SOFTTIMER_DAEMON_TASK_STACK_SIZE, PL_CFG_TASK_PRIORITIES_MAX, NULL);
+	                        softtimer_daemon_task, 0,
+	                        PL_CFG_SOFTTIMER_DAEMON_TASK_STACK_SIZE, 0, NULL);
 	return 0;
 }

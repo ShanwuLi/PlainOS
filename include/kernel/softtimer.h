@@ -100,7 +100,7 @@ int pl_softtimer_cancel(stimer_handle_t timer);
  *  @timer: handle of soft timer requested.
  *
  * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
+ *  void.
  ************************************************************************************/
 void pl_softtimer_release(stimer_handle_t timer);
 
