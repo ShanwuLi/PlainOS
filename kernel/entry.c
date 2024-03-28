@@ -1,6 +1,6 @@
 #include <port.h>
-#include <kernel/mempool.h>
-#include "syslog_private.h"
+#include "mempool.h"
+#include "syslog.h"
 #include "task.h"
 #include "idletask.h"
 
