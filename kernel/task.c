@@ -885,16 +885,17 @@ static void update_softtimer_list(void)
 		if (pl_count_cmp(&pos->reach_cnt, &g_task_core_blk.systicks) > 0)
 			break;
 
-		/* replaced by list_move_chain_to_node_behind */
+		/* replaced by list_move_chain_to_node_behind because it's more fast */
 		//list_del_node(&pos->node);
 		//list_add_node_at_tail(&timer_ctrl->head, &pos->node);
 	}
 
 	list_move_chain_to_node_behind(&timer_ctrl->head, g_task_core_blk.timer_list.next, pos->node.prev);
 	timer_tcb = (struct tcb *)(timer_ctrl->daemon);
-	list_del_node(&timer_tcb->node);
-	if (timer_tcb->curr_state != PL_TASK_STATE_READY)
+	if (timer_tcb->curr_state == PL_TASK_STATE_PENDING) {
+		list_del_node(&timer_tcb->node);
 		pl_task_insert_tcb_to_rdylist(timer_tcb);
+	}
 }
 
 /*************************************************************************************

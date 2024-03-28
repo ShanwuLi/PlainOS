@@ -53,7 +53,8 @@ static int softtimer_daemon_task(int argc, char **argv)
 	while (true) {
 		if (list_is_empty(&softtimer_ctrl.head)) {
 			pl_task_pend(softtimer_ctrl.daemon);
-		} else {
+			continue;
+		}
 
 		pl_enter_critical();
 		first = list_first_entry(&softtimer_ctrl.head, struct softtimer, node);
@@ -64,7 +65,6 @@ static int softtimer_daemon_task(int argc, char **argv)
 
 		if (stimer_fun != NULL)
 			stimer_fun(first);
-		}
 	}
 
 	return 0;
