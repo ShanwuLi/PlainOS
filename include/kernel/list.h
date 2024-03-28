@@ -117,9 +117,9 @@ struct list_node {
  *   void
  ************************************************************************************/
 #define list_for_each_entry(pos, list_head, entry_type, member) \
-	for (pos = container_of((list_head)->next, entry_type, member); \
-	     &pos->member != (list_head); \
-	     pos = container_of(pos->member.next, entry_type, member))
+	for ((pos) = container_of((list_head)->next, entry_type, member); \
+	     &(pos)->member != (list_head); \
+	     (pos) = container_of((pos)->member.next, entry_type, member))
 
 /*************************************************************************************
  * Function Name: list_for_each_entry_safe
@@ -136,10 +136,10 @@ struct list_node {
  *   none
  ************************************************************************************/
 #define list_for_each_entry_safe(pos, temp, list_head, entry_type, member) \
-	for (pos = container_of((list_head)->next, entry_type, member), \
-	     temp = list_next_entry(pos, entry_type, member); \
-	     &pos->member != (list_head); \
-	     pos = temp, temp = list_next_entry(temp, entry_type, member))
+	for ((pos) = container_of((list_head)->next, entry_type, member), \
+	     (temp) = list_next_entry(pos, entry_type, member); \
+	     &(pos)->member != (list_head); \
+	     (pos) = (temp), (temp) = list_next_entry((temp), entry_type, member))
 
 
 #ifdef __cplusplus

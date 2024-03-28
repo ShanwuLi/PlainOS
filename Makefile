@@ -115,21 +115,21 @@ endif
 
 # Tool invocations
 $(TARGET).elf: $(OBJS)
-	@echo "Making:" $(TARGET).lds
+	@echo "MK:" $(TARGET).lds
 	@$(CC) $(INC) -x assembler-with-cpp -E -P $(LINK_SCRIPT) -o $(TARGET).lds
-	@echo "Making:" $@
+	@echo "LD:" $@
 	@$(CC) $(LDFLAGS) $(OBJS) -o $@  $(LIBS)
 
 $(TARGET).hex: $(TARGET).elf
-	@echo "Making:" $@
+	@echo "MKIMG:" $@
 	@$(CP) -O ihex $< $@
 
 $(TARGET).bin: $(TARGET).elf
-	@echo "Making:" $@
+	@echo "MKIMG:" $@
 	@$(CP) -O binary -S $< $@
 
 $(TARGET).lst: $(TARGET).elf
-	@echo "Making:" $@
+	@echo "IMGINFO:" $@
 	@$(OBJDUMP) -d --source --all-headers --demangle --line-numbers --wide $< > $@
 
 $(TARGET).size: $(TARGET).elf

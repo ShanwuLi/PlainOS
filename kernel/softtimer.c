@@ -256,8 +256,7 @@ struct softtimer_ctrl *pl_softtimer_get_ctrl(void)
 int pl_softtimer_core_init(void)
 {
 	list_init(&softtimer_ctrl.head);
-	softtimer_ctrl.daemon = pl_task_create("softtimer_daemon",
-	                        softtimer_daemon_task, 0,
+	softtimer_ctrl.daemon = pl_task_create("softtimer_daemon", softtimer_daemon_task, 0,
 	                        PL_CFG_SOFTTIMER_DAEMON_TASK_STACK_SIZE, 0, NULL);
 	return 0;
 }
