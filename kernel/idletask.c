@@ -43,7 +43,7 @@ static int idle_task(int argc, char *argv[])
 	pl_do_initcalls();
 
 	while(1) {
-		pl_early_syslog("idletask===============================================\r\n");
+		//pl_early_syslog("idletask===============================================\r\n");
 		for (volatile int i = 0; i < 10000; i++);
 	}
 

@@ -42,7 +42,6 @@ static int mempool_test(void)
 	mempool_size = pl_mempool_get_free_bytes(g_pl_default_mempool);
 	pl_syslog_info("mempool_size:%d\r\n", mempool_size);
 	dump_mempool();
-	
 
 	p = pl_mempool_malloc(g_pl_default_mempool, 200);
 	USED(p);

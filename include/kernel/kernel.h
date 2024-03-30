@@ -27,8 +27,8 @@ SOFTWARE.
 #include <config.h>
 #include <types.h>
 
-#define __used                          __attribute__((used))
-#define __const                         __attribute__((section("__const")))
+#define pl_used                          __attribute__((used))
+#define pl_const                         __attribute__((section("pl_const")))
 #define USED(sym)                       ((void)(sym))
 #define ARRAY_SIZE(a)                   (sizeof(a) / sizeof(a[0]))
 

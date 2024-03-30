@@ -28,7 +28,7 @@ SOFTWARE.
 typedef int                          (*initcall_t)(void);
 typedef int                          (*exitcall_t)(void);
 
-#define __define_initcall(fn, id)    static initcall_t __initcall_##fn##id __used \
+#define __define_initcall(fn, id)    static initcall_t __initcall_##fn##id pl_used \
                                       __attribute__((section(".initcall" #id ".init"))) = fn
 
 #define __init                        __attribute__((section(".pl_init.init")))

@@ -26,7 +26,7 @@ SOFTWARE.
 typedef int (*plainos_app_call_t)(int argc, char *argv[]);
 
 #define __define_appcall(fn, id)  static plainos_app_call_t \
-	__appcall_##fn##id __used \
+	__appcall_##fn##id pl_used \
 	__attribute__((section(".appcall" #id ".app"))) = fn
 
 #define system_app_register(app)      __define_appcall(app, 0)

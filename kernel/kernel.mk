@@ -32,3 +32,4 @@ C_SRCS += $(KERNEL_DIR)/syslog.c
 C_SRCS += $(KERNEL_DIR)/task.c
 C_SRCS += $(KERNEL_DIR)/semaphore.c
 C_SRCS += $(KERNEL_DIR)/softtimer.c
+C_SRCS += $(KERNEL_DIR)/datafifo.c

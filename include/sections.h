@@ -25,7 +25,7 @@ SOFTWARE.
 
 #include "errno.h"
 
-#define CONST_SECTION               *(__const)
+#define CONST_SECTION               *(pl_const)
 
 #define INIT_CALLS_LEVEL(level)     __initcall##level##_start = .; \
 	                                KEEP(*(.initcall##level##.init)) \
@@ -98,6 +98,9 @@ SOFTWARE.
 	                                LONG(-EPIPE  ) \
 	                                LONG(-EDOM   ) \
 	                                LONG(-ERANGE ) \
+	                                               \
+	                                LONG(-EFULL )  \
+	                                LONG(-EEMPTY ) \
 	                                LONG(-EREGED ) \
 	                                LONG(-ETIMEOUT) \
 	                                LONG(ERROR  ) \
