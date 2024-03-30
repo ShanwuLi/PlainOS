@@ -99,8 +99,8 @@ pl_kfifo_handle pl_kfifo_request(uint_t buff_size)
 }
 
 /*************************************************************************************
- * Function Name: pl_datafifo_destroy
- * Description: destroy a data fifo.
+ * Function Name: pl_kfifo_destroy
+ * Description: destroy a kfifo.
  *
  * Param:
  *   @datafifo: datafifo handle.
@@ -108,7 +108,7 @@ pl_kfifo_handle pl_kfifo_request(uint_t buff_size)
  * Return:
  *   void.
  ************************************************************************************/
-void pl_datafifo_destroy(pl_kfifo_handle fifo)
+void pl_kfifo_destroy(pl_kfifo_handle fifo)
 {
 	struct kfifo *kfifo = (struct kfifo *)fifo;
 

@@ -27,8 +27,8 @@ SOFTWARE.
 #include <types.h>
 #include <errno.h>
 
-#define PL_DATAFIFO_EMPTY       (-EEMPTY)
-#define PL_DATAFIFO_FULL        (-EFULL)
+#define PL_KFIFO_EMPTY       (-EEMPTY)
+#define PL_KFIFO__FULL       (-EFULL)
 
 typedef void* pl_kfifo_handle;
 
@@ -62,16 +62,16 @@ pl_kfifo_handle pl_kfifo_init(char *buff, uint_t buff_size);
 pl_kfifo_handle pl_kfifo_request(uint_t buff_size);
 
 /*************************************************************************************
- * Function Name: pl_datafifo_destroy
- * Description: destroy a data fifo.
+ * Function Name: pl_kfifo_destroy
+ * Description: destroy a kfifo.
  *
  * Param:
- *   @datafifo: datafifo handle.
+ *   @fifo: datafifo handle.
  *
  * Return:
  *   void.
  ************************************************************************************/
-void pl_datafifo_destroy(pl_kfifo_handle fifo);
+void pl_kfifo_destroy(pl_kfifo_handle fifo);
 
 /*************************************************************************************
  * Function Name: kfifo_len
