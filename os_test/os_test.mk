@@ -41,7 +41,7 @@ C_SRCS += $(OSTEST_DIR)/stimer_test.c
 endif
 
 # datafifo test
-ifeq ($(PL_MK_CFG_OS_DATAFIFO_TEST), y)
+ifeq ($(PL_MK_CFG_OS_KFIFO_TEST), y)
 C_SRCS += $(OSTEST_DIR)/kfifo_test.c
 endif
 
