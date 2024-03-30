@@ -33,7 +33,7 @@ struct data_fifo {
 	char *buff;
 };
 
-static size_t datafifo_size(struct data_fifo *fifo)
+static size_t datafifo_data_num(struct data_fifo *fifo)
 {
 	return (fifo->in - fifo->out + fifo->size) % fifo->size;
 }
@@ -130,17 +130,26 @@ void pl_datafifo_destroy(datafifo_handle fifo)
 int pl_datafifo_push(datafifo_handle fifo, char *data, size_t data_len)
 {
 	struct data_fifo *datafifo = (struct data_fifo *)fifo;
+	size_t datafifo_in;
 
 	pl_enter_critical();
-	if ((datafifo->size - datafifo_size(fifo) - 1) < data_len) {
+	if ((datafifo->size - datafifo_data_num(fifo) - 1) < data_len) {
 		pl_exit_critical();
 		return -EFULL;
 	}
 
+	datafifo_in = datafifo->in;
 	datafifo->in = (datafifo->in + data_len + 1) % datafifo->size;
 	pl_exit_critical();
 
-	memcpy(&datafifo->buff[datafifo->in], data, data_len);
+	if (datafifo_in + data_len < datafifo->size) {
+		memcpy(&datafifo->buff[datafifo_in], data, data_len);
+		return OK;
+	}
+
+	memcpy(&datafifo->buff[datafifo_in], data, datafifo->size - datafifo_in);
+	memcpy(&datafifo->buff[0], data + datafifo->size - datafifo_in, datafifo->in);
+
 	return OK;
 }
 
@@ -158,17 +167,25 @@ int pl_datafifo_push(datafifo_handle fifo, char *data, size_t data_len)
  ************************************************************************************/
 int pl_datafifo_pop(datafifo_handle fifo, char *data, size_t data_len)
 {
+	size_t datafifo_out;
 	struct data_fifo *datafifo = (struct data_fifo *)fifo;
 
 	pl_enter_critical();
-	if (datafifo_size(fifo) < data_len) {
+	if (datafifo_data_num(fifo) < data_len) {
 		pl_exit_critical();
 		return -EEMPTY;
 	}
 
+	datafifo_out = datafifo->out;
 	datafifo->out = (datafifo->out + data_len) % datafifo->size;
 	pl_exit_critical();
 
-	memcpy(data, &datafifo->buff[datafifo->out], data_len);
+	if (datafifo_out + data_len < datafifo->size) {
+		memcpy(&datafifo->buff[datafifo_out], data, data_len);
+		return OK;
+	}
+
+	memcpy(data, &datafifo->buff[datafifo_out], datafifo->size - datafifo_out);
+	memcpy(data + datafifo->size - datafifo_out, &datafifo->buff[0], datafifo->in);
 	return OK;
 }
