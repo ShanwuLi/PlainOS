@@ -47,7 +47,7 @@ struct kfifo {
  * Return:
  *   fifodata handle.
  ************************************************************************************/
-struct kfifo* pl_kfifo_init(char *buff, uint_t buff_size)
+pl_kfifo_handle pl_kfifo_init(char *buff, uint_t buff_size)
 {
 	struct kfifo *fifo;
 
@@ -70,8 +70,8 @@ struct kfifo* pl_kfifo_init(char *buff, uint_t buff_size)
 }
 
 /*************************************************************************************
- * Function Name: pl_datafifo_request
- * Description: request and initialize a data fifo.
+ * Function Name: pl_kfifo_request
+ * Description: request and initialize a kfifo.
  *
  * Param:
  *   @buff_size: size of the datafifo buffer.
@@ -79,11 +79,14 @@ struct kfifo* pl_kfifo_init(char *buff, uint_t buff_size)
  * Return:
  *   fifodata handle.
  ************************************************************************************/
-kfifo_handle pl_datafifo_request(uint_t buff_size)
+pl_kfifo_handle pl_kfifo_request(uint_t buff_size)
 {
-	struct kfifo *kfifo = pl_mempool_malloc(g_pl_default_mempool,
-	                      sizeof(struct kfifo) + buff_size);
+	struct kfifo *kfifo;
 
+	if (!is_power_of_2(buff_size))
+		return NULL;
+
+	kfifo = pl_mempool_malloc(g_pl_default_mempool, sizeof(struct kfifo) + buff_size);
 	if (kfifo == NULL)
 		return NULL;
 
@@ -105,7 +108,7 @@ kfifo_handle pl_datafifo_request(uint_t buff_size)
  * Return:
  *   void.
  ************************************************************************************/
-void pl_datafifo_destroy(kfifo_handle fifo)
+void pl_datafifo_destroy(pl_kfifo_handle fifo)
 {
 	struct kfifo *kfifo = (struct kfifo *)fifo;
 
@@ -129,7 +132,7 @@ void pl_datafifo_destroy(kfifo_handle fifo)
  * Return:
  *   the length of the available data in kfifo.
  ************************************************************************************/
-uint_t kfifo_len(kfifo_handle fifo)
+uint_t kfifo_len(pl_kfifo_handle fifo)
 {
 	struct kfifo *kfifo = (struct kfifo *)fifo;
 
@@ -148,7 +151,7 @@ uint_t kfifo_len(kfifo_handle fifo)
  * Return:
  *   The actual length of data got from kfifo.
  ************************************************************************************/
-uint_t pl_kfifo_get(kfifo_handle fifo, char *data, uint_t data_len)
+uint_t pl_kfifo_get(pl_kfifo_handle fifo, char *data, uint_t data_len)
 {
 	uint_t len;
 	struct kfifo *kfifo = (struct kfifo *)fifo;
@@ -156,7 +159,7 @@ uint_t pl_kfifo_get(kfifo_handle fifo, char *data, uint_t data_len)
 
 	pl_port_cpu_dmb();
 	/* first get the data from fifo->out until the end of the buffer */
-	len = min(data_len, kfifo->size - (kfifo->out & (kfifo->size - 1)));
+	len = min(size, kfifo->size - (kfifo->out & (kfifo->size - 1)));
 	memcpy(data, kfifo->buff + (kfifo->out & (kfifo->size - 1)), len);
 	/* then get the rest (if any) from the beginning of the buffer */
 	memcpy(data + len, kfifo->buff, size - len);
@@ -179,9 +182,9 @@ uint_t pl_kfifo_get(kfifo_handle fifo, char *data, uint_t data_len)
  * Return:
  *   The actual length of data put to the kfifo.
  ************************************************************************************/
-uint_t pl_kfifo_put(kfifo_handle fifo, char *data, uint_t data_len)
+uint_t pl_kfifo_put(pl_kfifo_handle fifo, char *data, uint_t data_len)
 {
-	uint_t len = 0;
+	uint_t len;
 	struct kfifo *kfifo = (struct kfifo *)fifo;
 	uint_t size = min(data_len, kfifo->size - kfifo->in + kfifo->out);
 
