@@ -21,8 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef __KERNEL_DATAFIFO_H__
-#define __KERNEL_DATAFIFO_H__
+#ifndef __KERNEL_KFIFO_H__
+#define __KERNEL_KFIFO_H__
 
 #include <types.h>
 #include <errno.h>
@@ -30,24 +30,24 @@ SOFTWARE.
 #define PL_DATAFIFO_EMPTY       (-EEMPTY)
 #define PL_DATAFIFO_FULL        (-EFULL)
 
-typedef void* datafifo_handle;
+typedef void* kfifo_handle;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /*************************************************************************************
- * Function Name: pl_datafifo_init
- * Description: initialize a data fifo.
+ * Function Name: pl_kfifo_init
+ * Description: initialize a fifo.
  *
  * Param:
- *   @buff: buffer of datafifo.
+ *   @buff: buffer of fifo.
  *   @buff_size: size of the buffer.
  *
  * Return:
  *   fifodata handle.
  ************************************************************************************/
-datafifo_handle pl_datafifo_init(char *buff, size_t buff_size);
+struct kfifo* pl_kfifo_init(char *buff, uint_t buff_size);
 
 /*************************************************************************************
  * Function Name: pl_datafifo_request
@@ -59,7 +59,7 @@ datafifo_handle pl_datafifo_init(char *buff, size_t buff_size);
  * Return:
  *   fifodata handle.
  ************************************************************************************/
-datafifo_handle pl_datafifo_request(size_t buff_size);
+kfifo_handle pl_datafifo_request(uint_t buff_size);
 
 /*************************************************************************************
  * Function Name: pl_datafifo_destroy
@@ -71,38 +71,50 @@ datafifo_handle pl_datafifo_request(size_t buff_size);
  * Return:
  *   void.
  ************************************************************************************/
-void pl_datafifo_destroy(datafifo_handle fifo);
+void pl_datafifo_destroy(kfifo_handle fifo);
 
 /*************************************************************************************
- * Function Name: pl_datafifo_push
- * Description: push data to datafifo.
+ * Function Name: kfifo_len
+ * Description: get the data length of the kfifo.
  *
  * Param:
- *   @datafifo: datafifo handle.
+ *   @fifo: kfifo handle.
+ *
+ * Return:
+ *   the length of the available data in kfifo.
+ ************************************************************************************/
+uint_t kfifo_len(kfifo_handle fifo);
+
+/*************************************************************************************
+ * Function Name: pl_kfifo_put
+ * Description: put the data to the kfifo.
+ *
+ * Param:
+ *   @fifo: kfifo handle.
  *   @data: data to be pushed.
  *   @data_len: data length.
  *
  * Return:
- *   Greater than or equal to 0 on success, less than 0 on failure.
+ *   The actual length of data put to the kfifo.
  ************************************************************************************/
-int pl_datafifo_push(datafifo_handle fifo, char *data, size_t data_len);
+uint_t pl_kfifo_put(kfifo_handle fifo, char *data, uint_t data_len);
 
 /*************************************************************************************
- * Function Name: pl_datafifo_pop
- * Description: pop data from datafifo.
+ * Function Name: pl_kfifo_get
+ * Description: get the data from kfifo.
  *
  * Param:
- *   @datafifo: datafifo handle.
- *   @data: data to be poped.
+ *   @fifo: kfifo handle.
+ *   @data: data to be pushed.
  *   @data_len: data length.
  *
  * Return:
- *   Greater than or equal to 0 on success, less than 0 on failure.
+ *   The actual length of data got from kfifo.
  ************************************************************************************/
-int pl_datafifo_pop(datafifo_handle fifo, char *data, size_t data_len);
+uint_t pl_kfifo_get(kfifo_handle fifo, char *data, uint_t data_len);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __KERNEL_DATAFIFO_H__ */
+#endif /* __KERNEL_KFIFO_H__ */
