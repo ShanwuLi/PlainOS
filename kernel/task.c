@@ -987,8 +987,11 @@ int pl_task_get_cpu_rate_count(u32_t *rate_base, u32_t *rate_useful)
 	if (rate_base == NULL || rate_useful == NULL)
 		return -EFAULT;
 
+	pl_enter_critical();
 	*rate_base = g_task_core_blk.cpu_rate_base;
 	*rate_useful = g_task_core_blk.cpu_rate_useful;
+	pl_exit_critical();
+
 	return OK;
 }
 

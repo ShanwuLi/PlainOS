@@ -59,6 +59,7 @@ static int softtimer_daemon_task(int argc, char **argv)
 		pl_enter_critical();
 		first = list_first_entry(&softtimer_ctrl.head, struct softtimer, node);
 		list_del_node(&first->node);
+		list_init(&first->node);
 		stimer_fun = first->fun;
 		first->fun = NULL;
 		pl_exit_critical();
@@ -145,9 +146,11 @@ int pl_softtimer_start(stimer_handle_t timer, stimer_fun_t fun,
 	struct softtimer *stimer = (struct softtimer *)timer;
 	struct list_node *timer_list = pl_task_get_timer_list();
 
-	if (stimer == NULL || fun == NULL || timing_cnt == NULL) {
+	if (stimer == NULL || fun == NULL || timing_cnt == NULL)
 		return -EFAULT;
-	}
+
+	if (!list_is_empty(&stimer->node))
+		return -EBUSY;
 
 	stimer->fun = fun;
 	stimer->priv_data = priv_data;
