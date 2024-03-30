@@ -1,5 +1,5 @@
 #include <kernel/initcall.h>
-#include <kernel/datafifo.h>
+#include <kernel/kfifo.h>
 #include <kernel/syslog.h>
 
 static int fifo_test(void)

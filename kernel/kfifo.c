@@ -52,14 +52,14 @@ struct kfifo* pl_kfifo_init(char *buff, uint_t buff_size)
 	struct kfifo *fifo;
 
 	if (buff == NULL || buff_size == 0)
-		return -EFAULT;
-	
+		return NULL;
+
 	if (!is_power_of_2(buff_size))
-		return -EINVAL;
+		return NULL;
 
 	fifo = (struct kfifo *)pl_mempool_malloc(g_pl_default_mempool, sizeof(struct kfifo));
 	if (fifo == NULL)
-		return -ENOMEM;
+		return NULL;
 
 	fifo->buff = buff;
 	fifo->size = buff_size;

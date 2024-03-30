@@ -42,7 +42,7 @@ endif
 
 # datafifo test
 ifeq ($(PL_MK_CFG_OS_DATAFIFO_TEST), y)
-C_SRCS += $(OSTEST_DIR)/datafifo_test.c
+C_SRCS += $(OSTEST_DIR)/kfifo_test.c
 endif
 
 endif
