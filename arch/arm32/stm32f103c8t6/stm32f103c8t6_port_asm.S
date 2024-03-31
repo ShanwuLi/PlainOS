@@ -79,6 +79,7 @@ switch_top:
 	/* r0 = pl_callee_save_curr_context_sp(sp) */
 	bl   pl_callee_save_curr_context_sp
 	pop  {lr}
+	dmb 0xF
 
 switch_bottom:
 
@@ -87,6 +88,7 @@ switch_bottom:
 	/* r0 = pl_callee_get_next_context() */
 	bl   pl_callee_get_next_context_sp
 	pop  {lr}
+	dmb 0xF
 
 	cpsid i  /* disable interrupt */
 	/* restore context */
