@@ -23,21 +23,15 @@ int main(void)
 	pl_callee_entry();
 }
 
-static int pl_early_port_putc_init(void)
+static int pl_port_putc_init(void)
 {
 	usart_init(&USART1);
 	pl_port_putc('A');
 	return 0;
 }
-early_initcall(pl_early_port_putc_init);
 
 int pl_port_putc(const char c)
 {
 	USART1.transmit_data(&USART1, c);
 	return 0;
-}
-
-void pl_port_schedule(void)
-{
-
 }

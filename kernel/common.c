@@ -25,8 +25,48 @@ SOFTWARE.
 #include <types.h>
 #include <port.h>
 #include <kernel/kernel.h>
+#include <common/oschlogo.h>
 
 static volatile int pl_critical_ref = 0;
+
+
+#ifdef PL_CFG_OS_CHAR_LOGO
+static char pl_const pl_os_char_logo[] = \
+" _______   __            __             ______    ______  \r\n\
+/       \\ /  |          /  |           /      \\  /      \\ \r\n\
+$$$$$$$  |$$ |  ______  $$/  _______  /$$$$$$  |/$$$$$$  |\r\n\
+$$ |__$$ |$$ | /      \\ /  |/       \\ $$ |  $$ |$$ \\__$$/ \r\n\
+$$    $$/ $$ | $$$$$$  |$$ |$$$$$$$  |$$ |  $$ |$$      \\ \r\n\
+$$$$$$$/  $$ | /    $$ |$$ |$$ |  $$ |$$ |  $$ | $$$$$$  |\r\n\
+$$ |      $$ |/$$$$$$$ |$$ |$$ |  $$ |$$ \\__$$ |/  \\__$$ |\r\n\
+$$ |      $$ |$$    $$ |$$ |$$ |  $$ |$$    $$/ $$    $$/ \r\n\
+$$/       $$/  $$$$$$$/ $$/ $$/   $$/  $$$$$$/   $$$$$$/  \r\n\
+                                                       \r\nE";
+#endif
+
+/*************************************************************************************
+ * Function Name: pl_dis_os_char_logo
+ * Description:
+ *    Display character logo.
+ *
+ * Param:
+ *   none.
+ *
+ * Return:
+ *   void.
+ ************************************************************************************/
+void pl_dis_os_char_logo(void)
+{
+#ifdef PL_CFG_OS_CHAR_LOGO
+	int i = 0;
+	char c = pl_port_rodata_read8(&pl_os_char_logo[i]);
+
+	for (; c != 'E'; i++) {
+		pl_port_putc(c);
+		c = pl_port_rodata_read8(&pl_os_char_logo[i]);
+	}
+#endif
+}
 
 /*************************************************************************************
  * Function Name: pl_align_address

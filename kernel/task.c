@@ -652,7 +652,7 @@ tid_t pl_task_create(const char *name, main_t task, u16_t prio,
 
 	tcb_and_stack = pl_mempool_malloc(g_pl_default_mempool, tcb_actual_size + stack_size);
 	if (tcb_and_stack == NULL)
-		return ERR_TO_PTR(-ENOMEM);
+		return NULL;
 
 	stack = (u8_t *)tcb_and_stack + tcb_actual_size;
 	task_init_and_create(name, task, prio, tcb_and_stack, stack, stack_size, argc, argv);

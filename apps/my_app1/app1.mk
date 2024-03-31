@@ -20,24 +20,4 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# compiler flags
-TEMP_FLAGS += $(DEFINE) -Wall -Wextra -Wwrite-strings -Wformat=2 \
-              -Werror=format-nonliteral -Wvla -Wlogical-op -Wshadow \
-              -Werror -Wmissing-declarations \
-              -ffunction-sections -fdata-sections -Wall \
-              -Werror=all -Werror=unused-function -Werror=deprecated-declarations \
-              -Wextra -Werror=unused-parameter -Werror=sign-compare -nostartfiles \
-              -fno-jump-tables
-
-C_FLAGS   += $(TEMP_FLAGS) -xc -Wmissing-prototypes -Werror=old-style-declaration \
-                           -std=c99
-CXX_FLAGS += $(TEMP_FLAGS) -xc++ -std=c++99
-ASM_FLAGS += -x assembler-with-cpp
-LDFLAGS   += -Wl,--gc-sections
-
-
-C_SRCS += $(ARCH_DIR)/avr/atmega2560/early_uart.c
-C_SRCS += $(ARCH_DIR)/avr/atmega2560/atmega2560_port.c
-ASM_SRCS += $(ARCH_DIR)/avr/atmega2560/atmega2560_asm_port.S
-
-LINK_SCRIPT := $(ARCH_DIR)/avr/atmega2560/atmega2560.ld
+C_SRCS += $(APPS_DIR)/my_app1/app1.c

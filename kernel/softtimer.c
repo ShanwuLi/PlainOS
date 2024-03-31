@@ -261,5 +261,11 @@ int pl_softtimer_core_init(void)
 	list_init(&softtimer_ctrl.head);
 	softtimer_ctrl.daemon = pl_task_create("softtimer_daemon", softtimer_daemon_task, 0,
 	                        PL_CFG_SOFTTIMER_DAEMON_TASK_STACK_SIZE, 0, NULL);
+	if (softtimer_ctrl.daemon == NULL) {
+		pl_syslog_err("soft timer init failed\r\n");
+		return ERROR;
+	}
+
+	pl_syslog_info("soft timer init successfully\r\n");
 	return 0;
 }

@@ -26,8 +26,8 @@ static void dump_mempool(void)
 
 	for (size_t i = 0; i < mm_pl->blk_num; i++) {
 		pl_syslog_info("====================================================\r\n");
-		pl_syslog_info("first_bits:%d\r\n", mm_pl->blk_first_bits[i]);
-		pl_syslog_info("max_bits:%d\r\n", mm_pl->blk_max_bits[i]);
+		pl_syslog_info("first_bits:%u\r\n", mm_pl->blk_first_bits[i]);
+		pl_syslog_info("max_bits:%u\r\n", mm_pl->blk_max_bits[i]);
 		pl_syslog_info("bitmap:0x%x\r\n", mm_pl->blk_bitmaps[i]);
 		pl_syslog_info("----------------------------------------------------\r\n");
 	}

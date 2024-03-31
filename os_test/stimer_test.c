@@ -97,7 +97,11 @@ static int softtimer_test_task(int argc, char *argv[])
 
 static int softtimer_test(void)
 {
+	tid_t timer_task = 
 	pl_task_create("softtimer_task", softtimer_test_task, PL_CFG_TASK_PRIORITIES_MAX - 1, 512, 0, NULL);
+	if (timer_task == NULL) {
+		pl_syslog_err("softtimer test task failed\r\n");
+	}
 
 	return 0;
 }

@@ -27,11 +27,11 @@ OBJDUMP  := $(CROSS_COMPILE)objdump
 CP       := $(CROSS_COMPILE)objcopy
 SIZE     := $(CROSS_COMPILE)size
 OPTIMIZE := -O3
-DEBUG    := -g #-DNDEBUG to close debug in DEFINE.
+DEBUG    := -g#-DNDEBUG to close debug in DEFINE.
 
 ARCH     := arm32
-MCU      := -mcpu=cortex-m3#-mmcu=atmega128 
-CHIP     := stm32f103c8t6#atmega128
+MCU      := -mcpu=cortex-m3#-mmcu=atmega2560
+CHIP     := stm32f103c8t6#atmega2560
 
 #=================================================================================================#
 #////////////////////////////// Do not to modify following code //////////////////////////////////#
@@ -56,8 +56,8 @@ RM := rm -rf
 -include $(TOPDIR)/kernel/kernel.mk
 -include $(TOPDIR)/drivers/drivers.mk
 -include $(TOPDIR)/lib/lib.mk
--include $(TOPDIR)/apps/apps.mk
 -include $(TOPDIR)/os_test/os_test.mk
+-include $(TOPDIR)/apps/apps.mk
 
 # compiler flags
 C_FLAGS   += $(MCU) $(INC) $(OPTIMIZE) $(DEBUG)

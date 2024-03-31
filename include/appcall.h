@@ -23,17 +23,27 @@ SOFTWARE.
 #ifndef __PLAINOS_APPCALL_H__
 #define __PLAINOS_APPCALL_H__
 
-typedef int (*plainos_app_call_t)(int argc, char *argv[]);
+#include <kernel/kernel.h>
 
-#define __define_appcall(fn, id)  static plainos_app_call_t \
+typedef int (*pl_app_call_t)(int argc, char *argv[]);
+
+struct pl_app_entry {
+	pl_app_call_t entry;
+	const char *name;
+};
+
+#define __define_appcall(fn, id, _name)  static struct pl_app_entry \
 	__appcall_##fn##id pl_used \
-	__attribute__((section(".appcall" #id ".app"))) = fn
+	__attribute__((section(".appcall" #id ".app"))) = { \
+		.entry = fn, \
+		.name = (_name), \
+	}
 
-#define system_app_register(app)      __define_appcall(app, 0)
-#define dfx_app_register(app)         __define_appcall(app, 1)
-#define excep_app_register(app)       __define_appcall(app, 2)
-#define perf_app_register(app)        __define_appcall(app, 3)
-#define test_app_register(app)        __define_appcall(app, 4)
-#define user_app_register(app)        __define_appcall(app, 5)
+#define system_app_register(app, _name)      __define_appcall(app, 0, _name)
+#define dfx_app_register(app, _name)         __define_appcall(app, 1, _name)
+#define excep_app_register(app, _name)       __define_appcall(app, 2, _name)
+#define perf_app_register(app, _name)        __define_appcall(app, 3, _name)
+#define test_app_register(app, _name)        __define_appcall(app, 4, _name)
+#define user_app_register(app, _name)        __define_appcall(app, 5, _name)
 
 #endif /* __PLAINOS_APPCALL_H__ */

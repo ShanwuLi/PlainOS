@@ -8,6 +8,7 @@
 ===============================================================================================*/
 #define SCB_ICSR_REG   0xE000ED04
 .extern pl_callee_get_next_context_sp
+.extern pl_callee_save_curr_context_sp
 
 .global PendSV_Handler
 .global pl_port_switch_context
