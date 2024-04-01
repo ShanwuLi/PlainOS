@@ -50,6 +50,11 @@ ASM_SRCS :=
 LINK_SCRIPT :=
 RM := rm -rf
 
+# get all arguments
+ALL_ARGS = $(MAKECMDGOALS)
+# get the second argument
+SECOND_ARG = $(word 2, $(ALL_ARGS))
+
 #-------------------------------------------------------------------------------------------------#
 # include sub-makefiles
 -include $(TOPDIR)/arch/arch.mk
@@ -152,3 +157,12 @@ disp_flags:
 	@echo "C_OBJS" : $(C_OBJS)
 	@echo "C_FLAGS:" $(C_FLAGS)
 	@echo "INC:" $(INC)
+
+# parse configuration file
+%_defconfig:
+	@echo "MK: config.h"
+	@echo "MK: config.mk"
+	@make -C $(TOPDIR)/tools/cfgparse
+	@./$(TOPDIR)/tools/cfgparse/cfgparse.exe $(SECOND_ARG)
+	@echo $(ALL_ARGS)
+
