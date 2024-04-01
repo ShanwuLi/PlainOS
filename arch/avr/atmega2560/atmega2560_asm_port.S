@@ -35,16 +35,16 @@ SOFTWARE.
 .global pl_port_switch_context
 
 
-	.section .text, "ax"
-	.type pl_port_rodata_read8, %function
+.section .text, "ax"
+.type pl_port_rodata_read8, %function
 pl_port_rodata_read8:
 	mov r30, r24
 	mov r31, r25
 	elpm r24, z
 	ret
 
-	.section .text, "ax"
-	.type pl_port_rodata_read16, %function
+.section .text, "ax"
+.type pl_port_rodata_read16, %function
 pl_port_rodata_read16:
 	mov r30, r24
 	mov r31, r25
@@ -52,8 +52,8 @@ pl_port_rodata_read16:
 	elpm r25, z
 	ret
 
-	.section .text, "ax"
-	.type pl_port_rodata_read32, %function
+.section .text, "ax"
+.type pl_port_rodata_read32, %function
 pl_port_rodata_read32:
 	mov r30, r24
 	mov r31, r25
@@ -63,18 +63,18 @@ pl_port_rodata_read32:
 	elpm r25, z
 	ret
 
-	.section .text, "ax"
-	.type pl_port_rodata_read, %function
+.section .text, "ax"
+.type pl_port_rodata_read, %function
 pl_port_rodata_read:
 	jmp pl_port_rodata_read16
 
 
 .section .data
 once_entry:
-  .byte 0x0
+	.byte 0x0
 
 .section .text, "ax"
-	.type pl_port_switch_context, %function
+.type pl_port_switch_context, %function
 pl_port_switch_context:
 
 	lds   r30, once_entry
@@ -173,18 +173,18 @@ switch_bottom:
 
 
 .section .text, "ax"
-	.type pl_port_cpu_dmb, %function
+.type pl_port_cpu_dmb, %function
 pl_port_cpu_dmb:
 	ret
 
 
 .section .text, "ax"
-	.type pl_port_cpu_dsb, %function
+.type pl_port_cpu_dsb, %function
 pl_port_cpu_dsb:
 	ret
 
 
 .section .text, "ax"
-	.type pl_port_cpu_isb, %function
+.type pl_port_cpu_isb, %function
 pl_port_cpu_isb:
 	ret
