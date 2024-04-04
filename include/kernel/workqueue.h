@@ -34,7 +34,6 @@ typedef struct {void *dummy[4];} pl_work_t;
 extern pl_wq_handle g_pl_sys_hiwq_handle;
 extern pl_wq_handle g_pl_sys_lowq_handle;
 
-
 /*************************************************************************************
  * Function Name: pl_workqueue_create
  *

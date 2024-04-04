@@ -29,6 +29,7 @@ SOFTWARE.
 #include "initcall.h"
 #include "idletask.h"
 #include "softtimer.h"
+#include "workqueue.h"
 
 /*************************************************************************************
  * Function Name: idle_task
@@ -36,13 +37,16 @@ SOFTWARE.
  ************************************************************************************/
 static int idle_task(int argc, char *argv[])
 {
-	int ret;
 	USED(argc);
 	USED(argv);
+
+	int ret;
 	pl_do_early_initcalls();
 	ret = pl_port_systick_init();
 	pl_assert(ret == 0);
 	ret = pl_softtimer_core_init();
+	pl_assert(ret == 0);
+	ret = pl_sys_wq_init();
 	pl_assert(ret == 0);
 	pl_do_initcalls();
 

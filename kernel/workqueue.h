@@ -48,8 +48,7 @@ struct work {
  *   initialize a workqueue in the system.
  * 
  * Parameters:
- *  @workqueue: workqueue handle.
- *  @work: work.
+ *  none
  *
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
