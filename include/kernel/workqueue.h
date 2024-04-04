@@ -36,10 +36,10 @@ extern pl_wq_handle g_pl_sys_lowq_handle;
 
 
 /*************************************************************************************
- * Function Name: pl_workqueue_request
+ * Function Name: pl_workqueue_create
  *
  * Description:
- *   request a workqueue.
+ *   create a workqueue.
  * 
  * Parameters:
  *  @name: workqueue name.
@@ -49,13 +49,13 @@ extern pl_wq_handle g_pl_sys_lowq_handle;
  * Return:
  *  @pl_wq_handle: handle of workqueue requested.
  ************************************************************************************/
-pl_wq_handle pl_workqueue_request(const char *name, u16_t prio, size_t wq_stack_sz);
+pl_wq_handle pl_workqueue_create(const char *name, u16_t prio, size_t wq_stack_sz);
 
 /*************************************************************************************
- * Function Name: pl_workqueue_release
+ * Function Name: pl_workqueue_destroy
  *
  * Description:
- *   request a workqueue.
+ *   destroy a workqueue.
  * 
  * Parameters:
  *  @workqueue: workqueue handle.
@@ -63,7 +63,7 @@ pl_wq_handle pl_workqueue_request(const char *name, u16_t prio, size_t wq_stack_
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_workqueue_release(pl_wq_handle workqueue);
+int pl_workqueue_destroy(pl_wq_handle workqueue);
 
 /*************************************************************************************
  * Function Name: pl_work_init

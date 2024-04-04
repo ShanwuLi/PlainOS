@@ -95,10 +95,10 @@ int pl_workqueue_init(struct workqueue *wq, const char *name, u16_t prio, size_t
 }
 
 /*************************************************************************************
- * Function Name: pl_workqueue_request
+ * Function Name: pl_workqueue_create
  *
  * Description:
- *   request a workqueue.
+ *   create a workqueue.
  * 
  * Parameters:
  *  @name: workqueue name.
@@ -108,7 +108,7 @@ int pl_workqueue_init(struct workqueue *wq, const char *name, u16_t prio, size_t
  * Return:
  *  @pl_wq_handle: handle of workqueue requested.
  ************************************************************************************/
-pl_wq_handle pl_workqueue_request(const char *name, u16_t prio, size_t wq_stack_sz)
+pl_wq_handle pl_workqueue_create(const char *name, u16_t prio, size_t wq_stack_sz)
 {
 	struct workqueue *wq;
 	char *argv[1];
@@ -128,10 +128,10 @@ pl_wq_handle pl_workqueue_request(const char *name, u16_t prio, size_t wq_stack_
 }
 
 /*************************************************************************************
- * Function Name: pl_workqueue_release
+ * Function Name: pl_workqueue_destroy
  *
  * Description:
- *   request a workqueue.
+ *   destroy a workqueue.
  * 
  * Parameters:
  *  @workqueue: workqueue handle.
@@ -139,7 +139,7 @@ pl_wq_handle pl_workqueue_request(const char *name, u16_t prio, size_t wq_stack_
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_workqueue_release(pl_wq_handle workqueue)
+int pl_workqueue_destroy(pl_wq_handle workqueue)
 {
 	struct workqueue *wq = (struct workqueue *)workqueue;
 
