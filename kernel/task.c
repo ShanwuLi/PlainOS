@@ -1046,6 +1046,7 @@ int pl_task_get_cpu_rate(u32_t *int_part, u32_t *deci_part)
 int pl_task_core_init(void)
 {
 	static struct tcb delay_dummy_tcb;
+	static struct tcb first_dummy_tcb;
 
 	cpu_rate_base = 0;
 	cpu_rate_idle = 0;
@@ -1059,7 +1060,7 @@ int pl_task_core_init(void)
 	delay_dummy_tcb.delay_ticks.lo32 = UINT32_MAX;
 	delay_dummy_tcb.name = "delay_head";
 
-	g_task_core_blk.curr_tcb = NULL;
+	g_task_core_blk.curr_tcb = &first_dummy_tcb;
 	g_task_core_blk.systicks.hi32 = 0;
 	g_task_core_blk.systicks.lo32 = 0;
 	g_task_core_blk.cpu_rate_base = PL_CFG_CPU_RATE_INTERVAL_TICKS;
