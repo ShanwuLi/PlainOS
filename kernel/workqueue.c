@@ -227,7 +227,7 @@ int pl_work_cancel(pl_wq_handle workqueue, pl_work_handle work)
 	struct work *wk = (struct work *)work;
 	struct workqueue *wq = (struct workqueue *)workqueue;
 
-	if (wq == NULL || work)
+	if (wq == NULL || work == NULL)
 		return -EFAULT;
 
 	if (list_is_empty(&wk->node)) {
