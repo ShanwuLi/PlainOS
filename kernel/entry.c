@@ -3,6 +3,7 @@
 #include "syslog.h"
 #include "task.h"
 #include "idletask.h"
+#include <kernel/assert.h>
 #include <kernel/syslog.h>
 #include <common/oschlogo.h>
 
@@ -16,8 +17,15 @@ void pl_callee_entry(void)
 
 	pl_early_syslog("PlainOS is starting...\r\n");
 	pl_dis_os_char_logo();
-	pl_default_mempool_init();
-	pl_task_core_init();
-	pl_idle_task_init();
+
+	ret = pl_default_mempool_init();
+	pl_assert(ret == 0);
+
+	ret = pl_task_core_init();
+	pl_assert(ret == 0);
+
+	ret = pl_idle_task_init();
+	pl_assert(ret == 0);
+
 	while(1);
 }

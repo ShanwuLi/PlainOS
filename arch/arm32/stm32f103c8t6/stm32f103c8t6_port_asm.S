@@ -50,10 +50,6 @@ pl_port_switch_context:
 	bx    lr
 
 
-.section .data
-is_first_switch:
-	.word 0x0
-
 .section .text.PendSV_Handler
 .type PendSV_Handler, %function
 
@@ -64,13 +60,6 @@ PendSV_Handler:
 	ldr   r2, [r1]
 	orr   r2, r2, #0x80000000
 	str   r2, [r1]
-
-	ldr   r1, =is_first_switch
-	ldr   r2, [r1]
-	ldr   r3, =0xff
-	str   r3, [r1]
-	cmp   r2, #0
-	beq   switch_bottom
 
 switch_top:
 	/* save context */

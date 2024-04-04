@@ -20,28 +20,18 @@
 # SOFTWARE.
 
 #=================================================================================================#
-# please replace the toolchain to your own.
-CROSS_COMPILE := arm-none-eabi-#avr
-CC       := $(CROSS_COMPILE)gcc
-OBJDUMP  := $(CROSS_COMPILE)objdump
-CP       := $(CROSS_COMPILE)objcopy
-SIZE     := $(CROSS_COMPILE)size
-OPTIMIZE := -O3
-DEBUG    := -g#-DNDEBUG to close debug in DEFINE.
-
-ARCH     := arm32
-MCU      := -mcpu=cortex-m3#-mmcu=atmega2560
-CHIP     := stm32f103c8t6#atmega2560
-
-#=================================================================================================#
 #////////////////////////////// Do not to modify following code //////////////////////////////////#
+# get all arguments
+ALL_ARGS = $(MAKECMDGOALS)
+# get the first argument
+FIRST_ARG = $(word 1, $(ALL_ARGS))
 
 TOPDIR   := .
 OUTDIR   := out
-INC      := -I$(TOPDIR)/include 
+INC      := -I$(TOPDIR)/include
 LIBDIR   :=
 LIBS     :=
-TARGET   := $(OUTDIR)/$(CHIP)
+TARGET   := $(OUTDIR)/plain
 DEFINE   := #-DNDEBUG
 
 CXX_SRCS :=
@@ -49,14 +39,11 @@ C_SRCS   :=
 ASM_SRCS :=
 LINK_SCRIPT :=
 RM := rm -rf
-
-# get all arguments
-ALL_ARGS = $(MAKECMDGOALS)
-# get the second argument
-SECOND_ARG = $(word 2, $(ALL_ARGS))
+CPY := cp -a
 
 #-------------------------------------------------------------------------------------------------#
 # include sub-makefiles
+-include $(TOPDIR)/config.mk
 -include $(TOPDIR)/arch/arch.mk
 -include $(TOPDIR)/kernel/kernel.mk
 -include $(TOPDIR)/drivers/drivers.mk
@@ -89,6 +76,13 @@ DEPS := $(C_DEPS) $(ASM_DEPS)
 
 TARGET_FILES := $(TARGET).elf $(TARGET).hex $(TARGET).bin $(TARGET).lst $(TARGET).map
 DIR_GUARD = @mkdir -p $(@D)
+
+# Configuration Target
+%_config:
+	@echo "Writing config.h..."
+	@echo "Writing config.mk..."
+	@$(CPY) $(TOPDIR)/configs/$(FIRST_ARG)/config.h $(TOPDIR)/include/
+	@$(CPY) $(TOPDIR)/configs/$(FIRST_ARG)/config.mk $(TOPDIR)/
 
 # All Target
 all: $(TARGET_FILES) $(TARGET).size
@@ -149,20 +143,22 @@ ifneq (,$(wildcard $(OUTDIR)/*))
 endif
 	@echo Removing done
 
+.PHONY:disclean
+disclean:
+	@echo Removing all output and configuration files
+ifneq (,$(wildcard $(TOPDIR)/config.mk $(TOPDIR)/include/config.h $(wildcard $(OUTDIR)/*)))
+	@$(RM) $(OUTDIR)
+	@$(RM) $(TOPDIR)/config.mk
+	@$(RM) $(TOPDIR)/include/config.h
+endif
+	@echo Removing done
+
 rebuild:
 	@make clean
 	@make all
 
-disp_flags:
+debug_flags:
 	@echo "C_OBJS" : $(C_OBJS)
 	@echo "C_FLAGS:" $(C_FLAGS)
 	@echo "INC:" $(INC)
-
-# parse configuration file
-%_defconfig:
-	@echo "MK: config.h"
-	@echo "MK: config.mk"
-	@make -C $(TOPDIR)/tools/cfgparse
-	@./$(TOPDIR)/tools/cfgparse/cfgparse.exe $(SECOND_ARG)
-	@echo $(ALL_ARGS)
-
+	@echo "CHIP:" $(CHIP)

@@ -69,18 +69,11 @@ pl_port_rodata_read:
 	jmp pl_port_rodata_read16
 
 
-.section .data
-once_entry:
-	.byte 0x0
 
 .section .text, "ax"
 .type pl_port_switch_context, %function
 pl_port_switch_context:
-
-	lds   r30, once_entry
-	cpi   r30, 0
-	breq  set_onceentry_to_1
-
+	cli              /* 关中断 */
 	push   r1        /*< R29入栈   */
 	push   r0        /*< R28入栈   */
 	lds    r0, 0x5f  /*< SREG入栈  */
@@ -122,15 +115,11 @@ pl_port_switch_context:
 	lds    r24, 0x5d /* save sp_l */
 	lds    r25, 0x5e /* save sp_h */
 	call   pl_callee_save_curr_context_sp
-
-
-
-set_onceentry_to_1:
-	ldi r30, 1
-	sts once_entry,  r30
+	sei              /*开中断 */
 
 switch_bottom:
 	call pl_callee_get_next_context_sp
+	cli              /* 关中断 */
 	sts  0x5d, r24 /* restore sp_l */
 	sts  0x5e, r25 /* restore sp_h */
 	pop  r28       /*< 各寄存器出栈，恢复任务环境   */
@@ -169,6 +158,7 @@ switch_bottom:
 	sts  0x5f, r0
 	pop  r0
 	pop	 r1
+	sei              /*开中断 */
 	ret
 
 

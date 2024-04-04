@@ -35,7 +35,7 @@ int pl_port_putc(const char c)
 
 int pl_port_systick_init(void)
 {
-    TCCR1B = 0x01;   //进行8预分频  16MHz
+    TCCR1B = 0x01;   //进行1预分频  16MHz
     TCNT1H = 0X00;
     TCNT1L = 0X00;
     OCR1AH = 0XFF;

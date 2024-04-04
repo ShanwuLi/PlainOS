@@ -22,6 +22,7 @@ SOFTWARE.
 */
 
 #include <port.h>
+#include <kernel/assert.h>
 #include <kernel/kernel.h>
 #include <kernel/task.h>
 #include <kernel/syslog.h>
@@ -35,11 +36,14 @@ SOFTWARE.
  ************************************************************************************/
 static int idle_task(int argc, char *argv[])
 {
+	int ret;
 	USED(argc);
 	USED(argv);
 	pl_do_early_initcalls();
-	pl_port_systick_init();
-	pl_softtimer_core_init();
+	ret = pl_port_systick_init();
+	pl_assert(ret == 0);
+	ret = pl_softtimer_core_init();
+	pl_assert(ret == 0);
 	pl_do_initcalls();
 
 	while(1) {
@@ -61,7 +65,14 @@ static int idle_task(int argc, char *argv[])
  ************************************************************************************/
 int pl_idle_task_init(void)
 {
-	pl_task_create("idle_task", idle_task, PL_CFG_TASK_PRIORITIES_MAX,
-	                PL_CFG_IDLE_TASK_STACK_SIZE, 0, NULL);
+	tid_t idle_taskid;
+
+	idle_taskid = pl_task_create("idle_task", idle_task, PL_CFG_TASK_PRIORITIES_MAX,
+	                              PL_CFG_IDLE_TASK_STACK_SIZE, 0, NULL);
+	if (idle_taskid == NULL) {
+		pl_early_syslog("idle task create failed\r\n");
+		return -1;
+	}
+
 	return 0;
 }
