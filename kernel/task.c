@@ -146,6 +146,21 @@ struct tcb *pl_task_get_curr_tcb(void)
 }
 
 /*************************************************************************************
+ * Function Name: pl_task_get_state
+ * Description: get task state.
+ *
+ * Parameters:
+ *  @tid: task id.
+ *
+ * Return:
+ *    @int :task state
+ ************************************************************************************/
+int pl_task_get_state(tid_t tid)
+{
+	return ((struct tcb *)tid)->curr_state;
+}
+
+/*************************************************************************************
  * Function Name: get_last_bit
  * Description: Get leading zero of bitmap.
  *
@@ -747,6 +762,33 @@ int pl_task_resume(tid_t tid)
 	pl_exit_critical();
 	pl_task_context_switch();
 
+	return OK;
+}
+
+/*************************************************************************************
+ * Function Name: pl_task_kill
+ *
+ * Description:
+ *   kill a task.
+ * 
+ * Parameters:
+ *  @tid: task id;
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_task_kill(tid_t tid)
+{
+	struct tcb *tcb = (struct tcb *)tid;
+
+	if (tcb == NULL)
+		return -EFAULT;
+
+	pl_enter_critical();
+	pl_task_remove_tcb_from_rdylist(tcb);
+	pl_task_insert_tcb_to_exitlist(tcb);
+	pl_exit_critical();
+	pl_task_context_switch();
 	return OK;
 }
 

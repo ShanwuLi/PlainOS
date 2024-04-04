@@ -21,87 +21,92 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef __KERNEL_SOFTTIMER_H__
-#define __KERNEL_SOFTTIMER_H__
+#ifndef __KERNEL_WORKQUEUE_H__
+#define __KERNEL_WORKQUEUE_H__
 
 #include <kernel/kernel.h>
 
-typedef void *pl_stimer_handle_t;
-typedef void (*stimer_fun_t)(pl_stimer_handle_t timer);
+typedef void *pl_work_handle;
+typedef void *pl_wq_handle;
+typedef void (*pl_work_fun_t)(pl_work_handle wq);
+typedef struct {void *dummy[4];} pl_work_t;
+
+extern pl_wq_handle g_pl_sys_hiwq_handle;
+extern pl_wq_handle g_pl_sys_lowq_handle;
+
 
 /*************************************************************************************
- * Function Name: pl_softtimer_request
+ * Function Name: pl_workqueue_request
  *
  * Description:
- *   request a soft timer.
+ *   request a workqueue.
  * 
  * Parameters:
- *  @name: timer name.
+ *  @name: workqueue name.
+ *  @proi: priority of workqueue.
+ *  @wq_stack_sz: workqueue task stack size.
  *
  * Return:
- *  @pl_stimer_handle_t: handle of soft timer requested.
+ *  @pl_wq_handle: handle of workqueue requested.
  ************************************************************************************/
-pl_stimer_handle_t pl_softtimer_request(const char *name);
+pl_wq_handle pl_workqueue_request(const char *name, int prio, size_t wq_stack_sz);
 
 /*************************************************************************************
- * Function Name: pl_softtimer_get_private_data
+ * Function Name: pl_workqueue_release
  *
  * Description:
- *   get private data of soft timer.
+ *   request a workqueue.
  * 
  * Parameters:
- *  @timer: handle of soft timer requested.
- *  @data: private data addr.
- *
- * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
-int pl_softtimer_get_private_data(pl_stimer_handle_t timer, void **data);
-
-/*************************************************************************************
- * Function Name: pl_softtimer_start
- *
- * Description:
- *   start soft timer.
- * 
- * Parameters:
- *  @timer: handle of soft timer requested.
- *  @fun: callback function.
- *  @timing_cnt: the count of timing.
- *  @priv_data: private data.
+ *  @workqueue: workqueue handle.
  *
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_softtimer_start(pl_stimer_handle_t timer, stimer_fun_t fun,
-                       struct count *timing_cnt, void *priv_data);
+int pl_workqueue_release(pl_wq_handle workqueue);
 
 /*************************************************************************************
- * Function Name: pl_softtimer_cancel
+ * Function Name: pl_work_init
  *
  * Description:
- *   cancel soft timer.
+ *   initialize a work.
  * 
  * Parameters:
- *  @timer: handle of soft timer requested.
+ *  @work: work.
  *
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_softtimer_cancel(pl_stimer_handle_t timer);
+int pl_work_init(pl_work_handle work, pl_work_fun_t fun, void *priv_data);
 
 /*************************************************************************************
- * Function Name: pl_softtimer_cancel
+ * Function Name: pl_work_add
  *
  * Description:
- *   cancel soft timer.
+ *   add a work to the workqueue.
  * 
  * Parameters:
- *  @timer: handle of soft timer requested.
+ *  @workqueue: workqueue handle.
+ *  @work: work.
  *
  * Return:
- *  void.
+ *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-void pl_softtimer_release(pl_stimer_handle_t timer);
+int pl_work_add(pl_wq_handle workqueue, pl_work_handle work);
 
-#endif /* __KERNEL_SOFTTIMER_H__ */
+/*************************************************************************************
+ * Function Name: pl_work_cancel
+ *
+ * Description:
+ *   cancel a work int the workqueue.
+ * 
+ * Parameters:
+ *  @workqueue: workqueue handle.
+ *  @work: work.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_work_cancel(pl_wq_handle workqueue, pl_work_handle work);
+
+#endif /* __KERNEL_WORKQUEUE_H__ */

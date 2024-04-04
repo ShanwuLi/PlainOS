@@ -154,6 +154,20 @@ int pl_task_pend(tid_t tid);
 int pl_task_resume(tid_t tid);
 
 /*************************************************************************************
+ * Function Name: pl_task_kill
+ *
+ * Description:
+ *   kill a task.
+ * 
+ * Parameters:
+ *  @tid: task id;
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_task_kill(tid_t tid);
+
+/*************************************************************************************
  * Function Name: pl_task_get_syscount
  *
  * Description:

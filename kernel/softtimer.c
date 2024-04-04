@@ -81,9 +81,9 @@ static int softtimer_daemon_task(int argc, char **argv)
  *  @name: timer name.
  *
  * Return:
- *  @stimer_handle_t: handle of soft timer requested.
+ *  @pl_stimer_handle_t: handle of soft timer requested.
  ************************************************************************************/
-stimer_handle_t pl_softtimer_request(const char *name)
+pl_stimer_handle_t pl_softtimer_request(const char *name)
 {
 	struct softtimer *timer;
 
@@ -95,7 +95,7 @@ stimer_handle_t pl_softtimer_request(const char *name)
 	timer->name = name;
 	list_init(&timer->node);
 
-	return (stimer_handle_t)timer;
+	return (pl_stimer_handle_t)timer;
 }
 
 /*************************************************************************************
@@ -111,7 +111,7 @@ stimer_handle_t pl_softtimer_request(const char *name)
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_softtimer_get_private_data(stimer_handle_t timer, void **data)
+int pl_softtimer_get_private_data(pl_stimer_handle_t timer, void **data)
 {
 	if (timer == NULL || data == NULL)
 		return -EFAULT;
@@ -138,7 +138,7 @@ int pl_softtimer_get_private_data(stimer_handle_t timer, void **data)
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_softtimer_start(stimer_handle_t timer, stimer_fun_t fun,
+int pl_softtimer_start(pl_stimer_handle_t timer, stimer_fun_t fun,
                        struct count *timing_cnt, void *priv_data)
 {
 	struct softtimer *pos;
@@ -188,7 +188,7 @@ out:
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_softtimer_cancel(stimer_handle_t timer)
+int pl_softtimer_cancel(pl_stimer_handle_t timer)
 {
 	struct softtimer *stimer = (struct softtimer *)timer;
 
@@ -219,7 +219,7 @@ int pl_softtimer_cancel(stimer_handle_t timer)
  * Return:
  *  void.
  ************************************************************************************/
-void pl_softtimer_release(stimer_handle_t timer)
+void pl_softtimer_release(pl_stimer_handle_t timer)
 {
 	if (timer == NULL)
 		return;

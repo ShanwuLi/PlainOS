@@ -4,10 +4,10 @@
 #include <kernel/task.h>
 
 static int times = 0;
-static stimer_handle_t stimer;
-static stimer_handle_t stimer2;
+static pl_stimer_handle_t stimer;
+static pl_stimer_handle_t stimer2;
 
-static void stimer_callback(stimer_handle_t timer)
+static void stimer_callback(pl_stimer_handle_t timer)
 {
 	int ret;
 	void *data;
@@ -23,7 +23,7 @@ static void stimer_callback(stimer_handle_t timer)
 }
 
 
-static void stimer_callback2(stimer_handle_t timer)
+static void stimer_callback2(pl_stimer_handle_t timer)
 {
 	int ret;
 	void *data;

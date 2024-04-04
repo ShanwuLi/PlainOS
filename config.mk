@@ -20,17 +20,22 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-KERNEL_DIR := $(TOPDIR)/kernel
+# please replace the toolchain to your own.
+CROSS_COMPILE := arm-none-eabi-#avr
+CC       := $(CROSS_COMPILE)gcc
+OBJDUMP  := $(CROSS_COMPILE)objdump
+CP       := $(CROSS_COMPILE)objcopy
+SIZE     := $(CROSS_COMPILE)size
+OPTIMIZE := -O3
+DEBUG    := -g#-DNDEBUG to close debug in DEFINE.
 
-C_SRCS += $(KERNEL_DIR)/common.c
-C_SRCS += $(KERNEL_DIR)/entry.c
-C_SRCS += $(KERNEL_DIR)/idletask.c
-C_SRCS += $(KERNEL_DIR)/initcall.c
-C_SRCS += $(KERNEL_DIR)/list.c
-C_SRCS += $(KERNEL_DIR)/mempool.c
-C_SRCS += $(KERNEL_DIR)/syslog.c
-C_SRCS += $(KERNEL_DIR)/task.c
-C_SRCS += $(KERNEL_DIR)/semaphore.c
-C_SRCS += $(KERNEL_DIR)/softtimer.c
-C_SRCS += $(KERNEL_DIR)/kfifo.c
-C_SRCS += $(KERNEL_DIR)/workqueue.c
+ARCH     := arm32
+MCU      := -mcpu=cortex-m3#-mmcu=atmega2560
+CHIP     := stm32f103c8t6#atmega2560
+
+# TEST CONFIGURATIONS
+PL_MK_CFG_OS_TEST = y
+PL_MK_CFG_OS_MEMPOOL_TEST = y
+PL_MK_CFG_OS_TASK_TEST = y
+PL_MK_CFG_OS_SOFTTIMER_TEST = y
+PL_MK_CFG_OS_KFIFO_TEST = y

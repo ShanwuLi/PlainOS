@@ -27,6 +27,7 @@ SOFTWARE.
 #include <types.h>
 #include <kernel/kernel.h>
 #include <kernel/list.h>
+#include <kernel/task.h>
 
 /*************************************************************************************
  * Type Name: task_state
@@ -89,6 +90,18 @@ typedef void (*task_entry_t)(struct tcb *tcb);
  *   @struct tcb: current tcb.
  ************************************************************************************/
 struct tcb *pl_task_get_curr_tcb(void);
+
+/*************************************************************************************
+ * Function Name: pl_task_get_state
+ * Description: get task state.
+ *
+ * Parameters:
+ *  @tid: task id.
+ *
+ * Return:
+ *    @int :task state
+ ************************************************************************************/
+int pl_task_get_state(tid_t tid);
 
 /*************************************************************************************
  * Function Name: pl_task_get_timer_list
