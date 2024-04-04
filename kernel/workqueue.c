@@ -143,7 +143,7 @@ int pl_workqueue_release(pl_wq_handle workqueue)
 {
 	struct workqueue *wq = (struct workqueue *)workqueue;
 
-	if (wq == NULL)
+	if (wq == NULL || wq == g_pl_sys_hiwq_handle || wq == g_pl_sys_lowq_handle)
 		return -EFAULT;
 
 	(void)pl_task_kill(wq->exec_thread);
