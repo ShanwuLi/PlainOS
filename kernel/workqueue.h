@@ -72,6 +72,6 @@ int pl_sys_wq_init(void);
  * Return:
  *  @pl_wq_handle: handle of workqueue requested.
  ************************************************************************************/
-int pl_workqueue_init(struct workqueue *wq, const char *name, int prio, size_t wq_stack_sz);
+int pl_workqueue_init(struct workqueue *wq, const char *name, u16_t prio, size_t wq_stack_sz);
 
 #endif /* __KERNEL_SOFTTIMER_PRIVATE_H__ */

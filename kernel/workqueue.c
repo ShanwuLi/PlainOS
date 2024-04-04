@@ -77,7 +77,7 @@ static int workqueue_task(int argc, char **argv)
  * Return:
  *  @pl_wq_handle: handle of workqueue requested.
  ************************************************************************************/
-int pl_workqueue_init(struct workqueue *wq, const char *name, int prio, size_t wq_stack_sz)
+int pl_workqueue_init(struct workqueue *wq, const char *name, u16_t prio, size_t wq_stack_sz)
 {
 	char *argv[1];
 
@@ -108,7 +108,7 @@ int pl_workqueue_init(struct workqueue *wq, const char *name, int prio, size_t w
  * Return:
  *  @pl_wq_handle: handle of workqueue requested.
  ************************************************************************************/
-pl_wq_handle pl_workqueue_request(const char *name, int prio, size_t wq_stack_sz)
+pl_wq_handle pl_workqueue_request(const char *name, u16_t prio, size_t wq_stack_sz)
 {
 	struct workqueue *wq;
 	char *argv[1];

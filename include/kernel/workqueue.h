@@ -49,7 +49,7 @@ extern pl_wq_handle g_pl_sys_lowq_handle;
  * Return:
  *  @pl_wq_handle: handle of workqueue requested.
  ************************************************************************************/
-pl_wq_handle pl_workqueue_request(const char *name, int prio, size_t wq_stack_sz);
+pl_wq_handle pl_workqueue_request(const char *name, u16_t prio, size_t wq_stack_sz);
 
 /*************************************************************************************
  * Function Name: pl_workqueue_release
