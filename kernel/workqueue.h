@@ -21,15 +21,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef __KERNEL_SOFTTIMER_PRIVATE_H__
-#define __KERNEL_SOFTTIMER_PRIVATE_H__
+#ifndef __KERNEL_WORKQUEUE_PRIVATE_H__
+#define __KERNEL_WORKQUEUE_PRIVATE_H__
 
 #include <kernel/kernel.h>
 #include <kernel/task.h>
 #include <kernel/list.h>
-#include <kernel/semaphore.h>
 #include <kernel/workqueue.h>
-#include "semaphore.h"
 
 struct workqueue {
 	struct list_node work_list;
@@ -74,4 +72,4 @@ int pl_sys_wq_init(void);
  ************************************************************************************/
 int pl_workqueue_init(struct workqueue *wq, const char *name, u16_t prio, size_t wq_stack_sz);
 
-#endif /* __KERNEL_SOFTTIMER_PRIVATE_H__ */
+#endif /* __KERNEL_WORKQUEUE_PRIVATE_H__ */
