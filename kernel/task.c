@@ -688,7 +688,7 @@ int pl_task_join(tid_t tid, int *ret)
  *   pend task.
  * 
  * Parameters:
- *  @tid: task id, if tid is NULL, it will pend myself.
+ *  @tid: task id, if tid is NULL, it will pend himself.
  *
  * Return:
  *  void.
