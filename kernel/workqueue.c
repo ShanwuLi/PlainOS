@@ -278,5 +278,6 @@ int pl_sys_wq_init(void)
 		return ret;
 	}
 
+	pl_early_syslog_info("sys workqueue init successfully\r\n");
 	return OK;
 }
