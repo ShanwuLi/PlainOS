@@ -10,8 +10,11 @@
 void pl_callee_entry(void)
 {
 	int ret;
-	pl_syslog_init();
 	ret = pl_port_putc_init();
+	if (ret < 0)
+		while(1);
+
+	ret = pl_syslog_init();
 	if (ret < 0)
 		while(1);
 

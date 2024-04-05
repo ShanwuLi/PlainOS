@@ -59,8 +59,12 @@ static u32_t cpu_rate_idle;
  *   @ready_list: list head array of ready tasks.
  *   @pend_list: list head of pending tasks.
  *   @delay_list: list head of delay tasks.
+ *   @exit_list: list head of exit tasks(killed or exited).
+ *   @timer_list: list head of soft timer.
  *   @curr_tcb: current context tcb.
  *   @systicks: systicks.
+ *   @cpu_rate_base: cpu rate base counter.
+ *   @cpu_rate_useful: cpu rate useful counter.
  *   @sched_lock_ref: schedule reference counter.
  *
  ************************************************************************************/
