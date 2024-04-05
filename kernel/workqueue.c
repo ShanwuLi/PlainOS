@@ -143,7 +143,7 @@ int pl_workqueue_destroy(pl_wq_handle workqueue)
 {
 	struct workqueue *wq = (struct workqueue *)workqueue;
 
-	if (wq == NULL || wq == g_pl_sys_hiwq_handle || wq == g_pl_sys_lowq_handle)
+	if (wq == NULL || wq == &pl_sys_hiwq || wq == &pl_sys_lowq)
 		return -EFAULT;
 
 	(void)pl_task_kill(wq->exec_thread);
@@ -264,6 +264,7 @@ int pl_sys_wq_init(void)
 	ret = pl_workqueue_init(&pl_sys_hiwq, "pl_sys_hiwq",
 	                        1, PL_CFG_HI_WORKQUEUE_TASK_STACK_SIZE);
 	if (ret < 0) {
+		g_pl_sys_hiwq_handle = NULL;
 		pl_early_syslog_err("hi workqueue request failed, ret:%d\r\n", ret);
 		return ret;
 	}
@@ -272,6 +273,7 @@ int pl_sys_wq_init(void)
 	                        PL_CFG_LO_WORKQUEUE_TASK_PRIORITY,
 	                        PL_CFG_LO_WORKQUEUE_TASK_STACK_SIZE);
 	if (ret < 0) {
+		g_pl_sys_lowq_handle = NULL;
 		pl_early_syslog_err("hi workqueue request failed, ret:%d\r\n", ret);
 		return ret;
 	}
