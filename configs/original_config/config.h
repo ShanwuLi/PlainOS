@@ -30,6 +30,7 @@ SOFTWARE.
 /* maximum priority of plainos */
 #define PL_CFG_ASSERT
 #define PL_CFG_OS_CHAR_LOGO
+#define PL_SYSTICK_TIME_SLICE_US                (25)
 #define PL_CFG_DEFAULT_MEMPOOL_SIZE             (10 * 1024)
 #define PL_CFG_DEFAULT_MEMPOOL_GRAIN_ORDER      (4)
 #define PL_CFG_MAX_TASKS_NUM                    (900u)

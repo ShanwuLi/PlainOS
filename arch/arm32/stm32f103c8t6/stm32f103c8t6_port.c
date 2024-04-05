@@ -1,4 +1,5 @@
 #include <port.h>
+#include <config.h>
 #include <kernel/initcall.h>
 #include "early_setup/early_uart.h"
 #include "stm32f10x.h"
@@ -32,7 +33,7 @@ int pl_port_systick_init(void)
 {
 	/** 填写你的OS滴答定时器初始化代码 **/
 	__asm__ volatile("cpsid	i\n\t");     /*< 关中断 */
-	SysTick_Config(1800); //900: 12.5us,  1800:25us,   3600:50us,   72000:1ms
+	SysTick_Config(PL_SYSTICK_TIME_SLICE_US * 72); // 1us 1900: 12.5us,  1800:25us,   3600:50us,   72000:1ms
 	NVIC_EnableIRQ(SysTick_IRQn);
 	__asm__ volatile("cpsie	i\n\t");     /*< 开中断 */
 	return 0;
