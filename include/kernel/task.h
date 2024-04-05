@@ -132,12 +132,12 @@ int pl_task_join(tid_t tid, int *ret);
  *   pend task.
  * 
  * Parameters:
- *  @tid: task id;
+ *  @tid: task id, if tid is NULL, it will pend myself.
  *
  * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
+ *  void.
  ************************************************************************************/
-int pl_task_pend(tid_t tid);
+void pl_task_pend(tid_t tid);
 
 /*************************************************************************************
  * Function Name: pl_task_resume
@@ -149,9 +149,9 @@ int pl_task_pend(tid_t tid);
  *  @tid: task id;
  *
  * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
+ *  void.
  ************************************************************************************/
-int pl_task_resume(tid_t tid);
+void pl_task_resume(tid_t tid);
 
 /*************************************************************************************
  * Function Name: pl_task_kill

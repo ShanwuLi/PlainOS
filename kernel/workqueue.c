@@ -44,7 +44,7 @@ static int workqueue_task(int argc, char **argv)
 
 	while (true) {
 		if (list_is_empty(&wq->work_list)) {
-			pl_task_pend(wq->exec_thread);
+			pl_task_pend(NULL);
 			continue;
 		}
 
@@ -262,8 +262,7 @@ int pl_sys_wq_init(void)
 	int ret;
 
 	ret = pl_workqueue_init(&pl_sys_hiwq, "pl_sys_hiwq",
-	                        PL_CFG_HI_WORKQUEUE_TASK_PRIORITY,
-	                        PL_CFG_HI_WORKQUEUE_TASK_STACK_SIZE);
+	                        1, PL_CFG_HI_WORKQUEUE_TASK_STACK_SIZE);
 	if (ret < 0) {
 		pl_early_syslog_err("hi workqueue request failed, ret:%d\r\n", ret);
 		return ret;

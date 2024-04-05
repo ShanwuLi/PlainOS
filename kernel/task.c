@@ -78,30 +78,6 @@ struct task_core_blk {
 };
 
 /*************************************************************************************
- * Global Variable Name: g_hiprio_idx_tbl
- * Description: Obtain the highest priority through the priority index table.
- *              Supports up to 4096 priority levels.
- ************************************************************************************/
-static u8_t pl_const g_hiprio_idx_tbl[256] = {
-	0, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,  /* 0x00 to 0x0F */
-	4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,  /* 0x10 to 0x1F */
-	5, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,  /* 0x20 to 0x2F */
-	4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,  /* 0x30 to 0x3F */
-	6, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,  /* 0x40 to 0x4F */
-	4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,  /* 0x50 to 0x5F */
-	5, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,  /* 0x60 to 0x6F */
-	4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,  /* 0x70 to 0x7F */
-	7, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,  /* 0x80 to 0x8F */
-	4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,  /* 0x90 to 0x9F */
-	5, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,  /* 0xA0 to 0xAF */
-	4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,  /* 0xB0 to 0xBF */
-	6, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,  /* 0xC0 to 0xCF */
-	4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,  /* 0xD0 to 0xDF */
-	5, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,  /* 0xE0 to 0xEF */
-	4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0   /* 0xF0 to 0xFF */
-};
-
-/*************************************************************************************
  * Global Variable Name: g_hiprio_bitmap
  *
  * Description: Obtain the highest priority through the priority bit map.
@@ -172,18 +148,14 @@ int pl_task_get_state(tid_t tid)
  ************************************************************************************/
 static u8_t get_last_bit(u32_t bitmap)
 {
-	u8_t i;
-	u8_t last_bit;
-	u8_t *p = (u8_t *)&bitmap;
+	u8_t i = 0;
 
-	for (i = 0; i < 4; i++) {
-		if (*p != 0)
-			break;
-		p++;
+	for (i = 0; i < 32; i++) {
+		if (bitmap & ((u32_t)1 << i))
+			return i;
 	}
 
-	last_bit = pl_port_rodata_read8(g_hiprio_idx_tbl + (*p));
-	return last_bit;
+	return i;
 }
 
 /*************************************************************************************
@@ -716,25 +688,23 @@ int pl_task_join(tid_t tid, int *ret)
  *   pend task.
  * 
  * Parameters:
- *  @tid: task id;
+ *  @tid: task id, if tid is NULL, it will pend myself.
  *
  * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
+ *  void.
  ************************************************************************************/
-int pl_task_pend(tid_t tid)
+void pl_task_pend(tid_t tid)
 {
 	struct tcb *tcb = (struct tcb *)tid;
 
 	if (tcb == NULL)
-		return -EFAULT;
+		tcb = g_task_core_blk.curr_tcb;
 
 	pl_enter_critical();
 	pl_task_remove_tcb_from_rdylist(tcb);
 	pl_task_insert_tcb_to_pendlist(tcb);
 	pl_exit_critical();
 	pl_task_context_switch();
-
-	return OK;
 }
 
 /*************************************************************************************
@@ -747,22 +717,20 @@ int pl_task_pend(tid_t tid)
  *  @tid: task id;
  *
  * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
+ *  void.
  ************************************************************************************/
-int pl_task_resume(tid_t tid)
+void pl_task_resume(tid_t tid)
 {
 	struct tcb *tcb = (struct tcb *)tid;
 
 	if (tcb == NULL)
-		return -EFAULT;
+		return;
 
 	pl_enter_critical();
 	list_del_node(&tcb->node);
 	pl_task_insert_tcb_to_rdylist(tcb);
 	pl_exit_critical();
 	pl_task_context_switch();
-
-	return OK;
 }
 
 /*************************************************************************************
