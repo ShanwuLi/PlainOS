@@ -12,10 +12,10 @@ static void stimer_callback(pl_stimer_handle_t timer)
 	int ret;
 	void *data;
 	USED(timer);
-	struct count c = {.hi32 = 0, .lo32 = 1};
+	struct count c = {.hi32 = 0, .lo32 = 90};
 
 	pl_softtimer_get_private_data(timer, &data);
-	pl_early_syslog_info("stimer_callback %s\r\n", (char *)data);
+	pl_port_putc('A');
 	ret = pl_softtimer_start(timer, stimer_callback, &c, data);
 	if (ret < 0) {
 		pl_syslog_err("pl_softtimer_add failed, ret:%d\r\n", ret);
@@ -27,10 +27,10 @@ static void stimer_callback2(pl_stimer_handle_t timer)
 {
 	int ret;
 	void *data;
-	struct count c = {.hi32 = 0, .lo32 = 1};
+	struct count c = {.hi32 = 0, .lo32 = 200};
 
 	pl_softtimer_get_private_data(timer, &data);
-	pl_early_syslog_info("stimer2_callback %s\r\n", (char *)data);
+	pl_port_putc('B');
 	ret = pl_softtimer_start(timer, stimer_callback2, &c, data);
 	if (ret < 0) {
 		pl_syslog_err("pl_softtimer_add failed, ret:%d\r\n", ret);
@@ -43,18 +43,16 @@ static void stimer_callback2(pl_stimer_handle_t timer)
 
 	ret = pl_softtimer_cancel(stimer);
 	if (ret < 0) {
-		pl_syslog_err("pl_softtimer_cancel failed, ret:%d\r\n", ret);
+		pl_port_putc('C');
 	}
 
-	pl_early_syslog_info("timer1 canceled!!!!!\r\n");
-
+	pl_port_putc('D');
 }
-
 
 static int stimer_test(void)
 {
 	int ret;
-	struct count c = {.hi32 = 0, .lo32 = 1};
+	struct count c = {.hi32 = 0, .lo32 = 200};
 
 	pl_syslog_info("stimer_test\r\n");
 	stimer = pl_softtimer_request("timer1");

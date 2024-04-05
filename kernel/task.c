@@ -697,10 +697,10 @@ void pl_task_pend(tid_t tid)
 {
 	struct tcb *tcb = (struct tcb *)tid;
 
+	pl_enter_critical();
 	if (tcb == NULL)
 		tcb = g_task_core_blk.curr_tcb;
 
-	pl_enter_critical();
 	pl_task_remove_tcb_from_rdylist(tcb);
 	pl_task_insert_tcb_to_pendlist(tcb);
 	pl_exit_critical();
