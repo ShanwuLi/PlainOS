@@ -198,7 +198,7 @@ void pl_put_format_log_locked(int (*putc)(const char c), const char *fmt, ...)
 int pl_syslog_init(void)
 {
 	pl_semaplore_init(&syslog_semaphore, 1);
-	pl_early_syslog_info("syslog init successfully\r\n");
+	pl_early_syslog("syslog init successfully\r\n");
 	return OK;
 }
 
