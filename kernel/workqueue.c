@@ -75,7 +75,7 @@ static int workqueue_task(int argc, char **argv)
  *  @wq_stack_sz: workqueue task stack size.
  *
  * Return:
- *  @pl_wq_handle: handle of workqueue requested.
+ *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
 int pl_workqueue_init(struct workqueue *wq, const char *name, u16_t prio, size_t wq_stack_sz)
 {

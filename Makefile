@@ -79,10 +79,11 @@ DIR_GUARD = @mkdir -p $(@D)
 
 # Configuration Target
 %_config:
-	@echo "Writing config.h..."
-	@echo "Writing config.mk..."
+	@echo "writing config.h"
+	@echo "writing config.mk"
 	@$(CPY) $(TOPDIR)/configs/$(FIRST_ARG)/config.h $(TOPDIR)/include/
 	@$(CPY) $(TOPDIR)/configs/$(FIRST_ARG)/config.mk $(TOPDIR)/
+	@echo "write done"
 
 # All Target
 all: $(TARGET_FILES) $(TARGET).size

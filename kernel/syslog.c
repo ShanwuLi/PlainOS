@@ -75,7 +75,7 @@ static void put_chars(int (*putc)(const char c),
 }
 
 /*************************************************************************************
- * Function Name: vformat_log
+ * Function Name: pl_vformat_log
  *
  * Description:
  *   put chars using puc with va_list.
@@ -88,7 +88,7 @@ static void put_chars(int (*putc)(const char c),
  * Return:
  *   none.
  ************************************************************************************/
-static void vformat_log(int (*putc)(const char c), const char *fmt, va_list valist)
+void pl_vformat_log(int (*putc)(const char c), const char *fmt, va_list valist)
 {
 	char str[24];
 	int state = 0;
@@ -162,7 +162,7 @@ static void vformat_log(int (*putc)(const char c), const char *fmt, va_list vali
 }
 
 /*************************************************************************************
- * Function Name: pl_put_early_format_log
+ * Function Name: pl_put_format_log_locked
  *
  * Description:
  *   put format log using putc. It will put [front][fmt][rear] string using putc.
@@ -174,12 +174,12 @@ static void vformat_log(int (*putc)(const char c), const char *fmt, va_list vali
  * Return:
  *   none.
  ************************************************************************************/
-void pl_put_early_format_log(int (*putc)(const char c), const char *fmt, ...)
+void pl_put_format_log_locked(int (*putc)(const char c), const char *fmt, ...)
 {
 	va_list valist;
 
 	va_start(valist, fmt);
-	vformat_log(putc, fmt, valist);
+	pl_vformat_log(putc, fmt, valist);
 	va_end(valist);
 }
 
@@ -221,7 +221,7 @@ void pl_put_format_log(int (*putc)(const char c), const char *fmt, ...)
 
 	pl_semaplore_take(&syslog_semaphore);
 	va_start(valist, fmt);
-	vformat_log(putc, fmt, valist);
+	pl_vformat_log(putc, fmt, valist);
 	va_end(valist);
 	pl_semaplore_give(&syslog_semaphore);
 }

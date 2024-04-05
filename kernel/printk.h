@@ -21,39 +21,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef __KERNEL_SYSLOG_PRIVATE_H__
-#define __KERNEL_SYSLOG_PRIVATE_H__
+#ifndef __KERNEL_PRINTK_PRIVATE_H__
+#define __KERNEL_PRINTK_PRIVATE_H__
 
-#include <stdarg.h>
 
-/*************************************************************************************
- * Function Name: pl_syslog_init
- *
- * Description:
- *   syslog initialization.
- * 
- * Parameters:
- *  none.
- *
- * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
-int pl_syslog_init(void);
 
-/*************************************************************************************
- * Function Name: pl_vformat_log
- *
- * Description:
- *   put chars using puc with va_list.
- *
- * Param:
- *   @putc: putc function.
- *   @fmt: format string.
- *   @valist: variable arguments list.
- * 
- * Return:
- *   none.
- ************************************************************************************/
-void pl_vformat_log(int (*putc)(const char c), const char *fmt, va_list valist);
 
-#endif /* __KERNEL_SYSLOG_PRIVATE_H__ */
+
+
+
+
+
+
+
+
+#endif /* __KERNEL_PRINTK_PRIVATE_H__ */

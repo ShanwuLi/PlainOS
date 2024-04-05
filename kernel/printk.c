@@ -21,39 +21,46 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef __KERNEL_SYSLOG_PRIVATE_H__
-#define __KERNEL_SYSLOG_PRIVATE_H__
+#include <kernel/kfifo.h>
+#include "syslog.h"
 
-#include <stdarg.h>
 
 /*************************************************************************************
- * Function Name: pl_syslog_init
+ * Function Name: pl_print
  *
  * Description:
- *   syslog initialization.
+ *   request a workqueue.
  * 
  * Parameters:
- *  none.
+ *  @name: workqueue name.
+ *  @proi: priority of workqueue.
+ *  @wq_stack_sz: workqueue task stack size.
  *
  * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
+ *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_syslog_init(void);
+
+
 
 /*************************************************************************************
- * Function Name: pl_vformat_log
+ * Function Name: pl_print
  *
  * Description:
- *   put chars using puc with va_list.
- *
- * Param:
- *   @putc: putc function.
- *   @fmt: format string.
- *   @valist: variable arguments list.
+ *   request a workqueue.
  * 
+ * Parameters:
+ *  @name: workqueue name.
+ *  @proi: priority of workqueue.
+ *  @wq_stack_sz: workqueue task stack size.
+ *
  * Return:
- *   none.
+ *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-void pl_vformat_log(int (*putc)(const char c), const char *fmt, va_list valist);
+int pl_print(fmt, ...)
+{
+	pl_vformat_log()
+}
 
-#endif /* __KERNEL_SYSLOG_PRIVATE_H__ */
+
+
+
