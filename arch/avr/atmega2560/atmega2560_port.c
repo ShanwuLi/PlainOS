@@ -3,6 +3,8 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
+static volatile int pl_critical_ref = 0;
+
 static usart USART1={
 	.ux_cofg = {
 		.number = 0,
@@ -35,7 +37,7 @@ int pl_port_putc(const char c)
 
 int pl_port_systick_init(void)
 {
-    TCCR1B = 0x01;   //进行1预分频  16MHz
+    TCCR1B = 0x02;   //进行2预分频  16MHz
     TCNT1H = 0X00;
     TCNT1L = 0X00;
     OCR1AH = 0XFF;
@@ -44,6 +46,7 @@ int pl_port_systick_init(void)
     pl_port_unmask_interrupts();
 	TIMSK1 |= (u8_t)(1<<0);
 
+	pl_port_putc('S');
 	return 0;
 }
 
@@ -60,6 +63,41 @@ void pl_port_mask_interrupts(void)
 void pl_port_unmask_interrupts(void)
 {
 	SREG |= (u8_t)(1<<7);     /*< 开中断 */
+}
+
+/*************************************************************************************
+ * Function Name: void pl_port_enter_critical(void)
+ * Description: enter critical area.
+ *
+ * Parameters:
+ *   none
+ *
+ * Return:
+ *   void.
+ ************************************************************************************/
+void pl_port_enter_critical(void)
+{
+	pl_port_mask_interrupts();
+	++pl_critical_ref;
+	pl_port_cpu_isb();
+}
+
+/*************************************************************************************
+ * Function Name: void pl_poty_exit_critical(void)
+ * Description: exit critical area.
+ *
+ * Parameters:
+ *   none
+ *
+ * Return:
+ *   void.
+ ************************************************************************************/
+void pl_poty_exit_critical(void)
+{
+	--pl_critical_ref;
+	if (pl_critical_ref == 0)
+		pl_port_unmask_interrupts();
+	pl_port_cpu_isb();
 }
 
 void *pl_port_task_stack_init(void *task, void *task_stack,

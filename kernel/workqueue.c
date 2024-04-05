@@ -22,6 +22,7 @@ SOFTWARE.
 */
 
 #include <errno.h>
+#include <port.h>
 #include <types.h>
 #include <config.h>
 #include <kernel/mempool.h>
@@ -48,13 +49,13 @@ static int workqueue_task(int argc, char **argv)
 			continue;
 		}
 
-		pl_enter_critical();
+		pl_port_enter_critical();
 		first = list_first_entry(&wq->work_list, struct work, node);
 		list_del_node(&first->node);
 		list_init(&first->node);
 		work_fun = first->fun;
 		first->fun = NULL;
-		pl_exit_critical();
+		pl_poty_exit_critical();
 
 		if (work_fun != NULL)
 			work_fun(first);
@@ -202,9 +203,9 @@ int pl_work_add(pl_wq_handle workqueue, pl_work_handle work)
 	if (!list_is_empty(&wk->node) && wk->fun != NULL)
 		return OK;
 
-	pl_enter_critical();
+	pl_port_enter_critical();
 	list_add_node_at_tail(&wq->work_list, &wk->node);
-	pl_exit_critical();
+	pl_poty_exit_critical();
 
 	return OK;
 }
@@ -237,9 +238,9 @@ int pl_work_cancel(pl_wq_handle workqueue, pl_work_handle work)
 		return ERROR;
 	}
 
-	pl_enter_critical();
+	pl_port_enter_critical();
 	list_del_node(&wk->node);
-	pl_exit_critical();
+	pl_poty_exit_critical();
 
 	return OK;
 }

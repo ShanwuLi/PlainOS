@@ -43,11 +43,11 @@ SOFTWARE.
 #define pl_assert(assertion)    \
 		do { \
 			if (!(assertion)) { \
-				pl_enter_critical(); \
+				pl_port_enter_critical(); \
 				pl_early_syslog_err("=>[ASSERT]:func:%s, line:%d\r\n", \
 				                   __func__, __LINE__); \
 				while(1); \
-				pl_exit_critical(); \
+				pl_poty_exit_critical(); \
 			} \
 		} while (false)
 #else

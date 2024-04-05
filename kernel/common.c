@@ -27,9 +27,6 @@ SOFTWARE.
 #include <kernel/kernel.h>
 #include <common/oschlogo.h>
 
-static volatile int pl_critical_ref = 0;
-
-
 #ifdef PL_CFG_OS_CHAR_LOGO
 static char pl_const pl_os_char_logo[] = \
 " _______   __            __             ______    ______  \r\n\
@@ -148,39 +145,4 @@ int pl_count_add(struct count *c, struct count *c1, struct count *c2)
 	c->hi32 = hi;
 	c->lo32 = lo;
 	return OK;
-}
-
-/*************************************************************************************
- * Function Name: void pl_enter_critical(void)
- * Description: enter critical area.
- *
- * Parameters:
- *   none
- *
- * Return:
- *   void.
- ************************************************************************************/
-void pl_enter_critical(void)
-{
-	pl_port_mask_interrupts();
-	++pl_critical_ref;
-	pl_port_cpu_isb();
-}
-
-/*************************************************************************************
- * Function Name: void pl_exit_critical(void)
- * Description: exit critical area.
- *
- * Parameters:
- *   none
- *
- * Return:
- *   void.
- ************************************************************************************/
-void pl_exit_critical(void)
-{
-	--pl_critical_ref;
-	if (pl_critical_ref == 0)
-		pl_port_unmask_interrupts();
-	pl_port_cpu_isb();
 }

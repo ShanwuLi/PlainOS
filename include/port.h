@@ -120,6 +120,30 @@ void pl_port_mask_interrupts(void);
 void pl_port_unmask_interrupts(void);
 
 /*************************************************************************************
+ * Function Name: void pl_port_enter_critical(void)
+ * Description: enter critical area.
+ *
+ * Parameters:
+ *   none
+ *
+ * Return:
+ *   void.
+ ************************************************************************************/
+void pl_port_enter_critical(void);
+
+/*************************************************************************************
+ * Function Name: void pl_poty_exit_critical(void)
+ * Description: exit critical area.
+ *
+ * Parameters:
+ *   none
+ *
+ * Return:
+ *   void.
+ ************************************************************************************/
+void pl_poty_exit_critical(void);
+
+/*************************************************************************************
  * Function Name: pl_port_putc_init
  *
  * Description:

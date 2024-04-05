@@ -427,9 +427,9 @@ void *pl_callee_get_next_context_sp(void)
  ************************************************************************************/
 void pl_task_schedule_lock(void)
 {
-	pl_enter_critical();
+	pl_port_enter_critical();
 	++g_task_core_blk.sched_lock_ref;
-	pl_exit_critical();
+	pl_poty_exit_critical();
 }
 
 /*************************************************************************************
@@ -444,9 +444,9 @@ void pl_task_schedule_lock(void)
  ************************************************************************************/
 void pl_task_schedule_unlock(void)
 {
-	pl_enter_critical();
+	pl_port_enter_critical();
 	--g_task_core_blk.sched_lock_ref;
-	pl_exit_critical();
+	pl_poty_exit_critical();
 }
 
 /*************************************************************************************
@@ -466,11 +466,11 @@ void pl_task_context_switch(void)
 	struct tcb *next_tcb;
 	struct tcb *idle_tcb;
 
-	pl_enter_critical();
+	pl_port_enter_critical();
 	hiprio = get_hiprio();
 	curr_tcb = g_task_core_blk.curr_tcb;
 	next_tcb = g_task_core_blk.ready_list[hiprio].head;
-	pl_exit_critical();
+	pl_poty_exit_critical();
 
 	idle_tcb = g_task_core_blk.ready_list[PL_CFG_TASK_PRIORITIES_MAX].head;
 	if (next_tcb == idle_tcb)
@@ -497,7 +497,7 @@ static void task_entry(struct tcb *tcb)
 	int exit_val = tcb->task(tcb->argc, tcb->argv);
 
 	/* insert current task to exit list */
-	pl_enter_critical();
+	pl_port_enter_critical();
 	pl_task_remove_tcb_from_rdylist(tcb);
 	pl_task_insert_tcb_to_exitlist(tcb);
 
@@ -508,7 +508,7 @@ static void task_entry(struct tcb *tcb)
 		pos->wait_for_task_ret = exit_val;
 	}
 
-	pl_exit_critical();
+	pl_poty_exit_critical();
 	/* switch task*/
 	pl_task_context_switch();
 	/* will be never come here */
@@ -572,9 +572,9 @@ static void task_init_and_create(const char *name, main_t task, u16_t prio,
 	stack = pl_port_task_stack_init(task_entry, stack, stack_size, tcb);
 	task_init_tcb(name, task, prio, tcb, stack, argc, argv);
 
-	pl_enter_critical();
+	pl_port_enter_critical();
 	pl_task_insert_tcb_to_rdylist(tcb);
-	pl_exit_critical();
+	pl_poty_exit_critical();
 	pl_task_context_switch();
 }
 
@@ -669,10 +669,10 @@ int pl_task_join(tid_t tid, int *ret)
 	if (tcb->curr_state == PL_TASK_STATE_EXIT)
 		return ERROR;
 
-	pl_enter_critical();
+	pl_port_enter_critical();
 	pl_task_remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
 	pl_task_insert_tcb_to_waitlist(&tcb->wait_head, g_task_core_blk.curr_tcb);
-	pl_exit_critical();
+	pl_poty_exit_critical();
 	pl_task_context_switch();
 
 	if (ret != NULL)
@@ -697,13 +697,13 @@ void pl_task_pend(tid_t tid)
 {
 	struct tcb *tcb = (struct tcb *)tid;
 
-	pl_enter_critical();
+	pl_port_enter_critical();
 	if (tcb == NULL)
 		tcb = g_task_core_blk.curr_tcb;
 
 	pl_task_remove_tcb_from_rdylist(tcb);
 	pl_task_insert_tcb_to_pendlist(tcb);
-	pl_exit_critical();
+	pl_poty_exit_critical();
 	pl_task_context_switch();
 }
 
@@ -726,10 +726,10 @@ void pl_task_resume(tid_t tid)
 	if (tcb == NULL)
 		return;
 
-	pl_enter_critical();
+	pl_port_enter_critical();
 	list_del_node(&tcb->node);
 	pl_task_insert_tcb_to_rdylist(tcb);
-	pl_exit_critical();
+	pl_poty_exit_critical();
 	pl_task_context_switch();
 }
 
@@ -752,10 +752,10 @@ int pl_task_kill(tid_t tid)
 	if (tcb == NULL)
 		return -EFAULT;
 
-	pl_enter_critical();
+	pl_port_enter_critical();
 	pl_task_remove_tcb_from_rdylist(tcb);
 	pl_task_insert_tcb_to_exitlist(tcb);
-	pl_exit_critical();
+	pl_poty_exit_critical();
 	pl_task_context_switch();
 	return OK;
 }
@@ -780,7 +780,7 @@ void pl_task_delay_ticks(u32_t ticks)
 	if (ticks == 0)
 		return;
 
-	pl_enter_critical();
+	pl_port_enter_critical();
 	end_ticks_lo32 = g_task_core_blk.systicks.lo32;
 	end_ticks_hi32 = g_task_core_blk.systicks.hi32;
 
@@ -792,7 +792,7 @@ void pl_task_delay_ticks(u32_t ticks)
 	g_task_core_blk.curr_tcb->delay_ticks.lo32 = ticks;
 	pl_task_remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
 	pl_task_insert_tcb_to_delaylist(g_task_core_blk.curr_tcb);
-	pl_exit_critical();
+	pl_poty_exit_critical();
 	pl_task_context_switch();
 }
 
@@ -970,10 +970,10 @@ int pl_task_get_syscount(struct count *c)
 	if (c == NULL)
 		return -EFAULT;
 
-	pl_enter_critical();
+	pl_port_enter_critical();
 	c->hi32 = g_task_core_blk.systicks.hi32;
 	c->lo32 = g_task_core_blk.systicks.lo32;
-	pl_exit_critical();
+	pl_poty_exit_critical();
 
 	return OK;
 }
@@ -997,10 +997,10 @@ int pl_task_get_cpu_rate_count(u32_t *rate_base, u32_t *rate_useful)
 	if (rate_base == NULL || rate_useful == NULL)
 		return -EFAULT;
 
-	pl_enter_critical();
+	pl_port_enter_critical();
 	*rate_base = g_task_core_blk.cpu_rate_base;
 	*rate_useful = g_task_core_blk.cpu_rate_useful;
-	pl_exit_critical();
+	pl_poty_exit_critical();
 
 	return OK;
 }
@@ -1029,10 +1029,10 @@ int pl_task_get_cpu_rate(u32_t *int_part, u32_t *deci_part)
 	if (int_part == NULL || deci_part == NULL)
 		return -EFAULT;
 
-	pl_enter_critical();
+	pl_port_enter_critical();
 	_cpu_rate_base = g_task_core_blk.cpu_rate_base;
 	_cpu_rate_useful = g_task_core_blk.cpu_rate_useful;
-	pl_exit_critical();
+	pl_poty_exit_critical();
 
 	integer_part = (_cpu_rate_useful * 100) / _cpu_rate_base;
 	decimal_part = (_cpu_rate_useful * 10000) / _cpu_rate_base - (integer_part * 100);

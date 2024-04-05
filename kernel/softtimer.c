@@ -22,6 +22,7 @@ SOFTWARE.
 */
 
 #include <errno.h>
+#include <port.h>
 #include <types.h>
 #include <config.h>
 #include <kernel/mempool.h>
@@ -56,13 +57,13 @@ static int softtimer_daemon_task(int argc, char **argv)
 			continue;
 		}
 
-		pl_enter_critical();
+		pl_port_enter_critical();
 		first = list_first_entry(&softtimer_ctrl.head, struct softtimer, node);
 		list_del_node(&first->node);
 		list_init(&first->node);
 		stimer_fun = first->fun;
 		first->fun = NULL;
-		pl_exit_critical();
+		pl_poty_exit_critical();
 
 		if (stimer_fun != NULL)
 			stimer_fun(first);
@@ -116,9 +117,9 @@ int pl_softtimer_get_private_data(pl_stimer_handle_t timer, void **data)
 	if (timer == NULL || data == NULL)
 		return -EFAULT;
 
-	pl_enter_critical();
+	pl_port_enter_critical();
 	*data = ((struct softtimer *)timer)->priv_data;
-	pl_exit_critical();
+	pl_poty_exit_critical();
 
 	return OK;
 }
@@ -159,7 +160,7 @@ int pl_softtimer_start(pl_stimer_handle_t timer, stimer_fun_t fun,
 	pl_task_get_syscount(&syscount);
 	pl_count_add(&stimer->reach_cnt, &syscount, timing_cnt);
 
-	pl_enter_critical();
+	pl_port_enter_critical();
 	if (list_is_empty(timer_list)) {
 		list_add_node_at_tail(timer_list, &stimer->node);
 		goto out;
@@ -172,7 +173,7 @@ int pl_softtimer_start(pl_stimer_handle_t timer, stimer_fun_t fun,
 
 	list_add_node_ahead(&pos->node, &stimer->node);
 out:
-	pl_exit_critical();
+	pl_poty_exit_critical();
 	return OK;
 }
 
@@ -198,10 +199,10 @@ int pl_softtimer_cancel(pl_stimer_handle_t timer)
 	if (list_is_empty(&stimer->node))
 		return ERROR;
 
-	pl_enter_critical();
+	pl_port_enter_critical();
 	list_del_node(&stimer->node);
 	stimer->fun = NULL;
-	pl_exit_critical();
+	pl_poty_exit_critical();
 	list_init(&stimer->node);
 
 	return OK;

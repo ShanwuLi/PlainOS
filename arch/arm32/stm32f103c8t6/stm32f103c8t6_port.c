@@ -4,6 +4,8 @@
 #include "early_setup/early_uart.h"
 #include "stm32f10x.h"
 
+static volatile int pl_critical_ref = 0;
+
 int pl_port_putc_init(void)
 {
 	NVIC_EnableIRQ(PendSV_IRQn);
@@ -26,6 +28,41 @@ void pl_port_mask_interrupts(void)
 void pl_port_unmask_interrupts(void)
 {
 	__asm__ volatile("cpsie	i\n\t");     /*< 开中断 */
+}
+
+/*************************************************************************************
+ * Function Name: void pl_port_enter_critical(void)
+ * Description: enter critical area.
+ *
+ * Parameters:
+ *   none
+ *
+ * Return:
+ *   void.
+ ************************************************************************************/
+void pl_port_enter_critical(void)
+{
+	pl_port_mask_interrupts();
+	++pl_critical_ref;
+	pl_port_cpu_isb();
+}
+
+/*************************************************************************************
+ * Function Name: void pl_poty_exit_critical(void)
+ * Description: exit critical area.
+ *
+ * Parameters:
+ *   none
+ *
+ * Return:
+ *   void.
+ ************************************************************************************/
+void pl_poty_exit_critical(void)
+{
+	--pl_critical_ref;
+	if (pl_critical_ref == 0)
+		pl_port_unmask_interrupts();
+	pl_port_cpu_isb();
 }
 
 //RTS OS滴答定时器初始化，移植时需要用户自己实现

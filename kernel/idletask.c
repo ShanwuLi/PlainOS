@@ -78,5 +78,6 @@ int pl_idle_task_init(void)
 		return -1;
 	}
 
+	pl_early_syslog("idle task init successfully\r\n");
 	return 0;
 }

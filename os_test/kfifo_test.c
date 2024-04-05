@@ -1,3 +1,5 @@
+
+#include <port.h>
 #include <kernel/assert.h>
 #include <kernel/initcall.h>
 #include <kernel/kfifo.h>
@@ -17,10 +19,10 @@ static int kfifo_test(void)
 		return 0;
 	}
 
-	pl_enter_critical();
+	pl_port_enter_critical();
 	pl_syslog_info("%%%%%%%%%%%%%%%%%% KFIFO TEST %%%%%%%%%%%%%%%%%%%%%%\r\n");
 	pl_syslog_info("get3:%s", "dwdejkfekvev\r\n");
-	pl_exit_critical();
+	pl_poty_exit_critical();
 
 	pl_kfifo_put(kfifo, (char *)"123", 3);
 	pl_kfifo_put(kfifo, (char *)"1234", 4);
@@ -30,10 +32,10 @@ static int kfifo_test(void)
 
 	data_num = pl_kfifo_get(kfifo, read_data, 50);
 
-	pl_enter_critical();
+	pl_port_enter_critical();
 	pl_syslog_info("data_num:%d, get3:%s end\r\n", data_num, read_data);
 	pl_syslog_info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\r\n");
-	pl_exit_critical();
+	pl_poty_exit_critical();
 
 	return 0;
 }
