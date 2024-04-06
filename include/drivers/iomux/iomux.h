@@ -27,6 +27,20 @@ SOFTWARE.
 #include <types.h>
 #include <kernel/list.h>
 
+/*************************************************************************************
+ * struct iomux:
+ * Description:
+ *   @nr: number of the io.
+ *   @map: map of the ios.
+ *   @function: function of the io.
+ *   @state: state of the io.
+ *
+ *  NOTE:
+ *   map:       [io_idx0, io_idx1, ..., io_idx_nr - 1]
+ *   function:  [idx0_fun, idx1_fun, ..., (idxnr - 1)_fun]
+ *   state:     [idx0_stat, idx1_stat, ..., (idxnr - 1)_stat]
+ *
+ ************************************************************************************/
 struct iomux {
 	u16_t nr;
 	u16_t *map;
@@ -34,6 +48,15 @@ struct iomux {
 	u8_t *state;
 };
 
+/*************************************************************************************
+ * struct iomux_ops:
+ * Description:
+ *   @set_function: set function of the io.
+ *   @get_function: get function of the ios.
+ *   @set_state: set state of the io.
+ *   @get_state: get state of the io.
+ *
+ ************************************************************************************/
 struct iomux_ops {
 	int (*set_function)(struct iomux *iomux, u16_t io_idx, u8_t function);
 	int (*get_function)(struct iomux *iomux, u16_t io_idx, u8_t *function);
@@ -41,6 +64,15 @@ struct iomux_ops {
 	int (*get_state)(struct iomux *iomux, u16_t io_idx, u8_t *state);
 };
 
+/*************************************************************************************
+ * struct iomux_desc:
+ * Description:
+ *   @name: the name of the iomux description.
+ *   @iomux: iomux pointer.
+ *   @ops: iomux operations.
+ *   @node: node of iomux_desc list.
+ *
+ ************************************************************************************/
 struct iomux_desc {
 	const char *name;
 	struct iomux *iomux;

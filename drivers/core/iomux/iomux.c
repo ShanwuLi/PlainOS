@@ -46,6 +46,8 @@ int pl_iomux_desc_register(struct iomux_desc *desc)
 	if (desc == NULL)
 		return -EFAULT;
 
+	if (desc->name == NULL || desc->iomux == NULL || desc->ops == NULL)
+		return -EACCES;
 
 	list_add_node_at_tail(&pl_iomux_desc_list, &desc->node);
 	return OK;
