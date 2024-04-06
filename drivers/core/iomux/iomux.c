@@ -25,6 +25,8 @@ SOFTWARE.
 #include <errno.h>
 #include <string.h>
 #include <kernel/list.h>
+#include <kernel/initcall.h>
+#include <kernel/syslog.h>
 #include <drivers/iomux/iomux.h>
 
 static struct list_node pl_iomux_desc_list;
@@ -223,5 +225,20 @@ int pl_iomux_get_pin_state(struct iomux_desc *desc, u16_t io_idx, u8_t *state)
 	return ret;
 }
 
-
-
+/*************************************************************************************
+ * Function Name: pl_iomux_init
+ * Description: iomux initialization.
+ *
+ * Param:
+ *   none.
+ *
+ * Return:
+ *   Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+static int pl_iomux_init(void)
+{
+	list_init(&pl_iomux_desc_list);
+	pl_early_syslog_info("iomux init successfully\r\n");
+	return OK;
+}
+core_initcall(pl_iomux_init);

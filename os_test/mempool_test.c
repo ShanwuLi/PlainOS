@@ -56,4 +56,4 @@ static int mempool_test(void)
 
 	return 0;
 }
-early_initcall(mempool_test);
+late_initcall(mempool_test);

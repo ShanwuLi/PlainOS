@@ -80,5 +80,4 @@ static int task_test(void)
 
 	return 0;
 }
-
-core_initcall(task_test);
+late_initcall(task_test);

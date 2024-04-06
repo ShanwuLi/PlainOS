@@ -103,4 +103,4 @@ static int softtimer_test(void)
 
 	return 0;
 }
-core_initcall(softtimer_test);
+late_initcall(softtimer_test);
