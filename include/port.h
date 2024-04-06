@@ -124,7 +124,7 @@ void pl_port_unmask_interrupts(void);
  * Description: enter critical area.
  *
  * Parameters:
- *   none
+ *   none.
  *
  * Return:
  *   void.
@@ -167,7 +167,7 @@ int pl_port_putc_init(void);
  *   @c: the char we want to put.
  *
  * Return:
- *  Greater than or equal to 0 on success, less than 0 with failure.
+ *   Greater than or equal to 0 on success, less than 0 with failure.
  ************************************************************************************/
 int pl_port_putc(const char c);
 
@@ -190,14 +190,13 @@ void pl_callee_entry(void);
  * Function Name: pl_port_systick_init
  *
  * Description:
- *   The function is used to initialize systick.
- *   on systick system.
- * 
+ *   The function is used to initialize systick on systick system.
+ *
  * Parameters:
- *  none
+ *  none.
  *
  * Return:
- *  none
+ *  none.
  ************************************************************************************/
 int pl_port_systick_init(void);
 
@@ -224,7 +223,7 @@ void pl_callee_systick_expiration(void);
  *  none
  *
  * Return:
- *    void *context sp;
+ *    void *context sp.
  ************************************************************************************/
 void pl_callee_save_curr_context_sp(void *context_sp);
 
@@ -236,7 +235,7 @@ void pl_callee_save_curr_context_sp(void *context_sp);
  *  none
  *
  * Return:
- *    void *context sp;
+ *    void *context sp.
  ************************************************************************************/
 void *pl_callee_get_next_context_sp(void);
 
@@ -250,7 +249,7 @@ void *pl_callee_get_next_context_sp(void);
  *
  * Parameters:
  *   @addr: the address of data we want to read.
- * 
+ *
  * Return:
  *   data of 8bits.
  ************************************************************************************/
@@ -264,7 +263,7 @@ u8_t pl_port_rodata_read8(void *addr);
  *
  * Param:
  *   @addr: the address of data we want to read.
- * 
+ *
  * Return:
  *   data of 16bits.
  ************************************************************************************/
@@ -278,7 +277,7 @@ u16_t pl_port_rodata_read16(void *addr);
  *
  * Parameters:
  *   @addr: the address of data we want to read.
- * 
+ *
  * Return:
  *   data of 32bits.
  ************************************************************************************/
@@ -292,7 +291,7 @@ u32_t pl_port_rodata_read32(void *addr);
  *
  * Parameters:
  *   @addr: the address of data we want to read.
- * 
+ *
  * Return:
  *   data of uintptr_t.
  ************************************************************************************/

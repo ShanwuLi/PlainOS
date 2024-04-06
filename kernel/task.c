@@ -876,10 +876,10 @@ static void update_delay_task_list(void)
 static void update_softtimer_list(void)
 {
 	bool list_empty;
+	struct tcb *timer_tcb;
 	struct softtimer *pos;
 	struct softtimer *first;
 	struct softtimer_ctrl *timer_ctrl;
-	struct tcb *timer_tcb;
 
 	timer_ctrl = pl_softtimer_get_ctrl();
 	/* if timer list is empty, we skip it */
@@ -894,8 +894,7 @@ static void update_softtimer_list(void)
 	}
 
 	/* update soft timer list */
-	list_for_each_entry(pos, &g_task_core_blk.timer_list,
-	    struct softtimer, node) {
+	list_for_each_entry(pos, &g_task_core_blk.timer_list, struct softtimer, node) {
 
 		if (pl_count_cmp(&pos->reach_cnt, &g_task_core_blk.systicks) > 0)
 			break;
@@ -962,7 +961,7 @@ void pl_callee_systick_expiration(void)
  * Description:
  *   The function is used to get syscount.
  *   on systick system.
- * 
+ *
  * Parameters:
  *  @c: count wanted to get.
  *
