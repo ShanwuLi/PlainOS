@@ -47,6 +47,28 @@ struct gpio_desc {
 	struct list_node node;
 };
 
+/*************************************************************************************
+ * Function Name: pl_gpio_desc_register
+ * Description: register gpio description
+ *
+ * Param:
+ *   @desc: gpio description.
+ *
+ * Return:
+ *   Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_gpio_desc_register(struct gpio_desc *desc);
 
+/*************************************************************************************
+ * Function Name: pl_gpio_desc_unregister
+ * Description: unregister gpio description
+ *
+ * Param:
+ *   @desc: gpio description.
+ *
+ * Return:
+ *   Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_gpio_desc_unregister(struct gpio_desc *desc);
 
 #endif /* __DRV_GPIO_H__ */
