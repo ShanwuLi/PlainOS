@@ -70,7 +70,7 @@ void pl_iomux_desc_unregister(struct iomux_desc *desc)
 }
 
 /*************************************************************************************
- * Function Name: pl_iomux_desc_find_by_name
+ * Function Name: pl_iomux_desc_find
  * Description: find iomux description
  *
  * Param:
@@ -79,7 +79,7 @@ void pl_iomux_desc_unregister(struct iomux_desc *desc)
  * Return:
  *   iomux description.
  ************************************************************************************/
-struct iomux_desc *pl_iomux_desc_find_by_name(const char *name)
+struct iomux_desc *pl_iomux_desc_find(const char *name)
 {
 	struct iomux_desc *pos;
 
@@ -96,132 +96,122 @@ struct iomux_desc *pl_iomux_desc_find_by_name(const char *name)
 }
 
 /*************************************************************************************
- * Function Name: pl_iomux_desc_find_by_name
- * Description: find iomux description
- *
- * Param:
- *   @id: iomux description id.
- *
- * Return:
- *   iomux description.
- ************************************************************************************/
-struct iomux_desc *pl_iomux_desc_find_by_id(u16_t id)
-{
-	struct iomux_desc *pos;
-
-	if (list_is_empty(&pl_iomux_desc_list))
-		return NULL;
-
-	list_for_each_entry(pos, &pl_iomux_desc_list, struct iomux_desc, node) {
-		if (pos->id == id) {
-			return pos;
-		}
-	}
-
-	return NULL;
-}
-
-/*************************************************************************************
- * Function Name: pl_iomux_set_pin_function
- * Description: set function for pin.
+ * Function Name: pl_iomux_set_io_function
+ * Description: set function for io.
  *
  * Param:
  *   @desc: iomux description.
  *   @io_idx: index of io.
- *   @function: function of the pin.
+ *   @function: function of the io.
  *
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_iomux_set_pin_function(struct iomux_desc *desc, u16_t io_idx, u8_t function)
+int pl_iomux_set_io_function(struct iomux_desc *desc, u16_t io_idx, u8_t function)
 {
 	int ret;
-	struct iomux *mux;
+	u16_t idx = io_idx;
 
-	if (desc == NULL || io_idx >= desc->ios_nr)
+	if (desc == NULL || desc->iomux == NULL)
 		return -EFAULT;
 
-	mux = &desc->ios[io_idx];
-	ret = desc->ops->set_function(mux, function);
+	if (io_idx >= desc->iomux->nr)
+		return -ERANGE;
 
+	if (desc->iomux->map != NULL)
+		idx = desc->iomux->map[io_idx];
+
+	ret = desc->ops->set_function(desc->iomux, idx, function);
 	return ret;
 }
 
 /*************************************************************************************
- * Function Name: pl_iomux_get_pin_function
- * Description: get function of the pin.
+ * Function Name: pl_iomux_get_io_function
+ * Description: get function of the io.
  *
  * Param:
  *   @desc: iomux description.
  *   @io_idx: index of io.
- *   @function: function of the pin.
+ *   @function: function of the io.
  *
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_iomux_get_pin_function(struct iomux_desc *desc, u16_t io_idx, u8_t *function)
+int pl_iomux_get_io_function(struct iomux_desc *desc, u16_t io_idx, u8_t *function)
 {
 	int ret;
-	struct iomux *mux;
+	u16_t idx = io_idx;
 
-	if (function == NULL || desc == NULL || io_idx >= desc->ios_nr)
+	if (desc == NULL || desc->iomux == NULL)
 		return -EFAULT;
 
-	mux = &desc->ios[io_idx];
-	ret = desc->ops->get_function(mux, function);
+	if (io_idx >= desc->iomux->nr)
+		return -ERANGE;
 
+	if (desc->iomux->map != NULL)
+		idx = desc->iomux->map[io_idx];
+
+	ret = desc->ops->get_function(desc->iomux, idx, function);
 	return ret;
 }
 
 /*************************************************************************************
- * Function Name: pl_iomux_set_pin_state
- * Description: set state of the pin.
+ * Function Name: pl_iomux_set_io_state
+ * Description: set state of the io.
  *
  * Param:
  *   @desc: iomux description.
  *   @io_idx: index of io.
- *   @state: state of the pin.
+ *   @state: state of the io.
  *
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_iomux_set_pin_state(struct iomux_desc *desc, u16_t io_idx, u8_t state)
+int pl_iomux_set_io_state(struct iomux_desc *desc, u16_t io_idx, u8_t state)
 {
 	int ret;
-	struct iomux *mux;
+	u16_t idx = io_idx;
 
-	if (desc == NULL || io_idx >= desc->ios_nr)
+	if (desc == NULL || desc->iomux == NULL)
 		return -EFAULT;
 
-	mux = &desc->ios[io_idx];
-	ret = desc->ops->set_state(mux, state);
+	if (io_idx >= desc->iomux->nr)
+		return -ERANGE;
 
+	if (desc->iomux->map != NULL)
+		idx = desc->iomux->map[io_idx];
+
+	ret = desc->ops->set_state(desc->iomux, idx, state);
 	return ret;
 }
 
 /*************************************************************************************
- * Function Name: pl_iomux_get_pin_state
- * Description: get state of the pin.
+ * Function Name: pl_iomux_get_io_state
+ * Description: get state of the io.
  *
  * Param:
  *   @desc: iomux description.
  *   @io_idx: index of io.
- *   @state: state of the pin.
+ *   @state: state of the io.
  *
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_iomux_get_pin_state(struct iomux_desc *desc, u16_t io_idx, u8_t *state)
+int pl_iomux_get_io_state(struct iomux_desc *desc, u16_t io_idx, u8_t *state)
 {
 	int ret;
-	struct iomux *mux;
+	u16_t idx = io_idx;
 
-	if (state == NULL || desc == NULL || io_idx >= desc->ios_nr)
+	if (desc == NULL || desc->iomux == NULL)
 		return -EFAULT;
 
-	mux = &desc->ios[io_idx];
-	ret = desc->ops->get_state(mux, state);
+	if (io_idx >= desc->iomux->nr)
+		return -ERANGE;
 
+	if (desc->iomux->map != NULL)
+		idx = desc->iomux->map[io_idx];
+
+	ret = desc->ops->get_state(desc->iomux, idx, state);
 	return ret;
 }
 

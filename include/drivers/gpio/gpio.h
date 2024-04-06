@@ -23,7 +23,29 @@ SOFTWARE.
 #ifndef __DRV_GPIO_H__
 #define __DRV_GPIO_H__
 
+#include <types.h>
+#include <kernel/list.h>
 
+struct gpio {
+	u8_t value;
+	u8_t dirction;
+};
+
+struct gpio_ops {
+	int (*set_direction)(struct gpio *gpio, u8_t direction);
+	int (*get_direction)(struct gpio *gpio, u8_t *direction);
+	int (*set_value)(struct gpio *gpio, u8_t value);
+	int (*get_value)(struct gpio *gpio, u8_t *value);
+};
+
+struct gpio_desc {
+	const char *name;
+	u16_t id;
+	u16_t gpio_nr;
+	u8_t *gpio;
+	struct gpio_ops *ops;
+	struct list_node node;
+};
 
 
 
