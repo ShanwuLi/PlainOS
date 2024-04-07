@@ -98,168 +98,6 @@ struct iomux_desc *pl_iomux_desc_find(const char *name)
 }
 
 /*************************************************************************************
- * Function Name: pl_iomux_set_io_fun
- * Description: set function for io.
- *
- * Param:
- *   @desc: iomux description.
- *   @io_idx: index of io.
- *   @function: function of the io.
- *
- * Return:
- *   Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
-int pl_iomux_set_io_fun(struct iomux_desc *desc, u16_t io_idx, u8_t fun)
-{
-	int ret;
-	u16_t idx = io_idx;
-
-	if (desc == NULL || desc->iomux == NULL)
-		return -EFAULT;
-
-	if (io_idx >= desc->iomux->nr)
-		return -ERANGE;
-
-	ret = desc->ops->set_fun(desc->iomux, idx, fun);
-	return ret;
-}
-
-/*************************************************************************************
- * Function Name: pl_iomux_get_io_fun
- * Description: get function of the io.
- *
- * Param:
- *   @desc: iomux description.
- *   @io_idx: index of io.
- *   @function: function of the io.
- *
- * Return:
- *   Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
-int pl_iomux_get_io_fun(struct iomux_desc *desc, u16_t io_idx, u8_t *fun)
-{
-	int ret;
-	u16_t idx = io_idx;
-
-	if (desc == NULL || desc->iomux == NULL)
-		return -EFAULT;
-
-	if (io_idx >= desc->iomux->nr)
-		return -ERANGE;
-
-	ret = desc->ops->get_fun(desc->iomux, idx, fun);
-	return ret;
-}
-
-/*************************************************************************************
- * Function Name: pl_iomux_set_io_drv
- * Description: set driver strength for io.
- *
- * Param:
- *   @desc: iomux description.
- *   @io_idx: index of io.
- *   @drv: driver strength of the io.
- *
- * Return:
- *   Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
-int pl_iomux_set_io_drv(struct iomux_desc *desc, u16_t io_idx, u8_t drv)
-{
-	int ret;
-	u16_t idx = io_idx;
-
-	if (desc == NULL || desc->iomux == NULL)
-		return -EFAULT;
-
-	if (io_idx >= desc->iomux->nr)
-		return -ERANGE;
-
-	ret = desc->ops->set_drv(desc->iomux, idx, drv);
-	return ret;
-}
-
-/*************************************************************************************
- * Function Name: pl_iomux_get_io_drv
- * Description: get driver strength of the io.
- *
- * Param:
- *   @desc: iomux description.
- *   @io_idx: index of io.
- *   @drv: driver strength of the io.
- *
- * Return:
- *   Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
-int pl_iomux_get_io_drv(struct iomux_desc *desc, u16_t io_idx, u8_t *drv)
-{
-	int ret;
-	u16_t idx = io_idx;
-
-	if (desc == NULL || desc->iomux == NULL)
-		return -EFAULT;
-
-	if (io_idx >= desc->iomux->nr)
-		return -ERANGE;
-
-	ret = desc->ops->get_drv(desc->iomux, idx, drv);
-	return ret;
-}
-
-/*************************************************************************************
- * Function Name: pl_iomux_set_io_state
- * Description: set state of the io.
- *
- * Param:
- *   @desc: iomux description.
- *   @io_idx: index of io.
- *   @state: state of the io.
- *
- * Return:
- *   Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
-int pl_iomux_set_io_state(struct iomux_desc *desc, u16_t io_idx, u8_t state)
-{
-	int ret;
-	u16_t idx = io_idx;
-
-	if (desc == NULL || desc->iomux == NULL)
-		return -EFAULT;
-
-	if (io_idx >= desc->iomux->nr)
-		return -ERANGE;
-
-	ret = desc->ops->set_state(desc->iomux, idx, state);
-	return ret;
-}
-
-/*************************************************************************************
- * Function Name: pl_iomux_get_io_state
- * Description: get state of the io.
- *
- * Param:
- *   @desc: iomux description.
- *   @io_idx: index of io.
- *   @state: state of the io.
- *
- * Return:
- *   Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
-int pl_iomux_get_io_state(struct iomux_desc *desc, u16_t io_idx, u8_t *state)
-{
-	int ret;
-	u16_t idx = io_idx;
-
-	if (desc == NULL || desc->iomux == NULL)
-		return -EFAULT;
-
-	if (io_idx >= desc->iomux->nr)
-		return -ERANGE;
-
-	ret = desc->ops->get_state(desc->iomux, idx, state);
-	return ret;
-}
-
-/*************************************************************************************
  * Function Name: pl_iomux_set_io_one
  * Description: set one of the io.
  *
@@ -274,7 +112,6 @@ int pl_iomux_get_io_state(struct iomux_desc *desc, u16_t io_idx, u8_t *state)
 int pl_iomux_set_io_one(struct iomux_desc *desc, u16_t io_idx, u8_t set, u8_t one)
 {
 	int ret;
-	u16_t idx = io_idx;
 
 	if (desc == NULL || desc->iomux == NULL)
 		return -EFAULT;
@@ -282,7 +119,7 @@ int pl_iomux_set_io_one(struct iomux_desc *desc, u16_t io_idx, u8_t set, u8_t on
 	if (io_idx >= desc->iomux->nr)
 		return -ERANGE;
 
-	ret = desc->ops->set_one(desc->iomux, idx, set, one);
+	ret = desc->ops->set_one(desc->iomux, io_idx, set, one);
 	return ret;
 }
 
@@ -301,7 +138,6 @@ int pl_iomux_set_io_one(struct iomux_desc *desc, u16_t io_idx, u8_t set, u8_t on
 int pl_iomux_get_io_one(struct iomux_desc *desc, u16_t io_idx, u8_t get, u8_t *one)
 {
 	int ret;
-	u16_t idx = io_idx;
 
 	if (desc == NULL || desc->iomux == NULL)
 		return -EFAULT;
@@ -309,7 +145,65 @@ int pl_iomux_get_io_one(struct iomux_desc *desc, u16_t io_idx, u8_t get, u8_t *o
 	if (io_idx >= desc->iomux->nr)
 		return -ERANGE;
 
-	ret = desc->ops->get_one(desc->iomux, idx, get, one);
+	ret = desc->ops->get_one(desc->iomux, io_idx, get, one);
+	return ret;
+}
+
+/*************************************************************************************
+ * Function Name: pl_iomux_set_io_grp
+ * Description: set group of the io.
+ *
+ * Param:
+ *   @desc: iomux description.
+ *   @io_idx_s: start index of io group.
+ *   @io_idx_e: end index of io group.
+ *   @set: set cmd.
+ *   @grp: group.
+ *
+ * Return:
+ *   Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_iomux_set_io_grp(struct iomux_desc *desc, u16_t io_idx_s,
+                            u16_t io_idx_e, u8_t set, u8_t *grp)
+{
+	int ret;
+
+	if (desc == NULL || desc->iomux == NULL)
+		return -EFAULT;
+
+	if (io_idx_s >= desc->iomux->nr || io_idx_e >= desc->iomux->nr || io_idx_s < io_idx_e)
+		return -ERANGE;
+
+	ret = desc->ops->set_grp(desc->iomux, io_idx_s, io_idx_e, set, grp);
+	return ret;
+}
+
+/*************************************************************************************
+ * Function Name: pl_iomux_get_io_grp
+ * Description: get group of the io.
+ *
+ * Param:
+ *   @desc: iomux description.
+ *   @io_idx_s: start index of io group.
+ *   @io_idx_e: end index of io group.
+ *   @set: set cmd.
+ *   @grp: group.
+ *
+ * Return:
+ *   Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_iomux_get_io_grp(struct iomux_desc *desc, u16_t io_idx_s,
+                            u16_t io_idx_e, u8_t get, u8_t *grp)
+{
+	int ret;
+
+	if (desc == NULL || desc->iomux == NULL)
+		return -EFAULT;
+
+	if (io_idx_s >= desc->iomux->nr || io_idx_e >= desc->iomux->nr || io_idx_s < io_idx_e)
+		return -ERANGE;
+
+	ret = desc->ops->get_grp(desc->iomux, io_idx_s, io_idx_e, get, grp);
 	return ret;
 }
 

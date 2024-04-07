@@ -23,6 +23,10 @@ SOFTWARE.
 
 #include <types.h>
 #include <errno.h>
+#include <string.h>
+#include <kernel/list.h>
+#include <kernel/initcall.h>
+#include <kernel/syslog.h>
 #include <drivers/gpio/gpio.h>
 
 static struct list_node pl_gpio_desc_list;
@@ -42,7 +46,7 @@ int pl_gpio_desc_register(struct gpio_desc *desc)
 	if (desc == NULL)
 		return -EFAULT;
 
-	if (desc->name == NULL || desc->gpios == NULL || desc->ops == NULL)
+	if (desc->name == NULL || desc->gpio == NULL || desc->ops == NULL)
 		return -EACCES;
 
 	list_add_node_at_tail(&pl_gpio_desc_list, &desc->node);
@@ -68,4 +72,157 @@ int pl_gpio_desc_unregister(struct gpio_desc *desc)
 	return OK;
 }
 
+/*************************************************************************************
+ * Function Name: pl_gpio_desc_find
+ * Description: find gpio description
+ *
+ * Param:
+ *   @name: gpio description name.
+ *
+ * Return:
+ *   gpio description.
+ ************************************************************************************/
+struct gpio_desc *pl_gpio_desc_find(const char *name)
+{
+	struct gpio_desc *pos;
+
+	if (list_is_empty(&pl_gpio_desc_list) || name == NULL)
+		return NULL;
+
+	list_for_each_entry(pos, &pl_gpio_desc_list, struct gpio_desc, node) {
+		if (strcmp(pos->name, name) == 0) {
+			return pos;
+		}
+	}
+
+	return NULL;
+}
+
+/*************************************************************************************
+ * Function Name: pl_gpio_set_io_one
+ * Description: set one of the io.
+ *
+ * Param:
+ *   @desc: gpio description.
+ *   @io_idx: index of io.
+ *   @one: one of the io.
+ *
+ * Return:
+ *   Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_gpio_set_io_one(struct gpio_desc *desc, u16_t io_idx, u8_t set, u8_t one)
+{
+	int ret;
+
+	if (desc == NULL || desc->gpio == NULL)
+		return -EFAULT;
+
+	if (io_idx >= desc->gpio->nr)
+		return -ERANGE;
+
+	ret = desc->ops->set_one(desc->gpio, io_idx, set, one);
+	return ret;
+}
+
+/*************************************************************************************
+ * Function Name: pl_gpio_get_io_one
+ * Description: get one of the io.
+ *
+ * Param:
+ *   @desc: gpio description.
+ *   @io_idx: index of io.
+ *   @one: one of the io.
+ *
+ * Return:
+ *   Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_gpio_get_io_one(struct gpio_desc *desc, u16_t io_idx, u8_t get, u8_t *one)
+{
+	int ret;
+
+	if (desc == NULL || desc->gpio == NULL)
+		return -EFAULT;
+
+	if (io_idx >= desc->gpio->nr)
+		return -ERANGE;
+
+	ret = desc->ops->get_one(desc->gpio, io_idx, get, one);
+	return ret;
+}
+
+/*************************************************************************************
+ * Function Name: pl_gpio_set_io_grp
+ * Description: set group of the io.
+ *
+ * Param:
+ *   @desc: gpio description.
+ *   @io_idx_s: start index of io group.
+ *   @io_idx_e: end index of io group.
+ *   @set: set cmd.
+ *   @grp: group.
+ *
+ * Return:
+ *   Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_gpio_set_io_grp(struct gpio_desc *desc, u16_t io_idx_s,
+                            u16_t io_idx_e, u8_t set, u8_t *grp)
+{
+	int ret;
+
+	if (desc == NULL || desc->gpio == NULL)
+		return -EFAULT;
+
+	if (io_idx_s >= desc->gpio->nr || io_idx_e >= desc->gpio->nr || io_idx_s < io_idx_e)
+		return -ERANGE;
+
+	ret = desc->ops->set_grp(desc->gpio, io_idx_s, io_idx_e, set, grp);
+	return ret;
+}
+
+/*************************************************************************************
+ * Function Name: pl_gpio_get_io_grp
+ * Description: get group of the io.
+ *
+ * Param:
+ *   @desc: gpio description.
+ *   @io_idx_s: start index of io group.
+ *   @io_idx_e: end index of io group.
+ *   @set: set cmd.
+ *   @grp: group.
+ *
+ * Return:
+ *   Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_gpio_get_io_grp(struct gpio_desc *desc, u16_t io_idx_s,
+                            u16_t io_idx_e, u8_t get, u8_t *grp)
+{
+	int ret;
+
+	if (desc == NULL || desc->gpio == NULL)
+		return -EFAULT;
+
+	if (io_idx_s >= desc->gpio->nr || io_idx_e >= desc->gpio->nr || io_idx_s < io_idx_e)
+		return -ERANGE;
+
+	ret = desc->ops->get_grp(desc->gpio, io_idx_s, io_idx_e, get, grp);
+	return ret;
+}
+
+/*************************************************************************************
+ * Function Name: pl_gpio_init
+ * Description: gpio initialization.
+ *
+ * Param:
+ *   none.
+ *
+ * Return:
+ *   Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+static int pl_gpio_init(void)
+{
+	list_init(&pl_gpio_desc_list);
+	pl_early_syslog_info("gpio init successfully\r\n");
+	return OK;
+}
+core_initcall(pl_gpio_init);
 
