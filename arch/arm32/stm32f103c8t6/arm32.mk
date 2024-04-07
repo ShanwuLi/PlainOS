@@ -50,3 +50,5 @@ C_SRCS += $(ARCH_DIR)/arm32/stm32f103c8t6/stm32f103c8t6_port.c
 C_SRCS += $(ARCH_DIR)/arm32/stm32f103c8t6/early_setup/early_uart.c
 
 LINK_SCRIPT := $(ARCH_DIR)/arm32/stm32f103c8t6/stm32f103c8t6.ld
+
+-include $(ARCH_DIR)/arm32/stm32f103c8t6/driver/*.mk

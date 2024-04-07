@@ -41,3 +41,5 @@ C_SRCS += $(ARCH_DIR)/avr/atmega2560/atmega2560_port.c
 ASM_SRCS += $(ARCH_DIR)/avr/atmega2560/atmega2560_asm_port.S
 
 LINK_SCRIPT := $(ARCH_DIR)/avr/atmega2560/atmega2560.ld
+
+-include $(ARCH_DIR)/avr/driver/*.mk
