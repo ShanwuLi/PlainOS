@@ -64,10 +64,10 @@ struct iomux {
  *
  ************************************************************************************/
 struct iomux_ops {
-	int (*set_one)(struct iomux *iomux, u16_t io_idx, u8_t set, u8_t one);
-	int (*get_one)(struct iomux *iomux, u16_t io_idx, u8_t get, u8_t *one);
-	int (*set_grp)(struct iomux *iomux, u16_t io_idx_s, u16_t io_idx_e, u8_t set, u8_t *grp);
-	int (*get_grp)(struct iomux *iomux, u16_t io_idx_s, u16_t io_idx_e, u8_t get, u8_t *grp);
+	int (*set_one)(struct iomux *iomux, u16_t io_idx, u8_t set, void *one);
+	int (*get_one)(struct iomux *iomux, u16_t io_idx, u8_t get, void *one);
+	int (*set_grp)(struct iomux *iomux, u16_t io_idx_s, u16_t io_idx_e, u8_t set, void *grp);
+	int (*get_grp)(struct iomux *iomux, u16_t io_idx_s, u16_t io_idx_e, u8_t get, void *grp);
 };
 
 /*************************************************************************************
@@ -136,7 +136,7 @@ struct iomux_desc *pl_iomux_desc_find(const char *name);
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_iomux_set_io_one(struct iomux_desc *desc, u16_t io_idx, u8_t set, u8_t one);
+int pl_iomux_set_io_one(struct iomux_desc *desc, u16_t io_idx, u8_t set, void *one);
 
 /*************************************************************************************
  * Function Name: pl_iomux_get_io_one
@@ -150,7 +150,7 @@ int pl_iomux_set_io_one(struct iomux_desc *desc, u16_t io_idx, u8_t set, u8_t on
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_iomux_get_io_one(struct iomux_desc *desc, u16_t io_idx, u8_t get, u8_t *one);
+int pl_iomux_get_io_one(struct iomux_desc *desc, u16_t io_idx, u8_t get, void *one);
 
 /*************************************************************************************
  * Function Name: pl_iomux_set_io_grp
@@ -167,7 +167,7 @@ int pl_iomux_get_io_one(struct iomux_desc *desc, u16_t io_idx, u8_t get, u8_t *o
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
 int pl_iomux_set_io_grp(struct iomux_desc *desc, u16_t io_idx_s,
-                            u16_t io_idx_e, u8_t set, u8_t *grp);
+                            u16_t io_idx_e, u8_t set, void *grp);
 
 /*************************************************************************************
  * Function Name: pl_iomux_get_io_grp
@@ -184,6 +184,6 @@ int pl_iomux_set_io_grp(struct iomux_desc *desc, u16_t io_idx_s,
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
 int pl_iomux_get_io_grp(struct iomux_desc *desc, u16_t io_idx_s,
-                            u16_t io_idx_e, u8_t get, u8_t *grp);
+                            u16_t io_idx_e, u8_t get, void *grp);
 
 #endif /* __DRV_IOMUX_H__ */

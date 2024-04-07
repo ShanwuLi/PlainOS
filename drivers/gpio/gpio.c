@@ -110,11 +110,11 @@ struct gpio_desc *pl_gpio_desc_find(const char *name)
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_gpio_set_io_one(struct gpio_desc *desc, u16_t io_idx, u8_t set, u8_t one)
+int pl_gpio_set_io_one(struct gpio_desc *desc, u16_t io_idx, u8_t set, void *one)
 {
 	int ret;
 
-	if (desc == NULL || desc->gpio == NULL)
+	if (desc == NULL || desc->gpio == NULL || one == NULL)
 		return -EFAULT;
 
 	if (io_idx >= desc->gpio->nr)
@@ -136,11 +136,11 @@ int pl_gpio_set_io_one(struct gpio_desc *desc, u16_t io_idx, u8_t set, u8_t one)
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_gpio_get_io_one(struct gpio_desc *desc, u16_t io_idx, u8_t get, u8_t *one)
+int pl_gpio_get_io_one(struct gpio_desc *desc, u16_t io_idx, u8_t get, void *one)
 {
 	int ret;
 
-	if (desc == NULL || desc->gpio == NULL)
+	if (desc == NULL || desc->gpio == NULL || one == NULL)
 		return -EFAULT;
 
 	if (io_idx >= desc->gpio->nr)
@@ -165,11 +165,11 @@ int pl_gpio_get_io_one(struct gpio_desc *desc, u16_t io_idx, u8_t get, u8_t *one
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
 int pl_gpio_set_io_grp(struct gpio_desc *desc, u16_t io_idx_s,
-                            u16_t io_idx_e, u8_t set, u8_t *grp)
+                            u16_t io_idx_e, u8_t set, void *grp)
 {
 	int ret;
 
-	if (desc == NULL || desc->gpio == NULL)
+	if (desc == NULL || desc->gpio == NULL || grp == NULL)
 		return -EFAULT;
 
 	if (io_idx_s >= desc->gpio->nr || io_idx_e >= desc->gpio->nr || io_idx_s < io_idx_e)
@@ -194,11 +194,11 @@ int pl_gpio_set_io_grp(struct gpio_desc *desc, u16_t io_idx_s,
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
 int pl_gpio_get_io_grp(struct gpio_desc *desc, u16_t io_idx_s,
-                            u16_t io_idx_e, u8_t get, u8_t *grp)
+                            u16_t io_idx_e, u8_t get, void *grp)
 {
 	int ret;
 
-	if (desc == NULL || desc->gpio == NULL)
+	if (desc == NULL || desc->gpio == NULL || grp == NULL)
 		return -EFAULT;
 
 	if (io_idx_s >= desc->gpio->nr || io_idx_e >= desc->gpio->nr || io_idx_s < io_idx_e)

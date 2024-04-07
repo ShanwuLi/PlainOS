@@ -109,11 +109,11 @@ struct iomux_desc *pl_iomux_desc_find(const char *name)
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_iomux_set_io_one(struct iomux_desc *desc, u16_t io_idx, u8_t set, u8_t one)
+int pl_iomux_set_io_one(struct iomux_desc *desc, u16_t io_idx, u8_t set, void *one)
 {
 	int ret;
 
-	if (desc == NULL || desc->iomux == NULL)
+	if (desc == NULL || desc->iomux == NULL || one == NULL)
 		return -EFAULT;
 
 	if (io_idx >= desc->iomux->nr)
@@ -135,11 +135,11 @@ int pl_iomux_set_io_one(struct iomux_desc *desc, u16_t io_idx, u8_t set, u8_t on
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_iomux_get_io_one(struct iomux_desc *desc, u16_t io_idx, u8_t get, u8_t *one)
+int pl_iomux_get_io_one(struct iomux_desc *desc, u16_t io_idx, u8_t get, void *one)
 {
 	int ret;
 
-	if (desc == NULL || desc->iomux == NULL)
+	if (desc == NULL || desc->iomux == NULL || one == NULL)
 		return -EFAULT;
 
 	if (io_idx >= desc->iomux->nr)
@@ -164,11 +164,11 @@ int pl_iomux_get_io_one(struct iomux_desc *desc, u16_t io_idx, u8_t get, u8_t *o
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
 int pl_iomux_set_io_grp(struct iomux_desc *desc, u16_t io_idx_s,
-                            u16_t io_idx_e, u8_t set, u8_t *grp)
+                            u16_t io_idx_e, u8_t set, void *grp)
 {
 	int ret;
 
-	if (desc == NULL || desc->iomux == NULL)
+	if (desc == NULL || desc->iomux == NULL || grp == NULL)
 		return -EFAULT;
 
 	if (io_idx_s >= desc->iomux->nr || io_idx_e >= desc->iomux->nr || io_idx_s < io_idx_e)
@@ -193,11 +193,11 @@ int pl_iomux_set_io_grp(struct iomux_desc *desc, u16_t io_idx_s,
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
 int pl_iomux_get_io_grp(struct iomux_desc *desc, u16_t io_idx_s,
-                            u16_t io_idx_e, u8_t get, u8_t *grp)
+                            u16_t io_idx_e, u8_t get, void *grp)
 {
 	int ret;
 
-	if (desc == NULL || desc->iomux == NULL)
+	if (desc == NULL || desc->iomux == NULL || grp == NULL)
 		return -EFAULT;
 
 	if (io_idx_s >= desc->iomux->nr || io_idx_e >= desc->iomux->nr || io_idx_s < io_idx_e)

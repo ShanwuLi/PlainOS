@@ -30,9 +30,10 @@ enum {
 	GPIO_SET_DIRECT = 0,
 	GPIO_SET_VALUE,
 	GPIO_SET_PULL_DOWN,
-	GPIO_SET_INTR_TRIG,
 	GPIO_SET_SPEED,
 	GPIO_SET_SAMPLE_RATE,
+	GPIO_SET_INTR_TRIG,
+	GPIO_SET_INTR_MASK,
 	GPIO_SET_END
 };
 
@@ -40,9 +41,10 @@ enum {
 	GPIO_GET_DIRECT = 0,
 	GPIO_GET_VALUE,
 	GPIO_GET_PULL_DOWN,
-	GPIO_GET_INTR_TRIG,
 	GPIO_GET_SPEED,
 	GPIO_GET_SAMPLE_RATE,
+	GPIO_GET_INTR_TRIG,
+	GPIO_GET_INTR_MASK,
 	GPIO_GET_END
 };
 
@@ -68,10 +70,10 @@ struct gpio {
  *
  ************************************************************************************/
 struct gpio_ops {
-	int (*set_one)(struct gpio *gpio, u16_t io_idx, u8_t set, u8_t one);
-	int (*get_one)(struct gpio *gpio, u16_t io_idx, u8_t get, u8_t *one);
-	int (*set_grp)(struct gpio *gpio, u16_t io_idx_s, u16_t io_idx_e, u8_t set, u8_t *grp);
-	int (*get_grp)(struct gpio *gpio, u16_t io_idx_s, u16_t io_idx_e, u8_t get, u8_t *grp);
+	int (*set_one)(struct gpio *gpio, u16_t io_idx, u8_t set, void *one);
+	int (*get_one)(struct gpio *gpio, u16_t io_idx, u8_t get, void *one);
+	int (*set_grp)(struct gpio *gpio, u16_t io_idx_s, u16_t io_idx_e, u8_t set, void *grp);
+	int (*get_grp)(struct gpio *gpio, u16_t io_idx_s, u16_t io_idx_e, u8_t get, void *grp);
 };
 
 struct gpio_desc {
@@ -129,7 +131,7 @@ struct gpio_desc *pl_gpio_desc_find(const char *name);
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_gpio_set_io_one(struct gpio_desc *desc, u16_t io_idx, u8_t set, u8_t one);
+int pl_gpio_set_io_one(struct gpio_desc *desc, u16_t io_idx, u8_t set, void *one);
 
 /*************************************************************************************
  * Function Name: pl_gpio_get_io_one
@@ -143,7 +145,7 @@ int pl_gpio_set_io_one(struct gpio_desc *desc, u16_t io_idx, u8_t set, u8_t one)
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_gpio_get_io_one(struct gpio_desc *desc, u16_t io_idx, u8_t get, u8_t *one);
+int pl_gpio_get_io_one(struct gpio_desc *desc, u16_t io_idx, u8_t get, void *one);
 
 /*************************************************************************************
  * Function Name: pl_gpio_set_io_grp
@@ -160,7 +162,7 @@ int pl_gpio_get_io_one(struct gpio_desc *desc, u16_t io_idx, u8_t get, u8_t *one
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
 int pl_gpio_set_io_grp(struct gpio_desc *desc, u16_t io_idx_s,
-                            u16_t io_idx_e, u8_t set, u8_t *grp);
+                            u16_t io_idx_e, u8_t set, void *grp);
 
 /*************************************************************************************
  * Function Name: pl_gpio_get_io_grp
@@ -177,7 +179,7 @@ int pl_gpio_set_io_grp(struct gpio_desc *desc, u16_t io_idx_s,
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
 int pl_gpio_get_io_grp(struct gpio_desc *desc, u16_t io_idx_s,
-                            u16_t io_idx_e, u8_t get, u8_t *grp);
+                            u16_t io_idx_e, u8_t get, void *grp);
 
 
 #endif /* __DRV_GPIO_H__ */
