@@ -60,11 +60,13 @@ SOFTWARE.
 #define	EDOM               33    /* Math argument out of domain of func */
 #define	ERANGE             34    /* Math result not representable */
 
+
 #define EFULL              35    /* full error */
 #define EEMPTY             36    /* empty error */
 #define EREGED             37    /* Has registered */
 #define ETIMEOUT           38    /* timeout */
-#define ERROR              -39   /* Unknow error */
+#define ENOSUPPORT         39    /* not support */
+#define ERROR              -40   /* Unknow error */
 
 #define ERR_TO_PTR(err)    ({ extern long __errno_start[]; \
 	                          long *ptr; \

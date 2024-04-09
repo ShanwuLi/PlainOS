@@ -29,6 +29,9 @@ SOFTWARE.
 #include <kernel/syslog.h>
 #include <drivers/iomux/iomux.h>
 
+typedef int (*set_item_t)(struct iomux *iomux, u16_t io_idx, u8_t item);
+typedef int (*get_item_t)(struct iomux *iomux, u16_t io_idx, u8_t *item);
+
 static struct list_node pl_iomux_desc_list;
 
 /*************************************************************************************
@@ -98,12 +101,172 @@ struct iomux_desc *pl_iomux_desc_find(const char *name)
 }
 
 /*************************************************************************************
+ * Function Name: pl_iomux_set_io_item
+ * Description: set item of the io.
+ *
+ * Param:
+ *   @desc: iomux description.
+ *   @ops_offset: operation function offset.
+ *   @io_idx: index of io.
+ *   @item: item of the io.
+ *
+ * Return:
+ *   Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+static int pl_iomux_set_io_item(struct iomux_desc *desc, int ops_offset,
+                                u16_t io_idx, u8_t item)
+{
+	set_item_t set_item;
+
+	if (desc == NULL || desc->iomux == NULL)
+		return -EFAULT;
+
+	if (io_idx >= desc->iomux->nr)
+		return -ERANGE;
+
+	set_item = (set_item_t)(desc->ops) + ops_offset;
+	return (set_item == NULL) ? -ENOSUPPORT : set_item(desc->iomux, io_idx, item);
+}
+
+/*************************************************************************************
+ * Function Name: pl_iomux_get_io_item
+ * Description: get item of the io.
+ *
+ * Param:
+ *   @desc: iomux description.
+ *   @ops_offset: operation function offset.
+ *   @io_idx: index of io.
+ *   @item: item of the io.
+ *
+ * Return:
+ *   Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+static int pl_iomux_get_io_item(struct iomux_desc *desc, int ops_offset,
+                                u16_t io_idx, u8_t *item)
+{
+	get_item_t get_item;
+
+	if (desc == NULL || desc->iomux == NULL || item == NULL)
+		return -EFAULT;
+
+	if (io_idx >= desc->iomux->nr)
+		return -ERANGE;
+
+	get_item = (get_item_t)(desc->ops) + ops_offset;
+	return (get_item == NULL) ? -ENOSUPPORT : get_item(desc->iomux, io_idx, item);
+}
+
+
+/*************************************************************************************
+ * Function Name: pl_iomux_set_io_func
+ * Description: set function of the io.
+ *
+ * Param:
+ *   @desc: iomux description.
+ *   @io_idx: index of io.
+ *   @func: function of the io.
+ *
+ * Return:
+ *   Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_iomux_set_io_func(struct iomux_desc *desc, u16_t io_idx, u8_t func)
+{
+	return pl_iomux_set_io_item(desc, 0, io_idx, func);
+}
+
+/*************************************************************************************
+ * Function Name: pl_iomux_get_io_func
+ * Description: get function of the io.
+ *
+ * Param:
+ *   @desc: iomux description.
+ *   @io_idx: index of io.
+ *   @func: function of the io.
+ *
+ * Return:
+ *   Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_iomux_get_io_func(struct iomux_desc *desc, u16_t io_idx, u8_t *func)
+{
+	return pl_iomux_get_io_item(desc, 1, io_idx, func); 
+}
+
+/*************************************************************************************
+ * Function Name: pl_iomux_set_io_drv
+ * Description: set driver strength of the io.
+ *
+ * Param:
+ *   @desc: iomux description.
+ *   @io_idx: index of io.
+ *   @drv: driver strength of the io.
+ *
+ * Return:
+ *   Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_iomux_set_io_drv(struct iomux_desc *desc, u16_t io_idx, u8_t drv)
+{
+	return pl_iomux_set_io_item(desc, 2, io_idx, drv);
+}
+
+/*************************************************************************************
+ * Function Name: pl_iomux_get_io_drv
+ * Description: get driver strength of the io.
+ *
+ * Param:
+ *   @desc: iomux description.
+ *   @io_idx: index of io.
+ *   @drv: driver strength of the io.
+ *
+ * Return:
+ *   Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_iomux_get_io_drv(struct iomux_desc *desc, u16_t io_idx, u8_t *drv)
+{
+	return pl_iomux_get_io_item(desc, 3, io_idx, drv);
+}
+
+/*************************************************************************************
+ * Function Name: pl_iomux_set_io_state
+ * Description: set state of the io.
+ *
+ * Param:
+ *   @desc: iomux description.
+ *   @io_idx: index of io.
+ *   @state: state of the io.
+ *
+ * Return:
+ *   Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_iomux_set_io_state(struct iomux_desc *desc, u16_t io_idx, u8_t state)
+{
+	return pl_iomux_set_io_item(desc, 4, io_idx, state);
+}
+
+/*************************************************************************************
+ * Function Name: pl_iomux_get_io_state
+ * Description: get state of the io.
+ *
+ * Param:
+ *   @desc: iomux description.
+ *   @io_idx: index of io.
+ *   @state: state of the io.
+ *
+ * Return:
+ *   Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_iomux_get_io_state(struct iomux_desc *desc, u16_t io_idx, u8_t *state)
+{
+	return pl_iomux_get_io_item(desc, 5, io_idx, state);
+}
+
+/*************************************************************************************
  * Function Name: pl_iomux_set_io_one
  * Description: set one of the io.
  *
  * Param:
  *   @desc: iomux description.
  *   @io_idx: index of io.
+ *   @set: set_cmd.
  *   @one: one of the io.
  *
  * Return:
