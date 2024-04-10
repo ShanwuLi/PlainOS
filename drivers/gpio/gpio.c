@@ -105,22 +105,22 @@ struct gpio_desc *pl_gpio_desc_find(const char *name)
  * Param:
  *   @desc: gpio description.
  *   @io_idx: index of io.
- *   @one: one of the io.
+ *   @value: value of the io.
  *
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_gpio_set_io_one(struct gpio_desc *desc, u16_t io_idx, u8_t set, void *one)
+int pl_gpio_set_io_one(struct gpio_desc *desc, u16_t io_idx, u8_t set, u8_t value)
 {
 	int ret;
 
-	if (desc == NULL || desc->gpio == NULL || one == NULL)
+	if (desc == NULL || desc->gpio == NULL)
 		return -EFAULT;
 
-	if (io_idx >= desc->gpio->nr)
+	if (io_idx >= desc->gpio->io_nr)
 		return -ERANGE;
 
-	ret = desc->ops->set_one(desc->gpio, io_idx, set, one);
+	ret = desc->ops->set_one(desc->gpio, io_idx, set, value);
 	return ret;
 }
 
@@ -131,22 +131,22 @@ int pl_gpio_set_io_one(struct gpio_desc *desc, u16_t io_idx, u8_t set, void *one
  * Param:
  *   @desc: gpio description.
  *   @io_idx: index of io.
- *   @one: one of the io.
+ *   @value: value of the io.
  *
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_gpio_get_io_one(struct gpio_desc *desc, u16_t io_idx, u8_t get, void *one)
+int pl_gpio_get_io_one(struct gpio_desc *desc, u16_t io_idx, u8_t get, u8_t *value)
 {
 	int ret;
 
-	if (desc == NULL || desc->gpio == NULL || one == NULL)
+	if (desc == NULL || desc->gpio == NULL || value == NULL)
 		return -EFAULT;
 
-	if (io_idx >= desc->gpio->nr)
+	if (io_idx >= desc->gpio->io_nr)
 		return -ERANGE;
 
-	ret = desc->ops->get_one(desc->gpio, io_idx, get, one);
+	ret = desc->ops->get_one(desc->gpio, io_idx, get, value);
 	return ret;
 }
 
@@ -156,26 +156,24 @@ int pl_gpio_get_io_one(struct gpio_desc *desc, u16_t io_idx, u8_t get, void *one
  *
  * Param:
  *   @desc: gpio description.
- *   @io_idx_s: start index of io group.
- *   @io_idx_e: end index of io group.
+ *   @gpr_idx: index of io group.
  *   @set: set cmd.
- *   @grp: group.
+ *   @value: group value.
  *
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_gpio_set_io_grp(struct gpio_desc *desc, u16_t io_idx_s,
-                            u16_t io_idx_e, u8_t set, void *grp)
+int pl_gpio_set_io_grp(struct gpio_desc *desc, u16_t gpr_idx, u8_t set, uintptr_t value)
 {
 	int ret;
 
-	if (desc == NULL || desc->gpio == NULL || grp == NULL)
+	if (desc == NULL || desc->gpio == NULL)
 		return -EFAULT;
 
-	if (io_idx_s >= desc->gpio->nr || io_idx_e >= desc->gpio->nr || io_idx_s < io_idx_e)
+	if (gpr_idx >= desc->gpio->grp_nr)
 		return -ERANGE;
 
-	ret = desc->ops->set_grp(desc->gpio, io_idx_s, io_idx_e, set, grp);
+	ret = desc->ops->set_grp(desc->gpio, gpr_idx, set, value);
 	return ret;
 }
 
@@ -185,26 +183,24 @@ int pl_gpio_set_io_grp(struct gpio_desc *desc, u16_t io_idx_s,
  *
  * Param:
  *   @desc: gpio description.
- *   @io_idx_s: start index of io group.
- *   @io_idx_e: end index of io group.
- *   @set: set cmd.
- *   @grp: group.
+ *   @gpr_idx: index of io group.
+ *   @get: get cmd.
+ *   @value: group value.
  *
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_gpio_get_io_grp(struct gpio_desc *desc, u16_t io_idx_s,
-                            u16_t io_idx_e, u8_t get, void *grp)
+int pl_gpio_get_io_grp(struct gpio_desc *desc, u16_t gpr_idx, u8_t get, uintptr_t *value)
 {
 	int ret;
 
-	if (desc == NULL || desc->gpio == NULL || grp == NULL)
+	if (desc == NULL || desc->gpio == NULL || value == NULL)
 		return -EFAULT;
 
-	if (io_idx_s >= desc->gpio->nr || io_idx_e >= desc->gpio->nr || io_idx_s < io_idx_e)
+	if (gpr_idx >= desc->gpio->grp_nr)
 		return -ERANGE;
 
-	ret = desc->ops->get_grp(desc->gpio, io_idx_s, io_idx_e, get, grp);
+	ret = desc->ops->get_grp(desc->gpio, gpr_idx, get, value);
 	return ret;
 }
 

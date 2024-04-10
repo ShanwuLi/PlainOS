@@ -48,16 +48,38 @@ enum {
 	GPIO_GET_END
 };
 
+
 /*************************************************************************************
  * struct gpio:
  * Description:
  *   @nr: number of the io.
- *   @some: special purpose for some.
+ *   @some: special purpose for these ioes.
  *
+ * NOTE:
+ *   group-1:  GPIOA [0 0 0 ... 0]
+ *   group-2:  GPIOB [0 0 0 ... 0]
+ *   ...
+ ************************************************************************************/
+struct gpio_grp {
+	u16_t nr;
+	void *some;
+};
+
+/*************************************************************************************
+ * struct gpio:
+ * Description:
+ *   @grp_nr: number of the group.
+ *   @grp: gpio group.
+ *
+ * NOTE:
+ *   group-1:  GPIOA [0 0 0 ... 0]
+ *   group-2:  GPIOB [0 0 0 ... 0]
+ *   ...
  ************************************************************************************/
 struct gpio {
-	u32_t nr;
-	void *some;
+	u16_t io_nr;
+	u16_t grp_nr;
+	struct gpio_grp *grp;
 };
 
 /*************************************************************************************
@@ -70,10 +92,10 @@ struct gpio {
  *
  ************************************************************************************/
 struct gpio_ops {
-	int (*set_one)(struct gpio *gpio, u16_t io_idx, u8_t set, void *one);
-	int (*get_one)(struct gpio *gpio, u16_t io_idx, u8_t get, void *one);
-	int (*set_grp)(struct gpio *gpio, u16_t io_idx_s, u16_t io_idx_e, u8_t set, void *grp);
-	int (*get_grp)(struct gpio *gpio, u16_t io_idx_s, u16_t io_idx_e, u8_t get, void *grp);
+	int (*set_one)(struct gpio *gpio, u16_t io_idx, u8_t set, u8_t value);
+	int (*get_one)(struct gpio *gpio, u16_t io_idx, u8_t get, u8_t *value);
+	int (*set_grp)(struct gpio *gpio, u16_t gpr_idx, u8_t set, uintptr_t value);
+	int (*get_grp)(struct gpio *gpio, u16_t gpr_idx, u8_t get, uintptr_t *value);
 };
 
 struct gpio_desc {
@@ -126,12 +148,12 @@ struct gpio_desc *pl_gpio_desc_find(const char *name);
  * Param:
  *   @desc: gpio description.
  *   @io_idx: index of io.
- *   @one: one of the io.
+ *   @value: value of the io.
  *
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_gpio_set_io_one(struct gpio_desc *desc, u16_t io_idx, u8_t set, void *one);
+int pl_gpio_set_io_one(struct gpio_desc *desc, u16_t io_idx, u8_t set, u8_t value);
 
 /*************************************************************************************
  * Function Name: pl_gpio_get_io_one
@@ -140,12 +162,12 @@ int pl_gpio_set_io_one(struct gpio_desc *desc, u16_t io_idx, u8_t set, void *one
  * Param:
  *   @desc: gpio description.
  *   @io_idx: index of io.
- *   @one: one of the io.
+ *   @value: value of the io.
  *
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_gpio_get_io_one(struct gpio_desc *desc, u16_t io_idx, u8_t get, void *one);
+int pl_gpio_get_io_one(struct gpio_desc *desc, u16_t io_idx, u8_t get, u8_t *value);
 
 /*************************************************************************************
  * Function Name: pl_gpio_set_io_grp
@@ -153,16 +175,14 @@ int pl_gpio_get_io_one(struct gpio_desc *desc, u16_t io_idx, u8_t get, void *one
  *
  * Param:
  *   @desc: gpio description.
- *   @io_idx_s: start index of io group.
- *   @io_idx_e: end index of io group.
+ *   @gpr_idx: index of io group.
  *   @set: set cmd.
- *   @grp: group.
+ *   @value: group value.
  *
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_gpio_set_io_grp(struct gpio_desc *desc, u16_t io_idx_s,
-                            u16_t io_idx_e, u8_t set, void *grp);
+int pl_gpio_set_io_grp(struct gpio_desc *desc, u16_t gpr_idx, u8_t set, uintptr_t value);
 
 /*************************************************************************************
  * Function Name: pl_gpio_get_io_grp
@@ -170,16 +190,13 @@ int pl_gpio_set_io_grp(struct gpio_desc *desc, u16_t io_idx_s,
  *
  * Param:
  *   @desc: gpio description.
- *   @io_idx_s: start index of io group.
- *   @io_idx_e: end index of io group.
- *   @set: set cmd.
- *   @grp: group.
+ *   @gpr_idx: index of io group.
+ *   @get: get cmd.
+ *   @value: group value.
  *
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_gpio_get_io_grp(struct gpio_desc *desc, u16_t io_idx_s,
-                            u16_t io_idx_e, u8_t get, void *grp);
-
+int pl_gpio_get_io_grp(struct gpio_desc *desc, u16_t gpr_idx, u8_t get, uintptr_t *value);
 
 #endif /* __DRV_GPIO_H__ */

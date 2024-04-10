@@ -121,7 +121,7 @@ static int pl_iomux_set_io_item(struct iomux_desc *desc, int ops_offset,
 	if (desc == NULL || desc->iomux == NULL)
 		return -EFAULT;
 
-	if (io_idx >= desc->iomux->nr)
+	if (io_idx >= desc->iomux->io_nr)
 		return -ERANGE;
 
 	set_item = (set_item_t)(desc->ops) + ops_offset;
@@ -149,7 +149,7 @@ static int pl_iomux_get_io_item(struct iomux_desc *desc, int ops_offset,
 	if (desc == NULL || desc->iomux == NULL || item == NULL)
 		return -EFAULT;
 
-	if (io_idx >= desc->iomux->nr)
+	if (io_idx >= desc->iomux->io_nr)
 		return -ERANGE;
 
 	get_item = (get_item_t)(desc->ops) + ops_offset;
@@ -267,22 +267,22 @@ int pl_iomux_get_io_state(struct iomux_desc *desc, u16_t io_idx, u8_t *state)
  *   @desc: iomux description.
  *   @io_idx: index of io.
  *   @set: set_cmd.
- *   @one: one of the io.
+ *   @value: value of the io.
  *
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_iomux_set_io_one(struct iomux_desc *desc, u16_t io_idx, u8_t set, void *one)
+int pl_iomux_set_io_one(struct iomux_desc *desc, u16_t io_idx, u8_t set, u8_t value)
 {
 	int ret;
 
-	if (desc == NULL || desc->iomux == NULL || one == NULL)
+	if (desc == NULL || desc->iomux == NULL)
 		return -EFAULT;
 
-	if (io_idx >= desc->iomux->nr)
+	if (io_idx >= desc->iomux->io_nr)
 		return -ERANGE;
 
-	ret = desc->ops->set_one(desc->iomux, io_idx, set, one);
+	ret = desc->ops->set_one(desc->iomux, io_idx, set, value);
 	return ret;
 }
 
@@ -293,22 +293,23 @@ int pl_iomux_set_io_one(struct iomux_desc *desc, u16_t io_idx, u8_t set, void *o
  * Param:
  *   @desc: iomux description.
  *   @io_idx: index of io.
- *   @one: one of the io.
+ *   @get: get cmd.
+ *   @value: value of the io.
  *
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_iomux_get_io_one(struct iomux_desc *desc, u16_t io_idx, u8_t get, void *one)
+int pl_iomux_get_io_one(struct iomux_desc *desc, u16_t io_idx, u8_t get, u8_t *value)
 {
 	int ret;
 
-	if (desc == NULL || desc->iomux == NULL || one == NULL)
+	if (desc == NULL || desc->iomux == NULL || value == NULL)
 		return -EFAULT;
 
-	if (io_idx >= desc->iomux->nr)
+	if (io_idx >= desc->iomux->io_nr)
 		return -ERANGE;
 
-	ret = desc->ops->get_one(desc->iomux, io_idx, get, one);
+	ret = desc->ops->get_one(desc->iomux, io_idx, get, value);
 	return ret;
 }
 
@@ -318,26 +319,24 @@ int pl_iomux_get_io_one(struct iomux_desc *desc, u16_t io_idx, u8_t get, void *o
  *
  * Param:
  *   @desc: iomux description.
- *   @io_idx_s: start index of io group.
- *   @io_idx_e: end index of io group.
+ *   @grp_idx: index of io group.
  *   @set: set cmd.
- *   @grp: group.
+ *   @value: group value.
  *
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_iomux_set_io_grp(struct iomux_desc *desc, u16_t io_idx_s,
-                            u16_t io_idx_e, u8_t set, void *grp)
+int pl_iomux_set_io_grp(struct iomux_desc *desc, u16_t grp_idx, u8_t set, uintptr_t value)
 {
 	int ret;
 
-	if (desc == NULL || desc->iomux == NULL || grp == NULL)
+	if (desc == NULL || desc->iomux == NULL)
 		return -EFAULT;
 
-	if (io_idx_s >= desc->iomux->nr || io_idx_e >= desc->iomux->nr || io_idx_s < io_idx_e)
+	if (grp_idx >= desc->iomux->grp_nr)
 		return -ERANGE;
 
-	ret = desc->ops->set_grp(desc->iomux, io_idx_s, io_idx_e, set, grp);
+	ret = desc->ops->set_grp(desc->iomux, grp_idx, set, value);
 	return ret;
 }
 
@@ -347,26 +346,24 @@ int pl_iomux_set_io_grp(struct iomux_desc *desc, u16_t io_idx_s,
  *
  * Param:
  *   @desc: iomux description.
- *   @io_idx_s: start index of io group.
- *   @io_idx_e: end index of io group.
- *   @set: set cmd.
- *   @grp: group.
+ *   @grp_idx: index of io group.
+ *   @get: get cmd.
+ *   @value: group value.
  *
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_iomux_get_io_grp(struct iomux_desc *desc, u16_t io_idx_s,
-                            u16_t io_idx_e, u8_t get, void *grp)
+int pl_iomux_get_io_grp(struct iomux_desc *desc, u16_t grp_idx, u8_t get, uintptr_t *value)
 {
 	int ret;
 
-	if (desc == NULL || desc->iomux == NULL || grp == NULL)
+	if (desc == NULL || desc->iomux == NULL || value == NULL)
 		return -EFAULT;
 
-	if (io_idx_s >= desc->iomux->nr || io_idx_e >= desc->iomux->nr || io_idx_s < io_idx_e)
+	if (grp_idx >= desc->iomux->grp_nr)
 		return -ERANGE;
 
-	ret = desc->ops->get_grp(desc->iomux, io_idx_s, io_idx_e, get, grp);
+	ret = desc->ops->get_grp(desc->iomux, grp_idx, get, value);
 	return ret;
 }
 
