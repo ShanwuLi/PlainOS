@@ -68,29 +68,10 @@ SOFTWARE.
 #define ENOSUPPORT         39    /* not support */
 #define ERROR              -40   /* Unknow error */
 
-#define ERR_TO_PTR(err)    ({ extern long __errno_start[]; \
-	                          long *ptr; \
-	                          if ((err) < ERROR || (err) > OK) \
-	                              ptr = NULL; \
-	                          else \
-	                              ptr = __errno_start - err; \
-	                          ptr;})
+#define ERR_TO_PTR(err)    ((void *)(uintptr_t)(err))
 
-#define PTR_TO_ERR(ptr)    ({ extern long __errno_start[]; \
-	                          extern long __errno_end[]; \
-	                          long err; \
-	                          if ((ptr) < __errno_start || (ptr) > __errno_end) \
-	                              err = ERROR; \
-	                          else \
-	                              err = *(ptr); \
-	                          err;})
+#define PTR_TO_ERR(ptr)    ((intptr_t)(ptr))
 
-#define IS_ERR_OR_NULL(ptr) ({ extern long __errno_start[]; \
-	                           extern long __errno_end[];   \
-	                           bool is_err_or_null = false; \
-	                           if (((ptr) >= __errno_start && (ptr) <= __errno_end) || \
-	                               (ptr) == NULL) \
-	                               is_err_or_null = true; \
-	                           is_err_or_null;})
+#define IS_ERR_OR_NULL(ptr) (((ptr) == NULL || ((intptr_t)(ptr)) < 0))
 
 #endif /* __PLAINOS_ERRNO_H__ */

@@ -220,5 +220,5 @@ static int pl_gpio_init(void)
 	pl_early_syslog_info("gpio init successfully\r\n");
 	return OK;
 }
-core_initcall(pl_gpio_init);
+pl_core_initcall(pl_gpio_init);
 

@@ -80,4 +80,4 @@ static int task_test(void)
 
 	return 0;
 }
-late_initcall(task_test);
+pl_late_initcall(task_test);

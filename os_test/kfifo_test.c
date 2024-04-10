@@ -40,4 +40,4 @@ static int kfifo_test(void)
 	return 0;
 }
 
-late_initcall(kfifo_test);
+pl_late_initcall(kfifo_test);

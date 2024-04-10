@@ -62,48 +62,4 @@ SOFTWARE.
 	                                APP_CALLS_LEVEL(5) \
 	                                __appcall_end = .;
 
-#define ERRNO_SECTION               __errno_start = .;  \
-	                                LONG(OK  ) \
-	                                LONG(-EPERM  ) \
-	                                LONG(-ENOENT ) \
-	                                LONG(-ESRCH  ) \
-	                                LONG(-EINTR  ) \
-	                                LONG(-EIO    ) \
-	                                LONG(-ENXIO  ) \
-	                                LONG(-E2BIG  ) \
-	                                LONG(-ENOEXEC) \
-	                                LONG(-EBADF  ) \
-	                                LONG(-ECHILD ) \
-	                                LONG(-EAGAIN ) \
-	                                LONG(-ENOMEM ) \
-	                                LONG(-EACCES ) \
-	                                LONG(-EFAULT ) \
-	                                LONG(-ENOTBLK) \
-	                                LONG(-EBUSY  ) \
-	                                LONG(-EEXIST ) \
-	                                LONG(-EXDEV  ) \
-	                                LONG(-ENODEV ) \
-	                                LONG(-ENOTDIR) \
-	                                LONG(-EISDIR ) \
-	                                LONG(-EINVAL ) \
-	                                LONG(-ENFILE ) \
-	                                LONG(-EMFILE ) \
-	                                LONG(-ENOTTY ) \
-	                                LONG(-ETXTBSY) \
-	                                LONG(-EFBIG  ) \
-	                                LONG(-ENOSPC ) \
-	                                LONG(-ESPIPE ) \
-	                                LONG(-EROFS  ) \
-	                                LONG(-EMLINK ) \
-	                                LONG(-EPIPE  ) \
-	                                LONG(-EDOM   ) \
-	                                LONG(-ERANGE ) \
-	                                               \
-	                                LONG(-EFULL )  \
-	                                LONG(-EEMPTY ) \
-	                                LONG(-EREGED ) \
-	                                LONG(-ETIMEOUT) \
-	                                LONG(ERROR  ) \
-	                                __errno_end = .;
-
 #endif /* __PLAINOS_SECTIONS_H__ */

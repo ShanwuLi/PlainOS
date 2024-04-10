@@ -104,9 +104,6 @@ SECTIONS
     *(.data*)
     *(.rodata)  /* We need to include .rodata here if gcc is used */
     *(.rodata*) /* with -fdata-sections.  */
-    . = ALIGN(2);
-    ERRNO_SECTION
-    . = ALIGN(2);
     *(.gnu.linkonce.d*)
     . = ALIGN(2);
      _edata = . ;
