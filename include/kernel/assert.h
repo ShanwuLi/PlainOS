@@ -47,7 +47,7 @@ SOFTWARE.
 				pl_early_syslog_err("=>[ASSERT]:func:%s, line:%d\r\n", \
 				                   __func__, __LINE__); \
 				while(1); \
-				pl_poty_exit_critical(); \
+				pl_port_exit_critical(); \
 			} \
 		} while (false)
 #else

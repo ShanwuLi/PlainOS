@@ -63,7 +63,7 @@ static int softtimer_daemon_task(int argc, char **argv)
 		list_init(&first->node);
 		stimer_fun = first->fun;
 		first->fun = NULL;
-		pl_poty_exit_critical();
+		pl_port_exit_critical();
 
 		if (stimer_fun != NULL)
 			stimer_fun(first);
@@ -119,7 +119,7 @@ int pl_softtimer_get_private_data(pl_stimer_handle_t timer, void **data)
 
 	pl_port_enter_critical();
 	*data = ((struct softtimer *)timer)->priv_data;
-	pl_poty_exit_critical();
+	pl_port_exit_critical();
 
 	return OK;
 }
@@ -173,7 +173,7 @@ int pl_softtimer_start(pl_stimer_handle_t timer, stimer_fun_t fun,
 
 	list_add_node_ahead(&pos->node, &stimer->node);
 out:
-	pl_poty_exit_critical();
+	pl_port_exit_critical();
 	return OK;
 }
 
@@ -202,7 +202,7 @@ int pl_softtimer_cancel(pl_stimer_handle_t timer)
 	pl_port_enter_critical();
 	list_del_node(&stimer->node);
 	stimer->fun = NULL;
-	pl_poty_exit_critical();
+	pl_port_exit_critical();
 	list_init(&stimer->node);
 
 	return OK;

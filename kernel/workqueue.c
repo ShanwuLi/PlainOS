@@ -55,7 +55,7 @@ static int workqueue_task(int argc, char **argv)
 		list_init(&first->node);
 		work_fun = first->fun;
 		first->fun = NULL;
-		pl_poty_exit_critical();
+		pl_port_exit_critical();
 
 		if (work_fun != NULL)
 			work_fun(first);
@@ -201,11 +201,11 @@ int pl_work_add(pl_wq_handle workqueue, pl_work_handle work)
 		return -EFAULT;
 
 	if (!list_is_empty(&wk->node) && wk->fun != NULL)
-		return OK;
+		return -EEXIST;
 
 	pl_port_enter_critical();
 	list_add_node_at_tail(&wq->work_list, &wk->node);
-	pl_poty_exit_critical();
+	pl_port_exit_critical();
 	pl_task_resume(wq->exec_thread);
 
 	return OK;
@@ -241,7 +241,7 @@ int pl_work_cancel(pl_wq_handle workqueue, pl_work_handle work)
 
 	pl_port_enter_critical();
 	list_del_node(&wk->node);
-	pl_poty_exit_critical();
+	pl_port_exit_critical();
 
 	return OK;
 }

@@ -112,12 +112,12 @@ int pl_semaplore_take(pl_semaphore_handle_t semap)
 		curr_tcb = pl_task_get_curr_tcb();
 		pl_task_remove_tcb_from_rdylist(curr_tcb);
 		pl_task_insert_tcb_to_waitlist(&sem->wait_list, curr_tcb);
-		pl_poty_exit_critical();
+		pl_port_exit_critical();
 		pl_task_context_switch();
 		return OK;
 	}
 
-	pl_poty_exit_critical();
+	pl_port_exit_critical();
 	return OK;
 }
 
@@ -148,12 +148,12 @@ int pl_semaplore_give(pl_semaphore_handle_t semap)
 		front_node = list_del_front_node(&sem->wait_list);
 		front_tcb = container_of(front_node, struct tcb, node);
 		pl_task_insert_tcb_to_rdylist(front_tcb);
-		pl_poty_exit_critical();
+		pl_port_exit_critical();
 		pl_task_context_switch();
 		return OK;
 	}
 
-	pl_poty_exit_critical();
+	pl_port_exit_critical();
 	return OK;
 }
 
@@ -175,11 +175,11 @@ void pl_semaplore_release(pl_semaphore_handle_t semap)
 
 	pl_port_enter_critical();
 	if (sem == NULL || (!sem->valid)) {
-		pl_poty_exit_critical();
+		pl_port_exit_critical();
 		return;
 	}
 
 	sem->valid = false;
-	pl_poty_exit_critical();
+	pl_port_exit_critical();
 	pl_mempool_free(g_pl_default_mempool, sem);
 }

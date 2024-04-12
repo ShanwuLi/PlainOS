@@ -433,7 +433,7 @@ void pl_task_schedule_lock(void)
 {
 	pl_port_enter_critical();
 	++g_task_core_blk.sched_lock_ref;
-	pl_poty_exit_critical();
+	pl_port_exit_critical();
 }
 
 /*************************************************************************************
@@ -450,7 +450,7 @@ void pl_task_schedule_unlock(void)
 {
 	pl_port_enter_critical();
 	--g_task_core_blk.sched_lock_ref;
-	pl_poty_exit_critical();
+	pl_port_exit_critical();
 }
 
 /*************************************************************************************
@@ -474,7 +474,7 @@ void pl_task_context_switch(void)
 	hiprio = get_hiprio();
 	curr_tcb = g_task_core_blk.curr_tcb;
 	next_tcb = g_task_core_blk.ready_list[hiprio].head;
-	pl_poty_exit_critical();
+	pl_port_exit_critical();
 
 	idle_tcb = g_task_core_blk.ready_list[PL_CFG_TASK_PRIORITIES_MAX].head;
 	if (next_tcb == idle_tcb)
@@ -512,7 +512,7 @@ static void task_entry(struct tcb *tcb)
 		pos->wait_for_task_ret = exit_val;
 	}
 
-	pl_poty_exit_critical();
+	pl_port_exit_critical();
 	/* switch task*/
 	pl_task_context_switch();
 	/* will be never come here */
@@ -578,7 +578,7 @@ static void task_init_and_create(const char *name, main_t task, u16_t prio,
 
 	pl_port_enter_critical();
 	pl_task_insert_tcb_to_rdylist(tcb);
-	pl_poty_exit_critical();
+	pl_port_exit_critical();
 	pl_task_context_switch();
 }
 
@@ -676,7 +676,7 @@ int pl_task_join(tid_t tid, int *ret)
 	pl_port_enter_critical();
 	pl_task_remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
 	pl_task_insert_tcb_to_waitlist(&tcb->wait_head, g_task_core_blk.curr_tcb);
-	pl_poty_exit_critical();
+	pl_port_exit_critical();
 	pl_task_context_switch();
 
 	if (ret != NULL)
@@ -706,13 +706,13 @@ void pl_task_pend(tid_t tid)
 		tcb = g_task_core_blk.curr_tcb;
 
 	if (tcb->curr_state == PL_TASK_STATE_PENDING) {
-		pl_poty_exit_critical();
+		pl_port_exit_critical();
 		return;
 	}
 
 	pl_task_remove_tcb_from_rdylist(tcb);
 	pl_task_insert_tcb_to_pendlist(tcb);
-	pl_poty_exit_critical();
+	pl_port_exit_critical();
 	pl_task_context_switch();
 }
 
@@ -737,13 +737,13 @@ void pl_task_resume(tid_t tid)
 
 	pl_port_enter_critical();
 	if (tcb->curr_state == PL_TASK_STATE_READY) {
-		pl_poty_exit_critical();
+		pl_port_exit_critical();
 		return;
 	}
 
 	list_del_node(&tcb->node);
 	pl_task_insert_tcb_to_rdylist(tcb);
-	pl_poty_exit_critical();
+	pl_port_exit_critical();
 	pl_task_context_switch();
 }
 
@@ -767,9 +767,14 @@ int pl_task_kill(tid_t tid)
 		return -EFAULT;
 
 	pl_port_enter_critical();
+	if (tcb->curr_state == PL_TASK_STATE_EXIT) {
+		pl_port_exit_critical();
+		return -EAGAIN;
+	}
+
 	pl_task_remove_tcb_from_rdylist(tcb);
 	pl_task_insert_tcb_to_exitlist(tcb);
-	pl_poty_exit_critical();
+	pl_port_exit_critical();
 	pl_task_context_switch();
 	return OK;
 }
@@ -806,7 +811,7 @@ void pl_task_delay_ticks(u32_t ticks)
 	g_task_core_blk.curr_tcb->delay_ticks.lo32 = ticks;
 	pl_task_remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
 	pl_task_insert_tcb_to_delaylist(g_task_core_blk.curr_tcb);
-	pl_poty_exit_critical();
+	pl_port_exit_critical();
 	pl_task_context_switch();
 }
 
@@ -986,7 +991,7 @@ int pl_task_get_syscount(struct count *c)
 	pl_port_enter_critical();
 	c->hi32 = g_task_core_blk.systicks.hi32;
 	c->lo32 = g_task_core_blk.systicks.lo32;
-	pl_poty_exit_critical();
+	pl_port_exit_critical();
 
 	return OK;
 }
@@ -1013,7 +1018,7 @@ int pl_task_get_cpu_rate_count(u32_t *rate_base, u32_t *rate_useful)
 	pl_port_enter_critical();
 	*rate_base = g_task_core_blk.cpu_rate_base;
 	*rate_useful = g_task_core_blk.cpu_rate_useful;
-	pl_poty_exit_critical();
+	pl_port_exit_critical();
 
 	return OK;
 }
@@ -1045,7 +1050,7 @@ int pl_task_get_cpu_rate(u32_t *int_part, u32_t *deci_part)
 	pl_port_enter_critical();
 	_cpu_rate_base = g_task_core_blk.cpu_rate_base;
 	_cpu_rate_useful = g_task_core_blk.cpu_rate_useful;
-	pl_poty_exit_critical();
+	pl_port_exit_critical();
 
 	integer_part = (_cpu_rate_useful * 100) / _cpu_rate_base;
 	decimal_part = (_cpu_rate_useful * 10000) / _cpu_rate_base - (integer_part * 100);
