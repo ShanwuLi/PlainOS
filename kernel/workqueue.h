@@ -56,18 +56,19 @@ struct work {
 int pl_sys_wq_init(void);
 
 /*************************************************************************************
- * Function Name: pl_workqueue_request
+ * Function Name: pl_workqueue_init
  *
  * Description:
- *   request a workqueue.
+ *   init a workqueue.
  * 
  * Parameters:
- *  @name: workqueue name.
- *  @proi: priority of workqueue.
+ *  @wq: workqueue struct address.
+ *  @name: name of workqueue.
+ *  @prio: priority of workqueue.
  *  @wq_stack_sz: workqueue task stack size.
  *
  * Return:
- *  @pl_wq_handle: handle of workqueue requested.
+ *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
 int pl_workqueue_init(struct workqueue *wq, const char *name, u16_t prio, size_t wq_stack_sz);
 

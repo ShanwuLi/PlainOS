@@ -65,14 +65,15 @@ static int workqueue_task(int argc, char **argv)
 }
 
 /*************************************************************************************
- * Function Name: pl_workqueue_request
+ * Function Name: pl_workqueue_init
  *
  * Description:
- *   request a workqueue.
+ *   init a workqueue.
  * 
  * Parameters:
- *  @name: workqueue name.
- *  @proi: priority of workqueue.
+ *  @wq: workqueue struct address.
+ *  @name: name of workqueue.
+ *  @prio: priority of workqueue.
  *  @wq_stack_sz: workqueue task stack size.
  *
  * Return:
