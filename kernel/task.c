@@ -705,6 +705,11 @@ void pl_task_pend(tid_t tid)
 	if (tcb == NULL)
 		tcb = g_task_core_blk.curr_tcb;
 
+	if (tcb->curr_state == PL_TASK_STATE_PENDING) {
+		pl_poty_exit_critical();
+		return;
+	}
+
 	pl_task_remove_tcb_from_rdylist(tcb);
 	pl_task_insert_tcb_to_pendlist(tcb);
 	pl_poty_exit_critical();
@@ -731,6 +736,11 @@ void pl_task_resume(tid_t tid)
 		return;
 
 	pl_port_enter_critical();
+	if (tcb->curr_state == PL_TASK_STATE_READY) {
+		pl_poty_exit_critical();
+		return;
+	}
+
 	list_del_node(&tcb->node);
 	pl_task_insert_tcb_to_rdylist(tcb);
 	pl_poty_exit_critical();

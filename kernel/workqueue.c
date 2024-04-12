@@ -206,6 +206,7 @@ int pl_work_add(pl_wq_handle workqueue, pl_work_handle work)
 	pl_port_enter_critical();
 	list_add_node_at_tail(&wq->work_list, &wk->node);
 	pl_poty_exit_critical();
+	pl_task_resume(wq->exec_thread);
 
 	return OK;
 }
