@@ -4,6 +4,31 @@
 #include <kernel/initcall.h>
 #include <drivers/gpio/gpio.h>
 
+
+static u8_t goio_base[7][3] = {
+	{	/* PINA, DDRA, PORTA */
+		0x20, 0x21, 0x22
+	},
+	{	/* PINB, DDRB, PORTB */
+		0x23, 0x24, 0x25
+	},
+	{	/* PINC, DDRC, PORTC */
+		0x26, 0x27, 0x28
+	},
+	{	/* PIND, DDRD, PORTD */
+		0x29, 0x2A, 0x2B
+	},
+	{	/* PINE, DDRE, PORTE */
+		0x2C, 0x2D, 0x2E
+	},
+	{	/* PINF, DDRF, PORTF */
+		0x2F, 0x30, 0x31
+	},
+	{	/* PING, DDRG, PORTG */
+		0x32, 0x33, 0x34
+	}
+};
+
 /*************************************************************************************
  * struct gpio:
  * Description:
@@ -20,55 +45,89 @@
 static struct gpio_grp atmega2560_gpio_grp['G' - 'A' + 1] = {
 	[0] = {
 		.nr = 8,
-		.some = (void *)((0x20 << 8) | 0x22)
+		.some = (void *)goio_base[0]
 	},
 	[1] = {
 		.nr = 8,
-		.some = (void *)((0x23 << 8) | 0x25)
+		.some = (void *)goio_base[1]
 	},
 	[2] = {
 		.nr = 8,
-		.some = (void *)((0x26 << 8) | 0x28)
+		.some = (void *)goio_base[2]
 	},
 	[3] = {
 		.nr = 8,
-		.some = (void *)((0x29 << 8) | 0x2b)
+		.some = (void *)goio_base[3]
 	},
 	[4] = {
 		.nr = 8,
-		.some = (void *)((0x2c << 8) | 0x2e)
+		.some = (void *)goio_base[4]
 	},
 	[5] = {
 		.nr = 8,
-		.some = (void *)((0x2f << 8) | 0x31)
+		.some = (void *)goio_base[5]
 	},
 	[6] = {
 		.nr = 8,
-		.some = (void *)((0x32 << 8) | 0x34)
+		.some = (void *)goio_base[6]
 	},
 };
 
 static struct gpio atmega2560_gpio = {
-	.io_nr = 6 * 8,
-	.grp_nr = 6,
+	.io_nr = 7 * 8,
+	.grp_nr = 7,
 	.grp = atmega2560_gpio_grp
 };
+
+
+static int mega2560_gpio_set_grp(struct gpio *gpio, u16_t grp_idx, u8_t set, uintptr_t value)
+{
+	volatile u8_t *base;
+	struct gpio_grp *grp = &gpio->grp[grp_idx];
+
+	switch (set) {
+	case GPIO_SET_VALUE:
+		base = (volatile u8_t *)(u16_t)(((u8_t *)(grp->some))[2]);
+		*base = (u8_t)value;
+		break;
+
+	case GPIO_SET_DIRECT:
+		base = (volatile u8_t *)(u16_t)(((u8_t *)(grp->some))[1]);
+		*base = (u8_t)value;
+		break;
+
+	default:
+		return -ENOSUPPORT;
+	}
+
+	return 0;
+}
 
 static int mega2560_gpio_set_one(struct gpio *gpio, u16_t io_idx, u8_t set, u8_t value)
 {
 	USED(set);
+	volatile u8_t *base;
 	u16_t grp_idx = io_idx / 8;
 	u16_t idx_in_grp = io_idx & 0x07;
 	struct gpio_grp *grp = &gpio->grp[grp_idx];
 
 	switch (set) {
 	case GPIO_SET_VALUE:
+		base = (volatile u8_t *)(u16_t)(((u8_t *)(grp->some))[2]);
 		if (value)
-			*(volatile u8_t*)((u16_t)grp->some & 0xff) |= (u8_t)(1 << idx_in_grp);
+			*base |= (u8_t)(1 << idx_in_grp);
 		else
-			*(volatile u8_t*)((u16_t)grp->some & 0xff) &= ~(u8_t)(1 << idx_in_grp);
+			*base &= ~(u8_t)(1 << idx_in_grp);
 		break;
-	
+
+	case GPIO_SET_DIRECT:
+		base = (volatile u8_t *)(u16_t)(((u8_t *)(grp->some))[1]);
+		if (value == GPIO_DIRECT_OUTPUT)
+			*base |= (u8_t)(1 << idx_in_grp);
+		else if (value == GPIO_DIRECT_INPUT)
+			*base &= ~(u8_t)(1 << idx_in_grp);
+		break;
+
 	default:
 		return -ENOSUPPORT;
 	}
@@ -79,7 +138,7 @@ static int mega2560_gpio_set_one(struct gpio *gpio, u16_t io_idx, u8_t set, u8_t
 struct gpio_ops ops = {
 	.set_one = mega2560_gpio_set_one,
 	.get_one = NULL,
-	.set_grp = NULL,
+	.set_grp = mega2560_gpio_set_grp,
 	.get_grp = NULL
 };
 

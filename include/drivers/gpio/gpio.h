@@ -27,6 +27,11 @@ SOFTWARE.
 #include <kernel/list.h>
 
 enum {
+	GPIO_DIRECT_INPUT = 0,
+	GPIO_DIRECT_OUTPUT,
+};
+
+enum {
 	GPIO_SET_DIRECT = 0,
 	GPIO_SET_VALUE,
 	GPIO_SET_PULL_DOWN,
@@ -94,8 +99,8 @@ struct gpio {
 struct gpio_ops {
 	int (*set_one)(struct gpio *gpio, u16_t io_idx, u8_t set, u8_t value);
 	int (*get_one)(struct gpio *gpio, u16_t io_idx, u8_t get, u8_t *value);
-	int (*set_grp)(struct gpio *gpio, u16_t gpr_idx, u8_t set, uintptr_t value);
-	int (*get_grp)(struct gpio *gpio, u16_t gpr_idx, u8_t get, uintptr_t *value);
+	int (*set_grp)(struct gpio *gpio, u16_t grp_idx, u8_t set, uintptr_t value);
+	int (*get_grp)(struct gpio *gpio, u16_t grp_idx, u8_t get, uintptr_t *value);
 };
 
 struct gpio_desc {
@@ -175,14 +180,14 @@ int pl_gpio_get_io_one(struct gpio_desc *desc, u16_t io_idx, u8_t get, u8_t *val
  *
  * Param:
  *   @desc: gpio description.
- *   @gpr_idx: index of io group.
+ *   @grp_idx: index of io group.
  *   @set: set cmd.
  *   @value: group value.
  *
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_gpio_set_io_grp(struct gpio_desc *desc, u16_t gpr_idx, u8_t set, uintptr_t value);
+int pl_gpio_set_io_grp(struct gpio_desc *desc, u16_t grp_idx, u8_t set, uintptr_t value);
 
 /*************************************************************************************
  * Function Name: pl_gpio_get_io_grp
@@ -190,13 +195,13 @@ int pl_gpio_set_io_grp(struct gpio_desc *desc, u16_t gpr_idx, u8_t set, uintptr_
  *
  * Param:
  *   @desc: gpio description.
- *   @gpr_idx: index of io group.
+ *   @grp_idx: index of io group.
  *   @get: get cmd.
  *   @value: group value.
  *
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_gpio_get_io_grp(struct gpio_desc *desc, u16_t gpr_idx, u8_t get, uintptr_t *value);
+int pl_gpio_get_io_grp(struct gpio_desc *desc, u16_t grp_idx, u8_t get, uintptr_t *value);
 
 #endif /* __DRV_GPIO_H__ */
