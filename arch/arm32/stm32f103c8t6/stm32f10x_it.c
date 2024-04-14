@@ -23,6 +23,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
+#include <kernel/syslog.h>
 
 /** @addtogroup STM32F10x_StdPeriph_Examples
   * @{
@@ -122,6 +123,16 @@ void SVC_Handler(void)
   */
 void DebugMon_Handler(void)
 {
+}
+
+void USART1_IRQHandler(void)
+{
+	char recv_char;
+	if(USART1->SR & (1 << 5)) {
+		recv_char = USART1->DR;
+		pl_port_putc(recv_char);
+		pl_port_putc('@');
+	}
 }
 
 /**
