@@ -34,7 +34,7 @@ static void stimer_callback2(pl_stimer_handle_t timer)
 	void *data;
 	struct count c = {.hi32 = 0, .lo32 = 200};
 
-	(void)pl_gpio_set_io_grp(gpio_desc, 1, GPIO_SET_VALUE, cnt);
+	(void)pl_gpio_set_io_one(gpio_desc, 15, GPIO_SET_VALUE, cnt);
 
 	cnt = ~cnt;
 
@@ -117,7 +117,8 @@ static int softtimer_test(void)
 		return 0;
 	}
 
-	ret = pl_gpio_set_io_grp(gpio_desc, 1, GPIO_SET_DIRECT, 0xFF);
+	/* set direction of GPIOB7 */
+	ret = pl_gpio_set_io_one(gpio_desc, 15, GPIO_SET_DIRECT, 1);
 	if (ret < 0) {
 		pl_syslog_err("gpio direction set failed, ret:%d\r\n", ret);
 		return 0;

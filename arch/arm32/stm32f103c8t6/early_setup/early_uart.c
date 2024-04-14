@@ -27,7 +27,7 @@ void USART1_Init(uint_t USART1_BaudRate)
    
    NVIC_SetPriorityGrouping(1);            //�������ȼ�����1
    NVIC_SetPriority(USART1_IRQn, NVIC_EncodePriority(1,2,1));     //������ռ���ȼ�Ϊ1�������ȼ�Ϊ1
-   NVIC_EnableIRQ(USART1_IRQn);            //ʹ��USART�ж�
+   NVIC_DisableIRQ(USART1_IRQn);            //ʹ��USART�ж�
 }
 
 int USART1_PrintChar(char c)

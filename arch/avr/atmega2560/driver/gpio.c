@@ -5,27 +5,27 @@
 #include <drivers/gpio/gpio.h>
 
 
-static u8_t goio_base[7][3] = {
-	{	/* PINA, DDRA, PORTA */
-		0x20, 0x21, 0x22
+static u8_t goio_base[7][4] = {
+	{	/* PINA, DDRA, PORTA, value */
+		0x20, 0x21, 0x22, 0
 	},
-	{	/* PINB, DDRB, PORTB */
-		0x23, 0x24, 0x25
+	{	/* PINB, DDRB, PORTB, value */
+		0x23, 0x24, 0x25, 0
 	},
-	{	/* PINC, DDRC, PORTC */
-		0x26, 0x27, 0x28
+	{	/* PINC, DDRC, PORTC, value */
+		0x26, 0x27, 0x28, 0
 	},
-	{	/* PIND, DDRD, PORTD */
-		0x29, 0x2A, 0x2B
+	{	/* PIND, DDRD, PORTD, value */
+		0x29, 0x2A, 0x2B, 0
 	},
-	{	/* PINE, DDRE, PORTE */
-		0x2C, 0x2D, 0x2E
+	{	/* PINE, DDRE, PORTE, value */
+		0x2C, 0x2D, 0x2E, 0
 	},
-	{	/* PINF, DDRF, PORTF */
-		0x2F, 0x30, 0x31
+	{	/* PINF, DDRF, PORTF, value */
+		0x2F, 0x30, 0x31, 0
 	},
-	{	/* PING, DDRG, PORTG */
-		0x32, 0x33, 0x34
+	{	/* PING, DDRG, PORTG, value */
+		0x32, 0x33, 0x34, 0
 	}
 };
 
