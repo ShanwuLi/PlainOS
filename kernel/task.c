@@ -505,6 +505,9 @@ static void task_entry(struct tcb *tcb)
 	pl_task_remove_tcb_from_rdylist(tcb);
 	pl_task_insert_tcb_to_exitlist(tcb);
 
+	if (list_is_empty(&tcb->wait_head))
+		goto done;
+
 	/* recover waiting tasks */
 	list_for_each_entry_safe(pos, tmp, &tcb->wait_head, struct tcb, node) {
 		list_del_node(&pos->node);
@@ -512,11 +515,13 @@ static void task_entry(struct tcb *tcb)
 		pos->wait_for_task_ret = exit_val;
 	}
 
+done:
 	pl_port_exit_critical();
 	/* switch task*/
 	pl_task_context_switch();
+
 	/* will be never come here */
-	while(1);
+	while(true);
 }
 
 /*************************************************************************************
@@ -604,9 +609,10 @@ tid_t pl_task_create_with_stack(const char *name, main_t task, u16_t prio,
 {
 	struct tcb *tcb;
 
-	if (task == NULL || stack == NULL) {
-		pl_early_syslog_err("task or stack is NULL\n");
-		return (tid_t)ERR_TO_PTR(-EFAULT);
+	if (name == NULL || task == NULL || stack == NULL ||
+	    prio > PL_CFG_TASK_PRIORITIES_MAX) {
+		pl_early_syslog_err("param is invalid\r\n");
+		return NULL;
 	}
 
 	tcb = (struct tcb *)pl_mempool_malloc(g_pl_default_mempool, sizeof(struct tcb));
@@ -638,9 +644,15 @@ tid_t pl_task_create(const char *name, main_t task, u16_t prio,
                      size_t stack_size, int argc, char *argv[])
 {
 	void *stack;
+	size_t tcb_actual_size;
 	struct tcb *tcb_and_stack;
-	size_t tcb_actual_size = pl_align_size(sizeof(struct tcb), sizeof(uintptr_t) << 1);
 
+	if (name == NULL || task == NULL || prio > PL_CFG_TASK_PRIORITIES_MAX) {
+		pl_early_syslog_err("param is invalid\r\n");
+		return NULL;
+	}
+
+	tcb_actual_size = pl_align_size(sizeof(struct tcb), sizeof(uintptr_t) << 1);
 	tcb_and_stack = pl_mempool_malloc(g_pl_default_mempool, tcb_actual_size + stack_size);
 	if (tcb_and_stack == NULL)
 		return NULL;

@@ -28,9 +28,17 @@ SOFTWARE.
 
 typedef void *pl_work_handle;
 typedef void *pl_wq_handle;
-typedef void (*pl_work_fun_t)(pl_work_handle wq);
+typedef void (*pl_work_fun_t)(pl_work_handle work);
 typedef struct {void *dummy[4];} pl_work_t;
 
+/*************************************************************************************
+ * Function Name: pl_workqueue_create
+ *  @g_pl_sys_hiwq_handle: handle of the hight priority workqueue.
+ *  @g_pl_sys_lowq_handle: handle of the low priority workqueue.
+ *
+ * Description:
+ *   create a workqueue.
+ ************************************************************************************/
 extern pl_wq_handle g_pl_sys_hiwq_handle;
 extern pl_wq_handle g_pl_sys_lowq_handle;
 
@@ -107,5 +115,33 @@ int pl_work_add(pl_wq_handle workqueue, pl_work_handle work);
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
 int pl_work_cancel(pl_wq_handle workqueue, pl_work_handle work);
+
+/*************************************************************************************
+ * Function Name: pl_work_get_fun
+ *
+ * Description:
+ *   get the callback function of work.
+ * 
+ * Parameters:
+ *  @work: work.
+ *
+ * Return:
+ *  callback function of the work.
+ ************************************************************************************/
+pl_work_fun_t pl_work_get_fun(pl_work_handle work);
+
+/*************************************************************************************
+ * Function Name: pl_work_get_private_data
+ *
+ * Description:
+ *   get the private data of work.
+ * 
+ * Parameters:
+ *  @work: work.
+ *
+ * Return:
+ *   private data of the work.
+ ************************************************************************************/
+void *pl_work_get_private_data(pl_work_handle work);
 
 #endif /* __KERNEL_WORKQUEUE_H__ */

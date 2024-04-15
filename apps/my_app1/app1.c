@@ -8,4 +8,4 @@ static int my_app_main(int argc, char *argv[])
 	return 0;
 }
 
-system_app_register(my_app_main, "app_test");
+pl_app_register(my_app_main, "app_test");

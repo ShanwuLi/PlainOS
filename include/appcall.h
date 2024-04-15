@@ -39,11 +39,6 @@ struct pl_app_entry {
 		.name = (_name), \
 	}
 
-#define system_app_register(app, _name)      __define_appcall(app, 0, _name)
-#define dfx_app_register(app, _name)         __define_appcall(app, 1, _name)
-#define excep_app_register(app, _name)       __define_appcall(app, 2, _name)
-#define perf_app_register(app, _name)        __define_appcall(app, 3, _name)
-#define test_app_register(app, _name)        __define_appcall(app, 4, _name)
-#define user_app_register(app, _name)        __define_appcall(app, 5, _name)
+#define pl_app_register(app, _name)        __define_appcall(app, 5, _name)
 
 #endif /* __PLAINOS_APPCALL_H__ */

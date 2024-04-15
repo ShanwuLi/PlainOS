@@ -53,5 +53,5 @@ void pl_callee_entry(void)
 	ret = pl_idle_task_init();
 	pl_assert(ret == 0);
 
-	while(1);
+	while(true);
 }

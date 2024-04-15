@@ -21,55 +21,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include <port.h>
-#include <kernel/assert.h>
-#include <kernel/kernel.h>
-#include <kernel/task.h>
-#include <kernel/syslog.h>
-#include "idletask.h"
-#include "inittask.h"
+#ifndef __KERNEL_INITTASK_PRIVATE_H__
+#define __KERNEL_INITTASK_PRIVATE_H__
 
 /*************************************************************************************
- * Function Name: idle_task
- * Description: idle task for system.
- ************************************************************************************/
-static int idle_task(int argc, char *argv[])
-{
-	USED(argc);
-	USED(argv);
-	int ret;
-
-	ret = pl_init_task_init();
-	pl_assert(ret == 0);
-
-	while(true) {
-		pl_early_syslog("idletask===============================================\r\n");
-		for (volatile int i = 0; i < 10000; i++);
-	}
-
-	return 0;
-}
-
-/*************************************************************************************
- * Function Name: pl_idle_task_init
- * Description: idle task init.
+ * Function Name: pl_init_task_init
+ * Description: initialization task.
  *
  * Param:
  *   none.
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_idle_task_init(void)
-{
-	tid_t idle_taskid;
+int pl_init_task_init(void);
 
-	idle_taskid = pl_task_create("idle_task", idle_task, PL_CFG_TASK_PRIORITIES_MAX,
-	                              PL_CFG_IDLE_TASK_STACK_SIZE, 0, NULL);
-	if (idle_taskid == NULL) {
-		pl_early_syslog("idle task create failed\r\n");
-		return -1;
-	}
-
-	pl_early_syslog("idle task init successfully\r\n");
-	return 0;
-}
+#endif /* __KERNEL_INITTASK_PRIVATE_H__ */

@@ -26,50 +26,54 @@ SOFTWARE.
 #include <kernel/kernel.h>
 #include <kernel/task.h>
 #include <kernel/syslog.h>
-#include "idletask.h"
+#include "initcall.h"
 #include "inittask.h"
+#include "softtimer.h"
+#include "workqueue.h"
 
 /*************************************************************************************
- * Function Name: idle_task
- * Description: idle task for system.
+ * Function Name: init_task
+ * Description: init task for system.
  ************************************************************************************/
-static int idle_task(int argc, char *argv[])
+static int init_task(int argc, char *argv[])
 {
 	USED(argc);
 	USED(argv);
+
 	int ret;
-
-	ret = pl_init_task_init();
+	pl_do_early_initcalls();
+	ret = pl_port_systick_init();
 	pl_assert(ret == 0);
+	ret = pl_softtimer_core_init();
+	pl_assert(ret == 0);
+	ret = pl_sys_wq_init();
+	pl_assert(ret == 0);
+	pl_do_initcalls();
 
-	while(true) {
-		pl_early_syslog("idletask===============================================\r\n");
-		for (volatile int i = 0; i < 10000; i++);
-	}
-
+	pl_early_syslog("init_task done\r\n");
 	return 0;
 }
 
 /*************************************************************************************
- * Function Name: pl_idle_task_init
- * Description: idle task init.
+ * Function Name: pl_init_task_init
+ * Description: initialization task.
  *
  * Param:
  *   none.
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_idle_task_init(void)
+int pl_init_task_init(void)
 {
-	tid_t idle_taskid;
+	tid_t init_taskid;
 
-	idle_taskid = pl_task_create("idle_task", idle_task, PL_CFG_TASK_PRIORITIES_MAX,
-	                              PL_CFG_IDLE_TASK_STACK_SIZE, 0, NULL);
-	if (idle_taskid == NULL) {
-		pl_early_syslog("idle task create failed\r\n");
+	init_taskid = pl_task_create("init_task", init_task, 1,
+	                              PL_CFG_INIT_TASK_STACK_SIZE, 0, NULL);
+	if (init_taskid == NULL) {
+		pl_early_syslog("init task create failed\r\n");
 		return -1;
 	}
 
-	pl_early_syslog("idle task init successfully\r\n");
+	pl_early_syslog("init task init done\r\n");
 	return 0;
 }

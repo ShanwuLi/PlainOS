@@ -45,4 +45,9 @@ ifeq ($(PL_MK_CFG_OS_KFIFO_TEST), y)
 C_SRCS += $(OSTEST_DIR)/kfifo_test.c
 endif
 
+# workqueue test
+ifeq ($(PL_MK_CFG_OS_WORKQUEUE_TEST), y)
+C_SRCS += $(OSTEST_DIR)/workqueue_test.c
+endif
+
 endif

@@ -41,7 +41,7 @@ static int workqueue_task(int argc, char **argv)
 	USED(argv);
 	pl_work_fun_t work_fun;
 	struct work *first;
-	struct workqueue *wq = (struct workqueue *)argv[0];
+	struct workqueue *wq = (struct workqueue *)argv;
 
 	while (true) {
 		if (list_is_empty(&wq->work_list)) {
@@ -81,15 +81,12 @@ static int workqueue_task(int argc, char **argv)
  ************************************************************************************/
 int pl_workqueue_init(struct workqueue *wq, const char *name, u16_t prio, size_t wq_stack_sz)
 {
-	char *argv[1];
-
 	if (wq == NULL)
 		return -EFAULT;
 
-	argv[0] = (char *)wq;
 	wq->name = name;
 	list_init(&wq->work_list);
-	wq->exec_thread = pl_task_create(name, workqueue_task, prio, wq_stack_sz, 1, argv);
+	wq->exec_thread = pl_task_create(name, workqueue_task, prio, wq_stack_sz, 1, (char **)wq);
 	if (wq->exec_thread == NULL)
 		return ERROR;
 
@@ -113,16 +110,14 @@ int pl_workqueue_init(struct workqueue *wq, const char *name, u16_t prio, size_t
 pl_wq_handle pl_workqueue_create(const char *name, u16_t prio, size_t wq_stack_sz)
 {
 	struct workqueue *wq;
-	char *argv[1];
 
 	wq = pl_mempool_malloc(g_pl_default_mempool, sizeof(struct workqueue));
 	if (wq == NULL)
 		return NULL;
 
-	argv[0] = (char *)wq;
 	list_init(&wq->work_list);
 	wq->name = name;
-	wq->exec_thread = pl_task_create(name, workqueue_task, prio, wq_stack_sz, 1, argv);
+	wq->exec_thread = pl_task_create(name, workqueue_task, prio, wq_stack_sz, 1, (char **)wq);
 	if (wq->exec_thread == NULL)
 		return NULL;
 
@@ -248,6 +243,50 @@ int pl_work_cancel(pl_wq_handle workqueue, pl_work_handle work)
 }
 
 /*************************************************************************************
+ * Function Name: pl_work_get_fun
+ *
+ * Description:
+ *   get the callback function of work.
+ * 
+ * Parameters:
+ *  @work: work.
+ *
+ * Return:
+ *  callback function of the work.
+ ************************************************************************************/
+pl_work_fun_t pl_work_get_fun(pl_work_handle work)
+{
+	struct work *wk = (struct work *)work;
+
+	if (wk == NULL)
+		return NULL;
+
+	return wk->fun;
+}
+
+/*************************************************************************************
+ * Function Name: pl_work_get_private_data
+ *
+ * Description:
+ *   get the private data of work.
+ * 
+ * Parameters:
+ *  @work: work.
+ *
+ * Return:
+ *   private data of the work.
+ ************************************************************************************/
+void *pl_work_get_private_data(pl_work_handle work)
+{
+	struct work *wk = (struct work *)work;
+
+	if (wk == NULL)
+		return NULL;
+
+	return wk->priv_data;
+}
+
+/*************************************************************************************
  * Function Name: pl_sys_wq_init
  *
  * Description:
@@ -265,7 +304,7 @@ int pl_sys_wq_init(void)
 	int ret;
 
 	ret = pl_workqueue_init(&pl_sys_hiwq, "pl_sys_hiwq",
-	                        1, PL_CFG_HI_WORKQUEUE_TASK_STACK_SIZE);
+	                        2, PL_CFG_HI_WORKQUEUE_TASK_STACK_SIZE);
 	if (ret < 0) {
 		g_pl_sys_hiwq_handle = NULL;
 		pl_early_syslog_err("hi workqueue request failed, ret:%d\r\n", ret);

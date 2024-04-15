@@ -75,8 +75,9 @@ static int idle_task1(int argc, char *argv[])
 
 static int task_test(void)
 {
-	pl_syslog_info("============8\r\n");
+	pl_syslog_info("task test\r\n");
 	pl_task_create("idle_task1", idle_task1, PL_CFG_TASK_PRIORITIES_MAX - 1, 512, 0, NULL);
+	pl_syslog_info("task test done\r\n");
 
 	return 0;
 }
