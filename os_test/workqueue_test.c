@@ -14,7 +14,7 @@ static void work_fun(pl_work_handle work)
 static pl_work_t hiwork;
 static pl_work_t lowork;
 
-static int task_test(void)
+static int workqueue_test(void)
 {
 	int ret;
 
@@ -38,4 +38,4 @@ static int task_test(void)
 	pl_syslog_info("workqueue test done\r\n");
 	return 0;
 }
-pl_late_initcall(task_test);
+pl_late_initcall(workqueue_test);

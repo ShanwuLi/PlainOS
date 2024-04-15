@@ -117,20 +117,6 @@ int pl_work_add(pl_wq_handle workqueue, pl_work_handle work);
 int pl_work_cancel(pl_wq_handle workqueue, pl_work_handle work);
 
 /*************************************************************************************
- * Function Name: pl_work_get_fun
- *
- * Description:
- *   get the callback function of work.
- * 
- * Parameters:
- *  @work: work.
- *
- * Return:
- *  callback function of the work.
- ************************************************************************************/
-pl_work_fun_t pl_work_get_fun(pl_work_handle work);
-
-/*************************************************************************************
  * Function Name: pl_work_get_private_data
  *
  * Description:
