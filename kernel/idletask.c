@@ -26,6 +26,7 @@ SOFTWARE.
 #include <kernel/kernel.h>
 #include <kernel/task.h>
 #include <kernel/syslog.h>
+#include "task.h"
 #include "idletask.h"
 #include "inittask.h"
 
@@ -63,8 +64,8 @@ int pl_idle_task_init(void)
 {
 	tid_t idle_taskid;
 
-	idle_taskid = pl_task_create("idle_task", idle_task, PL_CFG_TASK_PRIORITIES_MAX,
-	                              PL_CFG_IDLE_TASK_STACK_SIZE, 0, NULL);
+	idle_taskid = pl_task_sys_create("idle_task", idle_task, PL_CFG_TASK_PRIORITIES_MAX,
+	                                 PL_CFG_IDLE_TASK_STACK_SIZE, 0, NULL);
 	if (idle_taskid == NULL) {
 		pl_early_syslog("idle task create failed\r\n");
 		return -1;

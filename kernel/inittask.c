@@ -26,6 +26,7 @@ SOFTWARE.
 #include <kernel/kernel.h>
 #include <kernel/task.h>
 #include <kernel/syslog.h>
+#include "task.h"
 #include "initcall.h"
 #include "inittask.h"
 #include "softtimer.h"
@@ -67,8 +68,8 @@ int pl_init_task_init(void)
 {
 	tid_t init_taskid;
 
-	init_taskid = pl_task_create("init_task", init_task, 1,
-	                              PL_CFG_INIT_TASK_STACK_SIZE, 0, NULL);
+	init_taskid = pl_task_sys_create("init_task", init_task, 0,
+	                                 PL_CFG_INIT_TASK_STACK_SIZE, 0, NULL);
 	if (init_taskid == NULL) {
 		pl_early_syslog("init task create failed\r\n");
 		return -1;

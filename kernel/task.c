@@ -36,8 +36,9 @@ SOFTWARE.
 /*************************************************************************************
  * Description: Definitions of highest priority of task.
  ************************************************************************************/
-#if (PL_CFG_TASK_PRIORITIES_MAX >= 512)
-	#error "PL_CFG_TASK_PRIORITIES_MAX must less 512"
+#if (PL_CFG_SYS_RSVD_HIGHEST_PRIOTITY < 2 || PL_CFG_TASK_PRIORITIES_MAX >= 512)
+	#error "PL_CFG_SYS_RSVD_HIGHEST_PRIOTITY must larger 2 and\
+	        PL_CFG_TASK_PRIORITIES_MAX must less 512"
 #endif
 
 /*************************************************************************************
@@ -545,7 +546,7 @@ static void task_init_tcb(const char *name, main_t task, u16_t prio,
 {
 	tcb->name = name;
 	tcb->parent = g_task_core_blk.curr_tcb;
-	tcb->prio = (prio > 0) ? prio : tcb->parent->prio;
+	tcb->prio = prio;
 	tcb->context_sp = stack;
 	tcb->task = task;
 	tcb->argc = argc;
@@ -588,6 +589,44 @@ static void task_init_and_create(const char *name, main_t task, u16_t prio,
 }
 
 /*************************************************************************************
+ * Function Name: pl_task_sys_create_with_stack
+ * Description: create a task with stack that must be provided in system.
+ *
+ * Parameters:
+ *   @name: name of the task (optional).
+ *   @task: task, prototype is "int task(int argc, char *argv[])"
+ *   @prio: priority of the task, if is 0, it will be its parent's priority (optional).
+ *   @stack: stack of the task (must provide).
+ *   @stack_size: size of the stack (must specify).
+ *   @argc: the count of argv (optional).
+ *   @argv: argv[] (optional).
+ *
+ * Return:
+ *   task handle.
+ ************************************************************************************/
+tid_t pl_task_sys_create_with_stack(const char *name, main_t task, u16_t prio,
+                                    void *stack, size_t stack_size,
+                                    int argc, char *argv[])
+{
+	struct tcb *tcb;
+
+	if (name == NULL || task == NULL || stack == NULL ||
+	    prio > PL_CFG_TASK_PRIORITIES_MAX) {
+		pl_early_syslog_err("param is invalid\r\n");
+		return NULL;
+	}
+
+	tcb = (struct tcb *)pl_mempool_malloc(g_pl_default_mempool, sizeof(struct tcb));
+	if (tcb == NULL) {
+		pl_early_syslog_err("no mem to alloc\r\n");
+		return NULL;
+	}
+
+	task_init_and_create(name, task, prio, tcb, stack, stack_size, argc, argv);
+	return tcb;
+}
+
+/*************************************************************************************
  * Function Name: pl_task_create_with_stack
  * Description: create a task with stack that must be provided.
  *
@@ -609,20 +648,48 @@ tid_t pl_task_create_with_stack(const char *name, main_t task, u16_t prio,
 {
 	struct tcb *tcb;
 
-	if (name == NULL || task == NULL || stack == NULL ||
-	    prio > PL_CFG_TASK_PRIORITIES_MAX) {
+	if (prio < PL_CFG_SYS_RSVD_HIGHEST_PRIOTITY)
+		prio = g_task_core_blk.curr_tcb->prio;
+
+	tcb = pl_task_sys_create_with_stack(name, task, prio, stack, stack_size, argc, argv);
+	return tcb;
+}
+
+/*************************************************************************************
+ * Function Name: pl_task_sys_create
+ * Description: create a task in system.
+ *
+ * Parameters:
+ *   @name: name of the task (optional).
+ *   @task: task, prototype is "int task(int argc, char *argv[])"
+ *   @prio: priority of the task, if is 0, it will be its parent's priority (optional).
+ *   @stack_size: size of the stack (must specify).
+ *   @argc: the count of argv (optional).
+ *   @argv: argv[] (optional).
+ *
+ * Return:
+ *   task id.
+ ************************************************************************************/
+tid_t pl_task_sys_create(const char *name, main_t task, u16_t prio,
+                         size_t stack_size, int argc, char *argv[])
+{
+	void *stack;
+	size_t tcb_actual_size;
+	struct tcb *tcb_and_stack;
+
+	if (name == NULL || task == NULL || prio > PL_CFG_TASK_PRIORITIES_MAX) {
 		pl_early_syslog_err("param is invalid\r\n");
 		return NULL;
 	}
 
-	tcb = (struct tcb *)pl_mempool_malloc(g_pl_default_mempool, sizeof(struct tcb));
-	if (tcb == NULL) {
-		pl_early_syslog_err("no mem to alloc\r\n");
-		return (tid_t)ERR_TO_PTR(-ENOMEM);
-	}
+	tcb_actual_size = pl_align_size(sizeof(struct tcb), sizeof(uintptr_t) << 1);
+	tcb_and_stack = pl_mempool_malloc(g_pl_default_mempool, tcb_actual_size + stack_size);
+	if (tcb_and_stack == NULL)
+		return NULL;
 
-	task_init_and_create(name, task, prio, tcb, stack, stack_size, argc, argv);
-	return tcb;
+	stack = (u8_t *)tcb_and_stack + tcb_actual_size;
+	task_init_and_create(name, task, prio, tcb_and_stack, stack, stack_size, argc, argv);
+	return tcb_and_stack;
 }
 
 /*************************************************************************************
@@ -643,22 +710,12 @@ tid_t pl_task_create_with_stack(const char *name, main_t task, u16_t prio,
 tid_t pl_task_create(const char *name, main_t task, u16_t prio,
                      size_t stack_size, int argc, char *argv[])
 {
-	void *stack;
-	size_t tcb_actual_size;
 	struct tcb *tcb_and_stack;
 
-	if (name == NULL || task == NULL || prio > PL_CFG_TASK_PRIORITIES_MAX) {
-		pl_early_syslog_err("param is invalid\r\n");
-		return NULL;
-	}
+	if (prio < PL_CFG_SYS_RSVD_HIGHEST_PRIOTITY)
+		prio = g_task_core_blk.curr_tcb->prio;
 
-	tcb_actual_size = pl_align_size(sizeof(struct tcb), sizeof(uintptr_t) << 1);
-	tcb_and_stack = pl_mempool_malloc(g_pl_default_mempool, tcb_actual_size + stack_size);
-	if (tcb_and_stack == NULL)
-		return NULL;
-
-	stack = (u8_t *)tcb_and_stack + tcb_actual_size;
-	task_init_and_create(name, task, prio, tcb_and_stack, stack, stack_size, argc, argv);
+	tcb_and_stack = pl_task_sys_create(name, task, prio, stack_size, argc, argv);
 	return tcb_and_stack;
 }
 

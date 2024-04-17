@@ -86,7 +86,7 @@ int pl_workqueue_init(struct workqueue *wq, const char *name, u16_t prio, size_t
 
 	wq->name = name;
 	list_init(&wq->work_list);
-	wq->exec_thread = pl_task_create(name, workqueue_task, prio, wq_stack_sz, 1, (char **)wq);
+	wq->exec_thread = pl_task_sys_create(name, workqueue_task, prio, wq_stack_sz, 1, (char **)wq);
 	if (wq->exec_thread == NULL)
 		return ERROR;
 
@@ -282,7 +282,7 @@ int pl_sys_wq_init(void)
 	int ret;
 
 	ret = pl_workqueue_init(&pl_sys_hiwq, "pl_sys_hiwq",
-	                        2, PL_CFG_HI_WORKQUEUE_TASK_STACK_SIZE);
+	                        1, PL_CFG_HI_WORKQUEUE_TASK_STACK_SIZE);
 	if (ret < 0) {
 		g_pl_sys_hiwq_handle = NULL;
 		pl_early_syslog_err("hi workqueue request failed, ret:%d\r\n", ret);

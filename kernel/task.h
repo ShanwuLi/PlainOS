@@ -216,4 +216,42 @@ void pl_task_remove_tcb_from_delaylist(struct tcb *tcb);
  ************************************************************************************/
 void pl_task_remove_tcb_from_rdylist(struct tcb *tcb);
 
+/*************************************************************************************
+ * Function Name: pl_task_sys_create_with_stack
+ * Description: create a task with stack that must be provided in system.
+ *
+ * Parameters:
+ *   @name: name of the task (optional).
+ *   @task: task, prototype is "int task(int argc, char *argv[])"
+ *   @prio: priority of the task, if is 0, it will be its parent's priority (optional).
+ *   @stack: stack of the task (must provide).
+ *   @stack_size: size of the stack (must specify).
+ *   @argc: the count of argv (optional).
+ *   @argv: argv[] (optional).
+ *
+ * Return:
+ *   task handle.
+ ************************************************************************************/
+tid_t pl_task_sys_create_with_stack(const char *name, main_t task, u16_t prio,
+                                    void *stack, size_t stack_size,
+                                    int argc, char *argv[]);
+
+/*************************************************************************************
+ * Function Name: pl_task_sys_create
+ * Description: create a task in system.
+ *
+ * Parameters:
+ *   @name: name of the task (optional).
+ *   @task: task, prototype is "int task(int argc, char *argv[])"
+ *   @prio: priority of the task, if is 0, it will be its parent's priority (optional).
+ *   @stack_size: size of the stack (must specify).
+ *   @argc: the count of argv (optional).
+ *   @argv: argv[] (optional).
+ *
+ * Return:
+ *   task id.
+ ************************************************************************************/
+tid_t pl_task_sys_create(const char *name, main_t task, u16_t prio,
+                         size_t stack_size, int argc, char *argv[]);
+
 #endif /* __KERNEL_TASK_PRIVATE_H__ */

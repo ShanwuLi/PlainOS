@@ -34,6 +34,7 @@ SOFTWARE.
 #define PL_CFG_DEFAULT_MEMPOOL_SIZE             (10 * 1024)
 #define PL_CFG_DEFAULT_MEMPOOL_GRAIN_ORDER      (4)
 #define PL_CFG_MAX_TASKS_NUM                    (900u)
+#define PL_CFG_SYS_RSVD_HIGHEST_PRIOTITY        (2u)
 #define PL_CFG_TASK_PRIORITIES_MAX              (99u)
 #define PL_CFG_INIT_TASK_STACK_SIZE             (512)
 #define PL_CFG_IDLE_TASK_STACK_SIZE             (512)
