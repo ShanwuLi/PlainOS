@@ -73,8 +73,8 @@ struct task_core_blk {
 	struct task_list ready_list[PL_CFG_TASK_PRIORITIES_MAX + 1];
 	struct task_list delay_list;
 	struct list_node pend_list;
-	struct list_node timer_list;
 	struct list_node exit_list;
+	struct list_node timer_list;
 	struct tcb *curr_tcb;
 	struct count systicks;
 	u32_t cpu_rate_base;
@@ -933,7 +933,7 @@ static void update_delay_task_list(void)
 	struct tcb *pos;
 	struct tcb *tmp;
 
-	/* update delay list */
+	/* update delay list which can't be empty because of having a dummy node */
 	list_for_each_entry_safe(pos, tmp, &g_task_core_blk.delay_list.head->node,
 		struct tcb, node) {
 
