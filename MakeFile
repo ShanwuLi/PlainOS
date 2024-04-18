@@ -55,6 +55,7 @@ RM := rm -rf
 # include sub-makefiles
 -include $(TOPDIR)/arch/arch.mk
 -include $(TOPDIR)/kernel/kernel.mk
+-include $(TOPDIR)/lib/lib.mk
 
 #////////////////////////////// Modify following code when you need it ///////////////////////////#
 

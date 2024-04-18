@@ -23,6 +23,7 @@ void USART1_Init(uint_t USART1_BaudRate)
 	integer=72*1000*1000/(USART1_BaudRate*16);         
 	decimal=(float)(72*1000*1000/(USART1_BaudRate*16))-integer;   
 	USART1->BRR=(integer<<4)|((unsigned int)decimal*16);
+	USART1_PrintChar('S');
 }
 
 int USART1_PrintChar(char c)

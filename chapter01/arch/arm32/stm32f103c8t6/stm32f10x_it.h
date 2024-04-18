@@ -38,7 +38,7 @@ void BusFault_Handler(void);
 void UsageFault_Handler(void);
 void SVC_Handler(void);
 void DebugMon_Handler(void);
-void PendSV_Handler(void);
+__attribute__((naked)) void PendSV_Handler(void);
 
 #endif /* __STM32F10x_IT_H */
 
