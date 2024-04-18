@@ -55,11 +55,6 @@ pl_port_switch_context:
 
 PendSV_Handler:
 	cpsid i /* disbale interrupt */
-	/* clear pending bit of PendSV */
-	ldr   r1, =SCB_ICSR_REG
-	ldr   r2, [r1]
-	orr   r2, r2, #0x80000000
-	str   r2, [r1]
 
 switch_top:
 	/* save context */
@@ -72,7 +67,6 @@ switch_top:
 	dmb 0xF
 
 switch_bottom:
-
 	cpsie i  /* enable interrupt */
 	push {lr}
 	/* r0 = pl_callee_get_next_context() */

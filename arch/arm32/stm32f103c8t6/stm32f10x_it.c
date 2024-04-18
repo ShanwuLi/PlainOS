@@ -51,7 +51,7 @@
   */
 void NMI_Handler(void)
 {
-	
+	pl_early_syslog_err("nmi fault\r\n");
 }
 
 /**
@@ -64,6 +64,7 @@ void HardFault_Handler(void)
   /* Go to infinite loop when Hard Fault exception occurs */
   while (1)
   {
+	pl_early_syslog_err("HardFault_Handler\r\n");
   }
 }
 
@@ -77,6 +78,7 @@ void MemManage_Handler(void)
   /* Go to infinite loop when Memory Manage exception occurs */
   while (1)
   {
+	pl_early_syslog_err("MemManage_Handler\r\n");
   }
 }
 
@@ -90,6 +92,7 @@ void BusFault_Handler(void)
   /* Go to infinite loop when Bus Fault exception occurs */
   while (1)
   {
+	pl_early_syslog_err("BusFault_Handler\r\n");
   }
 }
 
@@ -104,6 +107,7 @@ void UsageFault_Handler(void)
   /* Go to infinite loop when Usage Fault exception occurs */
   while (1)
   {
+	pl_early_syslog_err("UsageFault_Handler\r\n");
   }
 }
 
