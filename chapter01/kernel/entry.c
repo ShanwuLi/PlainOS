@@ -99,6 +99,7 @@ void task02(void){
 		USART1_PrintChar('\t');
 		delay(1000000);
 		pl_port_switch_contex();	//任务中循环调用PendSV
+	};
 }
 
 void delay(uint32_t n){
@@ -109,8 +110,7 @@ void delay(uint32_t n){
 }
 
 void pl_callee_entry(void);
-void pl_callee_entry(void)
-{
+void pl_callee_entry(){
 	uint_t USART1_BaudRate = 115200;
 	USART1_Init(USART1_BaudRate);
 	USART1_PrintChar('S');
