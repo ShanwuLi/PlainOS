@@ -4,6 +4,7 @@
 
 void pl_sys_dump(u32_t *fault_args)
 {
+	pl_early_syslog_err("system dump:\r\n");
 	pl_early_syslog_err("r0:0x%x\r\n",  fault_args[0]);
 	pl_early_syslog_err("r1:0x%x\r\n",  fault_args[1]);
 	pl_early_syslog_err("r2:0x%x\r\n",  fault_args[2]);

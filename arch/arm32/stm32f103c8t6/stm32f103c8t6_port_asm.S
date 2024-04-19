@@ -82,6 +82,8 @@ switch_bottom:
 	cpsie i  /* enable interrupt */
 	bx    lr
 
+
+
 ////////////// barrier implement //////////////////
 .section .text.pl_port_cpu_dmb
 .type pl_port_cpu_dmb, %function

@@ -160,5 +160,5 @@ static int atmega2560_gpio_init(void)
 
 	pl_early_syslog_info("atmega2560_gpio_init done\r\n");
 	return OK;
-} 
+}
 pl_bsp_initcall(atmega2560_gpio_init);
