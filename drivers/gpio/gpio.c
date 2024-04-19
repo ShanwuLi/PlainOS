@@ -221,4 +221,3 @@ static int pl_gpio_init(void)
 	return OK;
 }
 pl_core_initcall(pl_gpio_init);
-
