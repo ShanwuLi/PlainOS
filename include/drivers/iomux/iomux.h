@@ -27,7 +27,6 @@ SOFTWARE.
 #include <types.h>
 #include <kernel/list.h>
 
-
 /*************************************************************************************
  * struct iomux:
  * Description:

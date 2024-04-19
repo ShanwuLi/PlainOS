@@ -36,6 +36,7 @@
 .global	Default_Handler
 .extern SystemInit
 .extern pl_callee_entry
+.extern pl_sys_dump
 
 
 /* start address for the initialization values of the .data section.
@@ -114,9 +115,12 @@ LoopFillZerobss:
 */
   .section	.text.Default_Handler,"ax",%progbits
 Default_Handler:
-Infinite_Loop:
-	b	Infinite_Loop
-  .size	Default_Handler, .-Default_Handler 
+	tst lr, #4  //将LR的值与4按位相与
+	ite eq      //若为0则是MSP，否则是PSP
+	mrseq r0, msp
+	mrsne r0, psp
+	b pl_sys_dump  //这个是C语言编写的函数
+	.size	Default_Handler, .-Default_Handler
 /******************************************************************************
 *
 * The minimal vector table for a Cortex M3.  Note that the proper constructs
