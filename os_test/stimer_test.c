@@ -4,7 +4,7 @@
 #include <kernel/task.h>
 #include <drivers/gpio/gpio.h>
 
-static int times = 0;
+//static int times = 0;
 static pl_stimer_handle_t stimer;
 static pl_stimer_handle_t stimer2;
 static struct gpio_desc *gpio_desc;
@@ -20,12 +20,11 @@ static void stimer_callback(pl_stimer_handle_t timer)
 
 	pl_softtimer_get_private_data(timer, &data);
 	pl_port_putc('A');
-	ret = pl_softtimer_start(timer, stimer_callback, &c, data);
+	ret = pl_softtimer_reload(timer, true, stimer_callback, &c, data);
 	if (ret < 0) {
 		pl_syslog_err("pl_softtimer_add failed, ret:%d\r\n", ret);
 	}
 }
-
 
 static void stimer_callback2(pl_stimer_handle_t timer)
 {
@@ -40,22 +39,11 @@ static void stimer_callback2(pl_stimer_handle_t timer)
 
 	pl_softtimer_get_private_data(timer, &data);
 	pl_port_putc('B');
-	ret = pl_softtimer_start(timer, stimer_callback2, &c, data);
+	ret = pl_softtimer_reload(timer, true, stimer_callback2, &c, data);
 	if (ret < 0) {
 		pl_syslog_err("pl_softtimer_add failed, ret:%d\r\n", ret);
 		return;
 	}
-
-	if (times++ < 1000) {
-		return;
-	}
-
-	ret = pl_softtimer_cancel(stimer);
-	if (ret < 0) {
-		pl_port_putc('C');
-	}
-
-	pl_port_putc('D');
 }
 
 static int stimer_test(void)

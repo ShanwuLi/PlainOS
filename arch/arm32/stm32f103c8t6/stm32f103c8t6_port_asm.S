@@ -52,28 +52,27 @@ pl_port_switch_context:
 
 .section .text.PendSV_Handler
 .type PendSV_Handler, %function
-
 PendSV_Handler:
+save_context:
 	cpsid i /* disbale interrupt */
-
-switch_top:
 	/* save context */
 	mrs   r0, psp
+	isb   0xf
 	stmdb r0!, {r4-r11}
 	push {lr}
 	/* r0 = pl_callee_save_curr_context_sp(sp) */
 	bl   pl_callee_save_curr_context_sp
 	pop  {lr}
-	dmb 0xF
+	dsb  0xf
+	isb  0xf
 
-switch_bottom:
+restore_context:
 	cpsie i  /* enable interrupt */
 	push {lr}
 	/* r0 = pl_callee_get_next_context() */
 	bl   pl_callee_get_next_context_sp
 	pop  {lr}
-	dmb 0xF
-
+	isb  0xf
 	cpsid i  /* disable interrupt */
 	/* restore context */
 	ldmia r0!, {r4-r11}

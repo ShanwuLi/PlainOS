@@ -22,7 +22,7 @@ void USART1_IRQHandler(void)
 
 	if(USART1->SR & (1 << 5)) {
 		recv_char = USART1->DR;
-		pl_port_putc(recv_char);
-		pl_port_putc('@');
 	}
+
+	(void)recv_char;
 }

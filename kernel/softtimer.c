@@ -67,6 +67,9 @@ static int softtimer_daemon_task(int argc, char **argv)
 
 		if (stimer_fun != NULL)
 			stimer_fun(first);
+		
+		if (first->reload)
+			pl_softtimer_start(first, first->fun, &first->timing_cnt, first->priv_data);
 	}
 
 	return 0;
@@ -94,6 +97,7 @@ pl_stimer_handle_t pl_softtimer_request(const char *name)
 	}
 
 	timer->name = name;
+	timer->reload = false;
 	list_init(&timer->node);
 
 	return (pl_stimer_handle_t)timer;
@@ -125,6 +129,30 @@ int pl_softtimer_get_private_data(pl_stimer_handle_t timer, void **data)
 }
 
 /*************************************************************************************
+ * Function Name: pl_softtimer_timer_init
+ *
+ * Description:
+ *   init soft timer.
+ * 
+ * Parameters:
+ *  @timer: handle of soft timer requested.
+ *  @fun: callback function.
+ *  @timing_cnt: the count of timing.
+ *  @priv_data: private data.
+ *
+ * Return:
+ *  void.
+ ************************************************************************************/
+static void pl_softtimer_timer_init(struct softtimer *stimer, stimer_fun_t fun,
+                                    struct count *timing_cnt, void *priv_data)
+{
+	stimer->fun = fun;
+	stimer->priv_data = priv_data;
+	stimer->timing_cnt.hi32 = timing_cnt->hi32;
+	stimer->timing_cnt.lo32 = timing_cnt->lo32;
+}
+
+/*************************************************************************************
  * Function Name: pl_softtimer_start
  *
  * Description:
@@ -153,11 +181,8 @@ int pl_softtimer_start(pl_stimer_handle_t timer, stimer_fun_t fun,
 	if (!list_is_empty(&stimer->node))
 		return -EBUSY;
 
-	stimer->fun = fun;
-	stimer->priv_data = priv_data;
-	stimer->timing_cnt.hi32 = timing_cnt->hi32;
-	stimer->timing_cnt.lo32 = timing_cnt->lo32;
 	pl_task_get_syscount(&syscount);
+	pl_softtimer_timer_init(stimer, fun, timing_cnt, priv_data);
 	pl_count_add(&stimer->reach_cnt, &syscount, timing_cnt);
 
 	pl_port_enter_critical();
@@ -174,6 +199,36 @@ int pl_softtimer_start(pl_stimer_handle_t timer, stimer_fun_t fun,
 	list_add_node_ahead(&pos->node, &stimer->node);
 out:
 	pl_port_exit_critical();
+	return OK;
+}
+
+/*************************************************************************************
+ * Function Name: pl_softtimer_reload
+ *
+ * Description:
+ *   reload soft timer.
+ * 
+ * Parameters:
+ *  @timer: handle of soft timer requested.
+ *  @reload: reload whether or not.
+ *  @fun: callback function.
+ *  @timing_cnt: the count of timing.
+ *  @priv_data: private data.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_softtimer_reload(pl_stimer_handle_t timer, bool reload, stimer_fun_t fun,
+                                      struct count *timing_cnt, void *priv_data)
+{
+	struct softtimer *stimer = (struct softtimer *)timer;
+
+	if (stimer == NULL || fun == NULL || timing_cnt == NULL)
+		return -EFAULT;
+
+	pl_softtimer_timer_init(stimer, fun, timing_cnt, priv_data);
+	stimer->reload = reload;
+
 	return OK;
 }
 
@@ -202,6 +257,7 @@ int pl_softtimer_cancel(pl_stimer_handle_t timer)
 	pl_port_enter_critical();
 	list_del_node(&stimer->node);
 	stimer->fun = NULL;
+	stimer->reload = false;
 	pl_port_exit_critical();
 	list_init(&stimer->node);
 

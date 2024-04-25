@@ -471,11 +471,10 @@ void pl_task_context_switch(void)
 	struct tcb *next_tcb;
 	struct tcb *idle_tcb;
 
-	pl_port_enter_critical();
+	pl_port_mask_interrupts();
 	hiprio = get_hiprio();
 	curr_tcb = g_task_core_blk.curr_tcb;
 	next_tcb = g_task_core_blk.ready_list[hiprio].head;
-	pl_port_exit_critical();
 
 	idle_tcb = g_task_core_blk.ready_list[PL_CFG_TASK_PRIORITIES_MAX].head;
 	if (next_tcb == idle_tcb)
@@ -483,6 +482,8 @@ void pl_task_context_switch(void)
 
 	if (curr_tcb != next_tcb)
 		pl_port_switch_context();
+
+	pl_port_unmask_interrupts();
 }
 
 /*************************************************************************************

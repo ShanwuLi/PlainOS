@@ -43,6 +43,7 @@ struct softtimer {
 	void *priv_data;
 	struct count timing_cnt;
 	struct count reach_cnt;
+	bool reload;
 };
 
 /*************************************************************************************
@@ -72,4 +73,5 @@ int pl_softtimer_core_init(void);
  *  @softtimer_ctrl: timer system controller.
  ************************************************************************************/
 struct softtimer_ctrl *pl_softtimer_get_ctrl(void);
+
 #endif /* __KERNEL_SOFTTIMER_PRIVATE_H__ */
