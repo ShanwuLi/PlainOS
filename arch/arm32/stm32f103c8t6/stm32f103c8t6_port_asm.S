@@ -63,17 +63,17 @@ save_context:
 	/* r0 = pl_callee_save_curr_context_sp(sp) */
 	bl   pl_callee_save_curr_context_sp
 	pop  {lr}
+	cpsie i  /* enable interrupt */
 	dsb  0xf
 	isb  0xf
 
 restore_context:
-	cpsie i  /* enable interrupt */
+	cpsid i  /* disable interrupt */
 	push {lr}
 	/* r0 = pl_callee_get_next_context() */
 	bl   pl_callee_get_next_context_sp
 	pop  {lr}
 	isb  0xf
-	cpsid i  /* disable interrupt */
 	/* restore context */
 	ldmia r0!, {r4-r11}
 	msr   psp, r0
