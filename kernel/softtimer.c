@@ -32,6 +32,31 @@ SOFTWARE.
 
 static struct softtimer_ctrl softtimer_ctrl;
 
+
+/*************************************************************************************
+ * Function Name: softtimer_consume_node
+ *
+ * Description:
+ *   consume a node of softtimer.
+ * 
+ * Parameters:
+ *  @first: the first of softtimer list node.
+ *
+ * Return:
+ *  callback function of softtimer.
+ ************************************************************************************/
+static stimer_fun_t softtimer_consume_node(struct softtimer *first)
+{
+	stimer_fun_t stimer_fun;
+
+	list_del_node(&first->node);
+	list_init(&first->node);
+	stimer_fun = first->fun;
+	first->fun = NULL;
+
+	return stimer_fun;
+}
+
 /*************************************************************************************
  * Function Name: softtimer_daemon_task
  *
@@ -52,22 +77,23 @@ static int softtimer_daemon_task(int argc, char **argv)
 	stimer_fun_t stimer_fun;
 
 	while (true) {
+		/* if list of softtimer is empty, we need to suspend daemon task */
 		if (list_is_empty(&softtimer_ctrl.head)) {
 			pl_task_pend(NULL);
 			continue;
 		}
 
+		/* get the first node from the softtimer list */
 		pl_port_enter_critical();
 		first = list_first_entry(&softtimer_ctrl.head, struct softtimer, node);
-		list_del_node(&first->node);
-		list_init(&first->node);
-		stimer_fun = first->fun;
-		first->fun = NULL;
+		stimer_fun = softtimer_consume_node(first);
 		pl_port_exit_critical();
 
+		/* call callback */
 		if (stimer_fun != NULL)
 			stimer_fun(first);
-		
+
+		/* reload softtimer */
 		if (first->reload)
 			pl_softtimer_start(first, first->fun, &first->timing_cnt, first->priv_data);
 	}
