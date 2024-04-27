@@ -9,8 +9,6 @@ static pl_stimer_handle_t stimer;
 static pl_stimer_handle_t stimer2;
 static struct gpio_desc *gpio_desc;
 
-
-
 static void stimer_callback(pl_stimer_handle_t timer)
 {
 	int ret;

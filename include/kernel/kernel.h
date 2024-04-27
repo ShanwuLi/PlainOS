@@ -44,7 +44,7 @@ SOFTWARE.
  *   void
  ************************************************************************************/
 #define container_of(ptr, struct_type, member) \
-	((struct_type *)((char *)ptr - (char *)(&(((struct_type *)0)->member))))
+	((struct_type *)((char *)(ptr) - (char *)(&(((struct_type *)0)->member))))
 
 typedef int (*main_t)(int argc, char *argv[]);
 

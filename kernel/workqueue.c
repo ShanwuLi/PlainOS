@@ -86,14 +86,14 @@ static int workqueue_task(int argc, char **argv)
 int pl_workqueue_init(struct workqueue *wq, const char *name, u16_t prio,
             size_t wq_stack_sz, u32_t wq_fifo_cap, struct work **wq_fifo)
 {
-	if (wq == NULL)
+	if (wq == NULL || wq_fifo == NULL)
 		return -EFAULT;
 
 	wq->fifo_in = 0;
 	wq->fifo_out = 0;
 	wq->fifo_cap = wq_fifo_cap;
 	wq->fifo = wq_fifo;
-	wq->name = name;
+	wq->name = (name == NULL) ? "anonymous wq" : name;
 
 	wq->exec_thread = pl_task_sys_create(name, workqueue_task, prio,
 	                                     wq_stack_sz, 1, (char **)wq);
@@ -124,7 +124,7 @@ pl_wq_handle pl_workqueue_create(const char *name, u16_t prio, size_t wq_stack_s
 	int ret;
 	struct workqueue *wq;
 
-	if (!is_power_of_2(wq_fifo_cap))
+	if (!is_power_of_2(wq_fifo_cap) || wq_fifo_cap == 0)
 		return NULL;
 
 	wq = pl_mempool_malloc(g_pl_default_mempool, sizeof(struct workqueue) +
@@ -286,6 +286,6 @@ int pl_sys_wq_init(void)
 		return ret;
 	}
 
-	pl_early_syslog_info("sys workqueue init successfully\r\n");
+	pl_early_syslog_info("sys workqueue init done\r\n");
 	return OK;
 }
