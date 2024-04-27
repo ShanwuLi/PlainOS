@@ -26,25 +26,23 @@ SOFTWARE.
 /*************************************************************************************
  * kernel definitions
  *************************************************************************************/
-
-/* maximum priority of plainos */
 #define PL_CFG_ASSERT
 #define PL_CFG_OS_CHAR_LOGO
-#define PL_SYSTICK_TIME_SLICE_US                (100)
-#define PL_CFG_DEFAULT_MEMPOOL_SIZE             (4 * 1024)
+#define PL_SYSTICK_TIME_SLICE_US                (10)
+#define PL_CFG_DEFAULT_MEMPOOL_SIZE             (10 * 1024)
 #define PL_CFG_DEFAULT_MEMPOOL_GRAIN_ORDER      (4)
-#define PL_CFG_MAX_TASKS_NUM                    (20u)
+#define PL_CFG_MAX_TASKS_NUM                    (900u)
 #define PL_CFG_SYS_RSVD_HIGHEST_PRIOTITY        (2u)
-#define PL_CFG_TASK_PRIORITIES_MAX              (10u)
+#define PL_CFG_TASK_PRIORITIES_MAX              (99u)
 #define PL_CFG_INIT_TASK_STACK_SIZE             (512)
 #define PL_CFG_IDLE_TASK_STACK_SIZE             (512)
-#define PL_CFG_CPU_RATE_INTERVAL_TICKS          (512)
+#define PL_CFG_CPU_RATE_INTERVAL_TICKS          (102400)
 #define PL_CFG_SOFTTIMER_DAEMON_TASK_STACK_SIZE (512)
-#define PL_CFG_HI_WORKQUEUE_TASK_STACK_SIZE     (128)
-#define PL_CFG_LO_WORKQUEUE_TASK_STACK_SIZE     (128)
-#define PL_CFG_HI_WORKQUEUE_TASK_PRIORITY       (0)
-#define PL_CFG_HI_WORKQUEUE_FIFO_CAPACITY       (4)
-#define PL_CFG_LO_WORKQUEUE_TASK_PRIORITY       (10)
-#define PL_CFG_LO_WORKQUEUE_FIFO_CAPACITY       (4)
+#define PL_CFG_HI_WORKQUEUE_TASK_STACK_SIZE     (512)
+#define PL_CFG_HI_WORKQUEUE_FIFO_CAPACITY       (128)
+#define PL_CFG_LO_WORKQUEUE_TASK_STACK_SIZE     (512)
+#define PL_CFG_LO_WORKQUEUE_TASK_PRIORITY       (PL_CFG_TASK_PRIORITIES_MAX)
+#define PL_CFG_LO_WORKQUEUE_FIFO_CAPACITY       (128)
 //#define PL_CFG_SYSLOG_ANSI_COLOR
+
 #endif /* __PLAINOS_CONFIG_H__ */

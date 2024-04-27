@@ -980,13 +980,8 @@ static void update_softtimer_list(void)
 
 	/* update soft timer list */
 	list_for_each_entry(pos, &g_task_core_blk.timer_list, struct softtimer, node) {
-
 		if (pl_count_cmp(&pos->reach_cnt, &g_task_core_blk.systicks) > 0)
 			break;
-
-		/* replaced by list_move_chain_to_node_behind because it's more fast */
-		//list_del_node(&pos->node);
-		//list_add_node_at_tail(&timer_ctrl->head, &pos->node);
 	}
 
 	/* insert timer node to daemon list and wakeup the daemon task */

@@ -226,7 +226,7 @@ pl_mempool_handle_t pl_mempool_init(void* pool, ushrt_t id, size_t pool_size,
 	mp->blk_max_bits = mp->blk_first_bits + blk_num;
 	mp->data_pool = mp->blk_max_bits + blk_num;
 	mp->data_pool = (uchar_t*)pl_align_address(mp->data_pool, sizeof(uintptr_t) << 2);
-	mp->data_pool_size = pool_size - ((size_t)mp->data_pool - (size_t)mp);
+	mp->data_pool_size = pool_size - ((size_t)(mp->data_pool) - (size_t)mp);
 	mp->data_pool_size &= (~(((size_t)1 << grain_order) - 1));
 
 	mempool_blk_init(mp);
@@ -499,8 +499,8 @@ void* pl_mempool_malloc(pl_mempool_handle_t mempool, size_t size)
 	/* get bit offset */
 	bit_offset = get_bit_offset(mp, blk_idx, mp->grain_order, alloc_size);
 	data_addr = (struct mempool_data*)(mp->data_pool +
-		(((blk_idx << mp->grain_order) * UINTPTR_T_BITS) |
-			(bit_offset << mp->grain_order)));
+	             (((blk_idx << mp->grain_order) * UINTPTR_T_BITS) |
+	               (bit_offset << mp->grain_order)));
 
 	/* set data structure */
 	data_addr->bit_idx = (blk_idx * UINTPTR_T_BITS) | bit_offset;
