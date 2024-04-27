@@ -28,12 +28,11 @@ void USART1_Init(uint_t USART1_BaudRate)
 
 int USART1_PrintChar(char c)
 {
-	uint_t times = 0;
 	USART1->DR = c;
-
-	for (times = 0; times < 120000; times++)
+	while(1) {
 		if(USART1->SR & (1 << 6)) //USART_SR第六位表示Transmission Complete
 			return 0;
+	}
 
 	return -1;
 }
