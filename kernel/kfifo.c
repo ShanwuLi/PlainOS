@@ -136,7 +136,7 @@ uint_t kfifo_len(pl_kfifo_handle fifo)
 {
 	struct kfifo *kfifo = (struct kfifo *)fifo;
 
-	return (kfifo->in - kfifo->out);
+	return (kfifo->in - kfifo->out) & (kfifo->size - 1);
 }
 
 /*************************************************************************************

@@ -839,7 +839,7 @@ int pl_task_kill(tid_t tid)
 	pl_port_enter_critical();
 	if (tcb->curr_state == PL_TASK_STATE_EXIT) {
 		pl_port_exit_critical();
-		return -EAGAIN;
+		return ERROR;
 	}
 
 	pl_task_remove_tcb_from_rdylist(tcb);

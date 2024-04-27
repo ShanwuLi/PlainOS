@@ -44,7 +44,6 @@ void pl_port_enter_critical(void)
 {
 	pl_port_mask_interrupts();
 	++pl_critical_ref;
-	pl_port_cpu_isb();
 }
 
 /*************************************************************************************
@@ -62,7 +61,6 @@ void pl_port_exit_critical(void)
 	--pl_critical_ref;
 	if (pl_critical_ref == 0)
 		pl_port_unmask_interrupts();
-	pl_port_cpu_isb();
 }
 
 //RTS OS滴答定时器初始化，移植时需要用户自己实现

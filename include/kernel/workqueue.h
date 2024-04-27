@@ -29,7 +29,7 @@ SOFTWARE.
 typedef void *pl_work_handle;
 typedef void *pl_wq_handle;
 typedef void (*pl_work_fun_t)(pl_work_handle work);
-typedef struct {void *dummy[4];} pl_work_t;
+typedef struct {void *dummy[2];} pl_work_t;
 
 /*************************************************************************************
  * Function Name: pl_workqueue_create
@@ -52,11 +52,13 @@ extern pl_wq_handle g_pl_sys_lowq_handle;
  *  @name: workqueue name.
  *  @proi: priority of workqueue.
  *  @wq_stack_sz: workqueue task stack size.
+ *  @wq_fifo_cap: capacity of workqueue fifo.
  *
  * Return:
  *  @pl_wq_handle: handle of workqueue requested.
  ************************************************************************************/
-pl_wq_handle pl_workqueue_create(const char *name, u16_t prio, size_t wq_stack_sz);
+pl_wq_handle pl_workqueue_create(const char *name, u16_t prio, size_t wq_stack_sz,
+                                 u32_t wq_fifo_cap);
 
 /*************************************************************************************
  * Function Name: pl_workqueue_destroy

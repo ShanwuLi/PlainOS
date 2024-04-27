@@ -26,19 +26,21 @@ SOFTWARE.
 
 #include <kernel/kernel.h>
 #include <kernel/task.h>
-#include <kernel/list.h>
+#include <kernel/kfifo.h>
 #include <kernel/workqueue.h>
 
-struct workqueue {
-	struct list_node work_list;
-	tid_t exec_thread;
-	const char *name;
-};
-
 struct work {
-	struct list_node node;
 	pl_work_fun_t fun;
 	void *priv_data;
+};
+
+struct workqueue {
+	tid_t exec_thread;
+	u32_t fifo_cap;
+	u32_t fifo_in;
+	u32_t fifo_out;
+	const char *name;
+	struct work **fifo;
 };
 
 /*************************************************************************************
@@ -66,10 +68,13 @@ int pl_sys_wq_init(void);
  *  @name: name of workqueue.
  *  @prio: priority of workqueue.
  *  @wq_stack_sz: workqueue task stack size.
+ *  @wq_fifo_cap: capacity of workqueue fifo.
+ *  @wq_fifo: fifo buffer of workqueue.
  *
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_workqueue_init(struct workqueue *wq, const char *name, u16_t prio, size_t wq_stack_sz);
+int pl_workqueue_init(struct workqueue *wq, const char *name, u16_t prio,
+            size_t wq_stack_sz, u32_t wq_fifo_cap, struct work **wq_fifo);
 
 #endif /* __KERNEL_WORKQUEUE_PRIVATE_H__ */

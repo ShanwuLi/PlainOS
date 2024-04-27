@@ -30,8 +30,11 @@ SOFTWARE.
 #include "workqueue.h"
 #include "task.h"
 
-struct workqueue pl_sys_hiwq;
-struct workqueue pl_sys_lowq;
+static struct workqueue pl_sys_hiwq;
+static struct workqueue pl_sys_lowq;
+static struct work *pl_sys_hiwq_fifo[PL_CFG_HI_WORKQUEUE_FIFO_CAPACITY];
+static struct work *pl_sys_lowq_fifo[PL_CFG_LO_WORKQUEUE_FIFO_CAPACITY];
+
 pl_wq_handle g_pl_sys_hiwq_handle = (pl_wq_handle)&pl_sys_hiwq;
 pl_wq_handle g_pl_sys_lowq_handle = (pl_wq_handle)&pl_sys_lowq;
 
@@ -39,26 +42,25 @@ static int workqueue_task(int argc, char **argv)
 {
 	USED(argc);
 	USED(argv);
-	pl_work_fun_t work_fun;
 	struct work *first;
 	struct workqueue *wq = (struct workqueue *)argv;
 
 	while (true) {
-		if (list_is_empty(&wq->work_list)) {
+		/* if work fifo is empty, we need to suspend wq task */
+		if (wq->fifo_out == wq->fifo_in) {
 			pl_task_pend(NULL);
 			continue;
 		}
 
+		/* get the first work */
 		pl_port_enter_critical();
-		first = list_first_entry(&wq->work_list, struct work, node);
-		list_del_node(&first->node);
-		list_init(&first->node);
-		work_fun = first->fun;
-		first->fun = NULL;
+		first = wq->fifo[wq->fifo_out & (wq->fifo_cap - 1)];
+		++wq->fifo_out;
 		pl_port_exit_critical();
 
-		if (work_fun != NULL)
-			work_fun(first);
+		/* call fun of callback */
+		if (first->fun != NULL)
+			first->fun(first);
 	}
 
 	return 0;
@@ -75,18 +77,26 @@ static int workqueue_task(int argc, char **argv)
  *  @name: name of workqueue.
  *  @prio: priority of workqueue.
  *  @wq_stack_sz: workqueue task stack size.
+ *  @wq_fifo_cap: capacity of workqueue fifo.
+ *  @wq_fifo: fifo buffer of workqueue.
  *
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_workqueue_init(struct workqueue *wq, const char *name, u16_t prio, size_t wq_stack_sz)
+int pl_workqueue_init(struct workqueue *wq, const char *name, u16_t prio,
+            size_t wq_stack_sz, u32_t wq_fifo_cap, struct work **wq_fifo)
 {
 	if (wq == NULL)
 		return -EFAULT;
 
+	wq->fifo_in = 0;
+	wq->fifo_out = 0;
+	wq->fifo_cap = wq_fifo_cap;
+	wq->fifo = wq_fifo;
 	wq->name = name;
-	list_init(&wq->work_list);
-	wq->exec_thread = pl_task_sys_create(name, workqueue_task, prio, wq_stack_sz, 1, (char **)wq);
+
+	wq->exec_thread = pl_task_sys_create(name, workqueue_task, prio,
+	                                     wq_stack_sz, 1, (char **)wq);
 	if (wq->exec_thread == NULL)
 		return ERROR;
 
@@ -103,22 +113,28 @@ int pl_workqueue_init(struct workqueue *wq, const char *name, u16_t prio, size_t
  *  @name: workqueue name.
  *  @proi: priority of workqueue.
  *  @wq_stack_sz: workqueue task stack size.
+ *  @wq_fifo_cap: capacity of workqueue fifo.
  *
  * Return:
  *  @pl_wq_handle: handle of workqueue requested.
  ************************************************************************************/
-pl_wq_handle pl_workqueue_create(const char *name, u16_t prio, size_t wq_stack_sz)
+pl_wq_handle pl_workqueue_create(const char *name, u16_t prio, size_t wq_stack_sz,
+                                 u32_t wq_fifo_cap)
 {
+	int ret;
 	struct workqueue *wq;
 
-	wq = pl_mempool_malloc(g_pl_default_mempool, sizeof(struct workqueue));
+	if (!is_power_of_2(wq_fifo_cap))
+		return NULL;
+
+	wq = pl_mempool_malloc(g_pl_default_mempool, sizeof(struct workqueue) +
+	                       sizeof(struct work *) * wq_fifo_cap);
 	if (wq == NULL)
 		return NULL;
 
-	list_init(&wq->work_list);
-	wq->name = name;
-	wq->exec_thread = pl_task_create(name, workqueue_task, prio, wq_stack_sz, 1, (char **)wq);
-	if (wq->exec_thread == NULL)
+	ret = pl_workqueue_init(wq, name, prio, wq_stack_sz, wq_fifo_cap,
+	                        (struct work **)(wq + 1));
+	if (ret < 0)
 		return NULL;
 
 	return wq;
@@ -138,14 +154,17 @@ pl_wq_handle pl_workqueue_create(const char *name, u16_t prio, size_t wq_stack_s
  ************************************************************************************/
 int pl_workqueue_destroy(pl_wq_handle workqueue)
 {
+	int ret;
 	struct workqueue *wq = (struct workqueue *)workqueue;
 
 	if (wq == NULL || wq == &pl_sys_hiwq || wq == &pl_sys_lowq)
 		return -EFAULT;
 
-	(void)pl_task_kill(wq->exec_thread);
-	pl_mempool_free(g_pl_default_mempool, wq);
+	ret = pl_task_kill(wq->exec_thread);
+	if (ret < 0)
+		return -EINVAL;
 
+	pl_mempool_free(g_pl_default_mempool, wq);
 	return OK;
 }
 
@@ -170,7 +189,6 @@ int pl_work_init(pl_work_handle work, pl_work_fun_t fun, void *priv_data)
 
 	wk->fun = fun;
 	wk->priv_data = priv_data;
-	list_init(&wk->node);
 
 	return OK;
 }
@@ -196,49 +214,15 @@ int pl_work_add(pl_wq_handle workqueue, pl_work_handle work)
 	if (wk == NULL || wq == NULL)
 		return -EFAULT;
 
-	if (!list_is_empty(&wk->node) && wk->fun != NULL)
-		return -EEXIST;
+	if (wq->fifo_cap - ((wq->fifo_in - wq->fifo_out) & (wq->fifo_cap - 1)) <= 1)
+		return -EFULL;
 
 	pl_port_enter_critical();
-	list_add_node_at_tail(&wq->work_list, &wk->node);
+	wq->fifo[wq->fifo_in & (wq->fifo_cap - 1)] = wk;
+	++wq->fifo_in;
 	pl_port_exit_critical();
+
 	pl_task_resume(wq->exec_thread);
-
-	return OK;
-}
-
-/*************************************************************************************
- * Function Name: pl_work_cancel
- *
- * Description:
- *   cancel a work int the workqueue.
- * 
- * Parameters:
- *  @workqueue: workqueue handle.
- *  @work: work.
- *
- * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
-int pl_work_cancel(pl_wq_handle workqueue, pl_work_handle work)
-{
-	struct work *wk = (struct work *)work;
-	struct workqueue *wq = (struct workqueue *)workqueue;
-
-	if (wk == NULL || wq == NULL)
-		return -EFAULT;
-
-	if (list_is_empty(&wk->node)) {
-		if (wk->fun != NULL)
-			return OK;
-
-		return ERROR;
-	}
-
-	pl_port_enter_critical();
-	list_del_node(&wk->node);
-	pl_port_exit_critical();
-
 	return OK;
 }
 
@@ -281,8 +265,10 @@ int pl_sys_wq_init(void)
 {
 	int ret;
 
-	ret = pl_workqueue_init(&pl_sys_hiwq, "pl_sys_hiwq",
-	                        1, PL_CFG_HI_WORKQUEUE_TASK_STACK_SIZE);
+	ret = pl_workqueue_init(&pl_sys_hiwq, "pl_sys_hiwq", 1,
+	                        PL_CFG_HI_WORKQUEUE_TASK_STACK_SIZE,
+	                        PL_CFG_HI_WORKQUEUE_FIFO_CAPACITY,
+	                        pl_sys_hiwq_fifo);
 	if (ret < 0) {
 		g_pl_sys_hiwq_handle = NULL;
 		pl_early_syslog_err("hi workqueue request failed, ret:%d\r\n", ret);
@@ -291,7 +277,9 @@ int pl_sys_wq_init(void)
 
 	ret = pl_workqueue_init(&pl_sys_lowq, "pl_sys_lowq",
 	                        PL_CFG_LO_WORKQUEUE_TASK_PRIORITY,
-	                        PL_CFG_LO_WORKQUEUE_TASK_STACK_SIZE);
+	                        PL_CFG_LO_WORKQUEUE_TASK_STACK_SIZE,
+	                        PL_CFG_LO_WORKQUEUE_FIFO_CAPACITY,
+	                        pl_sys_lowq_fifo);
 	if (ret < 0) {
 		g_pl_sys_lowq_handle = NULL;
 		pl_early_syslog_err("hi workqueue request failed, ret:%d\r\n", ret);
