@@ -80,12 +80,15 @@ void SysTick_Handler(void)
 	pl_callee_systick_expiration();
 }
 
-void *pl_port_task_stack_init(void *task, void *task_stack,
-                               size_t stack_size, void *param)
+void *pl_port_task_stack_init(void *task, void *task_stack, size_t stack_size,
+                    void **context_sp_min, void **context_sp_max, void *param)
 {
 	u32_t *stack = (u32_t *)task_stack;
 
+	*context_sp_min = stack;
 	stack       +=  stack_size / sizeof(u32_t);
+	*context_sp_max = stack;
+
 	*(--stack)  = (u32_t)(1<<24);  /* XPSR */
 	*(--stack)  = (u32_t)task;     /* PC */
 	*(--stack)  = (u32_t)0;        /* LR */

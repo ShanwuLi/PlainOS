@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 # please replace the toolchain to your own.
-CROSS_COMPILE := arm-none-eabi-#avr
+CROSS_COMPILE := avr-
 CC       := $(CROSS_COMPILE)gcc
 OBJDUMP  := $(CROSS_COMPILE)objdump
 CP       := $(CROSS_COMPILE)objcopy
@@ -29,13 +29,12 @@ SIZE     := $(CROSS_COMPILE)size
 OPTIMIZE := -O3
 DEBUG    := -g#-DNDEBUG to close debug in DEFINE.
 
-ARCH     := arm32
-MCU      := -mcpu=cortex-m3#-mmcu=atmega2560
-CHIP     := stm32f103c8t6#atmega2560
+ARCH     := avr
+MCU      := -mmcu=atmega2560
+CHIP     := atmega2560
 
-# TEST CONFIGURATIONS
-PL_MK_CFG_OS_TEST = y
-PL_MK_CFG_OS_MEMPOOL_TEST = y
+PL_MK_CFG_OS_TEST = n
+PL_MK_CFG_OS_MEMPOOL_TEST = n
 PL_MK_CFG_OS_TASK_TEST = y
 PL_MK_CFG_OS_SOFTTIMER_TEST = y
 PL_MK_CFG_OS_KFIFO_TEST = y

@@ -100,11 +100,15 @@ void pl_port_exit_critical(void)
 	pl_port_cpu_isb();
 }
 
-void *pl_port_task_stack_init(void *task, void *task_stack,
-                               size_t stack_size, void *param)
+void *pl_port_task_stack_init(void *task, void *task_stack, size_t stack_size,
+                    void **context_sp_min, void **context_sp_max, void *param)
 {
 	char *stack = task_stack;
+
+    *context_sp_min = stack;
     stack       +=  stack_size - 1;
+    *context_sp_max = stack;
+
     *(stack--)  =   (u8_t)((u16_t)task);
     *(stack--)  =   (u8_t)((u16_t)task>>8);
     *(stack--)  =   (u8_t)(0);

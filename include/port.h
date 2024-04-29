@@ -324,16 +324,18 @@ void pl_port_switch_context(void);
  *       task_stack       task_stack + regs                task_stack + stack_size
  
  * Parameters:
- *  @task_entry: the task entry of initialization.
+ *  @task: the task entry of initialization.
  *  @task_stack: task stack.
+ *  @context_sp_min: minimum stack pointer used to check stack overflow.
+ *  @context_sp_max: maximum stack pointer used to check stack overflow.
  *  @stack_size: stack size.
  *  @param: parameter passed.
  *
  * Return:
  *  pointer to the task_stack + regs.
  ************************************************************************************/
-void *pl_port_task_stack_init(void *task_entry, void *task_stack,
-                              size_t stack_size, void *param);
+void *pl_port_task_stack_init(void *task, void *task_stack, size_t stack_size,
+                    void **context_sp_min, void **context_sp_max, void *param);
 
 
 #endif /* __PLAINOS_PORT_H__ */

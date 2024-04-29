@@ -49,6 +49,8 @@ enum task_state {
  *
  * Members:
  *   @context_sp: task stack pointer.
+ *   @context_sp_min: minimum stack pointer used to check stack overflow.
+ *   @context_sp_max: maximum stack pointer used to check stack overflow.
  *   @name: task name.
  *   @parent: pointer to parent task.
  *   @task: task routine.
@@ -57,12 +59,13 @@ enum task_state {
  *   @node: list node of the same priority tcb.
  *   @curr_state: current state of system.
  *   @prio: priority of the task, support priority up to 4096.
- *   @signal: signal of the task received.
  *   @delay_ticks: high/low 32bit ticks of delay.
  *
  ************************************************************************************/
 struct tcb {
 	void *context_sp;
+	void *context_sp_min;
+	void *context_sp_max;
 	const char *name;
 	struct tcb *parent;
 	main_t task;
@@ -73,7 +76,6 @@ struct tcb {
 	struct list_node node;
 	u8_t curr_state;
 	u16_t prio;
-	uint_t signal;
 	struct count delay_ticks;
 };
 

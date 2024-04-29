@@ -187,6 +187,31 @@ static u16_t get_hiprio(void)
 	return hiprio;
 }
 
+#ifdef PL_CFG_CHECK_STACK_OVERFLOW
+/*************************************************************************************
+ * Function Name: pl_check_stack_overflow
+ * Description: check stack overflow whether or not.
+ *
+ * Parameters:
+ *   @context_sp: context stack pointer.
+ *   @tcb: task control block.
+ *
+ * Return:
+ *   not zero: stack overflow.
+ *   zero: not overflow.
+ ************************************************************************************/
+static int pl_check_stack_overflow(void *context_sp, struct tcb *tcb)
+{
+	if (context_sp < tcb->context_sp_min)
+		return context_sp - tcb->context_sp_min;
+
+	if (context_sp > tcb->context_sp_max)
+		return context_sp - tcb->context_sp_max;
+
+	return 0;
+}
+#endif /* PL_CFG_CHECK_STACK_OVERFLOW */
+
 /*************************************************************************************
  * Function Name: pl_callee_save_curr_context_sp
  * Description: update context and return context_sp of the current task.
@@ -199,7 +224,20 @@ static u16_t get_hiprio(void)
  ************************************************************************************/
 void pl_callee_save_curr_context_sp(void *context_sp)
 {
-	g_task_core_blk.curr_tcb->context_sp = context_sp;
+	struct tcb *tcb = g_task_core_blk.curr_tcb;
+
+#ifdef PL_CFG_CHECK_STACK_OVERFLOW
+	/* check stack overflow */
+	int stack_overflow = pl_check_stack_overflow(context_sp, tcb);
+	if (stack_overflow != 0) {
+		pl_port_enter_critical();
+		pl_early_syslog_err("\r\nOH MY GOD, task[%s] stack overflow\r\n", tcb->name);
+		pl_early_syslog_err("overflow size:%d\r\n", stack_overflow);
+		while(1);
+	}
+#endif /* PL_CFG_CHECK_STACK_OVERFLOW */
+
+	tcb->context_sp = context_sp;
 }
 
 /*************************************************************************************
@@ -552,7 +590,6 @@ static void task_init_tcb(const char *name, main_t task, u16_t prio,
 	tcb->task = task;
 	tcb->argc = argc;
 	tcb->argv = argv;
-	tcb->signal = 0;
 	tcb->delay_ticks.hi32 = 0;
 	tcb->delay_ticks.lo32 = 0;
 	tcb->wait_for_task_ret = ERROR;
@@ -580,7 +617,8 @@ static void task_init_and_create(const char *name, main_t task, u16_t prio,
                                  struct tcb *tcb, void *stack, size_t stack_size,
                                  int argc, char *argv[])
 {
-	stack = pl_port_task_stack_init(task_entry, stack, stack_size, tcb);
+	stack = pl_port_task_stack_init(task_entry, stack, stack_size, &tcb->context_sp_min,
+	                                &tcb->context_sp_max, tcb);
 	task_init_tcb(name, task, prio, tcb, stack, argc, argv);
 
 	pl_port_enter_critical();
@@ -1147,6 +1185,8 @@ int pl_task_core_init(void)
 	list_init(&g_task_core_blk.pend_list);
 	list_init(&g_task_core_blk.timer_list);
 	list_init(&g_task_core_blk.exit_list);
+	first_dummy_tcb.context_sp_min = NULL;
+	first_dummy_tcb.context_sp_max = (void *)UINTPTR_T_MAX;
 
 	list_init(&delay_dummy_tcb.node);
 	delay_dummy_tcb.delay_ticks.hi32 = UINT32_MAX;
