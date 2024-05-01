@@ -16,7 +16,7 @@ static int idle_task2(int argc, char *argv[])
 {
 	argc = 0;
 
-	while(argc < 100) {
+	while(argc < 10) {
 		//pl_schedule_lock();
 		pl_syslog_info("%s\r\n", argv[0]);
 		idle_task2_run_count++;
