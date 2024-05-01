@@ -490,6 +490,30 @@ void pl_task_schedule_unlock(void)
 }
 
 /*************************************************************************************
+ * Function Name: pl_task_exit_tcb_free
+ * Description: free exited tcb.
+ *
+ * Parameters:
+ *   void.
+ *
+ * Return:
+ *   void.
+ ************************************************************************************/
+static void pl_task_exit_tcb_free(void)
+{
+	struct tcb *pos;
+	struct tcb *tmp;
+
+	if (list_is_empty(&g_task_core_blk.exit_list))
+		return;
+
+	list_for_each_entry_safe(pos, tmp, &g_task_core_blk.exit_list, struct tcb, node) {
+		list_del_node(&pos->node);
+		pl_mempool_free(g_pl_default_mempool, pos);
+	}
+}
+
+/*************************************************************************************
  * Function Name: pl_task_context_switch
  * Description: switch task.
  *
@@ -505,6 +529,9 @@ void pl_task_context_switch(void)
 	struct tcb *curr_tcb;
 	struct tcb *next_tcb;
 	struct tcb *idle_tcb;
+
+	if (g_task_core_blk.sched_lock_ref != 0)
+		return;
 
 	pl_port_mask_interrupts();
 	hiprio = get_hiprio();
@@ -646,12 +673,17 @@ tid_t pl_task_sys_create_with_stack(const char *name, main_t task, u16_t prio,
 {
 	struct tcb *tcb;
 
+	/* free exited tcb when create task whether failure or success */
+	pl_task_exit_tcb_free();
+
+	/* check parameters */
 	if (name == NULL || task == NULL || stack == NULL ||
 	    prio > PL_CFG_TASK_PRIORITIES_MAX) {
 		pl_early_syslog_err("param is invalid\r\n");
 		return NULL;
 	}
 
+	/* alloc memory */
 	tcb = (struct tcb *)pl_mempool_malloc(g_pl_default_mempool, sizeof(struct tcb));
 	if (tcb == NULL) {
 		pl_early_syslog_err("no mem to alloc\r\n");
@@ -713,11 +745,16 @@ tid_t pl_task_sys_create(const char *name, main_t task, u16_t prio,
 	size_t tcb_actual_size;
 	struct tcb *tcb_and_stack;
 
+	/* free exited tcb when create task whether failure or success */
+	pl_task_exit_tcb_free();
+
+	/* check parameters */
 	if (name == NULL || task == NULL || prio > PL_CFG_TASK_PRIORITIES_MAX) {
 		pl_early_syslog_err("param is invalid\r\n");
 		return NULL;
 	}
 
+	/* align address and alloc memory */
 	tcb_actual_size = pl_align_size(sizeof(struct tcb), sizeof(uintptr_t) << 1);
 	tcb_and_stack = pl_mempool_malloc(g_pl_default_mempool, tcb_actual_size + stack_size);
 	if (tcb_and_stack == NULL)
