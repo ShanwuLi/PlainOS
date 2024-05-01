@@ -1165,6 +1165,35 @@ int pl_task_get_cpu_rate(u32_t *int_part, u32_t *deci_part)
 }
 
 /*************************************************************************************
+ * Function Name: pl_task_init_dummy_tcb
+ * Description: initialize dummy delay and first tcb.
+ *
+ * Parameters:
+ *   @delay_dummy_tcb: delay dummy tcb.
+ *   @first_dummy_tcb: first dummy tcb.
+ *
+ * Return:
+ *   void.
+ ************************************************************************************/
+static void pl_task_init_dummy_tcb(struct tcb *delay_dummy_tcb,
+                                   struct tcb *first_dummy_tcb)
+{
+	/* init delay tcb */
+	list_init(&delay_dummy_tcb->node);
+	delay_dummy_tcb->delay_ticks.hi32 = UINT32_MAX;
+	delay_dummy_tcb->delay_ticks.lo32 = UINT32_MAX;
+	delay_dummy_tcb->name = "delay_head";
+
+	/* init first dummy tcb */
+	list_init(&first_dummy_tcb->node);
+	first_dummy_tcb->argc = 0;
+	first_dummy_tcb->argv = NULL;
+	first_dummy_tcb->context_sp_min = NULL;
+	first_dummy_tcb->context_sp_max = (void *)UINTPTR_T_MAX;
+	first_dummy_tcb->name = "first_dummy";
+}
+
+/*************************************************************************************
  * Function Name: pl_task_core_init
  * Description: initialize task component.
  *
@@ -1185,14 +1214,11 @@ int pl_task_core_init(void)
 	list_init(&g_task_core_blk.pend_list);
 	list_init(&g_task_core_blk.timer_list);
 	list_init(&g_task_core_blk.exit_list);
-	first_dummy_tcb.context_sp_min = NULL;
-	first_dummy_tcb.context_sp_max = (void *)UINTPTR_T_MAX;
 
-	list_init(&delay_dummy_tcb.node);
-	delay_dummy_tcb.delay_ticks.hi32 = UINT32_MAX;
-	delay_dummy_tcb.delay_ticks.lo32 = UINT32_MAX;
-	delay_dummy_tcb.name = "delay_head";
+	/* init delay_dummy_tcb and first_dummy_tcb */
+	pl_task_init_dummy_tcb(&delay_dummy_tcb, &first_dummy_tcb);
 
+	/* init task core block */
 	g_task_core_blk.curr_tcb = &first_dummy_tcb;
 	g_task_core_blk.systicks.hi32 = 0;
 	g_task_core_blk.systicks.lo32 = 0;
