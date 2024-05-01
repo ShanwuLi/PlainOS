@@ -34,7 +34,7 @@ SOFTWARE.
 
 ////////////////////////////// macros need to implement //////////////////////////////
 /*************************************************************************************
- * Function Name: pl_port_cpu_barrier
+ * Function Name: pl_port_compile_barrier
  * 
  * Description:
  *   compiler barrier.
@@ -45,7 +45,7 @@ SOFTWARE.
  * Return:
  *   void.
  ************************************************************************************/
-#define pl_port_cpu_barrier   asm volatile("": : :"memory")
+#define pl_port_compile_barrier   asm volatile("": : :"memory")
 
 //////////////////////////////////// extern  ports ///////////////////////////////////
 /*************************************************************************************

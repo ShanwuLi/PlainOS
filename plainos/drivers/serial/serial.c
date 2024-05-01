@@ -21,35 +21,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef __DRIVER_UART_H__
-#define __DRIVER_UART_H__
-
-#include <types.h>
-
-
-
-
-struct uart_client {
-	uchar_t id;
-	uchar_t parity_mode;
-	uchar_t data_bits;
-	uchar_t stop_bits;
-	uint_t baud_rate;
-	void *private;
-};
-
-typedef int (*uart_recv_callback_t)(struct uart_client *client, void *arg);
-
-struct uart_recv_info {
-	void *arg;
-	size_t recv_size; /* if recv_size set to zero, it will determine by frame_end_data */
-	char *recv_data;
-	uint_t frame_end_data;
-	uart_recv_callback_t callback;
-};
-
-int uart_transfer(struct uart_client *client, char *data_buff, size_t data_len);
-int uart_recv_register(struct uart_client *client, struct uart_recv_info *info);
+#include <config.h>
+#include <errno.h>
+#include <string.h>
+#include <kernel/list.h>
+#include <kernel/initcall.h>
+#include <kernel/syslog.h>
 
 
-#endif /* __DRIVER_UART_H__ */
+
+
+
