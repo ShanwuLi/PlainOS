@@ -151,8 +151,8 @@ endif
 	@echo Removing done
 
 #=================================================================================================#
-.PHONY:disclean
-disclean:
+.PHONY:distclean
+distclean:
 	@echo Removing all output and configuration files
 ifneq (,$(wildcard $(TOPDIR)/config.mk $(TOPDIR)/include/config.h $(wildcard $(OUTDIR)/*)))
 	@$(RM) $(OUTDIR)
