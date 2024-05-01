@@ -114,11 +114,14 @@ int pl_gpio_set_io_one(struct gpio_desc *desc, u16_t io_idx, u8_t set, u8_t valu
 {
 	int ret;
 
-	if (desc == NULL || desc->gpio == NULL)
+	if (desc == NULL || desc->gpio == NULL || desc->ops == NULL)
 		return -EFAULT;
 
 	if (io_idx >= desc->gpio->io_nr)
 		return -ERANGE;
+
+	if (desc->ops->set_one == NULL)
+		return -ENOSUPPORT;
 
 	ret = desc->ops->set_one(desc->gpio, io_idx, set, value);
 	return ret;
@@ -140,11 +143,14 @@ int pl_gpio_get_io_one(struct gpio_desc *desc, u16_t io_idx, u8_t get, u8_t *val
 {
 	int ret;
 
-	if (desc == NULL || desc->gpio == NULL || value == NULL)
+	if (desc == NULL || value == NULL || desc->gpio == NULL || desc->ops == NULL)
 		return -EFAULT;
 
 	if (io_idx >= desc->gpio->io_nr)
 		return -ERANGE;
+
+	if (desc->ops->get_one == NULL)
+		return -ENOSUPPORT;
 
 	ret = desc->ops->get_one(desc->gpio, io_idx, get, value);
 	return ret;
@@ -167,11 +173,14 @@ int pl_gpio_set_io_grp(struct gpio_desc *desc, u16_t grp_idx, u8_t set, uintptr_
 {
 	int ret;
 
-	if (desc == NULL || desc->gpio == NULL)
+	if (desc == NULL || desc->gpio == NULL || desc->ops == NULL)
 		return -EFAULT;
 
 	if (grp_idx >= desc->gpio->grp_nr)
 		return -ERANGE;
+	
+	if (desc->ops->set_grp == NULL)
+		return -ENOSUPPORT;
 
 	ret = desc->ops->set_grp(desc->gpio, grp_idx, set, value);
 	return ret;
@@ -194,11 +203,14 @@ int pl_gpio_get_io_grp(struct gpio_desc *desc, u16_t grp_idx, u8_t get, uintptr_
 {
 	int ret;
 
-	if (desc == NULL || desc->gpio == NULL || value == NULL)
+	if (desc == NULL || value == NULL || desc->gpio == NULL || desc->ops == NULL)
 		return -EFAULT;
 
 	if (grp_idx >= desc->gpio->grp_nr)
 		return -ERANGE;
+	
+	if (desc->ops->get_grp == NULL)
+		return -ENOSUPPORT;
 
 	ret = desc->ops->get_grp(desc->gpio, grp_idx, get, value);
 	return ret;

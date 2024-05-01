@@ -276,11 +276,14 @@ int pl_iomux_set_io_one(struct iomux_desc *desc, u16_t io_idx, u8_t set, u8_t va
 {
 	int ret;
 
-	if (desc == NULL || desc->iomux == NULL)
+	if (desc == NULL || desc->iomux == NULL || desc->ops == NULL)
 		return -EFAULT;
 
 	if (io_idx >= desc->iomux->io_nr)
 		return -ERANGE;
+	
+	if (desc->ops->set_one == NULL)
+		return -ENOSUPPORT;
 
 	ret = desc->ops->set_one(desc->iomux, io_idx, set, value);
 	return ret;
@@ -303,11 +306,14 @@ int pl_iomux_get_io_one(struct iomux_desc *desc, u16_t io_idx, u8_t get, u8_t *v
 {
 	int ret;
 
-	if (desc == NULL || desc->iomux == NULL || value == NULL)
+	if (desc == NULL || value == NULL || desc->iomux == NULL || desc->ops == NULL)
 		return -EFAULT;
 
 	if (io_idx >= desc->iomux->io_nr)
 		return -ERANGE;
+	
+	if (desc->ops->get_one == NULL)
+		return -ENOSUPPORT;
 
 	ret = desc->ops->get_one(desc->iomux, io_idx, get, value);
 	return ret;
@@ -330,11 +336,14 @@ int pl_iomux_set_io_grp(struct iomux_desc *desc, u16_t grp_idx, u8_t set, uintpt
 {
 	int ret;
 
-	if (desc == NULL || desc->iomux == NULL)
+	if (desc == NULL || desc->iomux == NULL || desc->ops == NULL)
 		return -EFAULT;
 
 	if (grp_idx >= desc->iomux->grp_nr)
 		return -ERANGE;
+	
+	if (desc->ops->set_grp == NULL)
+		return -ENOSUPPORT;
 
 	ret = desc->ops->set_grp(desc->iomux, grp_idx, set, value);
 	return ret;
@@ -357,11 +366,14 @@ int pl_iomux_get_io_grp(struct iomux_desc *desc, u16_t grp_idx, u8_t get, uintpt
 {
 	int ret;
 
-	if (desc == NULL || desc->iomux == NULL || value == NULL)
+	if (desc == NULL || value == NULL || desc->iomux == NULL || desc->ops == NULL)
 		return -EFAULT;
 
 	if (grp_idx >= desc->iomux->grp_nr)
 		return -ERANGE;
+	
+	if (desc->ops->get_grp == NULL)
+		return -ENOSUPPORT;
 
 	ret = desc->ops->get_grp(desc->iomux, grp_idx, get, value);
 	return ret;
