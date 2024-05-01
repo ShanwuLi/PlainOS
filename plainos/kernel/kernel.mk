@@ -23,6 +23,7 @@
 KERNEL_DIR := $(TOPDIR)/kernel
 
 C_SRCS += $(KERNEL_DIR)/common.c
+C_SRCS += $(KERNEL_DIR)/panic.c
 C_SRCS += $(KERNEL_DIR)/entry.c
 C_SRCS += $(KERNEL_DIR)/inittask.c
 C_SRCS += $(KERNEL_DIR)/idletask.c

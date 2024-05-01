@@ -82,7 +82,7 @@ static int task_test(void)
 	tid_t  test_task;
 	pl_syslog_info("task test\r\n");
 
-	test_task = pl_task_create("idle_task1", idle_task1, PL_CFG_TASK_PRIORITIES_MAX - 1, 512, 0, NULL);
+	test_task = pl_task_create("idle_task1", idle_task1, PL_CFG_TASK_PRIORITIES_MAX - 1, 360, 0, NULL);
 	if (test_task == NULL) {
 		pl_syslog_err("test task create failed\r\n");
 		return 0;

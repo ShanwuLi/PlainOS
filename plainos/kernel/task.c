@@ -31,6 +31,7 @@ SOFTWARE.
 #include <kernel/mempool.h>
 #include <lib/string.h>
 #include "task.h"
+#include "panic.h"
 #include "softtimer.h"
 
 /*************************************************************************************
@@ -229,12 +230,8 @@ void pl_callee_save_curr_context_sp(void *context_sp)
 #ifdef PL_CFG_CHECK_STACK_OVERFLOW
 	/* check stack overflow */
 	int stack_overflow = pl_check_stack_overflow(context_sp, tcb);
-	if (stack_overflow != 0) {
-		pl_port_enter_critical();
-		pl_early_syslog_err("\r\nOH MY GOD, task[%s] stack overflow\r\n", tcb->name);
-		pl_early_syslog_err("overflow size:%d\r\n", stack_overflow);
-		while(1);
-	}
+	if (stack_overflow != 0)
+		pl_panic_task_dump(tcb, PL_PANIC_REASON_STACKOVF, (void *)stack_overflow);
 #endif /* PL_CFG_CHECK_STACK_OVERFLOW */
 
 	tcb->context_sp = context_sp;
@@ -1023,7 +1020,8 @@ static void update_softtimer_list(void)
 	}
 
 	/* insert timer node to daemon list and wakeup the daemon task */
-	list_move_chain_to_node_behind(&timer_ctrl->head, g_task_core_blk.timer_list.next, pos->node.prev);
+	list_move_chain_to_node_behind(&timer_ctrl->head, g_task_core_blk.timer_list.next,
+	                                pos->node.prev);
 	timer_tcb = (struct tcb *)(timer_ctrl->daemon);
 	if (timer_tcb->curr_state == PL_TASK_STATE_PENDING) {
 		list_del_node(&timer_tcb->node);
