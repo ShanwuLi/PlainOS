@@ -80,7 +80,7 @@ void pl_panic_task_dump(struct tcb *panic_tcb, u32_t panic_reason, void *arg)
 	pl_early_syslog_err("PANIC REASON:\r\n");
 	switch (panic_reason) {
 	case PL_PANIC_REASON_STACKOVF:
-		pl_early_syslog_err("[stack overflow] size of overflow:%d\r\n", (u32_t)arg);
+		pl_early_syslog_err("[stack overflow] size of overflow:%d\r\n", (int)arg);
 		break;
 
 	default:
