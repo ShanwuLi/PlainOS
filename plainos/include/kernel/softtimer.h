@@ -29,6 +29,10 @@ SOFTWARE.
 typedef void *pl_stimer_handle_t;
 typedef void (*stimer_fun_t)(pl_stimer_handle_t timer);
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*************************************************************************************
  * Function Name: pl_softtimer_request
  *
@@ -122,5 +126,9 @@ int pl_softtimer_cancel(pl_stimer_handle_t timer);
  *  void.
  ************************************************************************************/
 void pl_softtimer_release(pl_stimer_handle_t timer);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __KERNEL_SOFTTIMER_H__ */

@@ -106,7 +106,7 @@ tid_t pl_task_create(const char *name, main_t task, u16_t prio,
  *  @ticks: delay ticks;
  *
  * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
+ *  none.
  ************************************************************************************/
 void pl_task_delay_ticks(u32_t ticks);
 

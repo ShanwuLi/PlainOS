@@ -28,7 +28,8 @@ SOFTWARE.
 
 enum panic_reason {
 	PL_PANIC_REASON_STACKOVF = 0,
-
+	PL_PANIC_REASON_DIVZERO,
+	PL_PANIC_REASON_DEADLOCK,
 };
 
 /*************************************************************************************

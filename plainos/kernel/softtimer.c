@@ -32,7 +32,6 @@ SOFTWARE.
 
 static struct softtimer_ctrl softtimer_ctrl;
 
-
 /*************************************************************************************
  * Function Name: softtimer_consume_node
  *

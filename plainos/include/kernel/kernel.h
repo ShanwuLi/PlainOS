@@ -57,6 +57,10 @@ struct count {
 #define min(a, b)                              (((a) < (b)) ? (a) : (b))
 #define max(a, b)                              (((a) > (b)) ? (a) : (b))
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*************************************************************************************
  * Function Name: pl_align_address
  * Description:
@@ -114,5 +118,8 @@ s32_t pl_count_cmp(struct count *c1, struct count *c2);
  ************************************************************************************/
 int pl_count_add(struct count *c, struct count *c1, struct count *c2);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __KERNEL_KERNEL_H__ */

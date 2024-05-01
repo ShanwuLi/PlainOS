@@ -33,6 +33,14 @@ SOFTWARE.
  * Type Name: task_state
  * Description: task state definition.
  *
+ * Members:
+ *   PL_TASK_STATE_READY: the task is ready, can run immediately.
+ *   PL_TASK_STATE_DELAY: the task is delay, it only be ready when delay is finished.
+ *   PL_TASK_STATE_WAITING: the task is wating for something, such as sub-threads.
+ *   PL_TASK_STATE_PENDING: the task is pended, we can use pl_task_pend() to do it.
+ *   PL_TASK_STATE_EXIT: the task is exit, when task has been killed or end itself.
+ *   PL_TASK_STATE_FATAL: a fatal error occurred in the task.
+ * 
  ************************************************************************************/
 enum task_state {
 	PL_TASK_STATE_READY = 0,
