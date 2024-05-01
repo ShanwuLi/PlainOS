@@ -1263,6 +1263,6 @@ int pl_task_core_init(void)
 	g_task_core_blk.delay_list.num = 0;
 	g_task_core_blk.delay_list.head = &delay_dummy_tcb;
 
-	pl_early_syslog_info("task core init successfully\r\n");
+	pl_early_syslog_info("task core init done\r\n");
 	return OK;
 }

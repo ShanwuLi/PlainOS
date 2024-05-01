@@ -349,6 +349,6 @@ int pl_softtimer_core_init(void)
 		return ERROR;
 	}
 
-	pl_syslog_info("soft timer init successfully\r\n");
+	pl_syslog_info("soft timer init done\r\n");
 	return 0;
 }
