@@ -28,7 +28,7 @@ SOFTWARE.
 #include <kernel/list.h>
 
 struct serial_desc;
-typedef void (*serial_recv_cb_t)(struct serial_desc *dev);
+typedef void (*serial_recv_cb_t)(struct serial_desc *desc);
 
 /*************************************************************************************
  * struct serial_ops:
@@ -55,19 +55,21 @@ struct serial_ops {
 /*************************************************************************************
  * struct serial_ops:
  * Description:
- *   @id: the ID number of the serial port.
+ *   @bus_no: the number of the serial port.
  *   @data_bits: data bits of the serial.
  *   @parity_bit: parity bit.
  *   @stop_bits: stop bit.
  *   @baud_rate: baud rate.
  *   @recv_buff_size: size of recv buffer.
+ *   @trigger_length: trigger call callback when received chars reach the length.
  *   @recv_buff: recv buffer.
+ *   @trigger_condition: trigger call callback when trigger_condition return truth.
  *   @recv_callback: callback function for receiving character.
- *   @ops: operation of serial.
+ *   @ops: serial's operations.
  *   @node: list node of serial_desc all registered.
  ************************************************************************************/
 struct serial_desc {
-	u8_t id;
+	u8_t bus_no;
 	u8_t data_bits;
 	u8_t parity_bit;
 	u8_t stop_bits;
@@ -81,5 +83,16 @@ struct serial_desc {
 	struct list_node node;
 };
 
+/*************************************************************************************
+ * Function Name: pl_serial_desc_register
+ * Description: register serial description
+ *
+ * Param:
+ *   @desc: serial description.
+ *
+ * Return:
+ *   Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_serial_desc_register(struct serial_desc *desc);
 
-#elif /* __DRV_SERIAL_H__ */
+#endif /* __DRV_SERIAL_H__ */

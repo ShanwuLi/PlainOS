@@ -27,8 +27,23 @@ SOFTWARE.
 #include <kernel/list.h>
 #include <kernel/initcall.h>
 #include <kernel/syslog.h>
+#include <drivers/serial/serial.h>
 
-
+/*************************************************************************************
+ * Function Name: pl_serial_desc_register
+ * Description: register serial description
+ *
+ * Param:
+ *   @desc: serial description.
+ *
+ * Return:
+ *   Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_serial_desc_register(struct serial_desc *desc)
+{
+	USED(desc);
+	return 0;
+}
 
 
 

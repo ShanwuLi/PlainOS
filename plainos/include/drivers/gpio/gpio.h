@@ -104,6 +104,7 @@ struct gpio_ops {
 };
 
 struct gpio_desc {
+	uint16_t no;
 	const char *name;
 	struct gpio *gpio;
 	struct gpio_ops *ops;
@@ -135,8 +136,8 @@ int pl_gpio_desc_register(struct gpio_desc *desc);
 int pl_gpio_desc_unregister(struct gpio_desc *desc);
 
 /*************************************************************************************
- * Function Name: pl_gpio_desc_find
- * Description: find gpio description
+ * Function Name: pl_gpio_desc_find_by_name
+ * Description: find gpio description by name.
  *
  * Param:
  *   @name: gpio description name.
@@ -144,7 +145,19 @@ int pl_gpio_desc_unregister(struct gpio_desc *desc);
  * Return:
  *   gpio description.
  ************************************************************************************/
-struct gpio_desc *pl_gpio_desc_find(const char *name);
+struct gpio_desc *pl_gpio_desc_find_by_name(const char *name);
+
+/*************************************************************************************
+ * Function Name: pl_gpio_desc_find_by_no
+ * Description: find gpio description by number.
+ *
+ * Param:
+ *   @no: gpio description number.
+ *
+ * Return:
+ *   gpio description.
+ ************************************************************************************/
+struct gpio_desc *pl_gpio_desc_find_by_no(uint16_t no);
 
 /*************************************************************************************
  * Function Name: pl_gpio_set_io_one

@@ -65,16 +65,25 @@ int pl_gpio_desc_register(struct gpio_desc *desc)
  ************************************************************************************/
 int pl_gpio_desc_unregister(struct gpio_desc *desc)
 {
+	struct gpio_desc *pos;
+	struct gpio_desc *tmp;
+
 	if (desc == NULL)
 		return -EFAULT;
 
-	list_del_node(&desc->node);
-	return OK;
+	list_for_each_entry_safe(pos, tmp, &pl_gpio_desc_list, struct gpio_desc, node) {
+		if (pos->name == desc->name) {
+			list_del_node(&desc->node);
+			return OK;
+		}
+	}
+
+	return -ENODEV;
 }
 
 /*************************************************************************************
- * Function Name: pl_gpio_desc_find
- * Description: find gpio description
+ * Function Name: pl_gpio_desc_find_by_name
+ * Description: find gpio description by name.
  *
  * Param:
  *   @name: gpio description name.
@@ -82,7 +91,7 @@ int pl_gpio_desc_unregister(struct gpio_desc *desc)
  * Return:
  *   gpio description.
  ************************************************************************************/
-struct gpio_desc *pl_gpio_desc_find(const char *name)
+struct gpio_desc *pl_gpio_desc_find_by_name(const char *name)
 {
 	struct gpio_desc *pos;
 
@@ -91,6 +100,32 @@ struct gpio_desc *pl_gpio_desc_find(const char *name)
 
 	list_for_each_entry(pos, &pl_gpio_desc_list, struct gpio_desc, node) {
 		if (strcmp(pos->name, name) == 0) {
+			return pos;
+		}
+	}
+
+	return NULL;
+}
+
+/*************************************************************************************
+ * Function Name: pl_gpio_desc_find_by_no
+ * Description: find gpio description by number.
+ *
+ * Param:
+ *   @no: gpio description number.
+ *
+ * Return:
+ *   gpio description.
+ ************************************************************************************/
+struct gpio_desc *pl_gpio_desc_find_by_no(uint16_t no)
+{
+	struct gpio_desc *pos;
+
+	if (list_is_empty(&pl_gpio_desc_list))
+		return NULL;
+
+	list_for_each_entry(pos, &pl_gpio_desc_list, struct gpio_desc, node) {
+		if (no == pos->no) {
 			return pos;
 		}
 	}
@@ -208,7 +243,7 @@ int pl_gpio_get_io_grp(struct gpio_desc *desc, u16_t grp_idx, u8_t get, uintptr_
 
 	if (grp_idx >= desc->gpio->grp_nr)
 		return -ERANGE;
-	
+
 	if (desc->ops->get_grp == NULL)
 		return -ENOSUPPORT;
 

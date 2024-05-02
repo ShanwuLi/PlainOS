@@ -99,7 +99,7 @@ static int softtimer_test(void)
 		pl_syslog_err("softtimer test task failed\r\n");
 	}
 
-	gpio_desc = pl_gpio_desc_find("atmega2560 gpio");
+	gpio_desc = pl_gpio_desc_find_by_no(0);
 	if (gpio_desc == NULL) {
 		pl_syslog_err("xxxxxxxxxxxxxxxxxxxnot found gpioxxxxxxxxxxxxxxxxxxxxx\r\n");
 		return 0;

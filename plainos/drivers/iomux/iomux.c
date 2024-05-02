@@ -66,17 +66,27 @@ int pl_iomux_desc_register(struct iomux_desc *desc)
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-void pl_iomux_desc_unregister(struct iomux_desc *desc)
+int pl_iomux_desc_unregister(struct iomux_desc *desc)
 {
-	if (desc == NULL || list_is_empty(&desc->node))
-		return;
+	struct iomux_desc *pos;
+	struct iomux_desc *tmp;
 
-	list_del_node(&desc->node);
+	if (desc == NULL)
+		return -EFAULT;
+	
+	list_for_each_entry_safe(pos, tmp, &pl_iomux_desc_list, struct iomux_desc, node) {
+		if (pos->name == desc->name && pos->no == desc->no) {
+			list_del_node(&desc->node);
+			return OK;
+		}
+	}
+
+	return -ENODEV;
 }
 
 /*************************************************************************************
- * Function Name: pl_iomux_desc_find
- * Description: find iomux description
+ * Function Name: pl_iomux_desc_find_by_name
+ * Description: find iomux description by name.
  *
  * Param:
  *   @name: iomux description name.
@@ -84,7 +94,7 @@ void pl_iomux_desc_unregister(struct iomux_desc *desc)
  * Return:
  *   iomux description.
  ************************************************************************************/
-struct iomux_desc *pl_iomux_desc_find(const char *name)
+struct iomux_desc *pl_iomux_desc_find_by_name(const char *name)
 {
 	struct iomux_desc *pos;
 
@@ -93,6 +103,32 @@ struct iomux_desc *pl_iomux_desc_find(const char *name)
 
 	list_for_each_entry(pos, &pl_iomux_desc_list, struct iomux_desc, node) {
 		if (strcmp(pos->name, name) == 0) {
+			return pos;
+		}
+	}
+
+	return NULL;
+}
+
+/*************************************************************************************
+ * Function Name: pl_iomux_desc_find_by_no
+ * Description: find iomux description by number.
+ *
+ * Param:
+ *   @name: iomux description name.
+ *
+ * Return:
+ *   iomux description.
+ ************************************************************************************/
+struct iomux_desc *pl_iomux_desc_find_by_no(uint16_t no)
+{
+	struct iomux_desc *pos;
+
+	if (list_is_empty(&pl_iomux_desc_list))
+		return NULL;
+
+	list_for_each_entry(pos, &pl_iomux_desc_list, struct iomux_desc, node) {
+		if (no == pos->no) {
 			return pos;
 		}
 	}

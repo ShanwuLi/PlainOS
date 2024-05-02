@@ -143,6 +143,7 @@ struct gpio_ops ops = {
 };
 
 static struct gpio_desc atmega2560_gpio_desc = {
+	.no = 0,
 	.name = "atmega2560 gpio",
 	.gpio = &atmega2560_gpio,
 	.ops = &ops,

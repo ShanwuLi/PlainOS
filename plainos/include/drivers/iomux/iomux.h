@@ -82,6 +82,7 @@ struct iomux_ops {
 /*************************************************************************************
  * struct iomux_desc:
  * Description:
+ *   @no: the number of the iomux description.
  *   @name: the name of the iomux description.
  *   @iomux: iomux pointer.
  *   @ops: iomux operations.
@@ -89,6 +90,7 @@ struct iomux_ops {
  *
  ************************************************************************************/
 struct iomux_desc {
+	uint16_t no;
 	const char *name;
 	struct iomux *iomux;
 	struct iomux_ops *ops;
@@ -118,11 +120,11 @@ int pl_iomux_desc_register(struct iomux_desc *desc);
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-void pl_iomux_desc_unregister(struct iomux_desc *desc);
+int pl_iomux_desc_unregister(struct iomux_desc *desc);
 
 /*************************************************************************************
- * Function Name: pl_iomux_desc_find
- * Description: find iomux description
+ * Function Name: pl_iomux_desc_find_by_name
+ * Description: find iomux description by name.
  *
  * Param:
  *   @name: iomux description name.
@@ -130,7 +132,19 @@ void pl_iomux_desc_unregister(struct iomux_desc *desc);
  * Return:
  *   iomux description.
  ************************************************************************************/
-struct iomux_desc *pl_iomux_desc_find(const char *name);
+struct iomux_desc *pl_iomux_desc_find_by_name(const char *name);
+
+/*************************************************************************************
+ * Function Name: pl_iomux_desc_find_by_no
+ * Description: find iomux description by number.
+ *
+ * Param:
+ *   @name: iomux description name.
+ *
+ * Return:
+ *   iomux description.
+ ************************************************************************************/
+struct iomux_desc *pl_iomux_desc_find_by_no(uint16_t no);
 
 /*================================ Client interfaces ===============================*/
 /*************************************************************************************
