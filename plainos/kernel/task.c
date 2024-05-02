@@ -526,6 +526,10 @@ static void pl_task_free_exit_tcb(pl_work_handle work)
  *
  * Return:
  *   none
+ * 
+ * NOTE:
+ *   Do not use it in pl_port_enter_critical.
+ * 
  ************************************************************************************/
 void pl_task_context_switch(void)
 {
