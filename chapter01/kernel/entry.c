@@ -13,7 +13,7 @@ static uint32_t Task02Stack[Task02StackSize];
 typedef struct TaskControlBlock{
 	uint32_t volatile TaskStackPointer;
 }TCB;
-static TCB TaskControlBlockArray[3];
+static TCB TaskControlBlockArray[2];
 
 //首次运行任务内容前需要将MCU状态送入各自的任务栈空间内，void (*Task)(void) Task变量指向函数，此处形式参数用于传递函数地址
 static __inline void  TaskCreate(void (*Task)(void), uint32_t *TaskStack, 
@@ -46,56 +46,37 @@ static void  TaskCreate(void (*Task)(void), uint32_t *TaskStack,
 }
 
 //USART1_PrintChar在中断中可能会扰乱LR寄存器数值从而影响程序PC返回值与MCU状态
-static uint8_t volatile TaskID = 2;
+static uint8_t volatile TaskID = 0;
 static uint8_t volatile TaskFirstSwitch = 1;
 
-void delay(uint32_t n);
-
-//这里使用STM32的PendSV_Handler异常来Context切换
-__attribute__((naked)) void PendSV_Handler(void)
+void pl_callee_save_curr_context_sp(void *context_sp);
+void pl_callee_save_curr_context_sp(void *context_sp)
 {
-	//*((volatile u32_t*)(0xE000ED04)) |= 0x80000000;	//给中断清零
+	TaskControlBlockArray[TaskID].TaskStackPointer = (uint32_t)context_sp;
+}
 
-	//if(TaskFirstSwitch == 0) {
-		__asm volatile("push {lr}");	//串口打印可能会干扰lr内容，成对pop和push保护lr内容
-		USART1_PrintChar('T');
-		// USART1_PrintChar('\n');
-		delay(1000);
-		__asm volatile("pop {lr}");
-
-		__asm volatile("push {R4-R11}");	//保护现场
-		TaskControlBlockArray[TaskID].TaskStackPointer = __get_MSP();
-	//}
-
-	TaskFirstSwitch = 0;
-	 __asm volatile("push {lr}");
-	USART1_PrintChar('B');
-	USART1_PrintChar('\n');
-	__asm volatile("pop {lr}");		//恢复现场
-	TaskID = (TaskID + 1)%2;
-	__set_MSP(TaskControlBlockArray[TaskID].TaskStackPointer);
-	__asm volatile("pop {R4-R11}"); 
-	__asm volatile("bx lr");
+void *pl_callee_get_next_context_sp(void);
+void *pl_callee_get_next_context_sp(void)
+{
+	TaskID = (TaskID + 1) % 2;
+	return (uint32_t *)TaskControlBlockArray[TaskID].TaskStackPointer;
 }
 
 void pl_port_switch_contex(void);
 void pl_port_switch_contex(void) {
-	__asm__ volatile("cpsid	i\n\t");
 	*((volatile u32_t*)(0xE000ED04)) |= 0x10000000; //用户主动调用出发PendSV异常
-	__asm__ volatile("cpsie	i\n\t");   
 }
 
 void task01(void);
 void task02(void);
-
+void delay(uint32_t n);
 
 void task01(void){
 	while(1){
 		USART1_PrintChar('1');
 		USART1_PrintChar('\n');
-		delay(900000);
+		delay(1000000);
 		pl_port_switch_contex();	//任务中循环调用PendSV
-		delay(900000);
 	};
 }
 
@@ -104,9 +85,8 @@ void task02(void){
 		USART1_PrintChar('2');
 		USART1_PrintChar('\n');
 		USART1_PrintChar('\t');
-		delay(900000);
+		delay(1000000);
 		pl_port_switch_contex();	//任务中循环调用PendSV
-		delay(900000);
 	};
 }
 

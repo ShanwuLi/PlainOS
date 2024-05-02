@@ -60,10 +60,6 @@ PendSV_Handler:
 	cpsid i /* Change Processor State (CPS) disbale interrupt */
 	/* clear pending bit of PendSV */
 	ldr   r1, =SCB_ICSR_REG			
-pending status
-	ldr   r2, [r1]					//将SCB_ICSR_REG内容给R2作为内容
-	orr   r2, r2, #0x80000000		//NMIPENDSET Write 1 to pend NMI，Read vale indicates NMI，将不可屏蔽中断阻塞
-	str   r2, [r1]					//将运算结果还给SCB_ICSR_REG作为内容
 
 	ldr   r1, =is_first_switch		//R1将is_first_switch地址作为内容
 	ldr   r2, [r1]					//将is_first_switch内容送给R2作为内容					
@@ -86,7 +82,7 @@ switch_bottom:
 	cpsie i  /* enable interrupt */
 	push {lr}	//总结规律，函数调用与中断会干涉LR内容，所以LR内容需要保护现场与还原现场
 	/* r0 = pl_callee_get_next_context() */
-	bl   pl_callee_get_next_context
+	bl   pl_callee_get_next_context_sp
 	pop  {lr}
 
 	cpsid i  /* disable interrupt */
