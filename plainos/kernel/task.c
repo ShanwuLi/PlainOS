@@ -29,10 +29,12 @@ SOFTWARE.
 #include <kernel/kernel.h>
 #include <kernel/syslog.h>
 #include <kernel/mempool.h>
+#include <kernel/workqueue.h>
 #include <lib/string.h>
 #include "task.h"
 #include "panic.h"
 #include "softtimer.h"
+#include "workqueue.h"
 
 /*************************************************************************************
  * Description: Definitions of highest priority of task.
@@ -490,7 +492,7 @@ void pl_task_schedule_unlock(void)
 }
 
 /*************************************************************************************
- * Function Name: pl_task_exit_tcb_free
+ * Function Name: pl_task_free_exit_tcb
  * Description: free exited tcb.
  *
  * Parameters:
@@ -499,8 +501,9 @@ void pl_task_schedule_unlock(void)
  * Return:
  *   void.
  ************************************************************************************/
-static void pl_task_exit_tcb_free(void)
+static void pl_task_free_exit_tcb(pl_work_handle work)
 {
+	USED(work);
 	struct tcb *pos;
 	struct tcb *tmp;
 
@@ -508,6 +511,7 @@ static void pl_task_exit_tcb_free(void)
 		return;
 
 	list_for_each_entry_safe(pos, tmp, &g_task_core_blk.exit_list, struct tcb, node) {
+		pl_syslog_info("freeing exit tcb->name:%s\r\n", pos->name);
 		list_del_node(&pos->node);
 		pl_mempool_free(g_pl_default_mempool, pos);
 	}
@@ -562,7 +566,11 @@ static void task_entry(struct tcb *tcb)
 {
 	struct tcb *pos;
 	struct tcb *tmp;
+	struct work exit_free;
 	int exit_val = tcb->task(tcb->argc, tcb->argv);
+
+	/* prepare work for freeing exit tcb */
+	pl_work_init((pl_work_handle)(&exit_free), pl_task_free_exit_tcb, NULL);
 
 	/* insert current task to exit list */
 	pl_port_enter_critical();
@@ -581,6 +589,7 @@ static void task_entry(struct tcb *tcb)
 
 done:
 	pl_port_exit_critical();
+	pl_work_add(g_pl_sys_hiwq_handle, (pl_work_handle)(&exit_free));
 	/* switch task*/
 	pl_task_context_switch();
 
@@ -673,9 +682,6 @@ tid_t pl_task_sys_create_with_stack(const char *name, main_t task, u16_t prio,
 {
 	struct tcb *tcb;
 
-	/* free exited tcb when create task whether failure or success */
-	pl_task_exit_tcb_free();
-
 	/* check parameters */
 	if (name == NULL || task == NULL || stack == NULL ||
 	    prio > PL_CFG_TASK_PRIORITIES_MAX) {
@@ -744,9 +750,6 @@ tid_t pl_task_sys_create(const char *name, main_t task, u16_t prio,
 	void *stack;
 	size_t tcb_actual_size;
 	struct tcb *tcb_and_stack;
-
-	/* free exited tcb when create task whether failure or success */
-	pl_task_exit_tcb_free();
 
 	/* check parameters */
 	if (name == NULL || task == NULL || prio > PL_CFG_TASK_PRIORITIES_MAX) {
