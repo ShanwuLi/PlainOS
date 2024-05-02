@@ -43,7 +43,7 @@ INC += -I$(ARCH_DIR)/arm32/stm32f103c8t6
 INC += -I$(ARCH_DIR)/arm32/stm32f103c8t6/cmsis  #注意这里设置的是全局可见路径
 
 ASM_SRCS += $(ARCH_DIR)/arm32/stm32f103c8t6/startup_stm32f10x_md.S
-#ASM_SRCS += $(ARCH_DIR)/arm32/stm32f103c8t6/stm32f103c8t6_port_asm.S
+ASM_SRCS += $(ARCH_DIR)/arm32/stm32f103c8t6/stm32f103c8t6_port_asm.S
 C_SRCS += $(ARCH_DIR)/arm32/stm32f103c8t6/system_stm32f10x.c
 C_SRCS += $(ARCH_DIR)/arm32/stm32f103c8t6/stm32f10x_it.c
 C_SRCS += $(ARCH_DIR)/arm32/stm32f103c8t6/early_setup/early_uart.c

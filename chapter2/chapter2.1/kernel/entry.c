@@ -44,34 +44,22 @@ static void  TaskCreate(void (*Task)(void), uint32_t *TaskStack,
 	*(--stack)  = (u32_t)0;        /* R11 */
 	TaskControlBlock->TaskStackPointer = (uint32_t)stack; //使用全局变量TaskControlBlock->TaskStackPointer成员记录个任务栈SP位置
 }
-
+ 
 //USART1_PrintChar在中断中可能会扰乱LR寄存器数值从而影响程序PC返回值与MCU状态
 static uint8_t volatile TaskID = 0;
 static uint8_t volatile TaskFirstSwitch = 1;
 
-//这里使用STM32的PendSV_Handler异常来Context切换
-__attribute__((naked)) void PendSV_Handler(void)
+void pl_callee_save_curr_context_sp(void *context_sp);
+void pl_callee_save_curr_context_sp(void *context_sp)
 {
-	*((volatile u32_t*)(0xE000ED04)) |= 0x80000000;	//给中断清零
+	TaskControlBlockArray[TaskID].TaskStackPointer = (uint32_t)context_sp;
+}
 
-	if(TaskFirstSwitch == 0) {
-		__asm volatile("push {R4-R11}");	//保护现场
-		TaskControlBlockArray[TaskID].TaskStackPointer = __get_MSP();
-		__asm volatile("push {lr}");	//串口打印可能会干扰lr内容，成对pop和push保护lr内容
-		USART1_PrintChar('T');
-		USART1_PrintChar('\n');
-		__asm volatile("pop {lr}");
-	}
-
-	TaskFirstSwitch = 0;
-	__asm volatile("push {lr}");
-	USART1_PrintChar('B');
-	USART1_PrintChar('\n');
-	__asm volatile("pop {lr}");		//恢复现场
-	TaskID = (TaskID + 1)%2;
-	__set_MSP(TaskControlBlockArray[TaskID].TaskStackPointer);
-	__asm volatile("pop {R4-R11}");
-	__asm volatile("bx lr");
+void *pl_callee_get_next_context_sp(void);
+void *pl_callee_get_next_context_sp(void)
+{
+	TaskID = (TaskID + 1) % 2;
+	return (uint32_t *)TaskControlBlockArray[TaskID].TaskStackPointer;
 }
 
 void pl_port_switch_contex(void);

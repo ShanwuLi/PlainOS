@@ -19,10 +19,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
+
+#********************************Attention!!!*********************************#
+#makefile注释后面一定不要留空格
+#********************************Attention!!!*********************************#
+
+
+
 #=================================================================================================#
 # please replace to your toolchain.
-CROSS_COMPILE := arm-none-eabi-#avr
-CC       := $(CROSS_COMPILE)gcc
+CROSS_COMPILE := arm-none-eabi-#avr,:=是覆盖之前的赋值，CROSS_COMPILE为变量名称
+CC       := $(CROSS_COMPILE)gcc#$(CROSS_COMPILE)对变量的引用
 OBJDUMP  := $(CROSS_COMPILE)objdump
 CP       := $(CROSS_COMPILE)objcopy
 SIZE     := $(CROSS_COMPILE)size
@@ -36,10 +44,11 @@ CHIP     := stm32f103c8t6#atmega128
 #=================================================================================================#
 #////////////////////////////// Modify following code when you need it ///////////////////////////#
 
-TOPDIR   := ./chapter01
-OUTDIR   := $(TOPDIR)/out
+TOPDIR   := .
+COMDIR   := ./chapter2/chapter2.1#COMDIR为参与工程编译的文件根目录
+OUTDIR   := $(TOPDIR)/out#直接将中间输出缓冲文件放在TOPDIR中便于烧录
 
-INC      := -I$(TOPDIR)/include 
+INC      := -I$(COMDIR)/include#-I选项将$(COMDIR)/include路径告诉编译器
 LIBDIR   :=
 LIBS     :=
 TARGET   := $(OUTDIR)/$(CHIP)
@@ -52,23 +61,23 @@ LINK_SCRIPT :=
 RM := rm -rf
 
 #-------------------------------------------------------------------------------------------------#
-# include sub-makefiles
--include $(TOPDIR)/arch/arch.mk
--include $(TOPDIR)/kernel/kernel.mk
--include $(TOPDIR)/lib/lib.mk
+# include sub-makefiles，-include为Makefile命令可以忽略不存在的文件警告
+-include $(COMDIR)/arch/arch.mk
+-include $(COMDIR)/kernel/kernel.mk
+-include $(COMDIR)/lib/lib.mk
 
 #////////////////////////////// Modify following code when you need it ///////////////////////////#
 
 
 # compiler flags
-C_FLAGS   += $(MCU) $(INC) $(OPTIMIZE) $(DEBUG)
+C_FLAGS   += $(MCU) $(INC) $(OPTIMIZE) $(DEBUG)#+=为追加等号之后的数值，这里是编译器shell命令
 CXX_FLAGS += $(MCU) $(INC) $(OPTIMIZE) $(DEBUG)
 ASM_FLAGS += $(MCU) $(INC) $(OPTIMIZE) $(DEBUG)
 LDFLAGS   += $(MCU) -T$(TARGET).lds $(LIBDIR) $(LIBS) -Wl,-Map=$(TARGET).map,--cref
 
-# list of objects
-CXX_OBJS_TMP = $(patsubst %.cpp,%.o,$(CXX_SRCS))
-CXX_OBJS := $(addprefix $(OUTDIR)/,$(CXX_OBJS_TMP))
+# list of objects，C++工程源文件
+CXX_OBJS_TMP = $(patsubst %.cpp,%.o,$(CXX_SRCS))#patsubst是模式字符串替换函数，将.cpp文件名称替换为.o结尾，搜索CXX_SRCS以空格分开的单词
+CXX_OBJS := $(addprefix $(OUTDIR)/,$(CXX_OBJS_TMP))#addprefix添加前缀函数，在目标文件名称前面加入out目录路径
 
 C_OBJS_TMP = $(patsubst %.c,%.o,$(C_SRCS))
 C_OBJS := $(addprefix $(OUTDIR)/,$(C_OBJS_TMP))
@@ -77,22 +86,22 @@ ASM_OBJS_TMP += $(patsubst %.S,%.o,$(ASM_SRCS))
 ASM_OBJS := $(addprefix $(OUTDIR)/,$(ASM_OBJS_TMP))
 
 
-OBJS := $(C_OBJS) $(ASM_OBJS) $(CXX_OBJS)
+OBJS := $(C_OBJS) $(ASM_OBJS) $(CXX_OBJS)#汇总工程所需的所有.o文件
 
-CXX_DEPS := $(subst .o,.d,$(CXX_OBJS))
+CXX_DEPS := $(subst .o,.d,$(CXX_OBJS))#字符串替换函数，将.o后缀替换为.d后缀，Depend
 C_DEPS := $(subst .o,.d,$(C_OBJS))
 ASM_DEPS := $(subst .o,.d,$(ASM_OBJS))
 DEPS := $(C_DEPS) $(ASM_DEPS)
 
 TARGET_FILES := $(TARGET).elf $(TARGET).hex $(TARGET).bin $(TARGET).lst $(TARGET).map
-DIR_GUARD = @mkdir -p $(@D)
+DIR_GUARD = @mkdir -p $(@D)#创建目录，$(@D)表示当前目录
 
 # All Target
 all: $(TARGET_FILES) $(TARGET).size
 
 # Each subdirectory must supply rules for building sources it contributes
 
-$(OUTDIR)/%.o: %.cpp
+$(OUTDIR)/%.o: %.cpp#$<代表第一个依赖文件，$@表示依赖文件，此处$(@)抓取OUTDIR目录
 	@echo "CCXX:" $<
 	$(DIR_GUARD)
 	@$(CC) $(CXX_FLAGS) -MMD -MP -MF$(@:%.o=%.d) -MT$(@) -c $< -o $@
@@ -106,12 +115,6 @@ $(OUTDIR)/%.o: %.S
 	@echo "AS:" $<
 	$(DIR_GUARD)
 	@$(CC) $(ASM_FLAGS) -MMD -MP -MF$(@:%.o=%.d) -MT$(@) -c $< -o $@
-
-ifneq ($(MAKECMDGOALS),clean)
-ifneq ($(strip $(DEPS)),)
--include $(DEPS)
-endif
-endif
 
 # Add inputs and outputs from these tool invocations to the build variables 
 
@@ -137,7 +140,7 @@ $(TARGET).lst: $(TARGET).elf
 $(TARGET).size: $(TARGET).elf
 	@$(SIZE) --common $<
 
-# Other Targets
+# Other Targets，.PHONY起到弱化同级目录下依赖项文件名冲突作用
 .PHONY:clean
 clean:
 	@echo Removing all output files
