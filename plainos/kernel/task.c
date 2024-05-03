@@ -493,6 +493,27 @@ void pl_task_schedule_unlock(void)
 }
 
 /*************************************************************************************
+ * Function Name: pl_task_get_schedule_ref
+ * Description: get reference count of schedule.
+ *
+ * Parameters:
+ *   none
+ *
+ * Return:
+ *   reference count.
+ ************************************************************************************/
+static uint_t pl_task_get_schedule_ref(void)
+{
+	uint_t ref;
+
+	pl_port_enter_critical();
+	ref = g_task_core_blk.sched_lock_ref;
+	pl_port_exit_critical();
+
+	return ref;
+}
+
+/*************************************************************************************
  * Function Name: pl_task_free_exit_tcb
  * Description: free exited tcb.
  *
@@ -539,7 +560,8 @@ void pl_task_context_switch(void)
 	struct tcb *next_tcb;
 	struct tcb *idle_tcb;
 
-	if (g_task_core_blk.sched_lock_ref != 0)
+
+	if (pl_task_get_schedule_ref() != 0)
 		return;
 
 	pl_port_mask_interrupts();
@@ -816,10 +838,12 @@ int pl_task_join(tid_t tid, int *ret)
 	if (tcb == NULL)
 		return -EFAULT;
 
-	if (tcb->curr_state == PL_TASK_STATE_EXIT)
-		return ERROR;
-
 	pl_port_enter_critical();
+	if (tcb->curr_state == PL_TASK_STATE_EXIT) {
+		pl_port_exit_critical();
+		return ERROR;
+	}
+
 	pl_task_remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
 	pl_task_insert_tcb_to_waitlist(&tcb->wait_head, g_task_core_blk.curr_tcb);
 	pl_port_exit_critical();
