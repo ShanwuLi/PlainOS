@@ -31,7 +31,7 @@ SOFTWARE.
 #define PL_CFG_CHECK_STACK_OVERFLOW
 #define PL_CFG_SYSTICK_TIME_SLICE_US                      (10)
 #define PL_CFG_DEFAULT_MEMPOOL_SIZE                       (16 * 1024)
-#define PL_CFG_DEFAULT_MEMPOOL_GRAIN_ORDER                (6)
+#define PL_CFG_DEFAULT_MEMPOOL_GRAIN_ORDER                (5)
 #define PL_CFG_MAX_TASKS_NUM                              (900u)
 #define PL_CFG_SYS_RSVD_HIGHEST_PRIOTITY                  (2u)
 #define PL_CFG_TASK_PRIORITIES_MAX                        (99u)

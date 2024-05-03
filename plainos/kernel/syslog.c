@@ -30,7 +30,12 @@ SOFTWARE.
 #include "syslog.h"
 #include "semaphore.h"
 
-static struct semaphore syslog_semaphore;
+struct syslog_ctrl {
+	struct semaphore syslog_semaphore;
+	int (*put_char)(char c);
+};
+
+static struct syslog_ctrl pl_syslog_ctrl;
 
 /*************************************************************************************
  * Function Name: put_string
@@ -184,6 +189,61 @@ void pl_put_format_log_locked(int (*putc)(const char c), const char *fmt, ...)
 }
 
 /*************************************************************************************
+ * Function Name: pl_put_format_log
+ *
+ * Description:
+ *   put format log (PlainOS has started).
+ *
+ * Parameters:
+ *  @fmt: format string.
+ *  @...: variable parameters.
+ *
+ * Return:
+ *  void.
+ ************************************************************************************/
+void pl_put_format_log(const char *fmt, ...)
+{
+	va_list valist;
+
+	if (pl_syslog_ctrl.put_char != NULL) {
+		va_start(valist, fmt);
+		pl_vformat_log(pl_syslog_ctrl.put_char, fmt, valist);
+		va_end(valist);
+		return;
+	}
+
+	pl_semaplore_take(&pl_syslog_ctrl.syslog_semaphore);
+	va_start(valist, fmt);
+	pl_vformat_log(pl_port_putc, fmt, valist);
+	va_end(valist);
+	pl_semaplore_give(&pl_syslog_ctrl.syslog_semaphore);
+}
+
+/*************************************************************************************
+ * Function Name: pl_syslog_redirect
+ *
+ * Description:
+ *   syslog redirect to put_char of user provided.
+ * 
+ * Parameters:
+ *  @put_char: redirect to put_char.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_syslog_redirect(int (*put_char)(char c))
+{
+	if (put_char == NULL)
+		return -EFAULT;
+
+	pl_semaplore_take(&pl_syslog_ctrl.syslog_semaphore);
+	pl_syslog_ctrl.put_char = put_char;
+	pl_semaplore_give(&pl_syslog_ctrl.syslog_semaphore);
+
+	return OK;
+}
+
+/*************************************************************************************
  * Function Name: pl_syslog_init
  *
  * Description:
@@ -197,32 +257,8 @@ void pl_put_format_log_locked(int (*putc)(const char c), const char *fmt, ...)
  ************************************************************************************/
 int pl_syslog_init(void)
 {
-	pl_semaplore_init(&syslog_semaphore, 1);
+	pl_syslog_ctrl.put_char = NULL;
+	pl_semaplore_init(&pl_syslog_ctrl.syslog_semaphore, 1);
 	pl_early_syslog("syslog init successfully\r\n");
 	return OK;
-}
-
-/*************************************************************************************
- * Function Name: pl_put_format_log
- *
- * Description:
- *   put format log (PlainOS has started).
- *
- * Parameters:
- *  @putc: function of putting char.
- *  @fmt: format string.
- *  @...: variable parameters.
- *
- * Return:
- *  void.
- ************************************************************************************/
-void pl_put_format_log(int (*putc)(const char c), const char *fmt, ...)
-{
-	va_list valist;
-
-	pl_semaplore_take(&syslog_semaphore);
-	va_start(valist, fmt);
-	pl_vformat_log(putc, fmt, valist);
-	va_end(valist);
-	pl_semaplore_give(&syslog_semaphore);
 }

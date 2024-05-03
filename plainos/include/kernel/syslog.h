@@ -149,14 +149,27 @@ void pl_put_format_log_locked(int (*putc)(const char c), const char *fmt, ...);
  *   put format log (PlainOS has started).
  *
  * Parameters:
- *  @putc: function of putting char.
  *  @fmt: format string.
  *  @...: variable parameters.
  *
  * Return:
  *  void.
  ************************************************************************************/
-void pl_put_format_log(int (*putc)(const char c), const char *fmt, ...);
+void pl_put_format_log(const char *fmt, ...);
+
+/*************************************************************************************
+ * Function Name: pl_syslog_redirect
+ *
+ * Description:
+ *   syslog redirect to put_char of user provided.
+ * 
+ * Parameters:
+ *  @put_char: redirect to put_char.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_syslog_redirect(int (*put_char)(char c));
 
 /*************************************************************************************
  * Function Name: pl_syslog
@@ -175,7 +188,7 @@ void pl_put_format_log(int (*putc)(const char c), const char *fmt, ...);
  *  void.
  ************************************************************************************/
 #define pl_syslog(fmt, ...)   \
-	pl_put_format_log(pl_port_putc, fmt, ## __VA_ARGS__)
+	pl_put_format_log(fmt, ## __VA_ARGS__)
 
 /*************************************************************************************
  * Function Name: pl_syslog_info
@@ -194,7 +207,7 @@ void pl_put_format_log(int (*putc)(const char c), const char *fmt, ...);
  *  void.
  ************************************************************************************/
 #define pl_syslog_info(fmt, ...)   \
-	pl_put_format_log(pl_port_putc, "[info]"fmt, ## __VA_ARGS__)
+	pl_put_format_log("[info]"fmt, ## __VA_ARGS__)
 
 /*************************************************************************************
  * Function Name: pl_syslog_warn
@@ -213,7 +226,7 @@ void pl_put_format_log(int (*putc)(const char c), const char *fmt, ...);
  *  void.
  ************************************************************************************/
 #define pl_syslog_warn(fmt, ...)   \
-	pl_put_format_log(pl_port_putc, PL_SYSLOG_WARN_ANSI_COLOR"[warn]"fmt \
+	pl_put_format_log(PL_SYSLOG_WARN_ANSI_COLOR"[warn]"fmt \
 	PL_SYSLOG_ANSI_COLOR_RESET, ## __VA_ARGS__)
 
 /*************************************************************************************
@@ -233,7 +246,7 @@ void pl_put_format_log(int (*putc)(const char c), const char *fmt, ...);
  *  void.
  ************************************************************************************/
 #define pl_syslog_err(fmt, ...)   \
-	pl_put_format_log(pl_port_putc, PL_SYSLOG_ERR_ANSI_COLOR"[erro]"fmt \
+	pl_put_format_log(PL_SYSLOG_ERR_ANSI_COLOR"[erro]"fmt \
 	PL_SYSLOG_ANSI_COLOR_RESET, ## __VA_ARGS__)
 
 #endif /* __KERNEL_SYSLOG_H__ */

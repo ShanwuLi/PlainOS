@@ -123,7 +123,7 @@ void pl_kfifo_destroy(pl_kfifo_handle fifo)
 }
 
 /*************************************************************************************
- * Function Name: kfifo_len
+ * Function Name: pl_kfifo_len
  * Description: get the data length of the kfifo.
  *
  * Param:
@@ -132,7 +132,7 @@ void pl_kfifo_destroy(pl_kfifo_handle fifo)
  * Return:
  *   the length of the available data in kfifo.
  ************************************************************************************/
-uint_t kfifo_len(pl_kfifo_handle fifo)
+uint_t pl_kfifo_len(pl_kfifo_handle fifo)
 {
 	struct kfifo *kfifo = (struct kfifo *)fifo;
 

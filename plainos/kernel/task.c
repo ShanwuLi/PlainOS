@@ -78,6 +78,7 @@ struct task_core_blk {
 	struct list_node pend_list;
 	struct list_node exit_list;
 	struct list_node timer_list;
+	struct work exit_free;
 	struct tcb *curr_tcb;
 	struct count systicks;
 	u32_t cpu_rate_base;
@@ -511,8 +512,8 @@ static void pl_task_free_exit_tcb(pl_work_handle work)
 		return;
 
 	list_for_each_entry_safe(pos, tmp, &g_task_core_blk.exit_list, struct tcb, node) {
-		pl_syslog_info("freeing exit tcb->name:%s\r\n", pos->name);
 		list_del_node(&pos->node);
+		list_init(&pos->node);
 		pl_mempool_free(g_pl_default_mempool, pos);
 	}
 }
@@ -570,11 +571,7 @@ static void task_entry(struct tcb *tcb)
 {
 	struct tcb *pos;
 	struct tcb *tmp;
-	struct work exit_free;
 	int exit_val = tcb->task(tcb->argc, tcb->argv);
-
-	/* prepare work for freeing exit tcb */
-	pl_work_init((pl_work_handle)(&exit_free), pl_task_free_exit_tcb, NULL);
 
 	/* insert current task to exit list */
 	pl_port_enter_critical();
@@ -593,7 +590,7 @@ static void task_entry(struct tcb *tcb)
 
 done:
 	pl_port_exit_critical();
-	pl_work_add(g_pl_sys_hiwq_handle, (pl_work_handle)(&exit_free));
+	pl_work_add(g_pl_sys_hiwq_handle, &g_task_core_blk.exit_free);
 	/* switch task*/
 	pl_task_context_switch();
 
@@ -1275,6 +1272,9 @@ int pl_task_core_init(void)
 	g_task_core_blk.sched_lock_ref = 0;
 	g_task_core_blk.delay_list.num = 0;
 	g_task_core_blk.delay_list.head = &delay_dummy_tcb;
+
+	/* init work for freeing exit tcb */
+	pl_work_init(&g_task_core_blk.exit_free, pl_task_free_exit_tcb, NULL);
 
 	pl_early_syslog_info("task core init done\r\n");
 	return OK;
