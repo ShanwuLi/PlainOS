@@ -25,13 +25,13 @@ SOFTWARE.
 
 #include <kernel/kernel.h>
 
-typedef int                          (*initcall_t)(void);
-typedef int                          (*exitcall_t)(void);
+typedef int                             (*initcall_t)(void);
+typedef int                             (*exitcall_t)(void);
 
-#define __define_initcall(fn, id)    static initcall_t __initcall_##fn##id pl_used \
-                                      __attribute__((section(".initcall" #id ".init"))) = fn
+#define __define_initcall(fn, id)        static initcall_t __initcall_##fn##id pl_used \
+                                         __attribute__((section(".initcall" #id ".init"))) = fn
 
-#define __init                        __attribute__((section(".pl_init.init")))
+#define __init                           __attribute__((section(".pl_init.init")))
 
 #define pl_early_initcall(fn)            __define_initcall(fn, early)
 #define pl_pure_initcall(fn)             __define_initcall(fn, 0)
