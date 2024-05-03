@@ -1,37 +1,19 @@
-# PlainOS
+# 1 项目介绍
+本工程为PlainOS分支，旨在一步步实现一个RTOS应有的基础功能。
 
-#### 介绍
-This project is Plain OS, aimed at developing a universal operating system with a plain and minimalist philosophy.
-
-#### 软件架构
-软件架构说明
-
-
-#### 安装教程
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
-
-#### 使用说明
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
-
-#### 参与贡献
-
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
-
-
-#### 特技
-
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+# 2 工程文件夹介绍
+- chapter文件夹为章节笔记配套的实验代码，方便用户直接根据章节内容讲解进行RTOS实验。
+- Makefile为管理工程编译的顶层文件，用户可以修改Makefile文件中的COMDIR编译路径即可选择第几章的内容参与编译，从而选择进行第几章的实验内容。
+    ```Makefile
+    TOPDIR   := .
+    COMDIR   := ./chapter1/chapter1.3#COMDIR为参与工程编译的文件根目录
+    OUTDIR   := $(TOPDIR)/out#直接将中间输出缓冲文件放在TOPDIR中便于烧录
+    ```
+- out目录存放编译器输出的二进制烧录等文件，将该目录至于工程根目录便于控制烧录路径不变。
+# 3 工程计划实现的功能
+- 第一章 RTOS软硬件平台介绍
+- 第二章 任务管理
+  - 手动切换2个任务
+  - 手动切换N个任务
+  - 定时切换2个任务
+  - 定时切换N个任务

@@ -45,7 +45,7 @@ CHIP     := stm32f103c8t6#atmega128
 #////////////////////////////// Modify following code when you need it ///////////////////////////#
 
 TOPDIR   := .
-COMDIR   := ./chapter2/chapter2.1#COMDIR为参与工程编译的文件根目录
+COMDIR   := ./chapter2/chapter2.2#COMDIR为参与工程编译的文件根目录
 OUTDIR   := $(TOPDIR)/out#直接将中间输出缓冲文件放在TOPDIR中便于烧录
 
 INC      := -I$(COMDIR)/include#-I选项将$(COMDIR)/include路径告诉编译器

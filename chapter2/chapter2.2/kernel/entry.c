@@ -6,14 +6,23 @@
 //用数组存储空间构建任务栈空间存放Context内容，全局变量不显式调用static
 #define Task01StackSize 100
 #define Task02StackSize 100
+#define Task03StackSize 100
+#define Task04StackSize 100
+#define Task05StackSize 100
+#define Task06StackSize 100
+#define TaskNumbers		6
 static uint32_t Task01Stack[Task01StackSize];
 static uint32_t Task02Stack[Task02StackSize];
+static uint32_t Task03Stack[Task03StackSize];
+static uint32_t Task04Stack[Task04StackSize];
+static uint32_t Task05Stack[Task05StackSize];
+static uint32_t Task06Stack[Task06StackSize];
 
 //创建任务控制块记录任务堆栈指针变化情况
 typedef struct TaskControlBlock{
 	uint32_t volatile TaskStackPointer;
 }TCB;
-static TCB TaskControlBlockArray[2];
+static TCB TaskControlBlockArray[TaskNumbers];
 
 //首次运行任务内容前需要将MCU状态送入各自的任务栈空间内，void (*Task)(void) Task变量指向函数，此处形式参数用于传递函数地址
 static void  TaskCreate(void (*Task)(void), uint32_t *TaskStack, 
@@ -58,7 +67,7 @@ void pl_callee_save_curr_context_sp(void *context_sp)
 void *pl_callee_get_next_context_sp(void);
 void *pl_callee_get_next_context_sp(void)
 {
-	TaskID = (TaskID + 1) % 2;
+	TaskID = (TaskID + 1) % TaskNumbers;
 	return (uint32_t *)TaskControlBlockArray[TaskID].TaskStackPointer;
 }
 
@@ -66,6 +75,10 @@ void pl_port_switch_context(void);
 
 void task01(void);
 void task02(void);
+void task03(void);
+void task04(void);
+void task05(void);
+void task06(void);
 void delay(uint32_t n);
 
 void task01(void){
@@ -94,6 +107,58 @@ void task02(void){
 	};
 }
 
+void task03(void){
+	while(1){
+		USART1_PrintChar('T');
+		USART1_PrintChar('A');
+		USART1_PrintChar('S');
+		USART1_PrintChar('K');
+		USART1_PrintChar('3');
+		USART1_PrintChar('\t');
+		delay(1000000);
+		pl_port_switch_context();	//任务中循环调用PendSV
+	};
+}
+
+void task04(void){
+	while(1){
+		USART1_PrintChar('T');
+		USART1_PrintChar('A');
+		USART1_PrintChar('S');
+		USART1_PrintChar('K');
+		USART1_PrintChar('4');
+		USART1_PrintChar('\t');
+		delay(1000000);
+		pl_port_switch_context();	//任务中循环调用PendSV
+	};
+}
+
+void task05(void){
+	while(1){
+		USART1_PrintChar('T');
+		USART1_PrintChar('A');
+		USART1_PrintChar('S');
+		USART1_PrintChar('K');
+		USART1_PrintChar('5');
+		USART1_PrintChar('\t');
+		delay(1000000);
+		pl_port_switch_context();	//任务中循环调用PendSV
+	};
+}
+
+void task06(void){
+	while(1){
+		USART1_PrintChar('T');
+		USART1_PrintChar('A');
+		USART1_PrintChar('S');
+		USART1_PrintChar('K');
+		USART1_PrintChar('6');
+		USART1_PrintChar('\t');
+		delay(1000000);
+		pl_port_switch_context();	//任务中循环调用PendSV
+	};
+}
+
 void delay(uint32_t n){
 	u32_t volatile i = 0;
 	for(i=0; i < n; ){
@@ -109,6 +174,10 @@ void pl_callee_entry(){
 	USART1_PrintChar('\t');
 	TaskCreate(task01, Task01Stack, Task01StackSize, &TaskControlBlockArray[0]);
 	TaskCreate(task02, Task02Stack, Task02StackSize, &TaskControlBlockArray[1]);
+	TaskCreate(task03, Task03Stack, Task03StackSize, &TaskControlBlockArray[2]);
+	TaskCreate(task04, Task04Stack, Task04StackSize, &TaskControlBlockArray[3]);
+	TaskCreate(task05, Task05Stack, Task05StackSize, &TaskControlBlockArray[4]);
+	TaskCreate(task06, Task06Stack, Task06StackSize, &TaskControlBlockArray[5]);
 	pl_port_switch_context();	//第一次手动调用PendSV
 	while(1);
 }
