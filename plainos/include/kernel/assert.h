@@ -35,7 +35,7 @@ SOFTWARE.
  * Description: assertion for PlainOS.
  *
  * Parameters:
- *   @assertion: if assertion is true, OS will be block here.
+ *   @assertion: if assertion is false, current task will be block here.
  *
  * Return:
  *   void.
