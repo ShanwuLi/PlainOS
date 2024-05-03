@@ -26,6 +26,7 @@ SOFTWARE.
 
 #include <config.h>
 #include <port.h>
+#include <kernel/task.h>
 #include <kernel/syslog.h>
 #include <kernel/kernel.h>
 
@@ -46,8 +47,8 @@ SOFTWARE.
 				pl_port_enter_critical(); \
 				pl_early_syslog_err("=>[ASSERT]:func:%s, line:%d\r\n", \
 				                   __func__, __LINE__); \
-				while(1); \
 				pl_port_exit_critical(); \
+				pl_task_pend(NULL);\
 			} \
 		} while (false)
 #else
