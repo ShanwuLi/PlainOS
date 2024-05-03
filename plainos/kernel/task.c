@@ -234,7 +234,7 @@ void pl_callee_save_curr_context_sp(void *context_sp)
 	/* check stack overflow */
 	int stack_overflow = pl_check_stack_overflow(context_sp, tcb);
 	if (stack_overflow != 0)
-		pl_panic_task_dump(tcb, PL_PANIC_REASON_STACKOVF, (void *)stack_overflow);
+		pl_panic_dump(tcb, PL_PANIC_REASON_STACKOVF, (void *)stack_overflow);
 #endif /* PL_CFG_CHECK_STACK_OVERFLOW */
 
 	tcb->context_sp = context_sp;

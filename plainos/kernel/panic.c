@@ -55,7 +55,7 @@ static void pl_task_dump(struct tcb *tcb)
 }
 
 /*************************************************************************************
- * Function Name: pl_panic_task_dump
+ * Function Name: pl_panic_dump
  * Description: dump task info when system panic.
  *
  * Param:
@@ -66,7 +66,7 @@ static void pl_task_dump(struct tcb *tcb)
  * Return:
  *   void.
  ************************************************************************************/
-void pl_panic_task_dump(struct tcb *panic_tcb, u32_t panic_reason, void *arg)
+void pl_panic_dump(struct tcb *panic_tcb, u32_t panic_reason, void *arg)
 {
 	if (panic_tcb == NULL)
 		return;
