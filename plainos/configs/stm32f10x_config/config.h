@@ -26,21 +26,21 @@ SOFTWARE.
 /*************************************************************************************
  * kernel definitions
  *************************************************************************************/
-#define PL_CFG_ASSERT
+#define PL_CFG_ASSERT                                     //断言不成立阻止当前任务进行运行，
 #define PL_CFG_OS_CHAR_LOGO
-#define PL_CFG_CHECK_STACK_OVERFLOW
+#define PL_CFG_CHECK_STACK_OVERFLOW                       //检测用户任务栈定义是否符合检测要求
 #define PL_CFG_SYSTICK_TIME_SLICE_US                      (10)
-#define PL_CFG_DEFAULT_MEMPOOL_SIZE                       (16 * 1024)
-#define PL_CFG_DEFAULT_MEMPOOL_GRAIN_ORDER                (6)
+#define PL_CFG_DEFAULT_MEMPOOL_SIZE                       (16 * 1024)   //16K
+#define PL_CFG_DEFAULT_MEMPOOL_GRAIN_ORDER                (6)           //内存颗粒度2的6次方，64Byte
 #define PL_CFG_MAX_TASKS_NUM                              (900u)
-#define PL_CFG_SYS_RSVD_HIGHEST_PRIOTITY                  (2u)
+#define PL_CFG_SYS_RSVD_HIGHEST_PRIOTITY                  (2u)          //reserved系统预留任务优先级
 #define PL_CFG_TASK_PRIORITIES_MAX                        (99u)
 #define PL_CFG_INIT_TASK_STACK_SIZE                       (512)
 #define PL_CFG_IDLE_TASK_STACK_SIZE                       (512)
-#define PL_CFG_CPU_RATE_INTERVAL_TICKS                    (102400)
-#define PL_CFG_SOFTTIMER_DAEMON_TASK_STACK_SIZE           (512)
-#define PL_CFG_HI_WORKQUEUE_TASK_STACK_SIZE               (512)
-#define PL_CFG_HI_WORKQUEUE_FIFO_CAPACITY                 (128)
+#define PL_CFG_CPU_RATE_INTERVAL_TICKS                    (102400)      //间隔ticks
+#define PL_CFG_SOFTTIMER_DAEMON_TASK_STACK_SIZE           (512)         //守护线程栈大小
+#define PL_CFG_HI_WORKQUEUE_TASK_STACK_SIZE               (512)         //高优先级工作队列
+#define PL_CFG_HI_WORKQUEUE_FIFO_CAPACITY                 (128)         //高优先级工作队列FIFO容量
 #define PL_CFG_LO_WORKQUEUE_TASK_STACK_SIZE               (512)
 #define PL_CFG_LO_WORKQUEUE_TASK_PRIORITY                 (PL_CFG_TASK_PRIORITIES_MAX)
 #define PL_CFG_LO_WORKQUEUE_FIFO_CAPACITY                 (128)

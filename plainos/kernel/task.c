@@ -56,7 +56,7 @@ struct task_list {
 static u32_t cpu_rate_base;
 static u32_t cpu_rate_idle;
 /*************************************************************************************
- * Structure Name: task_core_blk
+ * Structure Name: task_core_blk，任务内核控制块
  * Description: task core block.
  *
  * Members:
@@ -79,7 +79,7 @@ struct task_core_blk {
 	struct list_node exit_list;
 	struct list_node timer_list;
 	struct tcb *curr_tcb;
-	struct count systicks;
+	struct count systicks; //全局syscount时间戳
 	u32_t cpu_rate_base;
 	u32_t cpu_rate_useful;
 	uint_t sched_lock_ref;
@@ -955,7 +955,7 @@ void pl_task_delay_ticks(u32_t ticks)
 		return;
 
 	pl_port_enter_critical();
-	end_ticks_lo32 = g_task_core_blk.systicks.lo32;
+	end_ticks_lo32 = g_task_core_blk.systicks.lo32;	//一个结构体两个变量获取当前systicks时间戳
 	end_ticks_hi32 = g_task_core_blk.systicks.hi32;
 
 	ticks += end_ticks_lo32;
@@ -1019,11 +1019,11 @@ static void update_delay_task_list(void)
 	struct tcb *pos;
 	struct tcb *tmp;
 
-	/* update delay list which can't be empty because of having a dummy node */
+	/* update delay list which can't be empty because of having a dummy node *///遍历延迟链表
 	list_for_each_entry_safe(pos, tmp, &g_task_core_blk.delay_list.head->node,
 		struct tcb, node) {
 
-		if (pl_count_cmp(&pos->delay_ticks, &g_task_core_blk.systicks) > 0)
+		if (pl_count_cmp(&pos->delay_ticks, &g_task_core_blk.systicks) > 0) //pl_task_delay_ticks和delay_ticks有关
 			break;
 
 		pl_task_remove_tcb_from_delaylist(pos);
@@ -1114,10 +1114,10 @@ void pl_callee_systick_expiration(void)
 		/* round robin */
 		prio = curr_tcb->prio;
 		rdy_list = &g_task_core_blk.ready_list[prio];
-		rdy_list->head = list_next_entry(curr_tcb, struct tcb, node);
+		rdy_list->head = list_next_entry(curr_tcb, struct tcb, node);	//任务轮询调度
 
 		/* switch task */
-		pl_task_context_switch();
+		pl_task_context_switch();	//优先级抢占
 	}
 }
 
