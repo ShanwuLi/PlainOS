@@ -34,7 +34,7 @@ CC       := $(CROSS_COMPILE)gcc#$(CROSS_COMPILE)对变量的引用
 OBJDUMP  := $(CROSS_COMPILE)objdump
 CP       := $(CROSS_COMPILE)objcopy
 SIZE     := $(CROSS_COMPILE)size
-OPTIMIZE := -O3
+OPTIMIZE := -O0
 DEBUG    := -g #-DNDEBUG to close debug in DEFINE.
 
 ARCH     := arm32

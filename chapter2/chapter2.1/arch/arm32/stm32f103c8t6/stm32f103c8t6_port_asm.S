@@ -6,11 +6,11 @@
  附言：该文件针对STM32F103的RTS操作系统移植
 
 ===============================================================================================*/
-#define SCB_ICSR_REG   0xE000ED04      //中断控制及状态寄存器，参考《Cortex-M3权威指南》P305
-.extern pl_callee_save_curr_context_sp //告诉本文件pl_callee_save_curr_context_sp在外部之后即可调用
+#define SCB_ICSR_REG   0xE000ED04      //0xE000ED04为Interrupt Control and State Register地址
+.extern pl_callee_save_curr_context_sp //.extern声明外部因素后pl_callee_save_curr_context_sp外部因素对本文件可用
 .extern pl_callee_get_next_context_sp
 
-.global PendSV_Handler //声明全局变量，之后C源文件可以进行调用
+.global PendSV_Handler 				   //.global声明全局因素后，其他文件可以调用本文件中PendSV_Handler因素
 .global pl_port_switch_context
 .global pl_port_cpu_dmb
 .global pl_port_cpu_dsb
@@ -32,9 +32,9 @@ arm-none-eabi-gcc -c(gcc -mthumb对于汇编来说似乎无关紧要，只是编
 ///笔者注：这里可以直接使用pop和push指令(使用MSP)
 
 .syntax unified
-.cpu cortex-m3
+.cpu cortex-m3	//Cortex-M3使用16bit thumb和32bit thumb2指令集，thumb指令集是thumb2指令集子集
 .fpu softvfp
-.thumb
+.thumb	
 
 
 .section .text.pl_port_switch_context
@@ -42,12 +42,12 @@ arm-none-eabi-gcc -c(gcc -mthumb对于汇编来说似乎无关紧要，只是编
 
 pl_port_switch_context:
 
-	ldr   r1, =SCB_ICSR_REG		//将中断控制及状态寄存器地址存入R1
-	ldr   r2, [r1,#0]			//将中断控制及状态寄存器地址单元内容复制给R2寄存器存储
-	ldr   r3, =0x10000000		//中断控制及状态寄存器PENDSTSET位置Write 1 to pend SYSTICK exception，不让滴答定时器工作，这里需要观察Exception Types表格参考The Definitive Guide to ARM Cortex M3 and Cortex M4 Processors, 3rd Edition Pe108页码
-	orr   r2, r2, r3			//将中断控制及状态寄存器地址单元内容与0x10000000按位或预算复制给R2存储
-	str   r2, [r1,#0]			//将R2内容复制给SCB_ICSR_REG地址单元存储
-	bx    lr					//Branch with Exchange，BX LR instruction to perform the exception return，link register (LR) R14，其他程序调用完成后返回PC，PC由LR寄存器决定
+	ldr   r1, =SCB_ICSR_REG		//ldr load something to register，将SCB_ICSR_REG装入r1
+	ldr   r2, [r1,#0]			//将[SCB_ICSR_REG,#0]解引用内容给R2
+	ldr   r3, =0x10000000		//SCB_ICSR_REG的28bit PENDSVSET位置1，主动触发 PENDSV异常
+	orr   r2, r2, r3			//or something to register，将r2, r3按位或运算结果给R2
+	str   r2, [r1,#0]			//store something to register，将R2内容存在[r1,#0]中
+	bx    lr					//Branch with Exchange，其他函数调用pl_port_switch_context会将调用点PC存入LR，pl_port_switch_context执行结束，LR弹出值给PC返回到调用点重新顺序执行
 
 
 .section .data
@@ -59,19 +59,25 @@ is_first_switch:
 
 PendSV_Handler:
 	cpsid i /* Change Processor State (CPS) disbale interrupt */
+	/* clear pending bit of PendSV PendSV异常处理完后一般硬件自动清零，这里一段也可以不写*/
+	ldr   r1, =SCB_ICSR_REG
+	ldr   r2, [r1,#0]
+	ldr   r3, =0x08000000
+	orr   r2, r2, r3
+	str   r2, [r1,#0]
 	/* clear pending bit of PendSV */
-	ldr   r1, =SCB_ICSR_REG		
-	ldr   r1, =is_first_switch		//R1将is_first_switch地址作为内容
-	ldr   r2, [r1]					//将is_first_switch内容送给R2作为内容					
+
+	ldr   r1, =is_first_switch		//将is_first_switch值给R1
+	ldr   r2, [r1]					//将[is_first_switch]解引用内容0x0给R2
 	ldr   r3, =0xff					//将0xff送给R3作为内容
-	str   r3, [r1]					//将0xff送给is_first_switch内存单元作为内容
+	str   r3, [r1]					//将0xff送给[is_first_switch]作为内容
 	cmp   r2, #0					//将is_first_switch存储单元内容和0相比
 	beq   switch_bottom				//if Equal, then go to p2 switch_bottom
 
 switch_top:
 	/* save context */
-	mrs   r0, psp					//将PSP内容放入到R0中
-	stmdb r0!, {r4-r11}				//Write multiple words to memory location specified by Rd. Address Decrement Before each write Rn writes back after the transfer is done.
+	mrs   r0, psp					//move from PSP to R0
+	stmdb r0!, {r4-r11}				//Store multiple registers to memory，decrement before
 	push {lr}						//将LR寄存器存储的地址压入堆栈中,保存此时LR内容
 	/* r0 = pl_callee_save_curr_context_sp(sp) */
 	bl   pl_callee_save_curr_context_sp			//bl将此时PC地址放入LR寄存器中，然后跳到其他函数执行
@@ -96,18 +102,18 @@ switch_bottom:
 ////////////// barrier implement //////////////////
 .section .text.pl_port_cpu_dmb
 .type pl_port_cpu_dmb, %function
-pl_port_cpu_dmb:               		//数据隔离
+pl_port_cpu_dmb:               		//data memory barrier
 	dmb 0xF
 	bx  lr
 
 .section .text.pl_port_cpu_dsb
 .type pl_port_cpu_dsb, %function
-pl_port_cpu_dsb:
+pl_port_cpu_dsb:					//Data Synchronization Barrier
 	dsb 0xF
 	bx  lr
 
 .section .text.pl_port_cpu_isb
 .type pl_port_cpu_isb, %function
 pl_port_cpu_isb:
-	isb 0xF
+	isb 0xF							//Instruction Synchronization Barrier
 	bx  lr

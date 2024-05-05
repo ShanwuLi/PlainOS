@@ -59,7 +59,7 @@ static void  TaskCreate(void (*Task)(void *arg), uint32_t *TaskStack,
 }
  
 //USART1_PrintChar在中断中可能会扰乱LR寄存器数值从而影响程序PC返回值与MCU状态
-static uint8_t volatile TaskID = 0;
+static int8_t volatile TaskID = -1;
 static uint8_t volatile TaskFirstSwitch = 1;
 
 void pl_callee_save_curr_context_sp(void *context_sp);
