@@ -34,7 +34,6 @@ SOFTWARE.
 #include "task.h"
 #include "panic.h"
 #include "softtimer.h"
-#include "workqueue.h"
 
 /*************************************************************************************
  * Description: Definitions of highest priority of task.
@@ -65,6 +64,7 @@ static u32_t cpu_rate_idle;
  *   @delay_list: list head of delay tasks.
  *   @exit_list: list head of exit tasks(killed or exited).
  *   @timer_list: list head of soft timer.
+ *   @exit_free: work for freeing wxit tcb.
  *   @curr_tcb: current context tcb.
  *   @systicks: systicks.
  *   @cpu_rate_base: cpu rate base counter.
@@ -78,7 +78,7 @@ struct task_core_blk {
 	struct list_node pend_list;
 	struct list_node exit_list;
 	struct list_node timer_list;
-	struct work exit_free;
+	struct pl_work exit_free;
 	struct tcb *curr_tcb;
 	struct count systicks;
 	u32_t cpu_rate_base;
@@ -140,7 +140,7 @@ struct tcb *pl_task_get_curr_tcb(void)
  * Return:
  *    @int :task state
  ************************************************************************************/
-int pl_task_get_state(tid_t tid)
+int pl_task_get_state(pl_tid_t tid)
 {
 	return ((struct tcb *)tid)->curr_state;
 }
@@ -523,7 +523,7 @@ static uint_t pl_task_get_schedule_ref(void)
  * Return:
  *   void.
  ************************************************************************************/
-static void pl_task_free_exit_tcb(pl_work_handle work)
+static void pl_task_free_exit_tcb(struct pl_work *work)
 {
 	USED(work);
 	struct tcb *pos;
@@ -699,9 +699,9 @@ static void task_init_and_create(const char *name, main_t task, u16_t prio,
  * Return:
  *   task handle.
  ************************************************************************************/
-tid_t pl_task_sys_create_with_stack(const char *name, main_t task, u16_t prio,
-                                    void *stack, size_t stack_size,
-                                    int argc, char *argv[])
+pl_tid_t pl_task_sys_create_with_stack(const char *name, main_t task, u16_t prio,
+                                       void *stack, size_t stack_size,
+                                       int argc, char *argv[])
 {
 	struct tcb *tcb;
 
@@ -739,9 +739,9 @@ tid_t pl_task_sys_create_with_stack(const char *name, main_t task, u16_t prio,
  * Return:
  *   task handle.
  ************************************************************************************/
-tid_t pl_task_create_with_stack(const char *name, main_t task, u16_t prio,
-                                void *stack, size_t stack_size,
-                                int argc, char *argv[])
+pl_tid_t pl_task_create_with_stack(const char *name, main_t task, u16_t prio,
+                                   void *stack, size_t stack_size,
+                                   int argc, char *argv[])
 {
 	struct tcb *tcb;
 
@@ -767,8 +767,8 @@ tid_t pl_task_create_with_stack(const char *name, main_t task, u16_t prio,
  * Return:
  *   task id.
  ************************************************************************************/
-tid_t pl_task_sys_create(const char *name, main_t task, u16_t prio,
-                         size_t stack_size, int argc, char *argv[])
+pl_tid_t pl_task_sys_create(const char *name, main_t task, u16_t prio,
+                            size_t stack_size, int argc, char *argv[])
 {
 	void *stack;
 	size_t tcb_actual_size;
@@ -806,8 +806,8 @@ tid_t pl_task_sys_create(const char *name, main_t task, u16_t prio,
  * Return:
  *   task id.
  ************************************************************************************/
-tid_t pl_task_create(const char *name, main_t task, u16_t prio,
-                     size_t stack_size, int argc, char *argv[])
+pl_tid_t pl_task_create(const char *name, main_t task, u16_t prio,
+                        size_t stack_size, int argc, char *argv[])
 {
 	struct tcb *tcb_and_stack;
 
@@ -831,7 +831,7 @@ tid_t pl_task_create(const char *name, main_t task, u16_t prio,
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_task_join(tid_t tid, int *ret)
+int pl_task_join(pl_tid_t tid, int *ret)
 {
 	struct tcb *tcb = (struct tcb *)tid;
 
@@ -870,7 +870,7 @@ int pl_task_join(tid_t tid, int *ret)
  * Return:
  *  void.
  ************************************************************************************/
-void pl_task_pend(tid_t tid)
+void pl_task_pend(pl_tid_t tid)
 {
 	struct tcb *tcb = (struct tcb *)tid;
 
@@ -904,7 +904,7 @@ void pl_task_pend(tid_t tid)
  * Return:
  *  void.
  ************************************************************************************/
-void pl_task_resume(tid_t tid)
+void pl_task_resume(pl_tid_t tid)
 {
 	struct tcb *tcb = (struct tcb *)tid;
 
@@ -935,7 +935,7 @@ void pl_task_resume(tid_t tid)
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_task_kill(tid_t tid)
+int pl_task_kill(pl_tid_t tid)
 {
 	struct tcb *tcb = (struct tcb *)tid;
 
@@ -1068,9 +1068,9 @@ static void update_softtimer_list(void)
 {
 	bool list_empty;
 	struct tcb *timer_tcb;
-	struct softtimer *pos;
-	struct softtimer *first;
-	struct softtimer_ctrl *timer_ctrl;
+	struct pl_stimer *pos;
+	struct pl_stimer *first;
+	struct pl_stimer_ctrl *timer_ctrl;
 
 	timer_ctrl = pl_softtimer_get_ctrl();
 	/* if timer list is empty, we skip it */
@@ -1079,13 +1079,13 @@ static void update_softtimer_list(void)
 		return;
 
 	/* Get the first entry of timer list node, We can know if the timer has timed out */
-	first = list_first_entry(&g_task_core_blk.timer_list, struct softtimer, node);
+	first = list_first_entry(&g_task_core_blk.timer_list, struct pl_stimer, node);
 	if (pl_count_cmp(&first->reach_cnt, &g_task_core_blk.systicks) > 0) {
 		return;
 	}
 
 	/* update soft timer list */
-	list_for_each_entry(pos, &g_task_core_blk.timer_list, struct softtimer, node) {
+	list_for_each_entry(pos, &g_task_core_blk.timer_list, struct pl_stimer, node) {
 		if (pl_count_cmp(&pos->reach_cnt, &g_task_core_blk.systicks) > 0)
 			break;
 	}

@@ -27,20 +27,21 @@ SOFTWARE.
 #include <types.h>
 #include <kernel/list.h>
 #include <kernel/kfifo.h>
+#include <kernel/workqueue.h>
 #include <kernel/semaphore.h>
 
 struct serial_desc;
-typedef void (*serial_recv_cb_t)(struct serial_desc *desc);
 
 /*************************************************************************************
  * struct serial_ops:
  * Description:
+ *   @set_baud_rate: set buard rate for serial.
+ *   @set_data_bits: set data bits for serial.
+ *   @set_parity_bit: set parity bit for serial.
+ *   @set_stop_bits: set stop bits for serial.
  *   @send_char: synchronous sending char.
  *   @recv_char: synchronous reception char.
  *   @send_str: synchronous sending string.
- *   @register_recv_cb: register a callback function and call it when the received
- *                      character meet condition.
- *   @unregister_recv_cb: unregister a callback function.
  *
  * NOTE:
  *   Trigger_condition has a higher priority than length triggering. 
@@ -55,10 +56,30 @@ struct serial_ops {
 	int (*send_char)(struct serial_desc *desc, char c);
 	int (*recv_char)(struct serial_desc *desc, char *c);
 	int (*send_str)(struct serial_desc *desc, char *str);
+};
 
-	int (*register_recv_cb)(struct serial_desc *desc, int (*trigger_condition)(char c),
-	                        size_t trigger_len, serial_recv_cb_t callback, void *arg);
-	int (*unregister_recv_cb)(struct serial_desc *desc);
+/*************************************************************************************
+ * struct serial_recv_info:
+ * Description:
+ *   @buff_size: size of recv buffer.
+ *   @buff_in: index of chars input.
+ *   @buff_out: index of chars output.
+ *   @ring_buff: ring buffer for receiving characters.
+ *   @call_condition: call callback condition.
+ *   @total_len: the length of total recevied characters.
+ *   @chars: recevied characters at the moment.
+ *   @chars_len: the length of recevied characters at the moment.
+ *   @callback: callback function called when conditions are met.
+ *   @cb_work: work for callback(will be executed in thread context).
+ ************************************************************************************/
+struct serial_recv_info {
+	uint_t buff_size;
+	uint_t buff_in;
+	uint_t buff_out;
+	char *ring_buff;
+	int (*call_condition)(uint_t total_len, char *chars, uint_t chars_len);
+	void (*callback)(struct serial_desc *desc);
+	pl_work_t cb_work;
 };
 
 /*************************************************************************************
@@ -69,11 +90,6 @@ struct serial_ops {
  *   @parity_bit: parity bit.
  *   @stop_bits: stop bit.
  *   @baud_rate: baud rate.
- *   @recv_buff_size: size of recv buffer.
- *   @trigger_length: trigger call callback when received chars reach the length.
- *   @recv_buff: recv buffer.
- *   @trigger_condition: trigger call callback when trigger_condition return truth.
- *   @recv_callback: callback function for receiving character.
  *   @ops: serial's operations.
  *   @node: list node of serial_desc all registered.
  ************************************************************************************/
@@ -83,14 +99,10 @@ struct serial_desc {
 	u8_t parity_bit;
 	u8_t stop_bits;
 	u32_t baud_rate;
-	size_t recv_buff_size;
-	size_t trigger_length;
-	pl_kfifo_handle recv_buff;
-	int (*trigger_condition)(struct serial_desc *desc, char *chars, size_t len);
-	serial_recv_cb_t recv_callback;
 	struct serial_ops *ops;
 	struct list_node node;
-	pl_semaphore_handle_t sem;
+	struct pl_sem sem;
+	struct serial_recv_info recv_info;
 };
 
 /*===================================== BSP Driver =================================*/
@@ -110,7 +122,7 @@ struct serial_desc {
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
 int pl_serial_desc_init(struct serial_desc *desc, u8_t port, struct serial_ops *ops,
-                                             size_t recv_buff_size, void *recv_buff);
+                                             uint_t recv_buff_size, void *recv_buff);
 
 /*************************************************************************************
  * Function Name: pl_serial_desc_register
@@ -125,7 +137,7 @@ int pl_serial_desc_init(struct serial_desc *desc, u8_t port, struct serial_ops *
 int pl_serial_desc_register(struct serial_desc *desc);
 
 /*************************************************************************************
- * Function Name: pl_serial_recv_handler
+ * Function Name: pl_serial_callee_recv_handler
  * Description: the handler of serial when received characters.
  *
  * Param:
@@ -134,7 +146,7 @@ int pl_serial_desc_register(struct serial_desc *desc);
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_serial_recv_handler(struct serial_desc *desc, char *chars, size_t len);
+int pl_serial_callee_recv_handler(struct serial_desc *desc, char *chars, uint_t chars_len);
 
 
 /*===================================== Client Driver =================================*/

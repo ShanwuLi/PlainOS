@@ -5,14 +5,14 @@
 #include <kernel/syslog.h>
 #include <kernel/workqueue.h>
 
-static void work_fun(pl_work_handle work)
+static void work_fun(struct pl_work *work)
 {
 	USED(work);
 	pl_syslog_info("%s\r\n", (char *)pl_work_get_private_data(work));
 }
 
-static pl_work_t hiwork;
-static pl_work_t lowork;
+static struct pl_work hiwork;
+static struct pl_work lowork;
 
 static int workqueue_test(void)
 {

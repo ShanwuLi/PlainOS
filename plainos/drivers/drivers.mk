@@ -23,4 +23,4 @@
 DRV_DIR := $(TOPDIR)/drivers
 -include $(DRV_DIR)/iomux/iomux.mk
 -include $(DRV_DIR)/gpio/gpio.mk
--include $(DRV_DIR)/serial/serial.mk
+#-include $(DRV_DIR)/serial/serial.mk

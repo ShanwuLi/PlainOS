@@ -33,6 +33,27 @@ SOFTWARE.
 
 static struct list_node pl_serial_desc_list;
 
+static void pl_serial_recv_cb_work_func(struct pl_work *work)
+{
+	USED(work);
+}
+
+static void serial_desc_init(struct serial_desc *desc, u8_t port, struct serial_ops *ops,
+                             struct pl_sem *sem, uint_t recv_buff_size, char *recv_buff)
+{
+	desc->sem = sem;
+	desc->port = port;
+	desc->ops = ops;
+	desc->recv_info.buff_in = 0;
+	desc->recv_info.buff_out = 0;
+	desc->recv_info.buff_size = recv_buff_size;
+	desc->recv_info.ring_buff = recv_buff;
+	desc->recv_info.callback = NULL;
+	desc->recv_info.call_condition = NULL;
+	list_init(&desc->node);
+	pl_work_init(&desc->recv_info.cb_work, pl_serial_recv_cb_work_func, desc);
+}
+
 /*************************************************************************************
  * Function Name: pl_serial_desc_init
  * Description: initialize serial description
@@ -49,13 +70,10 @@ static struct list_node pl_serial_desc_list;
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
 int pl_serial_desc_init(struct serial_desc *desc, u8_t port, struct serial_ops *ops,
-                                             size_t recv_buff_size, void *recv_buff)
+                                             uint_t recv_buff_size, char *recv_buff)
 {
-	pl_kfifo_handle recv_fifo;
-	pl_semaphore_handle_t sem;
-
-	if (!is_power_of_2(recv_buff_size))
-		return -EINVAL;
+	int ret;
+	struct pl_sem *sem;
 
 	if (recv_buff == NULL) {
 		recv_buff = pl_mempool_malloc(g_pl_default_mempool, recv_buff_size);
@@ -63,20 +81,13 @@ int pl_serial_desc_init(struct serial_desc *desc, u8_t port, struct serial_ops *
 			return -ENOMEM;
 	}
 
-	recv_fifo = pl_kfifo_init(recv_buff, recv_buff_size);
-	if (recv_fifo == NULL)
-		return -EINVAL;
-
 	sem = pl_semaplore_request(1);
-	if (sem == NULL)
+	if (sem == NULL) {
+		pl_mempool_free(g_pl_default_mempool, recv_buff_size);
 		return -EFAULT;
+	}
 
-	desc->sem = sem;
-	desc->port = port;
-	desc->ops = ops;
-	desc->trigger_length = 0;
-	desc->trigger_condition = NULL;
-	desc->recv_buff = recv_fifo;
+	serial_desc_init(desc, port, ops, sem, recv_buff_size, recv_buff);
 	return OK;
 }
 
@@ -103,7 +114,7 @@ int pl_serial_desc_register(struct serial_desc *desc)
 }
 
 /*************************************************************************************
- * Function Name: pl_serial_recv_handler
+ * Function Name: pl_serial_callee_recv_handler
  * Description: the handler of serial when received characters.
  *
  * Param:
@@ -112,28 +123,23 @@ int pl_serial_desc_register(struct serial_desc *desc)
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_serial_recv_handler(struct serial_desc *desc, char *chars, size_t len)
+int pl_serial_callee_recv_handler(struct serial_desc *desc, char *chars, uint_t chars_len);
 {
 	int ret;
 	uint_t fifo_data_size;
 
-	if (desc == NULL || (desc->trigger_condition == NULL &&
-	    desc->trigger_length == 0))
+	if (desc == NUL)
 		return -EFAULT;
 
-	pl_kfifo_put(desc->recv_buff, chars, len);
+	
 	if (desc->trigger_condition != NULL) {
-		ret = desc->trigger_condition(desc, chars, len);
+		ret = desc->recv_info.call_condition(desc, chars, len);
 		if (ret < 0)
-			return ret;
+			return OK;
 
 		/* call callbcak */
-		return OK;
-	}
-
-	fifo_data_size = pl_kfifo_len(desc->recv_buff);
-	if (fifo_data_size >= desc->trigger_length) {
-
+		ret = pl_work_add(g_pl_sys_hiwq_handle, &desc->recv_callback_work);
+		return ret;
 	}
 
 	return OK;

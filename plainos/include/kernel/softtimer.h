@@ -24,10 +24,22 @@ SOFTWARE.
 #ifndef __KERNEL_SOFTTIMER_H__
 #define __KERNEL_SOFTTIMER_H__
 
+#include <types.h>
+#include <kernel/list.h>
 #include <kernel/kernel.h>
 
-typedef void *pl_stimer_handle_t;
-typedef void (*stimer_fun_t)(pl_stimer_handle_t timer);
+struct pl_stimer;
+typedef void (*pl_stimer_fun_t)(struct pl_stimer *timer);
+
+struct pl_stimer {
+	struct list_node node;
+	const char *name;
+	pl_stimer_fun_t fun;
+	void *priv_data;
+	struct count timing_cnt;
+	struct count reach_cnt;
+	bool reload;
+};
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,9 +55,9 @@ extern "C" {
  *  @name: timer name.
  *
  * Return:
- *  @pl_stimer_handle_t: handle of soft timer requested.
+ *  @struct pl_stimer*: handle of soft timer requested.
  ************************************************************************************/
-pl_stimer_handle_t pl_softtimer_request(const char *name);
+struct pl_stimer *pl_softtimer_request(const char *name);
 
 /*************************************************************************************
  * Function Name: pl_softtimer_get_private_data
@@ -60,7 +72,7 @@ pl_stimer_handle_t pl_softtimer_request(const char *name);
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_softtimer_get_private_data(pl_stimer_handle_t timer, void **data);
+int pl_softtimer_get_private_data(struct pl_stimer *timer, void **data);
 
 /*************************************************************************************
  * Function Name: pl_softtimer_start
@@ -77,7 +89,7 @@ int pl_softtimer_get_private_data(pl_stimer_handle_t timer, void **data);
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_softtimer_start(pl_stimer_handle_t timer, stimer_fun_t fun,
+int pl_softtimer_start(struct pl_stimer *timer, pl_stimer_fun_t fun,
                        struct count *timing_cnt, void *priv_data);
 
 /*************************************************************************************
@@ -96,7 +108,7 @@ int pl_softtimer_start(pl_stimer_handle_t timer, stimer_fun_t fun,
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_softtimer_reload(pl_stimer_handle_t timer, bool reload, stimer_fun_t fun,
+int pl_softtimer_reload(struct pl_stimer *timer, bool reload, pl_stimer_fun_t fun,
                                       struct count *timing_cnt, void *priv_data);
 
 /*************************************************************************************
@@ -111,7 +123,7 @@ int pl_softtimer_reload(pl_stimer_handle_t timer, bool reload, stimer_fun_t fun,
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_softtimer_cancel(pl_stimer_handle_t timer);
+int pl_softtimer_cancel(struct pl_stimer *timer);
 
 /*************************************************************************************
  * Function Name: pl_softtimer_cancel
@@ -125,7 +137,7 @@ int pl_softtimer_cancel(pl_stimer_handle_t timer);
  * Return:
  *  void.
  ************************************************************************************/
-void pl_softtimer_release(pl_stimer_handle_t timer);
+void pl_softtimer_release(struct pl_stimer *timer);
 
 #ifdef __cplusplus
 }

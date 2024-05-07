@@ -28,7 +28,6 @@ SOFTWARE.
 #include <kernel/mempool.h>
 #include <kernel/assert.h>
 #include <kernel/semaphore.h>
-#include "semaphore.h"
 
 /*************************************************************************************
  * Description: mempool structure definition.
@@ -52,7 +51,7 @@ struct mempool_data {
 };
 
 struct default_mempool {
-	struct semaphore sem;
+	struct pl_sem sem;
 	u8_t pool_data[PL_CFG_DEFAULT_MEMPOOL_SIZE];
 };
 

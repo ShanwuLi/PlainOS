@@ -36,8 +36,8 @@ static int idle_task1(int argc, char *argv[])
 	USED(argv);
 	int r;
 	int ret;
-	tid_t tcb2;
-	tid_t tcb3;
+	pl_tid_t tcb2;
+	pl_tid_t tcb3;
 	u32_t int_part;
 	u32_t deci_part;
 
@@ -79,7 +79,7 @@ static int idle_task1(int argc, char *argv[])
 
 static int task_test(void)
 {
-	tid_t  test_task;
+	pl_tid_t test_task;
 	pl_syslog_info("task test\r\n");
 
 	test_task = pl_task_create("idle_task1", idle_task1, PL_CFG_TASK_PRIORITIES_MAX - 1, 512, 0, NULL);

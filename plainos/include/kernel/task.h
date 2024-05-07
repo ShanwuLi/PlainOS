@@ -28,7 +28,7 @@ SOFTWARE.
 #include <types.h>
 #include "kernel.h"
 
-typedef void *tid_t;
+typedef void *pl_tid_t;
 
 #ifdef __cplusplus
 extern "C" {
@@ -74,9 +74,9 @@ void pl_task_schedule_unlock(void);
  * Return:
  *   task id.
  ************************************************************************************/
-tid_t pl_task_create_with_stack(const char *name, main_t task, u16_t prio,
-                                void *stack, size_t stack_size,
-                                int argc, char *argv[]);
+pl_tid_t pl_task_create_with_stack(const char *name, main_t task, u16_t prio,
+                                   void *stack, size_t stack_size,
+                                   int argc, char *argv[]);
 
 /*************************************************************************************
  * Function Name: pl_task_create
@@ -93,8 +93,8 @@ tid_t pl_task_create_with_stack(const char *name, main_t task, u16_t prio,
  * Return:
  *   task id.
  ************************************************************************************/
-tid_t pl_task_create(const char *name, main_t task, u16_t prio,
-                     size_t stack_size, int argc, char *argv[]);
+pl_tid_t pl_task_create(const char *name, main_t task, u16_t prio,
+                        size_t stack_size, int argc, char *argv[]);
 
 /*************************************************************************************
  * Function Name: pl_task_delay_ticks
@@ -123,7 +123,7 @@ void pl_task_delay_ticks(u32_t ticks);
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_task_join(tid_t tid, int *ret);
+int pl_task_join(pl_tid_t tid, int *ret);
 
 /*************************************************************************************
  * Function Name: pl_task_pend
@@ -140,7 +140,7 @@ int pl_task_join(tid_t tid, int *ret);
  * Return:
  *  void.
  ************************************************************************************/
-void pl_task_pend(tid_t tid);
+void pl_task_pend(pl_tid_t tid);
 
 /*************************************************************************************
  * Function Name: pl_task_resume
@@ -157,7 +157,7 @@ void pl_task_pend(tid_t tid);
  * Return:
  *  void.
  ************************************************************************************/
-void pl_task_resume(tid_t tid);
+void pl_task_resume(pl_tid_t tid);
 
 /*************************************************************************************
  * Function Name: pl_task_kill
@@ -171,7 +171,7 @@ void pl_task_resume(tid_t tid);
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_task_kill(tid_t tid);
+int pl_task_kill(pl_tid_t tid);
 
 /*************************************************************************************
  * Function Name: pl_task_get_syscount

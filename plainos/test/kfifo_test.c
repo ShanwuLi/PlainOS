@@ -12,7 +12,7 @@ static char read_data[100] = {0};
 static int kfifo_test(void)
 {
 	uint_t data_num;
-	pl_kfifo_handle kfifo = pl_kfifo_request(128);
+	struct pl_kfifo *kfifo = pl_kfifo_request(128);
 
 	if (kfifo == NULL) {
 		pl_syslog_err("pl_kfifo_request failed\r\n");

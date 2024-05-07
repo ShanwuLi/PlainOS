@@ -62,7 +62,7 @@ static int idle_task(int argc, char *argv[])
  ************************************************************************************/
 int pl_idle_task_init(void)
 {
-	tid_t idle_taskid;
+	pl_tid_t idle_taskid;
 
 	idle_taskid = pl_task_sys_create("idle_task", idle_task, PL_CFG_TASK_PRIORITIES_MAX,
 	                                 PL_CFG_IDLE_TASK_STACK_SIZE, 0, NULL);

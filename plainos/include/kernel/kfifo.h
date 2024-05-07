@@ -27,10 +27,14 @@ SOFTWARE.
 #include <types.h>
 #include <errno.h>
 
-#define PL_KFIFO_EMPTY       (-EEMPTY)
-#define PL_KFIFO__FULL       (-EFULL)
+struct pl_kfifo {
+	uint_t in;
+	uint_t out;
+	uint_t size;
+	char *buff;
+};
 
-typedef void* pl_kfifo_handle;
+typedef void* pl_kfifo_handle_t;
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,7 +51,7 @@ extern "C" {
  * Return:
  *   fifodata handle.
  ************************************************************************************/
-pl_kfifo_handle pl_kfifo_init(char *buff, uint_t buff_size);
+struct pl_kfifo *pl_kfifo_init(char *buff, uint_t buff_size);
 
 /*************************************************************************************
  * Function Name: pl_kfifo_request
@@ -59,7 +63,7 @@ pl_kfifo_handle pl_kfifo_init(char *buff, uint_t buff_size);
  * Return:
  *   fifodata handle.
  ************************************************************************************/
-pl_kfifo_handle pl_kfifo_request(uint_t buff_size);
+struct pl_kfifo *pl_kfifo_request(uint_t buff_size);
 
 /*************************************************************************************
  * Function Name: pl_kfifo_destroy
@@ -71,7 +75,7 @@ pl_kfifo_handle pl_kfifo_request(uint_t buff_size);
  * Return:
  *   void.
  ************************************************************************************/
-void pl_kfifo_destroy(pl_kfifo_handle fifo);
+void pl_kfifo_destroy(struct pl_kfifo *fifo);
 
 /*************************************************************************************
  * Function Name: pl_kfifo_len
@@ -83,7 +87,7 @@ void pl_kfifo_destroy(pl_kfifo_handle fifo);
  * Return:
  *   the length of the available data in kfifo.
  ************************************************************************************/
-uint_t pl_kfifo_len(pl_kfifo_handle fifo);
+uint_t pl_kfifo_len(struct pl_kfifo *fifo);
 
 /*************************************************************************************
  * Function Name: pl_kfifo_put
@@ -97,7 +101,7 @@ uint_t pl_kfifo_len(pl_kfifo_handle fifo);
  * Return:
  *   The actual length of data put to the kfifo.
  ************************************************************************************/
-uint_t pl_kfifo_put(pl_kfifo_handle fifo, char *data, uint_t data_len);
+uint_t pl_kfifo_put(struct pl_kfifo *fifo, char *data, uint_t data_len);
 
 /*************************************************************************************
  * Function Name: pl_kfifo_get
@@ -111,7 +115,7 @@ uint_t pl_kfifo_put(pl_kfifo_handle fifo, char *data, uint_t data_len);
  * Return:
  *   The actual length of data got from kfifo.
  ************************************************************************************/
-uint_t pl_kfifo_get(pl_kfifo_handle fifo, char *data, uint_t data_len);
+uint_t pl_kfifo_get(struct pl_kfifo *fifo, char *data, uint_t data_len);
 
 #ifdef __cplusplus
 }

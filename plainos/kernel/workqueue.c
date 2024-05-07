@@ -30,20 +30,20 @@ SOFTWARE.
 #include "workqueue.h"
 #include "task.h"
 
-static struct workqueue pl_sys_hiwq;
-static struct workqueue pl_sys_lowq;
-static struct work *pl_sys_hiwq_fifo[PL_CFG_HI_WORKQUEUE_FIFO_CAPACITY];
-static struct work *pl_sys_lowq_fifo[PL_CFG_LO_WORKQUEUE_FIFO_CAPACITY];
+static struct pl_workqueue pl_sys_hiwq;
+static struct pl_workqueue pl_sys_lowq;
+static struct pl_work *pl_sys_hiwq_fifo[PL_CFG_HI_WORKQUEUE_FIFO_CAPACITY];
+static struct pl_work *pl_sys_lowq_fifo[PL_CFG_LO_WORKQUEUE_FIFO_CAPACITY];
 
-pl_wq_handle g_pl_sys_hiwq_handle = (pl_wq_handle)&pl_sys_hiwq;
-pl_wq_handle g_pl_sys_lowq_handle = (pl_wq_handle)&pl_sys_lowq;
+struct pl_workqueue *g_pl_sys_hiwq_handle = &pl_sys_hiwq;
+struct pl_workqueue *g_pl_sys_lowq_handle = &pl_sys_lowq;
 
 static int workqueue_task(int argc, char **argv)
 {
 	USED(argc);
 	USED(argv);
-	struct work *first;
-	struct workqueue *wq = (struct workqueue *)argv;
+	struct pl_work *first;
+	struct pl_workqueue *wq = (struct pl_workqueue *)argv;
 
 	while (true) {
 		/* if work fifo is empty, we need to suspend wq task */
@@ -83,8 +83,8 @@ static int workqueue_task(int argc, char **argv)
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_workqueue_init(struct workqueue *wq, const char *name, u16_t prio,
-            size_t wq_stack_sz, u32_t wq_fifo_cap, struct work **wq_fifo)
+static int pl_workqueue_init(struct pl_workqueue *wq, const char *name, u16_t prio,
+                   size_t wq_stack_sz, u32_t wq_fifo_cap, struct pl_work **wq_fifo)
 {
 	if (wq == NULL || wq_fifo == NULL)
 		return -EFAULT;
@@ -116,24 +116,24 @@ int pl_workqueue_init(struct workqueue *wq, const char *name, u16_t prio,
  *  @wq_fifo_cap: capacity of workqueue fifo.
  *
  * Return:
- *  @pl_wq_handle: handle of workqueue requested.
+ *  @struct pl_workqueue*: handle of workqueue requested.
  ************************************************************************************/
-pl_wq_handle pl_workqueue_create(const char *name, u16_t prio, size_t wq_stack_sz,
-                                 u32_t wq_fifo_cap)
+struct pl_workqueue *pl_workqueue_create(const char *name, u16_t prio,
+                                         size_t wq_stack_sz, u32_t wq_fifo_cap)
 {
 	int ret;
-	struct workqueue *wq;
+	struct pl_workqueue *wq;
 
 	if (!is_power_of_2(wq_fifo_cap) || wq_fifo_cap == 0)
 		return NULL;
 
-	wq = pl_mempool_malloc(g_pl_default_mempool, sizeof(struct workqueue) +
-	                       sizeof(struct work *) * wq_fifo_cap);
+	wq = pl_mempool_malloc(g_pl_default_mempool, sizeof(struct pl_workqueue) +
+	                       sizeof(struct pl_work *) * wq_fifo_cap);
 	if (wq == NULL)
 		return NULL;
 
 	ret = pl_workqueue_init(wq, name, prio, wq_stack_sz, wq_fifo_cap,
-	                        (struct work **)(wq + 1));
+	                        (struct pl_work **)(wq + 1));
 	if (ret < 0)
 		return NULL;
 
@@ -152,10 +152,9 @@ pl_wq_handle pl_workqueue_create(const char *name, u16_t prio, size_t wq_stack_s
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_workqueue_destroy(pl_wq_handle workqueue)
+int pl_workqueue_destroy(struct pl_workqueue *wq)
 {
 	int ret;
-	struct workqueue *wq = (struct workqueue *)workqueue;
 
 	if (wq == NULL || wq == &pl_sys_hiwq || wq == &pl_sys_lowq)
 		return -EFAULT;
@@ -180,10 +179,8 @@ int pl_workqueue_destroy(pl_wq_handle workqueue)
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_work_init(pl_work_handle work, pl_work_fun_t fun, void *priv_data)
+int pl_work_init(struct pl_work *wk, pl_work_fun_t fun, void *priv_data)
 {
-	struct work *wk = (struct work *)work;
-
 	if (wk == NULL || fun == NULL)
 		return -EFAULT;
 
@@ -200,17 +197,14 @@ int pl_work_init(pl_work_handle work, pl_work_fun_t fun, void *priv_data)
  *   add a work to the workqueue.
  * 
  * Parameters:
- *  @workqueue: workqueue handle.
- *  @work: work.
+ *  @wq: workqueue handle.
+ *  @wk: work.
  *
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_work_add(pl_wq_handle workqueue, pl_work_handle work)
+int pl_work_add(struct pl_workqueue *wq, struct pl_work *wk)
 {
-	struct work *wk = (struct work *)work;
-	struct workqueue *wq = (struct workqueue *)workqueue;
-
 	if (wk == NULL || wq == NULL)
 		return -EFAULT;
 
@@ -238,10 +232,8 @@ int pl_work_add(pl_wq_handle workqueue, pl_work_handle work)
  * Return:
  *   private data of the work.
  ************************************************************************************/
-void *pl_work_get_private_data(pl_work_handle work)
+void *pl_work_get_private_data(struct pl_work *wk)
 {
-	struct work *wk = (struct work *)work;
-
 	if (wk == NULL)
 		return NULL;
 
@@ -255,8 +247,7 @@ void *pl_work_get_private_data(pl_work_handle work)
  *   initialize a workqueue in the system.
  * 
  * Parameters:
- *  @workqueue: workqueue handle.
- *  @work: work.
+ *   none.
  *
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.

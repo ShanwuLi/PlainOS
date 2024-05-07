@@ -24,12 +24,26 @@ SOFTWARE.
 #ifndef __KERNEL_WORKQUEUE_H__
 #define __KERNEL_WORKQUEUE_H__
 
+#include <types.h>
+#include <kernel/task.h>
 #include <kernel/kernel.h>
 
-typedef void *pl_work_handle;
-typedef void *pl_wq_handle;
-typedef void (*pl_work_fun_t)(pl_work_handle work);
-typedef struct {void *dummy[2];} pl_work_t;
+struct pl_work;
+typedef void (*pl_work_fun_t)(struct pl_work *work);
+
+struct pl_work {
+	pl_work_fun_t fun;
+	void *priv_data;
+};
+
+struct pl_workqueue {
+	pl_tid_t exec_thread;
+	u32_t fifo_cap;
+	u32_t fifo_in;
+	u32_t fifo_out;
+	const char *name;
+	struct pl_work **fifo;
+};
 
 /*************************************************************************************
  * Function Name: pl_workqueue_create
@@ -39,8 +53,8 @@ typedef struct {void *dummy[2];} pl_work_t;
  * Description:
  *   create a workqueue.
  ************************************************************************************/
-extern pl_wq_handle g_pl_sys_hiwq_handle;
-extern pl_wq_handle g_pl_sys_lowq_handle;
+extern struct pl_workqueue *g_pl_sys_hiwq_handle;
+extern struct pl_workqueue *g_pl_sys_lowq_handle;
 
 /*************************************************************************************
  * Function Name: pl_workqueue_create
@@ -55,10 +69,10 @@ extern pl_wq_handle g_pl_sys_lowq_handle;
  *  @wq_fifo_cap: capacity of workqueue fifo.
  *
  * Return:
- *  @pl_wq_handle: handle of workqueue requested.
+ *  @struct pl_workqueue*: handle of workqueue requested.
  ************************************************************************************/
-pl_wq_handle pl_workqueue_create(const char *name, u16_t prio, size_t wq_stack_sz,
-                                 u32_t wq_fifo_cap);
+struct pl_workqueue *pl_workqueue_create(const char *name, u16_t prio,
+                                         size_t wq_stack_sz, u32_t wq_fifo_cap);
 
 /*************************************************************************************
  * Function Name: pl_workqueue_destroy
@@ -72,7 +86,7 @@ pl_wq_handle pl_workqueue_create(const char *name, u16_t prio, size_t wq_stack_s
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_workqueue_destroy(pl_wq_handle workqueue);
+int pl_workqueue_destroy(struct pl_workqueue *workqueue);
 
 /*************************************************************************************
  * Function Name: pl_work_init
@@ -86,7 +100,7 @@ int pl_workqueue_destroy(pl_wq_handle workqueue);
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_work_init(pl_work_handle work, pl_work_fun_t fun, void *priv_data);
+int pl_work_init(struct pl_work *work, pl_work_fun_t fun, void *priv_data);
 
 /*************************************************************************************
  * Function Name: pl_work_add
@@ -101,7 +115,7 @@ int pl_work_init(pl_work_handle work, pl_work_fun_t fun, void *priv_data);
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_work_add(pl_wq_handle workqueue, pl_work_handle work);
+int pl_work_add(struct pl_workqueue *workqueue, struct pl_work *work);
 
 /*************************************************************************************
  * Function Name: pl_work_cancel
@@ -116,7 +130,7 @@ int pl_work_add(pl_wq_handle workqueue, pl_work_handle work);
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_work_cancel(pl_wq_handle workqueue, pl_work_handle work);
+int pl_work_cancel(struct pl_workqueue *workqueue, struct pl_work *work);
 
 /*************************************************************************************
  * Function Name: pl_work_get_private_data
@@ -130,6 +144,6 @@ int pl_work_cancel(pl_wq_handle workqueue, pl_work_handle work);
  * Return:
  *   private data of the work.
  ************************************************************************************/
-void *pl_work_get_private_data(pl_work_handle work);
+void *pl_work_get_private_data(struct pl_work *work);
 
 #endif /* __KERNEL_WORKQUEUE_H__ */

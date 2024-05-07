@@ -28,14 +28,13 @@ SOFTWARE.
 #include <kernel/syslog.h>
 #include <kernel/semaphore.h>
 #include "syslog.h"
-#include "semaphore.h"
 
-struct syslog_ctrl {
-	struct semaphore syslog_semaphore;
+struct pl_syslog_ctrl {
+	struct pl_sem syslog_semaphore;
 	int (*put_char)(char c);
 };
 
-static struct syslog_ctrl pl_syslog_ctrl;
+static struct pl_syslog_ctrl pl_syslog_ctrl;
 
 /*************************************************************************************
  * Function Name: put_string

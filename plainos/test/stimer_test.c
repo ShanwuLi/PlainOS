@@ -5,11 +5,11 @@
 #include <drivers/gpio/gpio.h>
 
 //static int times = 0;
-static pl_stimer_handle_t stimer;
-static pl_stimer_handle_t stimer2;
+static struct pl_stimer *stimer;
+static struct pl_stimer *stimer2;
 static struct gpio_desc *gpio_desc;
 
-static void stimer_callback(pl_stimer_handle_t timer)
+static void stimer_callback(struct pl_stimer *timer)
 {
 	int ret;
 	void *data;
@@ -24,7 +24,7 @@ static void stimer_callback(pl_stimer_handle_t timer)
 	}
 }
 
-static void stimer_callback2(pl_stimer_handle_t timer)
+static void stimer_callback2(struct pl_stimer *timer)
 {
 	int ret;
 	static u8_t cnt = 0;
@@ -93,7 +93,7 @@ static int softtimer_test(void)
 	int ret;
 
 	pl_syslog_info("softtimer test\r\n");
-	tid_t timer_task = 
+	pl_tid_t timer_task = 
 	pl_task_create("softtimer_task", softtimer_test_task, PL_CFG_TASK_PRIORITIES_MAX - 1, 512, 0, NULL);
 	if (timer_task == NULL) {
 		pl_syslog_err("softtimer test task failed\r\n");

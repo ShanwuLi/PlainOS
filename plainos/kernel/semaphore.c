@@ -27,10 +27,9 @@ SOFTWARE.
 #include <kernel/list.h>
 #include <kernel/kernel.h>
 #include <kernel/semaphore.h>
-#include "task.h"
 #include <kernel/syslog.h>
 #include <kernel/mempool.h>
-#include "semaphore.h"
+#include "task.h"
 
 /*************************************************************************************
  * Function Name: pl_semaplore_init
@@ -45,16 +44,16 @@ SOFTWARE.
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_semaplore_init(struct semaphore *semap, int val)
+int pl_semaplore_init(struct pl_sem *sem, int val)
 {
-	if (semap == NULL) {
+	if (sem == NULL) {
 		pl_syslog_err("pl_sem alloc failed\r\n");
 		return -EFAULT;
 	}
 
-	semap->valid = true;
-	semap->value = val;
-	list_init(&semap->wait_list);
+	sem->valid = true;
+	sem->value = val;
+	list_init(&sem->wait_list);
 	return OK;
 }
 
@@ -70,20 +69,20 @@ int pl_semaplore_init(struct semaphore *semap, int val)
  * Return:
  *  @semaphore_handle.
  ************************************************************************************/
-pl_semaphore_handle_t pl_semaplore_request(int val)
+struct pl_sem *pl_semaplore_request(int val)
 {
-	struct semaphore *semap;
+	struct pl_sem *sem;
 
-	semap = pl_mempool_malloc(g_pl_default_mempool, sizeof(struct semaphore));
-	if (semap == NULL) {
+	sem = pl_mempool_malloc(g_pl_default_mempool, sizeof(struct pl_sem));
+	if (sem == NULL) {
 		pl_syslog_err("pl_sem alloc failed\r\n");
-		return ERR_TO_PTR(-EFAULT);
+		return NULL;
 	}
 
-	semap->valid = true;
-	semap->value = val;
-	list_init(&semap->wait_list);
-	return semap;
+	sem->valid = true;
+	sem->value = val;
+	list_init(&sem->wait_list);
+	return sem;
 }
 
 /*************************************************************************************
@@ -93,17 +92,16 @@ pl_semaphore_handle_t pl_semaplore_request(int val)
  *    take semaphore.
  * 
  * Parameters:
- *  @semap: semaphore handle.
+ *  @sem: semaphore handle.
  *
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_semaplore_take(pl_semaphore_handle_t semap)
+int pl_semaplore_take(struct pl_sem *sem)
 {
 	struct tcb *curr_tcb;
-	struct semaphore *sem = (struct semaphore *)semap;
 
-	if (semap == NULL || (!sem->valid))
+	if (sem == NULL || (!sem->valid))
 		return -EFAULT;
 
 	pl_port_enter_critical();
@@ -128,18 +126,17 @@ int pl_semaplore_take(pl_semaphore_handle_t semap)
  *    give semaphore.
  * 
  * Parameters:
- *  @semap: semaphore handle.
+ *  @sem: semaphore handle.
  *
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_semaplore_give(pl_semaphore_handle_t semap)
+int pl_semaplore_give(struct pl_sem *sem)
 {
 	struct tcb *front_tcb;
 	struct list_node *front_node;
-	struct semaphore *sem = (struct semaphore *)semap;
 
-	if (semap == NULL || (!sem->valid))
+	if (sem == NULL || (!sem->valid))
 		return -EFAULT;
 
 	pl_port_enter_critical();
@@ -169,10 +166,8 @@ int pl_semaplore_give(pl_semaphore_handle_t semap)
  * Return:
  *   void.
  ************************************************************************************/
-void pl_semaplore_release(pl_semaphore_handle_t semap)
+void pl_semaplore_release(struct pl_sem *sem)
 {
-	struct semaphore *sem = (struct semaphore *)semap;
-
 	pl_port_enter_critical();
 	if (sem == NULL || (!sem->valid)) {
 		pl_port_exit_critical();

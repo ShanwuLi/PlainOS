@@ -66,7 +66,7 @@ static int init_task(int argc, char *argv[])
  ************************************************************************************/
 int pl_init_task_init(void)
 {
-	tid_t init_taskid;
+	pl_tid_t init_taskid;
 
 	init_taskid = pl_task_sys_create("init_task", init_task, 0,
 	                                 PL_CFG_INIT_TASK_STACK_SIZE, 0, NULL);

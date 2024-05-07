@@ -111,7 +111,7 @@ struct tcb *pl_task_get_curr_tcb(void);
  * Return:
  *    @int :task state
  ************************************************************************************/
-int pl_task_get_state(tid_t tid);
+int pl_task_get_state(pl_tid_t tid);
 
 /*************************************************************************************
  * Function Name: pl_task_get_timer_list
@@ -242,9 +242,9 @@ void pl_task_remove_tcb_from_rdylist(struct tcb *tcb);
  * Return:
  *   task handle.
  ************************************************************************************/
-tid_t pl_task_sys_create_with_stack(const char *name, main_t task, u16_t prio,
-                                    void *stack, size_t stack_size,
-                                    int argc, char *argv[]);
+pl_tid_t pl_task_sys_create_with_stack(const char *name, main_t task, u16_t prio,
+                                       void *stack, size_t stack_size,
+                                       int argc, char *argv[]);
 
 /*************************************************************************************
  * Function Name: pl_task_sys_create
@@ -261,7 +261,7 @@ tid_t pl_task_sys_create_with_stack(const char *name, main_t task, u16_t prio,
  * Return:
  *   task id.
  ************************************************************************************/
-tid_t pl_task_sys_create(const char *name, main_t task, u16_t prio,
-                         size_t stack_size, int argc, char *argv[]);
+pl_tid_t pl_task_sys_create(const char *name, main_t task, u16_t prio,
+                            size_t stack_size, int argc, char *argv[]);
 
 #endif /* __KERNEL_TASK_PRIVATE_H__ */
