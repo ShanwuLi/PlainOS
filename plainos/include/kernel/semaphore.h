@@ -33,7 +33,6 @@ struct pl_sem {
 	bool valid;
 };
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif

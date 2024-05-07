@@ -34,8 +34,6 @@ struct pl_kfifo {
 	char *buff;
 };
 
-typedef void* pl_kfifo_handle_t;
-
 #ifdef __cplusplus
 extern "C" {
 #endif
