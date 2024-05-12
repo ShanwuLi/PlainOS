@@ -33,25 +33,25 @@ SOFTWARE.
 
 static struct list_node pl_serial_desc_list;
 
+/*************************************************************************************
+ * Function Name: pl_serial_recv_cb_work_func
+ * Description: work function for callback.
+ *
+ * Param:
+ *   @work: passed work.
+ *
+ * Return:
+ *   void.
+ ************************************************************************************/
 static void pl_serial_recv_cb_work_func(struct pl_work *work)
 {
-	USED(work);
-}
+	struct pl_serial_recv_info *recv_info = container_of(work,\
+	                                        struct pl_serial_recv_info, cb_work);
 
-static void serial_desc_init(struct serial_desc *desc, u8_t port, struct serial_ops *ops,
-                             struct pl_sem *sem, uint_t recv_buff_size, char *recv_buff)
-{
-	desc->sem = sem;
-	desc->port = port;
-	desc->ops = ops;
-	desc->recv_info.buff_in = 0;
-	desc->recv_info.buff_out = 0;
-	desc->recv_info.buff_size = recv_buff_size;
-	desc->recv_info.ring_buff = recv_buff;
-	desc->recv_info.callback = NULL;
-	desc->recv_info.call_condition = NULL;
-	list_init(&desc->node);
-	pl_work_init(&desc->recv_info.cb_work, pl_serial_recv_cb_work_func, desc);
+	if (recv_info->callback == NULL)
+		return;
+
+	recv_info->callback(recv_info->fifo);
 }
 
 /*************************************************************************************
@@ -63,31 +63,39 @@ static void serial_desc_init(struct serial_desc *desc, u8_t port, struct serial_
  *   @port: serial port.
  *   @ops: operations of serial.
  *   @recv_buff_size: size of buffer for receiving chars, MUST BE POWER OF 2.
- *   @recv_buff: buffer for receiving chars, if is NULL,
- *               system will alloc memory for it.
  *
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_serial_desc_init(struct serial_desc *desc, u8_t port, struct serial_ops *ops,
-                                             uint_t recv_buff_size, char *recv_buff)
+int pl_serial_desc_init(struct pl_serial_desc *desc, u8_t port,
+              struct pl_serial_ops *ops, uint_t recv_buff_size)
 {
 	int ret;
-	struct pl_sem *sem;
+	struct pl_kfifo *fifo;
 
-	if (recv_buff == NULL) {
-		recv_buff = pl_mempool_malloc(g_pl_default_mempool, recv_buff_size);
-		if (recv_buff == NULL)
-			return -ENOMEM;
-	}
-
-	sem = pl_semaplore_request(1);
-	if (sem == NULL) {
-		pl_mempool_free(g_pl_default_mempool, recv_buff_size);
+	if (desc == NULL)
 		return -EFAULT;
-	}
 
-	serial_desc_init(desc, port, ops, sem, recv_buff_size, recv_buff);
+	ret = pl_semaphore_init(&desc->sem, 1);
+	if (ret < 0)
+		return ret;
+
+	ret = pl_work_init(&desc->recv_info.cb_work,
+	                   pl_serial_recv_cb_work_func, desc);
+	if (ret < 0)
+		return ret;
+
+	fifo = pl_kfifo_request(recv_buff_size);
+	if (fifo == NULL)
+		return -ENOMEM;
+
+	desc->port = port;
+	desc->ops = ops;
+	desc->recv_info.fifo = fifo;
+	desc->recv_info.callback = NULL;
+	desc->recv_info.call_condition = NULL;
+	list_init(&desc->node);
+
 	return OK;
 }
 
@@ -101,7 +109,7 @@ int pl_serial_desc_init(struct serial_desc *desc, u8_t port, struct serial_ops *
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_serial_desc_register(struct serial_desc *desc)
+int pl_serial_desc_register(struct pl_serial_desc *desc)
 {
 	if (desc == NULL)
 		return -EFAULT;
@@ -119,28 +127,32 @@ int pl_serial_desc_register(struct serial_desc *desc)
  *
  * Param:
  *   @desc: serial description.
+ *   @chars: characters received.
+ *   @chars_len: length of characters received.
  *
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_serial_callee_recv_handler(struct serial_desc *desc, char *chars, uint_t chars_len);
+int pl_serial_callee_recv_handler(struct pl_serial_desc *desc,
+                                char *chars, uint_t chars_len)
 {
 	int ret;
-	uint_t fifo_data_size;
+	pl_serial_call_condition_t call_condition;
 
-	if (desc == NUL)
+	if (desc == NULL)
 		return -EFAULT;
 
-	
-	if (desc->trigger_condition != NULL) {
-		ret = desc->recv_info.call_condition(desc, chars, len);
-		if (ret < 0)
-			return OK;
+	call_condition = desc->recv_info.call_condition;
+	if (call_condition == NULL)
+		return OK;
 
-		/* call callbcak */
-		ret = pl_work_add(g_pl_sys_hiwq_handle, &desc->recv_callback_work);
-		return ret;
-	}
+	ret = call_condition(desc->recv_info.fifo, chars, chars_len);
+	if (ret < 0)
+		return OK;
+
+	/* call callbcak */
+	ret = pl_work_add(g_pl_sys_hiwq_handle, &desc->recv_info.cb_work);
+	return ret;
 
 	return OK;
 }
@@ -156,7 +168,7 @@ int pl_serial_callee_recv_handler(struct serial_desc *desc, char *chars, uint_t 
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_serial_set_baud_rate(struct serial_desc *desc, u32_t baud_rate)
+int pl_serial_set_baud_rate(struct pl_serial_desc *desc, u32_t baud_rate)
 {
 	int ret;
 
@@ -166,9 +178,9 @@ int pl_serial_set_baud_rate(struct serial_desc *desc, u32_t baud_rate)
 	if (desc->ops == NULL || desc->ops->set_baud_rate == NULL)
 		return -EACCES;
 
-	pl_semaplore_take(desc->sem);
+	pl_semaphore_wait(&desc->sem);
 	ret = desc->ops->set_baud_rate(desc, baud_rate);
-	pl_semaplore_give(desc->sem);
+	pl_semaphore_post(&desc->sem);
 	return ret;
 }
 
@@ -183,7 +195,7 @@ int pl_serial_set_baud_rate(struct serial_desc *desc, u32_t baud_rate)
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_serial_set_data_bits(struct serial_desc *desc, u8_t data_bits)
+int pl_serial_set_data_bits(struct pl_serial_desc *desc, u8_t data_bits)
 {
 	int ret;
 
@@ -193,9 +205,9 @@ int pl_serial_set_data_bits(struct serial_desc *desc, u8_t data_bits)
 	if (desc->ops == NULL || desc->ops->set_data_bits == NULL)
 		return -EACCES;
 
-	pl_semaplore_take(desc->sem);
+	pl_semaphore_wait(&desc->sem);
 	ret = desc->ops->set_data_bits(desc, data_bits);
-	pl_semaplore_give(desc->sem);
+	pl_semaphore_post(&desc->sem);
 	return ret;
 }
 
@@ -210,7 +222,7 @@ int pl_serial_set_data_bits(struct serial_desc *desc, u8_t data_bits)
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_serial_set_parity_bit(struct serial_desc *desc, u8_t parity_bit)
+int pl_serial_set_parity_bit(struct pl_serial_desc *desc, u8_t parity_bit)
 {
 	int ret;
 
@@ -220,9 +232,9 @@ int pl_serial_set_parity_bit(struct serial_desc *desc, u8_t parity_bit)
 	if (desc->ops == NULL || desc->ops->set_parity_bit == NULL)
 		return -EACCES;
 
-	pl_semaplore_take(desc->sem);
+	pl_semaphore_wait(&desc->sem);
 	ret = desc->ops->set_parity_bit(desc, parity_bit);
-	pl_semaplore_give(desc->sem);
+	pl_semaphore_post(&desc->sem);
 	return ret;
 }
 
@@ -237,7 +249,7 @@ int pl_serial_set_parity_bit(struct serial_desc *desc, u8_t parity_bit)
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_serial_set_stop_bits(struct serial_desc *desc, u8_t stop_bits)
+int pl_serial_set_stop_bits(struct pl_serial_desc *desc, u8_t stop_bits)
 {
 	int ret;
 
@@ -247,9 +259,9 @@ int pl_serial_set_stop_bits(struct serial_desc *desc, u8_t stop_bits)
 	if (desc->ops == NULL || desc->ops->set_stop_bits == NULL)
 		return -EACCES;
 
-	pl_semaplore_take(desc->sem);
+	pl_semaphore_wait(&desc->sem);
 	ret = desc->ops->set_stop_bits(desc, stop_bits);
-	pl_semaplore_give(desc->sem);
+	pl_semaphore_post(&desc->sem);
 	return ret;
 }
 
@@ -264,7 +276,7 @@ int pl_serial_set_stop_bits(struct serial_desc *desc, u8_t stop_bits)
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_serial_send_char(struct serial_desc *desc, char c)
+int pl_serial_send_char(struct pl_serial_desc *desc, char c)
 {
 	int ret;
 
@@ -274,9 +286,9 @@ int pl_serial_send_char(struct serial_desc *desc, char c)
 	if (desc->ops == NULL || desc->ops->send_char == NULL)
 		return -EACCES;
 
-	pl_semaplore_take(desc->sem);
+	pl_semaphore_wait(&desc->sem);
 	ret = desc->ops->send_char(desc, c);
-	pl_semaplore_give(desc->sem);
+	pl_semaphore_post(&desc->sem);
 	return ret;
 }
 
@@ -291,7 +303,7 @@ int pl_serial_send_char(struct serial_desc *desc, char c)
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-static int pl_serial_send_string(struct serial_desc *desc, char *str)
+static int pl_serial_send_string(struct pl_serial_desc *desc, char *str)
 {
 	int ret;
 
@@ -317,7 +329,7 @@ static int pl_serial_send_string(struct serial_desc *desc, char *str)
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_serial_send_str(struct serial_desc *desc, char *str)
+int pl_serial_send_str(struct pl_serial_desc *desc, char *str)
 {
 	int ret;
 
@@ -328,13 +340,114 @@ int pl_serial_send_str(struct serial_desc *desc, char *str)
 	    &desc->ops->send_str == NULL))
 		return -EACCES;
 
-	pl_semaplore_take(desc->sem);
+	pl_semaphore_wait(&desc->sem);
 	if (desc->ops->send_str == NULL)
 		ret = pl_serial_send_string(desc, str);
 	else
 		ret = desc->ops->send_str(desc, str);
-	pl_semaplore_give(desc->sem);
+	pl_semaphore_post(&desc->sem);
 
 	return ret;
 }
 
+/*************************************************************************************
+ * Function Name: pl_serial_register_recv_call_condition
+ * Description: register call condition for serial when received some characters.
+ *
+ * Param:
+ *   @desc: serial description.
+ *   @condition: call condition.
+ *
+ * Return:
+ *   Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_serial_register_recv_call_condition(struct pl_serial_desc *desc,
+                                  pl_serial_call_condition_t condition)
+{
+	if (desc == NULL)
+		return -EFAULT;
+
+	pl_port_enter_critical();
+	if (desc->recv_info.call_condition != NULL) {
+		pl_port_exit_critical();
+		return -EBUSY;
+	}
+
+	desc->recv_info.call_condition = condition;
+	pl_port_exit_critical();
+
+	return OK;
+}
+
+/*************************************************************************************
+ * Function Name: pl_serial_unregister_recv_call_condition
+ * Description: unregister call condition for serial when received some characters.
+ *
+ * Param:
+ *   @desc: serial description.
+ *
+ * Return:
+ *   Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_serial_unregister_recv_call_condition(struct pl_serial_desc *desc)
+{
+	if (desc == NULL)
+		return -EFAULT;
+
+	pl_port_enter_critical();
+	desc->recv_info.call_condition = NULL;
+	pl_port_exit_critical();
+
+	return OK;
+}
+
+/*************************************************************************************
+ * Function Name: pl_serial_send_string
+ * Description: register callback for serial when received some characters.
+ *
+ * Param:
+ *   @desc: serial description.
+ *   @recv_callback: callback function.
+ *
+ * Return:
+ *   Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_serial_register_recv_callback(struct pl_serial_desc *desc,
+                              pl_serial_callback_t recv_callback)
+{
+	if (desc == NULL)
+		return -EFAULT;
+
+	pl_task_schedule_lock();
+	if (desc->recv_info.callback != NULL) {
+		pl_task_schedule_unlock();
+		return -EBUSY;
+	}
+
+	desc->recv_info.callback = recv_callback;
+	pl_task_schedule_unlock();
+
+	return OK;
+}
+
+/*************************************************************************************
+ * Function Name: pl_serial_unregister_recv_callback
+ * Description: unregister callback for serial when received some characters.
+ *
+ * Param:
+ *   @desc: serial description.
+ *
+ * Return:
+ *   Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_serial_unregister_recv_callback(struct pl_serial_desc *desc)
+{
+	if (desc == NULL)
+		return -EFAULT;
+
+	pl_task_schedule_lock();
+	desc->recv_info.callback = NULL;
+	pl_task_schedule_unlock();
+
+	return OK;
+}

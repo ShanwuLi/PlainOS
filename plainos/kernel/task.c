@@ -493,27 +493,6 @@ void pl_task_schedule_unlock(void)
 }
 
 /*************************************************************************************
- * Function Name: pl_task_get_schedule_ref
- * Description: get reference count of schedule.
- *
- * Parameters:
- *   none
- *
- * Return:
- *   reference count.
- ************************************************************************************/
-static uint_t pl_task_get_schedule_ref(void)
-{
-	uint_t ref;
-
-	pl_port_enter_critical();
-	ref = g_task_core_blk.sched_lock_ref;
-	pl_port_exit_critical();
-
-	return ref;
-}
-
-/*************************************************************************************
  * Function Name: pl_task_free_exit_tcb
  * Description: free exited tcb.
  *
@@ -560,11 +539,12 @@ void pl_task_context_switch(void)
 	struct tcb *next_tcb;
 	struct tcb *idle_tcb;
 
-
-	if (pl_task_get_schedule_ref() != 0)
+	pl_port_enter_critical();
+	if (g_task_core_blk.sched_lock_ref != 0) {
+		pl_port_exit_critical();
 		return;
+	}
 
-	pl_port_mask_interrupts();
 	hiprio = get_hiprio();
 	curr_tcb = g_task_core_blk.curr_tcb;
 	next_tcb = g_task_core_blk.ready_list[hiprio].head;
@@ -576,7 +556,7 @@ void pl_task_context_switch(void)
 	if (curr_tcb != next_tcb)
 		pl_port_switch_context();
 
-	pl_port_unmask_interrupts();
+	pl_port_exit_critical();
 }
 
 /*************************************************************************************
