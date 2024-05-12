@@ -431,7 +431,9 @@ void pl_task_remove_tcb_from_rdylist(struct tcb *tcb)
 		return;
 	}
 
-	rdylist->head = list_next_entry(tcb, struct tcb, node);
+	if (tcb == rdylist->head)
+		rdylist->head = list_next_entry(tcb, struct tcb, node);
+
 	list_del_node(&tcb->node);
 	--rdylist->num;
 }
