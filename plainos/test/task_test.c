@@ -48,7 +48,7 @@ static int idle_task1(int argc, char *argv[])
 	tcb3 = pl_task_create("idle_task3", idle_task2, PL_CFG_TASK_PRIORITIES_MAX - 2, 256, 1, argvs3);
 	if (tcb2 == NULL || tcb3 == NULL) {
 		pl_syslog_info("idle_task2 or idle_task3 create failed\r\n");
-		return ERROR;
+		return -ENOMEM;
 	}
 
 	r = pl_task_join(tcb2, &ret);

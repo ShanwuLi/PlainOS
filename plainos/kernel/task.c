@@ -630,7 +630,7 @@ static void task_init_tcb(const char *name, main_t task, u16_t prio,
 	tcb->argv = argv;
 	tcb->delay_ticks.hi32 = 0;
 	tcb->delay_ticks.lo32 = 0;
-	tcb->wait_for_task_ret = ERROR;
+	tcb->wait_for_task_ret = -EUNKNOWE;
 	list_init(&tcb->wait_head);
 }
 
@@ -823,7 +823,7 @@ int pl_task_join(pl_tid_t tid, int *ret)
 	pl_port_enter_critical();
 	if (tcb->curr_state == PL_TASK_STATE_EXIT) {
 		pl_port_exit_critical();
-		return ERROR;
+		return -EALREADY;
 	}
 
 	pl_task_remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
@@ -927,7 +927,7 @@ int pl_task_kill(pl_tid_t tid)
 	pl_port_enter_critical();
 	if (tcb->curr_state == PL_TASK_STATE_EXIT) {
 		pl_port_exit_critical();
-		return ERROR;
+		return -EALREADY;
 	}
 
 	pl_task_remove_tcb_from_rdylist(tcb);

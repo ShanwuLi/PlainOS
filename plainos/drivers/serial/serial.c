@@ -142,6 +142,7 @@ int pl_serial_callee_recv_handler(struct pl_serial_desc *desc,
 	if (desc == NULL)
 		return -EFAULT;
 
+	pl_kfifo_put(desc->recv_info.fifo, chars, chars_len);
 	call_condition = desc->recv_info.call_condition;
 	if (call_condition == NULL)
 		return OK;
@@ -155,6 +156,31 @@ int pl_serial_callee_recv_handler(struct pl_serial_desc *desc,
 	return ret;
 
 	return OK;
+}
+
+/*************************************************************************************
+ * Function Name: pl_serial_find_desc
+ * Description: find serial description by port.
+ *
+ * Param:
+ *   @port: serial port.
+ *
+ * Return:
+ *   struct pl_serial_desc if is not NULL.
+ ************************************************************************************/
+struct pl_serial_desc *pl_serial_find_desc(u8_t port)
+{
+	struct pl_serial_desc *pos;
+
+	if (list_is_empty(&pl_serial_desc_list))
+		return NULL;
+
+	list_for_each_entry(pos, &pl_serial_desc_list, struct pl_serial_desc, node) {
+		if (port == pos->port)
+			return pos;
+	}
+
+	return NULL;
 }
 
 /*************************************************************************************
@@ -451,3 +477,21 @@ int pl_serial_unregister_recv_callback(struct pl_serial_desc *desc)
 
 	return OK;
 }
+
+/*************************************************************************************
+ * Function Name: pl_serial_core_init
+ * Description: serial framework init.
+ *
+ * Param:
+ *   @desc: serial description.
+ *
+ * Return:
+ *   Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+static int pl_serial_core_init(void)
+{
+	list_init(&pl_serial_desc_list);
+	pl_early_syslog_info("serial init done\r\n");
+	return 0;
+}
+pl_core_initcall(pl_serial_core_init);

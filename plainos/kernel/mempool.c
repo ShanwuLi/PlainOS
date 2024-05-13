@@ -482,7 +482,7 @@ void* pl_mempool_malloc(pl_mempool_handle_t mempool, size_t size)
 	if (mp == NULL)
 		return NULL;
 
-	pl_semaplore_take(&pl_default_mempool.sem);
+	pl_semaphore_wait(&pl_default_mempool.sem);
 	/* get block index */
 	if (bit_num < UINTPTR_T_BITS)
 		found = get_blk_idx(mp, alloc_size, find_bit_condition, &blk_idx);
@@ -491,7 +491,7 @@ void* pl_mempool_malloc(pl_mempool_handle_t mempool, size_t size)
 
 	/* check block index */
 	if (!found || blk_idx >= mp->blk_num) {
-		pl_semaplore_give(&pl_default_mempool.sem);
+		pl_semaphore_post(&pl_default_mempool.sem);
 		return NULL;
 	}
 
@@ -507,7 +507,7 @@ void* pl_mempool_malloc(pl_mempool_handle_t mempool, size_t size)
 
 	/* update bitmap */
 	update_bit_map(mp, blk_idx, bit_offset, bit_num, false);
-	pl_semaplore_give(&pl_default_mempool.sem);
+	pl_semaphore_post(&pl_default_mempool.sem);
 
 	return (void*)data_addr->data;
 }
@@ -574,11 +574,11 @@ void pl_mempool_free(pl_mempool_handle_t mempool, void* p)
 	if (data_addr == NULL)
 		return;
 
-	pl_semaplore_take(&pl_default_mempool.sem);
+	pl_semaphore_wait(&pl_default_mempool.sem);
 	blk_idx = data_addr->bit_idx / UINTPTR_T_BITS;
 	bit_offset = data_addr->bit_idx & (UINTPTR_T_BITS - 1);
 	update_bit_map(mp, blk_idx, bit_offset, data_addr->bit_num, true);
-	pl_semaplore_give(&pl_default_mempool.sem);
+	pl_semaphore_post(&pl_default_mempool.sem);
 }
 
 /*************************************************************************************
@@ -631,10 +631,10 @@ size_t pl_mempool_get_free_bytes(pl_mempool_handle_t mempool)
 	if (mp == NULL)
 		return 0;
 
-	pl_semaplore_take(&pl_default_mempool.sem);
+	pl_semaphore_wait(&pl_default_mempool.sem);
 	for (i = 0; i < mp->blk_num; i++)
 		rest_bytes += mempool_blk_get_free_bytes(mp, i, mp->grain_order);
-	pl_semaplore_give(&pl_default_mempool.sem);
+	pl_semaphore_post(&pl_default_mempool.sem);
 
 	return rest_bytes;
 }
@@ -747,7 +747,7 @@ void *pl_mempool_calloc(pl_mempool_handle_t mempool, size_t num, size_t size)
  ************************************************************************************/
 int pl_default_mempool_init(void)
 {
-	int ret = pl_semaplore_init(&pl_default_mempool.sem, 1);
+	int ret = pl_semaphore_init(&pl_default_mempool.sem, 1);
 	pl_assert(ret == OK);
 
 	g_pl_default_mempool = pl_mempool_init(pl_default_mempool.pool_data,

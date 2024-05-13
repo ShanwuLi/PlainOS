@@ -269,10 +269,10 @@ int pl_softtimer_reload(struct pl_stimer *timer, bool reload, pl_stimer_fun_t fu
 int pl_softtimer_cancel(struct pl_stimer *timer)
 {
 	if (timer == NULL || timer->fun == NULL)
-		return ERROR;
+		return -EFAULT;
 
 	if (list_is_empty(&timer->node))
-		return ERROR;
+		return -EEMPTY;
 
 	pl_port_enter_critical();
 	list_del_node(&timer->node);
@@ -341,7 +341,7 @@ int pl_softtimer_core_init(void)
 	                        PL_CFG_SOFTTIMER_DAEMON_TASK_STACK_SIZE, 0, NULL);
 	if (pl_stimer_ctrl.daemon == NULL) {
 		pl_syslog_err("soft timer init failed\r\n");
-		return ERROR;
+		return -EFAULT;
 	}
 
 	pl_syslog_info("soft timer init done\r\n");

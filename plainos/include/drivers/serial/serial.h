@@ -163,6 +163,18 @@ int pl_serial_callee_recv_handler(struct pl_serial_desc *desc,
 
 /*================================== Client Driver =================================*/
 /*************************************************************************************
+ * Function Name: pl_serial_find_desc
+ * Description: find serial description by port.
+ *
+ * Param:
+ *   @port: serial port.
+ *
+ * Return:
+ *   struct pl_serial_desc if is not NULL.
+ ************************************************************************************/
+struct pl_serial_desc *pl_serial_find_desc(u8_t port);
+
+/*************************************************************************************
  * Function Name: pl_serial_set_baud_rate
  * Description: set baud rate for serial.
  *

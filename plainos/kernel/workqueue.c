@@ -98,7 +98,7 @@ static int pl_workqueue_init(struct pl_workqueue *wq, const char *name, u16_t pr
 	wq->exec_thread = pl_task_sys_create(name, workqueue_task, prio,
 	                                     wq_stack_sz, 1, (char **)wq);
 	if (wq->exec_thread == NULL)
-		return ERROR;
+		return -EUNKNOWE;
 
 	return OK;
 }

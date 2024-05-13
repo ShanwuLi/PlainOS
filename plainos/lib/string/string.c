@@ -33,7 +33,7 @@ int pl_lib_ull2str(char *str, unsigned long long n, unsigned char base)
 	unsigned long long num = n;
 
 	if (base > 16)
-		return ERROR;
+		return -ERANGE;
 
 	while(num / base) {
 		num /= base;

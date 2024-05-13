@@ -22,3 +22,4 @@
 
 C_SRCS += $(ARCH_DIR)/arm32/stm32f103c8t6/driver/gpio.c
 C_SRCS += $(ARCH_DIR)/arm32/stm32f103c8t6/driver/iomux.c
+C_SRCS += $(ARCH_DIR)/arm32/stm32f103c8t6/driver/serial.c

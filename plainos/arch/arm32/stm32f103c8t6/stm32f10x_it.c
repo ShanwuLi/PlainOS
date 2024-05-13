@@ -15,14 +15,3 @@ void pl_sys_dump(u32_t *fault_args)
 	pl_early_syslog_err("psr:0x%x\r\n", fault_args[7]);
 	while (true);
 }
-
-void USART1_IRQHandler(void)
-{
-	char recv_char;
-
-	if(USART1->SR & (1 << 5)) {
-		recv_char = USART1->DR;
-	}
-
-	(void)recv_char;
-}

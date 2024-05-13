@@ -38,7 +38,7 @@ extern "C" {
 #endif
 
 /*************************************************************************************
- * Function Name: pl_semaplore_init
+ * Function Name: pl_semaphore_init
  *
  * Description:
  *   request a semaphore.
@@ -50,10 +50,10 @@ extern "C" {
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure..
  ************************************************************************************/
-int pl_semaplore_init(struct pl_sem *sem, int val);
+int pl_semaphore_init(struct pl_sem *sem, int val);
 
 /*************************************************************************************
- * Function Name: pl_semaplore_request
+ * Function Name: pl_semaphore_request
  *
  * Description:
  *   request a semaphore.
@@ -64,10 +64,10 @@ int pl_semaplore_init(struct pl_sem *sem, int val);
  * Return:
  *  @semaphore_handle.
  ************************************************************************************/
-struct pl_sem *pl_semaplore_request(int val);
+struct pl_sem *pl_semaphore_request(int val);
 
 /*************************************************************************************
- * Function Name: pl_semaplore_take
+ * Function Name: pl_semaphore_wait
  *
  * Description:
  *    take semaphore.
@@ -78,10 +78,10 @@ struct pl_sem *pl_semaplore_request(int val);
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_semaplore_take(struct pl_sem *sem);
+int pl_semaphore_wait(struct pl_sem *sem);
 
 /*************************************************************************************
- * Function Name: pl_semaplore_give
+ * Function Name: pl_semaphore_post
  *
  * Description:
  *    give semaphore.
@@ -92,10 +92,10 @@ int pl_semaplore_take(struct pl_sem *sem);
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_semaplore_give(struct pl_sem *sem);
+int pl_semaphore_post(struct pl_sem *sem);
 
 /*************************************************************************************
- * Function Name: pl_semaplore_release
+ * Function Name: pl_semaphore_release
  *
  * Description:
  *   release a semaphore.
@@ -106,7 +106,7 @@ int pl_semaplore_give(struct pl_sem *sem);
  * Return:
  *   void.
  ************************************************************************************/
-void pl_semaplore_release(struct pl_sem *sem);
+void pl_semaphore_release(struct pl_sem *sem);
 
 #ifdef __cplusplus
 }

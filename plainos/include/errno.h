@@ -66,7 +66,8 @@ SOFTWARE.
 #define EREGED             37    /* Has registered */
 #define ETIMEOUT           38    /* timeout */
 #define ENOSUPPORT         39    /* not support */
-#define ERROR              -40   /* Unknow error */
+#define EALREADY           40    /* already done */
+#define EUNKNOWE           41    /* Unknow error */
 
 #define ERR_TO_PTR(err)    ((void *)(uintptr_t)(err))
 

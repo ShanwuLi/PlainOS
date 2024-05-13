@@ -211,11 +211,11 @@ void pl_put_format_log(const char *fmt, ...)
 		return;
 	}
 
-	pl_semaplore_take(&pl_syslog_ctrl.syslog_semaphore);
+	pl_semaphore_wait(&pl_syslog_ctrl.syslog_semaphore);
 	va_start(valist, fmt);
 	pl_vformat_log(pl_port_putc, fmt, valist);
 	va_end(valist);
-	pl_semaplore_give(&pl_syslog_ctrl.syslog_semaphore);
+	pl_semaphore_post(&pl_syslog_ctrl.syslog_semaphore);
 }
 
 /*************************************************************************************
@@ -235,9 +235,9 @@ int pl_syslog_redirect(int (*put_char)(char c))
 	if (put_char == NULL)
 		return -EFAULT;
 
-	pl_semaplore_take(&pl_syslog_ctrl.syslog_semaphore);
+	pl_semaphore_wait(&pl_syslog_ctrl.syslog_semaphore);
 	pl_syslog_ctrl.put_char = put_char;
-	pl_semaplore_give(&pl_syslog_ctrl.syslog_semaphore);
+	pl_semaphore_post(&pl_syslog_ctrl.syslog_semaphore);
 
 	return OK;
 }
@@ -257,7 +257,7 @@ int pl_syslog_redirect(int (*put_char)(char c))
 int pl_syslog_init(void)
 {
 	pl_syslog_ctrl.put_char = NULL;
-	pl_semaplore_init(&pl_syslog_ctrl.syslog_semaphore, 1);
+	pl_semaphore_init(&pl_syslog_ctrl.syslog_semaphore, 1);
 	pl_early_syslog("syslog init successfully\r\n");
 	return OK;
 }
