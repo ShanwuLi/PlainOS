@@ -52,6 +52,18 @@ extern "C" {
 struct pl_kfifo *pl_kfifo_init(char *buff, uint_t buff_size);
 
 /*************************************************************************************
+ * Function Name: pl_kfifo_back
+ * Description: back the kfifo
+ *
+ * Param:
+ *   @fifo: kfifo handle.
+ *
+ * Return:
+ *   none.
+ ************************************************************************************/
+void pl_kfifo_back(struct pl_kfifo *kfifo);
+
+/*************************************************************************************
  * Function Name: pl_kfifo_request
  * Description: request and initialize a kfifo.
  *

@@ -51,7 +51,7 @@ static int init_task(int argc, char *argv[])
 	pl_assert(ret == 0);
 	pl_do_initcalls();
 
-	pl_early_syslog("init_task done\r\n");
+	//pl_early_syslog_info("init_task done\r\n");
 	return 0;
 }
 
@@ -71,10 +71,10 @@ int pl_init_task_init(void)
 	init_taskid = pl_task_sys_create("init_task", init_task, 0,
 	                                 PL_CFG_INIT_TASK_STACK_SIZE, 0, NULL);
 	if (init_taskid == NULL) {
-		pl_early_syslog("init task create failed\r\n");
+		pl_early_syslog_err("init task create failed\r\n");
 		return -1;
 	}
 
-	pl_early_syslog("init task init done\r\n");
+	//pl_early_syslog_info("init task init done\r\n");
 	return 0;
 }

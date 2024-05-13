@@ -56,7 +56,7 @@ static void put_string(int (*putc)(const char c), const char *str)
 }
 
 /*************************************************************************************
- * Function Name: put_chars
+ * Function Name: pl_syslog_put_chars
  *
  * Description:
  *   put chars using puc.
@@ -69,8 +69,7 @@ static void put_string(int (*putc)(const char c), const char *str)
  * Return:
  *   none.
  ************************************************************************************/
-static void put_chars(int (*putc)(const char c),
-             const char *start, const char *end)
+void pl_syslog_put_chars(int (*putc)(const char c), const char *start, const char *end)
 {
 	const char *ch;
  
@@ -156,7 +155,7 @@ void pl_vformat_log(int (*putc)(const char c), const char *fmt, va_list valist)
 			break;
 
 		default:
-			put_chars(putc, ch, fmt);
+			pl_syslog_put_chars(putc, ch, fmt);
 			break;
 		}
 

@@ -34,7 +34,7 @@ MCU      := -mcpu=cortex-m3#-mmcu=atmega2560
 CHIP     := stm32f103c8t6#atmega2560
 
 # TEST CONFIGURATIONS
-PL_MK_CFG_OS_TEST = y
+PL_MK_CFG_OS_TEST = n
 PL_MK_CFG_OS_MEMPOOL_TEST = y
 PL_MK_CFG_OS_TASK_TEST = y
 PL_MK_CFG_OS_SOFTTIMER_TEST = y

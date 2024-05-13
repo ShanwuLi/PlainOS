@@ -137,10 +137,17 @@ int pl_serial_callee_recv_handler(struct pl_serial_desc *desc,
                                 char *chars, uint_t chars_len)
 {
 	int ret;
+	pl_serial_call_filter_t filter;
 	pl_serial_call_condition_t call_condition;
 
 	if (desc == NULL)
 		return -EFAULT;
+
+	filter = desc->recv_info.filter;
+	if (filter != NULL) {
+		if (filter(desc->recv_info.fifo, chars, chars_len) < 0)
+			return OK;
+	}
 
 	pl_kfifo_put(desc->recv_info.fifo, chars, chars_len);
 	call_condition = desc->recv_info.call_condition;
@@ -374,6 +381,57 @@ int pl_serial_send_str(struct pl_serial_desc *desc, char *str)
 	pl_semaphore_post(&desc->sem);
 
 	return ret;
+}
+
+/*************************************************************************************
+ * Function Name: pl_serial_register_recv_call_condition
+ * Description: register filter for serial when received some characters.
+ *
+ * Param:
+ *   @desc: serial description.
+ *   @filter: filter.
+ *
+ * Return:
+ *   Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_serial_register_recv_filter(struct pl_serial_desc *desc,
+                                   pl_serial_call_filter_t filter)
+{
+	if (desc == NULL)
+		return -EFAULT;
+
+	pl_port_enter_critical();
+	if (desc->recv_info.filter != NULL) {
+		pl_port_exit_critical();
+		return -EBUSY;
+	}
+
+	desc->recv_info.filter = filter;
+	pl_port_exit_critical();
+
+	return OK;
+}
+
+/*************************************************************************************
+ * Function Name: pl_serial_unregister_recv_filter
+ * Description: unregister filter for serial when received some characters.
+ *
+ * Param:
+ *   @desc: serial description.
+ *
+ * Return:
+ *   Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_serial_unregister_recv_filter(struct pl_serial_desc *desc)
+{
+	if (desc == NULL)
+		return -EFAULT;
+
+	pl_port_enter_critical();
+	desc->recv_info.filter = NULL;
+	pl_port_exit_critical();
+
+	return OK;
 }
 
 /*************************************************************************************

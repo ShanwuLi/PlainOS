@@ -30,30 +30,6 @@ SOFTWARE.
 
 static struct pl_serial_desc stm32f10x_serial_desc;
 
-static int callback_condition(struct pl_kfifo *recv_fifo, char *chars, uint_t chars_len)
-{
-	USED(recv_fifo);
-
-	if (chars[chars_len - 1] == '\r') {
-		return 0;
-	}
-
-	return -1;
-}
-
-static void callback(struct pl_kfifo *recv_fifo)
-{
-	USED(recv_fifo);
-	pl_syslog_info("in:0x%x, out:0x%x\r\n", recv_fifo->in, recv_fifo->out);
-	while (recv_fifo->out != recv_fifo->in) {
-		pl_port_putc(recv_fifo->buff[recv_fifo->out & (recv_fifo->size - 1)]);
-		++recv_fifo->out;
-	}
-
-	pl_port_putc('\r');
-	pl_port_putc('\n');
-}
-
 void USART1_IRQHandler(void)
 {
 	char recv_char;
@@ -75,8 +51,7 @@ static struct pl_serial_ops stm32f10x_serial_ops = {
 	.recv_char = NULL,
 };
 
-int stm32f10x_serial_init(void);
-int stm32f10x_serial_init(void)
+static int stm32f10x_serial_init(void)
 {
 	int ret;
 
@@ -93,19 +68,7 @@ int stm32f10x_serial_init(void)
 		return ret;
 	}
 
-	ret = pl_serial_register_recv_call_condition(&stm32f10x_serial_desc,
-	            callback_condition);
-	if (ret < 0) {
-		pl_syslog_err("stm32f10x callback condition register failed, ret:%d\r\n", ret);
-		return ret;
-	}
-
-	ret = pl_serial_register_recv_callback(&stm32f10x_serial_desc, callback);
-	if (ret < 0) {
-		pl_syslog_err("stm32f10x callback register failed, ret:%d\r\n", ret);
-		return ret;
-	}
-
+	pl_syslog_info("stm32f10x serial init done\r\n");
 	return 0;
 }
 pl_bsp_initcall(stm32f10x_serial_init);

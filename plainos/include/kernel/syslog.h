@@ -65,6 +65,22 @@ SOFTWARE.
 void pl_put_format_log_locked(int (*putc)(const char c), const char *fmt, ...);
 
 /*************************************************************************************
+ * Function Name: pl_syslog_put_chars
+ *
+ * Description:
+ *   put chars using puc.
+ *
+ * Param:
+ *   @putc: putc function.
+ *   @start: start char.
+ *   @end: end char.
+ * 
+ * Return:
+ *   none.
+ ************************************************************************************/
+void pl_syslog_put_chars(int (*putc)(const char c), const char *start, const char *end);
+
+/*************************************************************************************
  * Function Name: pl_early_syslog
  *
  * Description:

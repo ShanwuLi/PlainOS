@@ -129,6 +129,22 @@ uint_t pl_kfifo_len(struct pl_kfifo *kfifo)
 }
 
 /*************************************************************************************
+ * Function Name: pl_kfifo_back
+ * Description: back the kfifo
+ *
+ * Param:
+ *   @fifo: kfifo handle.
+ *
+ * Return:
+ *   none.
+ ************************************************************************************/
+void pl_kfifo_back(struct pl_kfifo *kfifo)
+{
+	if (pl_kfifo_len(kfifo) > 0)
+		--kfifo->in;
+}
+
+/*************************************************************************************
  * Function Name: pl_kfifo_get
  * Description: get the data from kfifo.
  *

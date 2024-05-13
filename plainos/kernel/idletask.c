@@ -44,7 +44,7 @@ static int idle_task(int argc, char *argv[])
 	pl_assert(ret == 0);
 
 	while(true) {
-		pl_early_syslog("idletask===============================================\r\n");
+		//pl_early_syslog("idletask===============================================\r\n");
 		for (volatile int i = 0; i < 10000; i++);
 	}
 
