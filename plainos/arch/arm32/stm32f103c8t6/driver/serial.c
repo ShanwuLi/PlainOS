@@ -29,6 +29,7 @@ SOFTWARE.
 #include "../stm32f10x_it.h"
 
 static struct pl_serial_desc stm32f10x_serial_desc;
+static u32_t recv_fifo[256];
 
 void USART1_IRQHandler(void)
 {
@@ -55,8 +56,8 @@ static int stm32f10x_serial_init(void)
 {
 	int ret;
 
-	ret = pl_serial_desc_init(&stm32f10x_serial_desc, 0,
-	                          &stm32f10x_serial_ops, 1024);
+	ret = pl_serial_desc_init(&stm32f10x_serial_desc, 0, &stm32f10x_serial_ops,
+	                          (char *)recv_fifo, 1024);
 	if (ret < 0) {
 		pl_syslog_err("stm32f10x serial init failed, ret:%d\r\n", ret);
 		return ret;

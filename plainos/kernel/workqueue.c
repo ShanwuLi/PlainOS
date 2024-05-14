@@ -124,7 +124,7 @@ struct pl_workqueue *pl_workqueue_create(const char *name, u16_t prio,
 	int ret;
 	struct pl_workqueue *wq;
 
-	if (!is_power_of_2(wq_fifo_cap) || wq_fifo_cap == 0)
+	if (!pl_is_power_of_2(wq_fifo_cap) || wq_fifo_cap == 0)
 		return NULL;
 
 	wq = pl_mempool_malloc(g_pl_default_mempool, sizeof(struct pl_workqueue) +

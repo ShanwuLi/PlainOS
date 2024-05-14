@@ -34,32 +34,27 @@ SOFTWARE.
  * Description: initialize a fifo.
  *
  * Param:
+ *   @kfifo: kfifo handle.
  *   @buff: buffer of fifo.
  *   @buff_size: size of the buffer.
  *
  * Return:
  *   fifodata handle.
  ************************************************************************************/
-struct pl_kfifo *pl_kfifo_init(char *buff, uint_t buff_size)
+int pl_kfifo_init(struct pl_kfifo *kfifo, char *buff, uint_t buff_size)
 {
-	struct pl_kfifo *kfifo;
+	if (kfifo == NULL || buff == NULL || buff_size == 0)
+		return -EFAULT;
 
-	if (buff == NULL || buff_size == 0)
-		return NULL;
-
-	if (!is_power_of_2(buff_size))
-		return NULL;
-
-	kfifo = pl_mempool_malloc(g_pl_default_mempool, sizeof(struct pl_kfifo));
-	if (kfifo == NULL)
-		return NULL;
+	if (!pl_is_power_of_2(buff_size))
+		return -EINVAL;
 
 	kfifo->buff = buff;
 	kfifo->size = buff_size;
 	kfifo->in = 0;
 	kfifo->out = 0;
 
-	return kfifo;
+	return OK;
 }
 
 /*************************************************************************************
@@ -76,7 +71,7 @@ struct pl_kfifo *pl_kfifo_request(uint_t buff_size)
 {
 	struct pl_kfifo *kfifo;
 
-	if (!is_power_of_2(buff_size))
+	if (!pl_is_power_of_2(buff_size))
 		return NULL;
 
 	kfifo = pl_mempool_malloc(g_pl_default_mempool, sizeof(struct pl_kfifo) + buff_size);

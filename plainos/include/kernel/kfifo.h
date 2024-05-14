@@ -43,13 +43,14 @@ extern "C" {
  * Description: initialize a fifo.
  *
  * Param:
+ *   @kfifo: kfifo handle.
  *   @buff: buffer of fifo.
  *   @buff_size: size of the buffer.
  *
  * Return:
  *   fifodata handle.
  ************************************************************************************/
-struct pl_kfifo *pl_kfifo_init(char *buff, uint_t buff_size);
+int pl_kfifo_init(struct pl_kfifo *kfifo, char *buff, uint_t buff_size);
 
 /*************************************************************************************
  * Function Name: pl_kfifo_back

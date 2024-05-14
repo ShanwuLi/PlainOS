@@ -34,11 +34,15 @@ static int plsh_filter(struct pl_kfifo *recv_fifo, char *chars, uint_t chars_len
 		if (pl_kfifo_len(recv_fifo) == 0)
 			return -EINVAL;
 
+		pl_syslog_put_chars(pl_port_putc, chars, chars + chars_len - 1);
+		pl_port_putc('\033');
+		pl_port_putc('[');
+		pl_port_putc('P');
 		pl_kfifo_back(recv_fifo);
-		pl_early_syslog("\033[P");
 		return -EINVAL;
 	}
 
+	pl_syslog_put_chars(pl_port_putc, chars, chars + chars_len - 1);
 	return OK;
 }
 
@@ -46,7 +50,6 @@ static int plsh_callback_condition(struct pl_kfifo *recv_fifo, char *chars, uint
 {
 	USED(recv_fifo);
 
-	pl_syslog_put_chars(pl_port_putc, chars, chars + chars_len - 1);
 	if (chars[chars_len - 1] == '\r') {
 		pl_port_putc('\n');
 		return OK;

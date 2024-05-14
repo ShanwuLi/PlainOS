@@ -53,7 +53,7 @@ struct count {
 	u32_t lo32;
 };
 
-#define is_power_of_2(x)                       ((x) != 0 && (((x) & ((x) - 1)) == 0))
+#define pl_is_power_of_2(x)                    ((x) != 0 && (((x) & ((x) - 1)) == 0))
 #define min(a, b)                              (((a) < (b)) ? (a) : (b))
 #define max(a, b)                              (((a) > (b)) ? (a) : (b))
 
