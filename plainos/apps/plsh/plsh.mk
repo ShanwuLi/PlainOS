@@ -21,4 +21,4 @@
 # SOFTWARE.
 
 PLSH_DIR := $(APPS_DIR)/plsh
-#C_SRCS += $(PLSH_DIR)/plsh.c
+C_SRCS += $(PLSH_DIR)/plsh.c

@@ -36,7 +36,7 @@ struct pl_serial_desc;
 /*************************************************************************************
  * struct serial_recv_info:
  * Description:
- *   @recv_condition: callback function will be called when call_condition return
+ *   @recv_process: callback function will be called when call_condition return
  *                    equal to or greater 0.
  *   @recv_fifo: fifo of receiving characters.
  *   @chars: recevied characters at the moment.
@@ -44,9 +44,8 @@ struct pl_serial_desc;
  *   @callback: callback function will be called when call_condition return equal to
  *              or greater 0.
  ************************************************************************************/
-typedef int (*pl_serial_recv_filter_t)(char *chars, uint_t *chars_len);
-typedef int (*pl_serial_recv_condition_t)(struct pl_kfifo *recv_fifo,
-                                          char *chars, uint_t chars_len);
+typedef int (*pl_serial_recv_process_t)(struct pl_kfifo *recv_fifo,
+                                        char *chars, uint_t chars_len);
 typedef void (*pl_serial_recv_callback_t)(struct pl_kfifo *recv_fifo);
 
 /*************************************************************************************
@@ -87,8 +86,7 @@ struct pl_serial_ops {
  ************************************************************************************/
 struct pl_serial_recv_info {
 	struct pl_kfifo fifo;
-	pl_serial_recv_filter_t filter;
-	pl_serial_recv_condition_t condition;
+	pl_serial_recv_process_t process;
 	pl_serial_recv_callback_t callback;
 	struct pl_work cb_work;
 };
@@ -257,22 +255,22 @@ int pl_serial_send_char(struct pl_serial_desc *desc, char c);
 int pl_serial_send_str(struct pl_serial_desc *desc, char *str);
 
 /*************************************************************************************
- * Function Name: pl_serial_register_recv_filter
- * Description: register filter for serial when received some characters.
+ * Function Name: pl_serial_register_recv_process
+ * Description: register procession for serial when received some characters.
  *
  * Param:
  *   @desc: serial description.
- *   @filter: filter for receiving characters.
+ *   @process: process.
  *
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_serial_register_recv_filter(struct pl_serial_desc *desc,
-                               pl_serial_recv_filter_t filter);
+int pl_serial_register_recv_process(struct pl_serial_desc *desc,
+                                    pl_serial_recv_process_t process);
 
 /*************************************************************************************
- * Function Name: pl_serial_unregister_recv_filter
- * Description: register filter for serial when received some characters.
+ * Function Name: pl_serial_unregister_recv_process
+ * Description: unregister procession for serial when received some characters.
  *
  * Param:
  *   @desc: serial description.
@@ -280,33 +278,7 @@ int pl_serial_register_recv_filter(struct pl_serial_desc *desc,
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_serial_unregister_recv_filter(struct pl_serial_desc *desc);
-
-/*************************************************************************************
- * Function Name: pl_serial_register_recv_condition
- * Description: register call condition for serial when received some characters.
- *
- * Param:
- *   @desc: serial description.
- *   @condition: call condition.
- *
- * Return:
- *   Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
-int pl_serial_register_recv_condition(struct pl_serial_desc *desc,
-                            pl_serial_recv_condition_t condition);
-
-/*************************************************************************************
- * Function Name: pl_serial_unregister_recv_condition
- * Description: unregister call condition for serial when received some characters.
- *
- * Param:
- *   @desc: serial description.
- *
- * Return:
- *   Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
-int pl_serial_unregister_recv_condition(struct pl_serial_desc *desc);
+int pl_serial_unregister_recv_process(struct pl_serial_desc *desc);
 
 /*************************************************************************************
  * Function Name: pl_serial_send_string

@@ -45,11 +45,10 @@ static struct list_node pl_serial_desc_list;
  ************************************************************************************/
 static void pl_serial_recv_cb_work_func(struct pl_work *work)
 {
-	struct pl_serial_recv_info *recv_info = container_of(work,\
-	                                        struct pl_serial_recv_info, cb_work);
-	if (recv_info->callback == NULL)
-		return;
+	struct pl_serial_recv_info *recv_info;
 
+	/* recv_info->callback is not NULL */
+	recv_info = container_of(work, struct pl_serial_recv_info, cb_work);
 	recv_info->callback(&recv_info->fifo);
 }
 
@@ -71,7 +70,7 @@ static void serial_desc_init(struct pl_serial_desc *desc, u8_t port,
 	desc->port = port;
 	desc->ops = ops;
 	desc->recv_info.callback = NULL;
-	desc->recv_info.condition = NULL;
+	desc->recv_info.process = NULL;
 	list_init(&desc->node);
 }
 
@@ -152,33 +151,25 @@ int pl_serial_callee_recv_handler(struct pl_serial_desc *desc,
                                 char *chars, uint_t chars_len)
 {
 	int ret;
-	pl_serial_recv_filter_t filter;
-	pl_serial_recv_condition_t condition;
+	pl_serial_recv_process_t process;
 
 	if (desc == NULL)
 		return -EFAULT;
 
-	/* setup filter for receiving characters */
-	filter = desc->recv_info.filter;
-	if (filter != NULL) {
-		if (filter(chars, &chars_len) < 0)
+	/* setup process for receiving characters */
+	process = desc->recv_info.process;
+	if (process != NULL) {
+		if (process(&desc->recv_info.fifo, chars, chars_len) == 0)
 			return OK;
+
+		/* check call callbcak */
+		if (desc->recv_info.callback == NULL)
+			return OK;
+
+		/* call callbcak */
+		ret = pl_work_add(g_pl_sys_hiwq_handle, &desc->recv_info.cb_work);
+		return ret;
 	}
-
-	/* put characters that has filtered to fifo */
-	pl_kfifo_put(&desc->recv_info.fifo, chars, chars_len);
-	condition = desc->recv_info.condition;
-	if (condition == NULL)
-		return OK;
-
-	/* get the condition for callback */
-	ret = condition(&desc->recv_info.fifo, chars, chars_len);
-	if (ret < 0)
-		return OK;
-
-	/* call callbcak */
-	ret = pl_work_add(g_pl_sys_hiwq_handle, &desc->recv_info.cb_work);
-	return ret;
 
 	return OK;
 }
@@ -402,37 +393,37 @@ int pl_serial_send_str(struct pl_serial_desc *desc, char *str)
 }
 
 /*************************************************************************************
- * Function Name: pl_serial_register_recv_filter
- * Description: register filter for serial when received some characters.
+ * Function Name: pl_serial_register_recv_process
+ * Description: register procession for serial when received some characters.
  *
  * Param:
  *   @desc: serial description.
- *   @filter: filter for receiving characters.
+ *   @process: process.
  *
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_serial_register_recv_filter(struct pl_serial_desc *desc,
-                               pl_serial_recv_filter_t filter)
+int pl_serial_register_recv_process(struct pl_serial_desc *desc,
+                                    pl_serial_recv_process_t process)
 {
 	if (desc == NULL)
 		return -EFAULT;
 
 	pl_port_enter_critical();
-	if (desc->recv_info.filter != NULL) {
+	if (desc->recv_info.process != NULL) {
 		pl_port_exit_critical();
 		return -EBUSY;
 	}
 
-	desc->recv_info.filter = filter;
+	desc->recv_info.process = process;
 	pl_port_exit_critical();
 
 	return OK;
 }
 
 /*************************************************************************************
- * Function Name: pl_serial_unregister_recv_filter
- * Description: register filter for serial when received some characters.
+ * Function Name: pl_serial_unregister_recv_process
+ * Description: unregister procession for serial when received some characters.
  *
  * Param:
  *   @desc: serial description.
@@ -440,64 +431,13 @@ int pl_serial_register_recv_filter(struct pl_serial_desc *desc,
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_serial_unregister_recv_filter(struct pl_serial_desc *desc)
+int pl_serial_unregister_recv_process(struct pl_serial_desc *desc)
 {
 	if (desc == NULL)
 		return -EFAULT;
 
 	pl_port_enter_critical();
-	desc->recv_info.filter = NULL;
-	pl_port_exit_critical();
-
-	return OK;
-}
-
-/*************************************************************************************
- * Function Name: pl_serial_register_recv_condition
- * Description: register call condition for serial when received some characters.
- *
- * Param:
- *   @desc: serial description.
- *   @condition: call condition.
- *
- * Return:
- *   Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
-int pl_serial_register_recv_condition(struct pl_serial_desc *desc,
-                             pl_serial_recv_condition_t condition)
-{
-	if (desc == NULL)
-		return -EFAULT;
-
-	pl_port_enter_critical();
-	if (desc->recv_info.condition != NULL) {
-		pl_port_exit_critical();
-		return -EBUSY;
-	}
-
-	desc->recv_info.condition = condition;
-	pl_port_exit_critical();
-
-	return OK;
-}
-
-/*************************************************************************************
- * Function Name: pl_serial_unregister_recv_condition
- * Description: unregister call condition for serial when received some characters.
- *
- * Param:
- *   @desc: serial description.
- *
- * Return:
- *   Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
-int pl_serial_unregister_recv_condition(struct pl_serial_desc *desc)
-{
-	if (desc == NULL)
-		return -EFAULT;
-
-	pl_port_enter_critical();
-	desc->recv_info.condition = NULL;
+	desc->recv_info.process = NULL;
 	pl_port_exit_critical();
 
 	return OK;

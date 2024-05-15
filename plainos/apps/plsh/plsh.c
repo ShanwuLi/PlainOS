@@ -27,49 +27,65 @@ SOFTWARE.
 #include <kernel/initcall.h>
 #include <drivers/serial/serial.h>
 
+#define ASCLL_ENTER                    13
+#define ASCLL_SPACE                    32
+#define ASCLL_BACKSPACE                8
 
-static int plsh_filter(struct pl_kfifo *recv_fifo, char *chars, uint_t chars_len)
+static int plsh_recv_process(struct pl_kfifo *recv_fifo,
+                             char *chars, uint_t chars_len)
 {
-	if (chars[chars_len - 1] == 0x08) {
-		if (pl_kfifo_len(recv_fifo) == 0)
-			return -EINVAL;
+	uint_t i;
+	int need_callback = 0;
+	uint_t idx_mask = recv_fifo->size - 1;
 
-		pl_syslog_put_chars(pl_port_putc, chars, chars + chars_len - 1);
-		pl_port_putc('\033');
-		pl_port_putc('[');
-		pl_port_putc('P');
-		pl_kfifo_back(recv_fifo);
-		return -EINVAL;
+	for (i = 0; i < chars_len; i++) {
+		/* skip control characters */
+		if (chars[i] < ASCLL_SPACE &&
+		    chars[i] != ASCLL_BACKSPACE &&
+		    chars[i] != ASCLL_ENTER)
+			continue;
+
+		/* delete char */
+		if (chars[i] == ASCLL_BACKSPACE) {
+			if (pl_kfifo_len(recv_fifo) == 0)
+				continue;
+
+			pl_port_putc(chars[i]);
+			pl_port_putc('\033');
+			pl_port_putc('[');
+			pl_port_putc('P');
+			recv_fifo->in--;
+			continue;
+		}
+
+		/* put char to recv_fifo */
+		recv_fifo->buff[recv_fifo->in & idx_mask] = chars[i];
+		recv_fifo->in++;
+
+		/* skip enter key when put chars */
+		if (chars[i] == ASCLL_ENTER) {
+			need_callback = 1;
+			continue;
+		}
+
+		/* put chars */
+		pl_port_putc(chars[i]);
 	}
 
-	pl_syslog_put_chars(pl_port_putc, chars, chars + chars_len - 1);
-	return OK;
-}
-
-static int plsh_callback_condition(struct pl_kfifo *recv_fifo, char *chars, uint_t chars_len)
-{
-	USED(recv_fifo);
-
-	if (chars[chars_len - 1] == '\r') {
-		pl_port_putc('\n');
-		return OK;
-	}
-
-	return -EINVAL;
+	return need_callback;
 }
 
 static void plsh_callback(struct pl_kfifo *recv_fifo)
 {
 	char ch;
+	pl_syslog("\r\n");
 
-	while (recv_fifo->out != recv_fifo->in) {
+	while (pl_kfifo_len(recv_fifo) != 0) {
 		ch = recv_fifo->buff[recv_fifo->out & (recv_fifo->size - 1)];
-		if (ch != '\r')
-			pl_port_putc(ch);
-
 		++recv_fifo->out;
+		if (ch != ASCLL_ENTER)
+			pl_port_putc(ch);
 	}
-
 	pl_syslog("plsh# ");
 }
 
@@ -84,14 +100,7 @@ static int pl_shell_init(void)
 		return -EFAULT;
 	}
 
-	ret = pl_serial_register_recv_filter(serial, plsh_filter);
-	if (ret < 0) {
-		pl_syslog_err("plsh init failed, ret:%d\r\n", ret);
-		return ret;
-	}
-
-	ret = pl_serial_register_recv_call_condition(serial,
-	                            plsh_callback_condition);
+	ret = pl_serial_register_recv_process(serial, plsh_recv_process);
 	if (ret < 0) {
 		pl_syslog_err("plsh init failed, ret:%d\r\n", ret);
 		return ret;
