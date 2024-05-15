@@ -428,7 +428,7 @@ int pl_iomux_get_io_grp(struct iomux_desc *desc, u16_t grp_idx, u8_t get, uintpt
 static int pl_iomux_init(void)
 {
 	list_init(&pl_iomux_desc_list);
-	pl_early_syslog_info("iomux init done\r\n");
+	pl_early_syslog_info("iomux core init done\r\n");
 	return OK;
 }
 pl_core_initcall(pl_iomux_init);

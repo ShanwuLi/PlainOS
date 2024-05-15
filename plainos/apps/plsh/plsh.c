@@ -23,6 +23,7 @@ SOFTWARE.
 
 #include <types.h>
 #include <errno.h>
+#include <config.h>
 #include <kernel/syslog.h>
 #include <kernel/initcall.h>
 #include <drivers/serial/serial.h>
@@ -86,7 +87,7 @@ static void plsh_callback(struct pl_kfifo *recv_fifo)
 		if (ch != ASCLL_ENTER)
 			pl_port_putc(ch);
 	}
-	pl_syslog("plsh# ");
+	pl_syslog(PL_CFG_SHELL_PREFIX_NAME"# ");
 }
 
 static int pl_shell_init(void)
@@ -113,7 +114,7 @@ static int pl_shell_init(void)
 	}
 
 	pl_syslog_info("plainos shell init done\r\n");
-	pl_syslog("plsh# ");
+	pl_syslog(PL_CFG_SHELL_PREFIX_NAME"# ");
 	return OK;
 }
 pl_late_initcall(pl_shell_init);

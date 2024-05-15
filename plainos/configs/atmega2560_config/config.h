@@ -31,6 +31,7 @@ SOFTWARE.
 #define PL_CFG_ASSERT
 #define PL_CFG_OS_CHAR_LOGO
 #define PL_CFG_CHECK_STACK_OVERFLOW
+#define PL_CFG_SHELL_PREFIX_NAME                          "plsh"
 #define PL_CFG_SYSTICK_TIME_SLICE_US                      (100)
 #define PL_CFG_DEFAULT_MEMPOOL_SIZE                       (3900)
 #define PL_CFG_DEFAULT_MEMPOOL_GRAIN_ORDER                (4)

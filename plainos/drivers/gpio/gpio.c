@@ -264,7 +264,7 @@ int pl_gpio_get_io_grp(struct gpio_desc *desc, u16_t grp_idx, u8_t get, uintptr_
 static int pl_gpio_init(void)
 {
 	list_init(&pl_gpio_desc_list);
-	pl_early_syslog_info("gpio init done\r\n");
+	pl_early_syslog_info("gpio core init done\r\n");
 	return OK;
 }
 pl_core_initcall(pl_gpio_init);

@@ -507,7 +507,7 @@ int pl_serial_unregister_recv_callback(struct pl_serial_desc *desc)
 static int pl_serial_core_init(void)
 {
 	list_init(&pl_serial_desc_list);
-	pl_early_syslog_info("serial init done\r\n");
+	pl_early_syslog_info("serial core init done\r\n");
 	return 0;
 }
 pl_core_initcall(pl_serial_core_init);
