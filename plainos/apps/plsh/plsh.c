@@ -60,8 +60,10 @@ static int plsh_recv_process(struct pl_kfifo *recv_fifo,
 		}
 
 		/* put char to recv_fifo */
-		recv_fifo->buff[recv_fifo->in & idx_mask] = chars[i];
-		recv_fifo->in++;
+		if (pl_kfifo_len(recv_fifo) < recv_fifo->size) {
+			recv_fifo->buff[recv_fifo->in & idx_mask] = chars[i];
+			recv_fifo->in++;
+		}
 
 		/* skip enter key when put chars */
 		if (chars[i] == ASCLL_ENTER) {
