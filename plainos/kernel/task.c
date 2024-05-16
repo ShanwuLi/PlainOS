@@ -884,10 +884,7 @@ void pl_task_resume(pl_tid_t tid)
 {
 	struct tcb *tcb = (struct tcb *)tid;
 
-	if (tcb == NULL)
-		return;
-
-	if (tcb->curr_state == PL_TASK_STATE_READY)
+	if (tcb == NULL || tcb->curr_state == PL_TASK_STATE_READY)
 		return;
 
 	pl_port_enter_critical();
