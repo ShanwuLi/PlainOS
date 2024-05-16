@@ -205,10 +205,13 @@ int pl_work_init(struct pl_work *wk, pl_work_fun_t fun, void *priv_data)
  ************************************************************************************/
 int pl_work_add(struct pl_workqueue *wq, struct pl_work *wk)
 {
+	uint_t itme_num;
+
 	if (wk == NULL || wq == NULL)
 		return -EFAULT;
 
-	if (wq->fifo_cap - ((wq->fifo_in - wq->fifo_out) & (wq->fifo_cap - 1)) <= 1)
+	itme_num = wq->fifo_in - wq->fifo_out;
+	if (itme_num >= wq->fifo_cap)
 		return -EFULL;
 
 	pl_port_enter_critical();
