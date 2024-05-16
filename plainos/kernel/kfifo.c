@@ -120,7 +120,7 @@ void pl_kfifo_destroy(struct pl_kfifo *kfifo)
  ************************************************************************************/
 uint_t pl_kfifo_len(struct pl_kfifo *kfifo)
 {
-	return (kfifo->in - kfifo->out) & (kfifo->size - 1);
+	return (kfifo->in - kfifo->out);
 }
 
 /*************************************************************************************

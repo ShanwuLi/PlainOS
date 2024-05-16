@@ -63,6 +63,8 @@ static int plsh_recv_process(struct pl_kfifo *recv_fifo,
 		if (pl_kfifo_len(recv_fifo) < recv_fifo->size) {
 			recv_fifo->buff[recv_fifo->in & idx_mask] = chars[i];
 			recv_fifo->in++;
+		} else {
+			pl_early_syslog_info("\r\n recv fifo is full===========\r\n");
 		}
 
 		/* skip enter key when put chars */
@@ -80,15 +82,13 @@ static int plsh_recv_process(struct pl_kfifo *recv_fifo,
 
 static void plsh_callback(struct pl_kfifo *recv_fifo)
 {
-	char ch;
 	pl_syslog("\r\n");
 
 	while (pl_kfifo_len(recv_fifo) != 0) {
-		ch = recv_fifo->buff[recv_fifo->out & (recv_fifo->size - 1)];
+		//ch = recv_fifo->buff[recv_fifo->out & (recv_fifo->size - 1)];
 		++recv_fifo->out;
-		if (ch != ASCLL_ENTER)
-			pl_port_putc(ch);
 	}
+
 	pl_syslog(PL_CFG_SHELL_PREFIX_NAME"# ");
 }
 
