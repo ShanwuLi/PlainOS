@@ -310,6 +310,7 @@ void pl_task_insert_tcb_to_rdylist(struct tcb *tcb)
 	u16_t prio = tcb->prio;
 	struct task_list *rdylist = &g_task_core_blk.ready_list[prio];
 
+	tcb->curr_state = PL_TASK_STATE_READY;
 	if (rdylist->head == NULL) {
 		list_init(&tcb->node);
 		rdylist->head = tcb;
@@ -319,7 +320,6 @@ void pl_task_insert_tcb_to_rdylist(struct tcb *tcb)
 
 	++rdylist->num;
 	set_bit_of_hiprio_bitmap(prio);
-	tcb->curr_state = PL_TASK_STATE_READY;
 }
 
 /*************************************************************************************
@@ -336,6 +336,7 @@ void pl_task_insert_tcb_to_delaylist(struct tcb *tcb)
 	struct task_list *delaylist = &g_task_core_blk.delay_list;
 	struct tcb *pos = delaylist->head;
 
+	tcb->curr_state = PL_TASK_STATE_DELAY;
 	list_for_each_entry(pos, &delaylist->head->node, struct tcb, node) {
 		if (pl_count_cmp(&tcb->delay_ticks, &pos->delay_ticks) < 0)
 			break;
@@ -344,7 +345,6 @@ void pl_task_insert_tcb_to_delaylist(struct tcb *tcb)
 	pos = list_prev_entry(pos, struct tcb, node);
 	++delaylist->num;
 	list_add_node_behind(&pos->node, &tcb->node);
-	tcb->curr_state = PL_TASK_STATE_DELAY;
 }
 
 /*************************************************************************************
@@ -358,8 +358,8 @@ void pl_task_insert_tcb_to_delaylist(struct tcb *tcb)
  ************************************************************************************/
 void pl_task_insert_tcb_to_exitlist(struct tcb *tcb)
 {
-	list_add_node_at_tail(&g_task_core_blk.exit_list, &tcb->node);
 	tcb->curr_state = PL_TASK_STATE_EXIT;
+	list_add_node_at_tail(&g_task_core_blk.exit_list, &tcb->node);
 }
 
 /*************************************************************************************
@@ -373,8 +373,8 @@ void pl_task_insert_tcb_to_exitlist(struct tcb *tcb)
  ************************************************************************************/
 void pl_task_insert_tcb_to_waitlist(struct list_node *wait_list, struct tcb *tcb)
 {
-	list_add_node_at_tail(wait_list, &tcb->node);
 	tcb->curr_state = PL_TASK_STATE_WAITING;
+	list_add_node_at_tail(wait_list, &tcb->node);
 }
 
 /*************************************************************************************
@@ -388,8 +388,8 @@ void pl_task_insert_tcb_to_waitlist(struct list_node *wait_list, struct tcb *tcb
  ************************************************************************************/
 void pl_task_insert_tcb_to_pendlist(struct tcb *tcb)
 {
-	list_add_node_at_tail(&g_task_core_blk.pend_list, &tcb->node);
 	tcb->curr_state = PL_TASK_STATE_PENDING;
+	list_add_node_at_tail(&g_task_core_blk.pend_list, &tcb->node);
 }
 
 /*************************************************************************************
@@ -541,12 +541,10 @@ void pl_task_context_switch(void)
 	struct tcb *next_tcb;
 	struct tcb *idle_tcb;
 
-	pl_port_enter_critical();
-	if (g_task_core_blk.sched_lock_ref != 0) {
-		pl_port_exit_critical();
+	if (g_task_core_blk.sched_lock_ref != 0)
 		return;
-	}
 
+	pl_port_enter_critical();
 	hiprio = get_hiprio();
 	curr_tcb = g_task_core_blk.curr_tcb;
 	next_tcb = g_task_core_blk.ready_list[hiprio].head;
@@ -820,12 +818,10 @@ int pl_task_join(pl_tid_t tid, int *ret)
 	if (tcb == NULL)
 		return -EFAULT;
 
-	pl_port_enter_critical();
-	if (tcb->curr_state == PL_TASK_STATE_EXIT) {
-		pl_port_exit_critical();
+	if (tcb->curr_state == PL_TASK_STATE_EXIT)
 		return -EALREADY;
-	}
 
+	pl_port_enter_critical();
 	pl_task_remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
 	pl_task_insert_tcb_to_waitlist(&tcb->wait_head, g_task_core_blk.curr_tcb);
 	pl_port_exit_critical();
@@ -856,15 +852,13 @@ void pl_task_pend(pl_tid_t tid)
 {
 	struct tcb *tcb = (struct tcb *)tid;
 
-	pl_port_enter_critical();
 	if (tcb == NULL)
 		tcb = g_task_core_blk.curr_tcb;
 
-	if (tcb->curr_state == PL_TASK_STATE_PENDING) {
-		pl_port_exit_critical();
+	if (tcb->curr_state == PL_TASK_STATE_PENDING)
 		return;
-	}
 
+	pl_port_enter_critical();
 	pl_task_remove_tcb_from_rdylist(tcb);
 	pl_task_insert_tcb_to_pendlist(tcb);
 	pl_port_exit_critical();
@@ -893,12 +887,10 @@ void pl_task_resume(pl_tid_t tid)
 	if (tcb == NULL)
 		return;
 
-	pl_port_enter_critical();
-	if (tcb->curr_state == PL_TASK_STATE_READY) {
-		pl_port_exit_critical();
+	if (tcb->curr_state == PL_TASK_STATE_READY)
 		return;
-	}
 
+	pl_port_enter_critical();
 	list_del_node(&tcb->node);
 	pl_task_insert_tcb_to_rdylist(tcb);
 	pl_port_exit_critical();
@@ -924,12 +916,10 @@ int pl_task_kill(pl_tid_t tid)
 	if (tcb == NULL)
 		return -EFAULT;
 
-	pl_port_enter_critical();
-	if (tcb->curr_state == PL_TASK_STATE_EXIT) {
-		pl_port_exit_critical();
+	if (tcb->curr_state == PL_TASK_STATE_EXIT)
 		return -EALREADY;
-	}
 
+	pl_port_enter_critical();
 	pl_task_remove_tcb_from_rdylist(tcb);
 	pl_task_insert_tcb_to_exitlist(tcb);
 	pl_port_exit_critical();
