@@ -32,8 +32,19 @@ SOFTWARE.
 #define ASCLL_SPACE                    32
 #define ASCLL_BACKSPACE                8
 
-static int plsh_recv_process(struct pl_kfifo *recv_fifo,
-                             char *chars, uint_t chars_len)
+/*************************************************************************************
+ * Function Name: plsh_recv_process
+ *
+ * Description:
+ *   init soft timer system.
+ * 
+ * Parameters:
+ *  none.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+static int plsh_recv_process(struct pl_kfifo *recv_fifo, char *chars, uint_t chars_len)
 {
 	uint_t i;
 	int need_callback = 0;
@@ -60,12 +71,13 @@ static int plsh_recv_process(struct pl_kfifo *recv_fifo,
 		}
 
 		/* put char to recv_fifo */
-		if (pl_kfifo_len(recv_fifo) < recv_fifo->size) {
-			recv_fifo->buff[recv_fifo->in & idx_mask] = chars[i];
-			recv_fifo->in++;
-		} else {
+		if (pl_kfifo_len(recv_fifo) >= recv_fifo->size) {
 			pl_early_syslog_info("\r\n recv fifo is full===========\r\n");
+			break;
 		}
+
+		recv_fifo->buff[recv_fifo->in & idx_mask] = chars[i];
+		recv_fifo->in++;
 
 		/* skip enter key when put chars */
 		if (chars[i] == ASCLL_ENTER) {
@@ -80,6 +92,18 @@ static int plsh_recv_process(struct pl_kfifo *recv_fifo,
 	return need_callback;
 }
 
+/*************************************************************************************
+ * Function Name: plsh_callback
+ *
+ * Description:
+ *   init soft timer system.
+ * 
+ * Parameters:
+ *  none.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
 static void plsh_callback(struct pl_kfifo *recv_fifo)
 {
 	pl_syslog("\r\n");
@@ -92,6 +116,18 @@ static void plsh_callback(struct pl_kfifo *recv_fifo)
 	pl_syslog(PL_CFG_SHELL_PREFIX_NAME"# ");
 }
 
+/*************************************************************************************
+ * Function Name: pl_shell_init
+ *
+ * Description:
+ *   init soft timer system.
+ * 
+ * Parameters:
+ *  none.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
 static int pl_shell_init(void)
 {
 	int ret;
