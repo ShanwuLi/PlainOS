@@ -143,7 +143,7 @@ static int plsh_cmd_parse(struct pl_kfifo *recv_fifo)
 
 	/* check argc */
 	if (plsh_cmd_argc > PL_CFG_SHELL_CMD_ARGC_MAX) {
-		pl_early_syslog_err("cmd argvs[%d] is too many,limited[%d]\r\n",
+		pl_early_syslog_err("cmd argvs[%d] is too many, limited[%d]\r\n",
 		                     plsh_cmd_argc, PL_CFG_SHELL_CMD_ARGC_MAX);
 		return -ERANGE;
 	}
