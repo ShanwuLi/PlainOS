@@ -69,7 +69,7 @@ SECTIONS
     . = ALIGN(2);
     *(.text.*)
     . = ALIGN(2);
-    INIT_CALLS_SECTION
+    PL_INIT_CALLS_SECTION
     . = ALIGN(2);
     PL_INIT_SECTION
     . = ALIGN(2);

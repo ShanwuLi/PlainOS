@@ -32,13 +32,13 @@ struct pl_app_entry {
 	const char *name;
 };
 
-#define __define_appcall(fn, id, _name)  static struct pl_app_entry \
-	__appcall_##fn##id pl_used \
-	__attribute__((section(".appcall" #id ".app"))) = { \
+#define __define_appcall(fn, _name)  static struct pl_app_entry \
+	__appcall_##fn pl_used \
+	__attribute__((section(".pl_appcall.app"))) = { \
 		.entry = fn, \
 		.name = (_name), \
 	}
 
-#define pl_app_register(app, _name)        __define_appcall(app, 5, _name)
+#define pl_app_register(app, _name)        __define_appcall(app, _name)
 
 #endif /* __PLAINOS_APPCALL_H__ */

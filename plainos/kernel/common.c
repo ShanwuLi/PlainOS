@@ -102,17 +102,12 @@ size_t pl_align_size(size_t size, uchar_t align)
 }
 
 /*************************************************************************************
- * Function Name: pl_count_cmp
- * Description: compare count1 with count2.
+ * @brief: compare count1 with count2.
  *
- * Parameters:
- *   @c1: count1.
- *   @c2: count2.
+ * @param c1: count1.
+ * @param c2: count2.
  *
- * Return:
- *   if c1  > c2: return > 0;
- *   if c1  < c2: return < 0;
- *   if c1 == c2: return 0.
+ * @return: if c1  > c2: return > 0; if c1  < c2: return < 0; if c1 == c2: return 0.
  ************************************************************************************/
 s32_t pl_count_cmp(struct count *c1, struct count *c2)
 {
@@ -123,16 +118,13 @@ s32_t pl_count_cmp(struct count *c1, struct count *c2)
 }
 
 /*************************************************************************************
- * Function Name: pl_count_add
- * Description: add count1 and count2 to return.
+ * @brief: add count1 and count2 to return.
  *
- * Parameters:
- *   @c: result = c1 + c2.
- *   @c1: count1.
- *   @c2: count2.
+ * @param c: result = c1 + c2.
+ * @param c1: count1.
+ * @param c2: count2.
  *
- * Return:
- *   count added.
+ * @return: OK: success; negative value: failure.
  ************************************************************************************/
 int pl_count_add(struct count *c, struct count *c1, struct count *c2)
 {

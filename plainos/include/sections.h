@@ -28,16 +28,12 @@ SOFTWARE.
 #define CONST_SECTION               *(pl_const)
 
 #define INIT_CALLS_LEVEL(level)     __initcall##level##_start = .; \
-	                                KEEP(*(.initcall##level##.init)) \
-	                                KEEP(*(.initcall##level##s.init))
-
-#define APP_CALLS_LEVEL(level)      __appcall##level##_start = .; \
-	                                KEEP(*(.appcall##level##.app)) \
-	                                KEEP(*(.appcall##level##s.app))
+	                                KEEP(*(.pl_initcall##level##.init)) \
+	                                KEEP(*(.pl_initcall##level##s.init))
 
 #define PL_INIT_SECTION             *(.pl_init.init) /* __init */
 
-#define INIT_CALLS_SECTION          __initcall_start = .; \
+#define PL_INIT_CALLS_SECTION       __initcall_start = .; \
 	                                __early_initcall_start = .; \
 	                                KEEP(*(.initcallearly.init)) \
 	                                __early_initcall_end = .; \
@@ -53,13 +49,8 @@ SOFTWARE.
 	                                INIT_CALLS_LEVEL(9) \
 	                                __initcall_end = .;
 
-#define APPS_CALLS_SECTION          __appcall_start = .; \
-	                                APP_CALLS_LEVEL(0) \
-	                                APP_CALLS_LEVEL(1) \
-	                                APP_CALLS_LEVEL(2) \
-	                                APP_CALLS_LEVEL(3) \
-	                                APP_CALLS_LEVEL(4) \
-	                                APP_CALLS_LEVEL(5) \
+#define PL_APPS_CALLS_SECTION       __appcall_start = .; \
+	                                KEEP(*(.pl_appcall.app)) \
 	                                __appcall_end = .;
 
 #endif /* __PLAINOS_SECTIONS_H__ */

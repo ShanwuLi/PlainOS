@@ -24,25 +24,104 @@ SOFTWARE.
 #include <types.h>
 #include <errno.h>
 #include <config.h>
+#include <kernel/task.h>
 #include <kernel/syslog.h>
 #include <kernel/initcall.h>
+#include <kernel/mempool.h>
 #include <drivers/serial/serial.h>
 
 #define ASCLL_ENTER                    13
 #define ASCLL_SPACE                    32
 #define ASCLL_BACKSPACE                8
 
+enum cmd_parse_state {
+	CMD_PARSE_STATE_INIT = 0,
+	CMD_PARSE_STATE_CMD,
+	CMD_PARSE_STATE_ARG,
+	CMD_PARSE_STATE_END,
+};
+
+static int plsh_cmd_argc = 0;
+static char **plsh_cmd_argvs;
+static char plsh_cmd_buffer[PL_CFG_SHELL_CMD_BUFF_MAX];
+
 /*************************************************************************************
- * Function Name: plsh_recv_process
+ * @breaf: parse the cmd.
  *
- * Description:
- *   init soft timer system.
+ * @param recv_fifo: fifo of receiving characters.
+ *
+ * @return: none.
+ ************************************************************************************/
+static void plsh_cmd_parse(struct pl_kfifo *recv_fifo)
+{
+	char ch;
+	uint_t i = 0;
+	int state = CMD_PARSE_STATE_INIT;
+
+	/* copy cmd to plsh_cmd_buffer */
+	plsh_cmd_argc = 0;
+	while (pl_kfifo_len(recv_fifo) != 0) {
+		ch = recv_fifo->buff[recv_fifo->out & (recv_fifo->size - 1)];
+		++recv_fifo->out;
+
+		/* check ending condition */
+		if (ch == ASCLL_ENTER || i == PL_CFG_SHELL_CMD_BUFF_MAX - 1) {
+			if (state == CMD_PARSE_STATE_CMD)
+				plsh_cmd_argc++;
+
+			plsh_cmd_buffer[i] = '\0';
+			break;
+		}
+
+		/* state machine for get the cmd */
+		switch (state) {
+		case CMD_PARSE_STATE_INIT:
+			if (ch != ASCLL_SPACE) {
+				state = CMD_PARSE_STATE_CMD;
+				plsh_cmd_buffer[i++] = ch;
+			}
+			break;
+
+		case CMD_PARSE_STATE_CMD:
+			if (ch == ASCLL_SPACE) {
+				state = CMD_PARSE_STATE_ARG;
+				plsh_cmd_argc++;
+			}
+			plsh_cmd_buffer[i++] = ch;
+			break;
+
+		case CMD_PARSE_STATE_ARG:
+			if (ch != ASCLL_SPACE) {
+				state = CMD_PARSE_STATE_CMD;
+				plsh_cmd_buffer[i++] = ch;
+			}
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	/* parse cmd */
+	plsh_cmd_argvs = pl_mempool_malloc(g_pl_default_mempool,
+	                        plsh_cmd_argc * sizeof(char **));
+	if (plsh_cmd_argvs == NULL)
+		return;
+
+	if (plsh_cmd_argc > 0)
+		pl_early_syslog_info("plsh_cmd_buffer, argc:%d, argvs:%s\r\n",
+	                          plsh_cmd_argc, plsh_cmd_buffer);
+}
+
+/*************************************************************************************
+ *
+ * @brief: precess the received characters.
  * 
- * Parameters:
- *  none.
+ * @param recv_fifo: fifo of receiving characters.
+ * @param chars: received characters.
+ * @param chars_len: length of received characters.
  *
- * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
+ * @return: if success, return 0; otherwise return negative value.
  ************************************************************************************/
 static int plsh_recv_process(struct pl_kfifo *recv_fifo, char *chars, uint_t chars_len)
 {
@@ -72,7 +151,7 @@ static int plsh_recv_process(struct pl_kfifo *recv_fifo, char *chars, uint_t cha
 
 		/* put char to recv_fifo */
 		if (pl_kfifo_len(recv_fifo) >= recv_fifo->size) {
-			pl_early_syslog_info("\r\n recv fifo is full===========\r\n");
+			pl_early_syslog_err("recv fifo is full\r\n");
 			break;
 		}
 
@@ -93,40 +172,29 @@ static int plsh_recv_process(struct pl_kfifo *recv_fifo, char *chars, uint_t cha
 }
 
 /*************************************************************************************
- * Function Name: plsh_callback
  *
- * Description:
- *   init soft timer system.
+ * @brief: callback of serial port.
  * 
- * Parameters:
- *  none.
+ * @param recv_fifo: fifo of receiving characters.
  *
- * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
+ * @return none.
  ************************************************************************************/
 static void plsh_callback(struct pl_kfifo *recv_fifo)
 {
 	pl_syslog("\r\n");
+	plsh_cmd_parse(recv_fifo);
 
-	while (pl_kfifo_len(recv_fifo) != 0) {
-		//ch = recv_fifo->buff[recv_fifo->out & (recv_fifo->size - 1)];
-		++recv_fifo->out;
-	}
-
+	/* create task for cmd execution */
 	pl_syslog(PL_CFG_SHELL_PREFIX_NAME"# ");
 }
 
 /*************************************************************************************
- * Function Name: pl_shell_init
  *
- * Description:
- *   init soft timer system.
+ * @brief: shell initialization.
  * 
- * Parameters:
- *  none.
+ * @param none.
  *
- * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
+ * @return: if success, return 0; otherwise return negative value..
  ************************************************************************************/
 static int pl_shell_init(void)
 {

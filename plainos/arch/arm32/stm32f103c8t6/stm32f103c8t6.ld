@@ -99,14 +99,14 @@ SECTIONS
   .initcall.init :
   {
     . = ALIGN(4);
-    INIT_CALLS_SECTION
+    PL_INIT_CALLS_SECTION
     . = ALIGN(4);
   } >FLASH
 
   .appcall.app :
   {
     . = ALIGN(4);
-    APPS_CALLS_SECTION
+    PL_APPS_CALLS_SECTION
     . = ALIGN(4);
   } >FLASH
 
