@@ -77,9 +77,6 @@ static int plsh_get_argvs_from_buffer( char *cmd_buff, int cmd_argc, char **cmd_
 			cmd_buff[i] = '\0';
 		}
 
-		if (j >= PL_CFG_SHELL_CMD_ARGC_MAX || j > cmd_argc)
-			return -ERANGE;
-
 		i++;
 	} while (ch);
 
@@ -144,6 +141,14 @@ static int plsh_cmd_parse(struct pl_kfifo *recv_fifo)
 		}
 	}
 
+	/* check argc */
+	if (plsh_cmd_argc > PL_CFG_SHELL_CMD_ARGC_MAX) {
+		pl_early_syslog_err("cmd argvs[%d] is too many,limited[%d]\r\n",
+		                     plsh_cmd_argc, PL_CFG_SHELL_CMD_ARGC_MAX);
+		return -ERANGE;
+	}
+
+	/* get the argvs from the buffer */
 	ret = plsh_get_argvs_from_buffer(plsh_cmd_buffer, plsh_cmd_argc, plsh_cmd_argvs);
 	if (ret < 0) {
 		return ret;
