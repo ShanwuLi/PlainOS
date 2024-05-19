@@ -45,6 +45,7 @@ struct pl_workqueue {
 	struct pl_work **fifo;
 };
 
+uint_t wq_get_work_num(void);
 /*************************************************************************************
  * Function Name: pl_workqueue_create
  *  @g_pl_sys_hiwq_handle: handle of the hight priority workqueue.
