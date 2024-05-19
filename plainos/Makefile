@@ -21,7 +21,7 @@
 
 #=================================================================================================#
 #////////////////////////////// Do not to modify following code //////////////////////////////////#
-# get all arguments
+# get all arguments,MAKECMDGOALS is folder name, just like stm32f10x_config、original_config and so on.
 ALL_ARGS = $(MAKECMDGOALS)
 # get the first argument
 FIRST_ARG = $(word 1, $(ALL_ARGS))
