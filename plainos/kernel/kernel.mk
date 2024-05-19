@@ -38,5 +38,5 @@ C_SRCS += $(KERNEL_DIR)/kfifo.c
 C_SRCS += $(KERNEL_DIR)/workqueue.c
 
 ifeq ($(PL_MK_CFG_OS_SHELL), y)
-C_SRCS += $(OSTEST_DIR)/workqueue_test.c
+C_SRCS += $(KERNEL_DIR)/shell.c
 endif
