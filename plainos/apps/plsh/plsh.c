@@ -59,8 +59,9 @@ static int plsh_get_argvs_from_buffer( char *cmd_buff, int cmd_argc, char **cmd_
 	int j = 0;
 	bool new_arg = false;
 
-	if (plsh_cmd_argc = 0)
-		return -EFAULT;
+	/* return error straightly */
+	if (cmd_argc == 0)
+		return -ENOEXEC;
 
 	/* get the argvs */
 	cmd_argvs[j++] = cmd_buff;
@@ -68,19 +69,16 @@ static int plsh_get_argvs_from_buffer( char *cmd_buff, int cmd_argc, char **cmd_
 		ch = cmd_buff[i];
 		if (new_arg) {
 			new_arg = false;
-			cmd_argvs[j] = cmd_buff + i;
-			j++;
+			cmd_argvs[j++] = cmd_buff + i;
 		}
 
-		if (ch == ASCLL_SPACE)
+		if (ch == ASCLL_SPACE) {
 			new_arg = true;
+			cmd_buff[i] = '\0';
+		}
 
 		i++;
 	} while (ch);
-
-	/* check the argc */
-	if (j != cmd_argc)
-		return -ERANGE;
 
 	return OK;
 }
@@ -96,7 +94,7 @@ static int plsh_cmd_parse(struct pl_kfifo *recv_fifo)
 {
 	int ret;
 	char ch;
-	uint_t i = 0;
+	int i = 0;
 	int state = CMD_PARSE_STATE_INIT;
 
 	/* copy cmd to plsh_cmd_buffer */
@@ -145,12 +143,17 @@ static int plsh_cmd_parse(struct pl_kfifo *recv_fifo)
 
 	ret = plsh_get_argvs_from_buffer(plsh_cmd_buffer, plsh_cmd_argc, plsh_cmd_argvs);
 	if (ret < 0) {
-		pl_early_syslog_err("cmd parse fail, ret:%d", ret);
 		return ret;
 	}
 
-	pl_early_syslog_info("plsh_cmd_buffer, argc:%d, argvs:%s\r\n",
+	pl_early_syslog_info("plsh_cmd_buffer, argc:%d, argv:%s\r\n",
 	                      plsh_cmd_argc, plsh_cmd_buffer);
+	
+	for (i = 0; i < plsh_cmd_argc; i++) {
+		pl_early_syslog_info("argv[%d]:%s\r\n", i, plsh_cmd_argvs[i]);
+	}
+
+	return OK;
 }
 
 /*************************************************************************************
