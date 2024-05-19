@@ -21,8 +21,8 @@ void USART1_Init(uint_t USART1_BaudRate)
    USART1->CR1|=(1<<3);                    //ʹ�ܷ���	
 	 
 	
-   integer=72*1000*1000/(USART1_BaudRate*16);         //ȡ����������
-   decimal=(float)(72*1000*1000/(USART1_BaudRate*16))-integer;   //ȡ��С������
+   integer=128*1000*1000/(USART1_BaudRate*16);         //ȡ����������
+   decimal=(float)(128*1000*1000/(USART1_BaudRate*16))-integer;   //ȡ��С������
    USART1->BRR=(integer<<4)|((unsigned int)decimal*16);  //��ת�����ֵ����BRR�Ĵ���
    
    //NVIC_SetPriorityGrouping(1);            //�������ȼ�����1
