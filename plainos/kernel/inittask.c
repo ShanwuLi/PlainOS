@@ -51,7 +51,6 @@ static int init_task(int argc, char *argv[])
 	pl_assert(ret == 0);
 	pl_do_initcalls();
 
-	//pl_early_syslog_info("init_task done\r\n");
 	return 0;
 }
 
@@ -75,6 +74,5 @@ int pl_init_task_init(void)
 		return -1;
 	}
 
-	//pl_early_syslog_info("init task init done\r\n");
 	return 0;
 }
