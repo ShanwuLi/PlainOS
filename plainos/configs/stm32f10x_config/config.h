@@ -33,7 +33,7 @@ SOFTWARE.
 #define PL_CFG_SHELL_CMD_BUFF_MAX                         (128)
 #define PL_CFG_SHELL_CMD_ARGC_MAX                         (20)
 #define PL_CFG_SYSTICK_TIME_SLICE_US                      (10)
-#define PL_CFG_DEFAULT_MEMPOOL_SIZE                       (16 * 1024)
+#define PL_CFG_DEFAULT_MEMPOOL_SIZE                       (14 * 1024)
 #define PL_CFG_DEFAULT_MEMPOOL_GRAIN_ORDER                (5)
 #define PL_CFG_MAX_TASKS_NUM                              (900u)
 #define PL_CFG_SYS_RSVD_HIGHEST_PRIOTITY                  (2u)

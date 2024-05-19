@@ -30,6 +30,7 @@ SOFTWARE.
 
 static struct pl_serial_desc stm32f10x_serial_desc;
 static u32_t recv_fifo[256];
+static bool recv_enabled = false;
 
 void USART1_IRQHandler(void)
 {
@@ -39,7 +40,26 @@ void USART1_IRQHandler(void)
 		recv_char = USART1->DR;
 	}
 
-	pl_serial_callee_recv_handler(&stm32f10x_serial_desc, &recv_char, 1);
+	if (recv_enabled)
+		pl_serial_callee_recv_handler(&stm32f10x_serial_desc, &recv_char, 1);
+}
+
+static int stm32f10x_serial_recv_enable(struct pl_serial_desc *desc)
+{
+	USED(desc);
+	pl_port_enter_critical();
+	recv_enabled = true;
+	pl_port_exit_critical();
+	return 0;
+}
+
+static int stm32f10x_serial_recv_disable(struct pl_serial_desc *desc)
+{
+	USED(desc);
+	pl_port_enter_critical();
+	recv_enabled = false;
+	pl_port_exit_critical();
+	return 0;
 }
 
 static struct pl_serial_ops stm32f10x_serial_ops = {
@@ -50,6 +70,8 @@ static struct pl_serial_ops stm32f10x_serial_ops = {
 	.set_parity_bit = NULL,
 	.set_stop_bits = NULL,
 	.recv_char = NULL,
+	.recv_disable = stm32f10x_serial_recv_disable,
+	.recv_enable = stm32f10x_serial_recv_enable,
 };
 
 static int stm32f10x_serial_init(void)
