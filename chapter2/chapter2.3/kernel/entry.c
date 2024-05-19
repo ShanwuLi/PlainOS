@@ -86,7 +86,7 @@ void pl_port_switch_context(void);
 void SysTick_Handler(void);
 void SysTick_Handler(void)
 {
-	USART1_PrintChar('G');
+	USART1_PrintChar('R');
 	__asm__ volatile("cpsid	i\n\t");     /*< 关中断 */
 	pl_port_switch_context();
 	__asm__ volatile("cpsie	i\n\t");     /*< 开中断 */
