@@ -237,7 +237,8 @@ static void plsh_callback(struct pl_kfifo *recv_fifo)
 	pl_syslog("\r\n");
 	plsh_cmd_parse(recv_fifo);
 
-	/* create task for cmd execution */
+	/* create task for cmd executation */
+
 	pl_syslog(PL_CFG_SHELL_PREFIX_NAME"# ");
 }
 
