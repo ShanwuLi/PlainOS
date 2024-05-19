@@ -202,7 +202,9 @@ static int plsh_recv_process(struct pl_kfifo *recv_fifo, char *chars, uint_t cha
 
 		/* put char to recv_fifo */
 		if (pl_kfifo_len(recv_fifo) >= recv_fifo->size) {
-			pl_early_syslog_err("recv fifo is full\r\n");
+			pl_early_syslog_err("recv fifo is full[%d], in:%u, out:%u\r\n",
+			                     pl_kfifo_len(recv_fifo), recv_fifo->in,
+			                     recv_fifo->out);
 			break;
 		}
 

@@ -28,8 +28,8 @@ SOFTWARE.
 #include <errno.h>
 
 struct pl_kfifo {
-	uint_t in;
-	uint_t out;
+	volatile uint_t in;
+	volatile uint_t out;
 	uint_t size;
 	char *buff;
 };
