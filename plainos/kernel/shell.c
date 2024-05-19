@@ -77,7 +77,7 @@ static int plsh_get_argvs_from_buffer( char *cmd_buff, int cmd_argc, char **cmd_
 			cmd_buff[i] = '\0';
 		}
 
-		if (j >= PL_CFG_SHELL_CMD_ARGC_MAX)
+		if (j >= PL_CFG_SHELL_CMD_ARGC_MAX || j > cmd_argc)
 			return -ERANGE;
 
 		i++;
