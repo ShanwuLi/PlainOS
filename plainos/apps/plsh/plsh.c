@@ -42,8 +42,48 @@ enum cmd_parse_state {
 };
 
 static int plsh_cmd_argc = 0;
-static char **plsh_cmd_argvs;
+static char *plsh_cmd_argvs[PL_CFG_SHELL_CMD_ARGC_MAX];
 static char plsh_cmd_buffer[PL_CFG_SHELL_CMD_BUFF_MAX];
+
+/*************************************************************************************
+ * @breaf: copy the cmd to plsh_cmd_buffer.
+ *
+ * @param recv_fifo: fifo of receiving characters.
+ *
+ * @return: if seuccess, return OK, else return error code.
+ ************************************************************************************/
+static int plsh_get_argvs_from_buffer( char *cmd_buff, int cmd_argc, char **cmd_argvs)
+{
+	char ch;
+	int i = 0;
+	int j = 0;
+	bool new_arg = false;
+
+	if (plsh_cmd_argc = 0)
+		return -EFAULT;
+
+	/* get the argvs */
+	cmd_argvs[j++] = cmd_buff;
+	do {
+		ch = cmd_buff[i];
+		if (new_arg) {
+			new_arg = false;
+			cmd_argvs[j] = cmd_buff + i;
+			j++;
+		}
+
+		if (ch == ASCLL_SPACE)
+			new_arg = true;
+
+		i++;
+	} while (ch);
+
+	/* check the argc */
+	if (j != cmd_argc)
+		return -ERANGE;
+
+	return OK;
+}
 
 /*************************************************************************************
  * @breaf: parse the cmd.
@@ -52,8 +92,9 @@ static char plsh_cmd_buffer[PL_CFG_SHELL_CMD_BUFF_MAX];
  *
  * @return: none.
  ************************************************************************************/
-static void plsh_cmd_parse(struct pl_kfifo *recv_fifo)
+static int plsh_cmd_parse(struct pl_kfifo *recv_fifo)
 {
+	int ret;
 	char ch;
 	uint_t i = 0;
 	int state = CMD_PARSE_STATE_INIT;
@@ -102,15 +143,14 @@ static void plsh_cmd_parse(struct pl_kfifo *recv_fifo)
 		}
 	}
 
-	/* parse cmd */
-	plsh_cmd_argvs = pl_mempool_malloc(g_pl_default_mempool,
-	                        plsh_cmd_argc * sizeof(char **));
-	if (plsh_cmd_argvs == NULL)
-		return;
+	ret = plsh_get_argvs_from_buffer(plsh_cmd_buffer, plsh_cmd_argc, plsh_cmd_argvs);
+	if (ret < 0) {
+		pl_early_syslog_err("cmd parse fail, ret:%d", ret);
+		return ret;
+	}
 
-	if (plsh_cmd_argc > 0)
-		pl_early_syslog_info("plsh_cmd_buffer, argc:%d, argvs:%s\r\n",
-	                          plsh_cmd_argc, plsh_cmd_buffer);
+	pl_early_syslog_info("plsh_cmd_buffer, argc:%d, argvs:%s\r\n",
+	                      plsh_cmd_argc, plsh_cmd_buffer);
 }
 
 /*************************************************************************************
