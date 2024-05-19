@@ -34,7 +34,7 @@ MCU      := -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard
 CHIP     := gd32f407vet6
 LIBS     += -lc -lm -lnosys 
 
-
+PL_MK_CFG_OS_SHELL = y
 # TEST CONFIGURATIONS
 PL_MK_CFG_OS_TEST = y
 PL_MK_CFG_OS_MEMPOOL_TEST = y
