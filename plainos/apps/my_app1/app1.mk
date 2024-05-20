@@ -21,3 +21,4 @@
 # SOFTWARE.
 
 C_SRCS += $(APPS_DIR)/my_app1/app1.c
+C_SRCS += $(APPS_DIR)/my_app1/pl_ls.c
