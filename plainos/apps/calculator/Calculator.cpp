@@ -8,6 +8,7 @@
 
 #include "Calculator.h"
 #include <math.h>
+#include <kernel/mempool.h>
 
 INFIX_INTO_SUFFIX::INFIX_INTO_SUFFIX(void)
 {
@@ -146,7 +147,7 @@ void INFIX_INTO_SUFFIX::Convert(const  char *InStream, char *OutStream)
 
 
 
-static DOUBLE_STACK Stack;
+
 double CALCULATE_SUFFIX::calculate(const char *Str)
 {
 
@@ -154,6 +155,7 @@ double CALCULATE_SUFFIX::calculate(const char *Str)
     char WorkSpace[50]={'\0'}; //
     char *p = WorkSpace;
     
+	DOUBLE_STACK *Stack = (DOUBLE_STACK *)pl_mempool_malloc(g_pl_default_mempool, sizeof(DOUBLE_STACK));
     while(*Str!='\0')
     {
        p = WorkSpace;
@@ -184,20 +186,20 @@ double CALCULATE_SUFFIX::calculate(const char *Str)
             }
           (*p)='\0';
           result1 =  atof(WorkSpace);
-          Stack.Push(result1);
+          Stack->Push(result1);
           }
        }
        else if(*Str == '!')
        {
-           result1 = Stack.Pop();
+           result1 = Stack->Pop();
            result1 = sqrt(result1);
-           Stack.Push(result1);
+           Stack->Push(result1);
            Str++;
        }
        else
        {
-           result2 = Stack.Pop();
-           result1 = Stack.Pop();
+           result2 = Stack->Pop();
+           result1 = Stack->Pop();
            switch(*Str)
            {
                case '+' : result1 = result1 + result2;break;
@@ -206,12 +208,12 @@ double CALCULATE_SUFFIX::calculate(const char *Str)
                case '/' : result1 = result1 / result2;break;    // 在此可添加检错机制
                default  : break;
            }
-           Stack.Push(result1);
+           Stack->Push(result1);
            Str++;
        }
     }
 
-    result1 = Stack.Pop();
+    result1 = Stack->Pop();
 
 	pl_mempool_free(g_pl_default_mempool, Stack);
     return result1;
