@@ -211,6 +211,7 @@ double CALCULATE_SUFFIX::calculate(const char *Str)
 
     result1 = Stack->Pop();
 
+	pl_mempool_free(g_pl_default_mempool, Stack);
     return result1;
 
 }
