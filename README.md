@@ -1,17 +1,16 @@
 # PlainOS
 
-#### 介绍
+## 项目介绍
 ![logo](logo.png)
+Plain含义是简单的意思，该项目旨在开发一个简单而又轻量化的实时操作系统（Real-time operating system, RTOS），因而取名为![logo](logo.svg)，
 
-This project is ![logo](logo.svg), aimed at developing a universal operating system with a plain and minimalist philosophy.
-
-#### 软件架构    
+## plainos软件架构    
 
 ```c++
-plain-os                                             顶层目录
-   |---- Makefile                                    顶层Makefile（编译入口）
+plainos                                             PlainOS顶层目录
+   |---- Makefile                                    PlainOS顶层Makefile（编译入口）
    |
-   |---- arch                                        特定架构目录（BSP驱动）
+   |---- arch                                        特定处理器硬件架构目录（BSP驱动）
    |      |
    |      |--- arm32                                 arm32目录
    |      |     |
@@ -72,36 +71,22 @@ plain-os                                             顶层目录
    |
    |---- os_test                                     OS自测试代码
    |
-   |---- documents                                   OS文档
+   |---- documents                                   OS文档，使用drawio绘图
 
 
 ```
 
-#### 安装教程
+## PlainOS使用入门
 
-1.  从官网下载交叉工具链安装并添加环境变量
-2.  在顶层目录下make xxx_config
-3.  在顶层目录执行make
-
-#### 使用说明
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
-
-#### 参与贡献
-
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
-
-
-#### 特技
-
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+1.  从各处理器官网安装交叉工具链并将其路径添加到环境变量中以便操作系统终端调用。
+2.  /plainos目录下执行make xxx_config指令在/plainos目录下生成配置文件，此处xxx_config为/plainos/configs目录下文件夹名称。
+3.  /plainos目录执行make指令在/out目录生成可执行二进制文件，此处/符号代表PlainOS工程根目录。
+4.  将/out目录下生成的二进制文件烧录到处理器即可运行PlainOS。
+   
+      以Windows10操作系统使用STM32F103C8T6开发PlainOS为例，用户可在自己指定目录终端下执行下述操作，Linux操作系统同理。
+```shell
+   git clone https://gitee.com/lsw-elecm/plain-os.git
+   cd  plainos
+   make stm32f10x_config
+   make 
+```
