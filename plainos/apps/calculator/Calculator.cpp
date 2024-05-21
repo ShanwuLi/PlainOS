@@ -8,7 +8,7 @@
 
 #include "Calculator.h"
 #include <math.h>
-#include <kernel/mempool.h>
+
 INFIX_INTO_SUFFIX::INFIX_INTO_SUFFIX(void)
 {
    ;
@@ -81,14 +81,14 @@ bool INFIX_INTO_SUFFIX::CheckLegal(const  char *InStream)
 void INFIX_INTO_SUFFIX::Convert(const  char *InStream, char *OutStream)
 {
    int NumbleFirst=0;
-   STACK *Stack = (STACK*)pl_mempool_malloc(g_pl_default_mempool, sizeof(STACK));
-   Stack->Push('@');
+   STACK Stack;
+   Stack.Push('@');
    char m=0;
-   while( !(Stack->StackEmpty()) )
+   while( !(Stack.StackEmpty()) )
    {
      if(((*InStream) == '(')&&((*(InStream+1) == '-')))
        {
-          Stack->Push(*InStream);
+          Stack.Push(*InStream);
           InStream++;
           if(NumbleFirst == 0)
            {
@@ -121,19 +121,19 @@ void INFIX_INTO_SUFFIX::Convert(const  char *InStream, char *OutStream)
      else
     {
       NumbleFirst = 0;
-      if(OSP(*InStream) > ISP(Stack->GetTopData()))
+      if(OSP(*InStream) > ISP(Stack.GetTopData()))
         {
-          Stack->Push(*InStream);
+          Stack.Push(*InStream);
           InStream++;
         }
-     else if(OSP(*InStream) < ISP(Stack->GetTopData()))
+     else if(OSP(*InStream) < ISP(Stack.GetTopData()))
         {
-          *OutStream = Stack->Pop();
+          *OutStream = Stack.Pop();
           OutStream++;
         }
      else
       {
-          m= Stack->Pop();
+          m= Stack.Pop();
          if(m== '(')
             InStream++;
       }
@@ -141,17 +141,19 @@ void INFIX_INTO_SUFFIX::Convert(const  char *InStream, char *OutStream)
    }
    *(OutStream-1) = '\0';
    *(OutStream)= '\0';
-
-   pl_mempool_free(g_pl_default_mempool, Stack);
 }
 
+
+
+
+static DOUBLE_STACK Stack;
 double CALCULATE_SUFFIX::calculate(const char *Str)
 {
 
     double result1 = 0.0,result2 = 0.0;
     char WorkSpace[50]={'\0'}; //
     char *p = WorkSpace;
-	DOUBLE_STACK *Stack = (DOUBLE_STACK*)pl_mempool_malloc(g_pl_default_mempool, sizeof(DOUBLE_STACK));
+    
     while(*Str!='\0')
     {
        p = WorkSpace;
@@ -182,20 +184,20 @@ double CALCULATE_SUFFIX::calculate(const char *Str)
             }
           (*p)='\0';
           result1 =  atof(WorkSpace);
-          Stack->Push(result1);
+          Stack.Push(result1);
           }
        }
        else if(*Str == '!')
        {
-           result1 = Stack->Pop();
+           result1 = Stack.Pop();
            result1 = sqrt(result1);
-           Stack->Push(result1);
+           Stack.Push(result1);
            Str++;
        }
        else
        {
-           result2 = Stack->Pop();
-           result1 = Stack->Pop();
+           result2 = Stack.Pop();
+           result1 = Stack.Pop();
            switch(*Str)
            {
                case '+' : result1 = result1 + result2;break;
@@ -204,12 +206,12 @@ double CALCULATE_SUFFIX::calculate(const char *Str)
                case '/' : result1 = result1 / result2;break;    // 在此可添加检错机制
                default  : break;
            }
-           Stack->Push(result1);
+           Stack.Push(result1);
            Str++;
        }
     }
 
-    result1 = Stack->Pop();
+    result1 = Stack.Pop();
 
     return result1;
 
