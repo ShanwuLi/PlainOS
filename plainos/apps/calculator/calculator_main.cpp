@@ -3,17 +3,16 @@
 #include <kernel/syslog.h>
 #include <appcall.h>
 
-
-static char str[100]={0};
 static int pl_calculator(int argc, char **argv)
 {
 	if (argc != 2)
 		return -1;
-	
+
     double result = 0.0;
+	char str[100]={0};
+
     INFIX_INTO_SUFFIX InfixIntoSuffix;
     CALCULATE_SUFFIX  cal;
-    
 
     if(!InfixIntoSuffix.CheckLegal(argv[1]))
        pl_syslog("input error\r\n");
