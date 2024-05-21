@@ -18,7 +18,9 @@ static int pl_calculator(int argc, char **argv)
        pl_syslog("input error\r\n");
     else
     {
+	  pl_syslog("statr convert\r\n");
       InfixIntoSuffix.Convert(argv[1], str);
+	   pl_syslog("statr calculate\r\n");
       result = cal.calculate(str);
       pl_syslog("%s = %d\r\n", argv[1], (int)result);
     }
