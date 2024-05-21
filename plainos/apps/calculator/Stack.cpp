@@ -5,7 +5,6 @@
 属性：开源
 ***####################################################################################****/
 #include "Stack.h"
-#include <kernel/syslog.h>
 STACK::STACK(void)
 {
     unsigned int i=0;
@@ -64,7 +63,6 @@ void DOUBLE_STACK::Push(double Data)
    if(StackPoint==200)
    return;
    else {
-	 pl_syslog("StackPoint:%d\r\n", StackPoint);
      StackArray[++StackPoint]= Data;
    }
 }
