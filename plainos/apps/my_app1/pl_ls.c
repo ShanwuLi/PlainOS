@@ -2,7 +2,6 @@
 #include <types.h>
 #include <appcall.h>
 #include <kernel/syslog.h>
-#include <kernel/initcall.h>
 
 extern struct pl_app_entry __appcall_start[];
 extern struct pl_app_entry __appcall_end[];

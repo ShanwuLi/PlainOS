@@ -29,8 +29,7 @@ TEMP_FLAGS += $(DEFINE) -mthumb -Wall --specs=nosys.specs -Wextra -Wwrite-string
               -Werror=all -Werror=deprecated-declarations \
               -Wextra -Werror=unused-parameter -Werror=sign-compare  -gdwarf-4 -ggdb -nostartfiles \
               -fstrict-volatile-bitfields -Werror=unused-but-set-variable -fno-jump-tables \
-              -fno-tree-switch-conversion -Werror=unused-function -Werror=unused-variable \
-              -Wmissing-prototypes
+              -fno-tree-switch-conversion -Werror=unused-function -Werror=unused-variable
 
 C_FLAGS  += $(DEFINE) $(TEMP_FLAGS) -xc -Wmissing-prototypes -Werror=old-style-declaration \
                                     -std=gnu17

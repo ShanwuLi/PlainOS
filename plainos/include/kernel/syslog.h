@@ -46,6 +46,11 @@ SOFTWARE.
 	#define PL_SYSLOG_ANSI_COLOR_RESET 
 #endif
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*************************************************************************************
  * Function Name: pl_put_format_log_locked
  *
@@ -264,5 +269,9 @@ int pl_syslog_redirect(int (*put_char)(char c));
 #define pl_syslog_err(fmt, ...)   \
 	pl_put_format_log(PL_SYSLOG_ERR_ANSI_COLOR"[erro]"fmt \
 	PL_SYSLOG_ANSI_COLOR_RESET, ## __VA_ARGS__)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __KERNEL_SYSLOG_H__ */
