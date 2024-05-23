@@ -37,7 +37,7 @@ SOFTWARE.
 #define ASCLL_SPACE                    32
 #define ASCLL_BACKSPACE                8
 
-#define ANSI_BACKSPACE                 "\033[P]"
+#define ANSI_BACKSPACE                 "\033[P"
 #define SERIAL_PROCESS_NOT_CALL        (-1)
 
 enum cmd_parse_state {
