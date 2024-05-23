@@ -26,6 +26,7 @@ SOFTWARE.
 #include <config.h>
 #include <appcall.h>
 #include <string.h>
+#include <kernel/task.h>
 #include <kernel/syslog.h>
 #include <kernel/initcall.h>
 #include <kernel/mempool.h>
@@ -36,10 +37,15 @@ SOFTWARE.
 #define ASCLL_SPACE                    32
 #define ASCLL_BACKSPACE                8
 
+#define ANSI_BACKSPACE                 "\033[P]"
+#define SERIAL_PROCESS_NOT_CALL        (-1)
+
 enum cmd_parse_state {
+	CMD_PARSE_STATE_ERR = -1,
 	CMD_PARSE_STATE_INIT = 0,
 	CMD_PARSE_STATE_CMD,
 	CMD_PARSE_STATE_ARG,
+	CMD_PARSE_STATE_NORMAL,
 	CMD_PARSE_STATE_END,
 };
 
@@ -47,9 +53,11 @@ extern struct pl_app_entry __appcall_start[];
 extern struct pl_app_entry __appcall_end[];
 
 struct pl_shell {
+	int state;
 	int cmd_argc;
+	int cmd_buffer_idx;
+	pl_tid_t cmd_task;
 	struct pl_serial_desc *desc;
-	struct pl_work cmd_exec_work;
 	char *cmd_argv[PL_CFG_SHELL_CMD_ARGC_MAX];
 	char cmd_buffer[PL_CFG_SHELL_CMD_BUFF_MAX];
 };
@@ -74,39 +82,65 @@ static struct pl_app_entry *plsh_find_app_entry(char *name)
 	return NULL;
 }
 
-/*************************************************************************************
- * @breaf: exec the cmd.
- *
- * @param work: work to be executed.
- *
- * @return none.
- ************************************************************************************/
-static void plsh_exec_work(struct pl_work *work)
+static int plsh_process_received_chars(struct pl_shell *sh, char recv_ch)
 {
-	USED(work);
-	int ret;
-	struct pl_app_entry *app_entry;
+	/* skip control characters */
+	if (recv_ch < ASCLL_SPACE && recv_ch != ASCLL_BACKSPACE && recv_ch != ASCLL_ENTER)
+		return CMD_PARSE_STATE_NORMAL;
 
-	app_entry = plsh_find_app_entry(plsh.cmd_argv[0]);
-	if (app_entry == NULL) {
-		pl_syslog_err("app[%s] not found\r\n", plsh.cmd_argv[0]);
-		goto out;
+	/* delete char */
+	if (recv_ch == ASCLL_BACKSPACE) {
+		if (sh->cmd_buffer_idx == 0)
+			return CMD_PARSE_STATE_NORMAL;
+
+		--sh->cmd_buffer_idx;
+		pl_port_putc(recv_ch);
+		pl_syslog(ANSI_BACKSPACE);
+		return CMD_PARSE_STATE_NORMAL;
 	}
 
-	/* disable receiving */
-	plsh.desc->ops->recv_disable(plsh.desc);
-	ret = app_entry->entry(plsh.cmd_argc, plsh.cmd_argv);
-	if (ret < 0) {
-		pl_syslog_err("app[%s] exec cmd failed, ret:%d\r\n",
-		              app_entry->name, ret);
+	pl_port_putc(recv_ch);
+	/* check ending condition */
+	if (sh->cmd_buffer_idx == PL_CFG_SHELL_CMD_BUFF_MAX - 1 ||
+		recv_ch == ASCLL_ENTER) {
+		if (sh->state == CMD_PARSE_STATE_CMD)
+			sh->cmd_argc++;
+
+		sh->cmd_buffer[sh->cmd_buffer_idx] = '\0';
+		pl_syslog("\r\n");
+		return ASCLL_ENTER;
 	}
 
-out:
-	/* enable receiving */
-	plsh.desc->ops->recv_enable(plsh.desc);
-	pl_syslog(PL_CFG_SHELL_PREFIX_NAME"# ");
+	/* state machine for get the cmd */
+	switch (sh->state) {
+	case CMD_PARSE_STATE_INIT:
+		if (recv_ch != ASCLL_SPACE) {
+			sh->state = CMD_PARSE_STATE_CMD;
+			sh->cmd_buffer[sh->cmd_buffer_idx++] = recv_ch;
+		}
+		break;
+
+	case CMD_PARSE_STATE_CMD:
+		if (recv_ch == ASCLL_SPACE) {
+			sh->state = CMD_PARSE_STATE_ARG;
+			sh->cmd_argc++;
+		}
+		sh->cmd_buffer[sh->cmd_buffer_idx++] = recv_ch;
+		break;
+
+	case CMD_PARSE_STATE_ARG:
+		if (recv_ch != ASCLL_SPACE) {
+			sh->state = CMD_PARSE_STATE_CMD;
+			sh->cmd_buffer[sh->cmd_buffer_idx++] = recv_ch;
+		}
+		break;
+
+	default:
+		break;
+	}
+
+	return CMD_PARSE_STATE_NORMAL;
 }
-
 
 /*************************************************************************************
  * @breaf: copy the cmd to plsh_cmd_buffer.
@@ -146,94 +180,77 @@ static int plsh_get_argvs_from_buffer( char *cmd_buff, int cmd_argc, char **cmd_
 	return OK;
 }
 
-/*************************************************************************************
- * @breaf: copy the cmd to plsh_cmd_buffer.
- *
- * @param recv_fifo: copies a command from the receive FIFO to the command buffer.
- *
- * @return: None.
- ************************************************************************************/
-static void plsh_copy_cmd_to_buffer(struct pl_kfifo *recv_fifo)
+
+static void plsh_cmd_reset(	struct pl_shell *sh)
 {
-	char ch;
-	int i = 0;
-	int state = CMD_PARSE_STATE_INIT;
-
-	/* copy cmd to plsh_cmd_buffer */
-	plsh.cmd_argc = 0;
-	while (pl_kfifo_len(recv_fifo) != 0) {
-		ch = recv_fifo->buff[recv_fifo->out & (recv_fifo->size - 1)];
-		++recv_fifo->out;
-
-		/* check ending condition */
-		if (ch == ASCLL_ENTER || i == PL_CFG_SHELL_CMD_BUFF_MAX - 1) {
-			if (state == CMD_PARSE_STATE_CMD)
-				plsh.cmd_argc++;
-
-			plsh.cmd_buffer[i] = '\0';
-			break;
-		}
-
-		/* state machine for get the cmd */
-		switch (state) {
-		case CMD_PARSE_STATE_INIT:
-			if (ch != ASCLL_SPACE) {
-				state = CMD_PARSE_STATE_CMD;
-				plsh.cmd_buffer[i++] = ch;
-			}
-			break;
-
-		case CMD_PARSE_STATE_CMD:
-			if (ch == ASCLL_SPACE) {
-				state = CMD_PARSE_STATE_ARG;
-				plsh.cmd_argc++;
-			}
-			plsh.cmd_buffer[i++] = ch;
-			break;
-
-		case CMD_PARSE_STATE_ARG:
-			if (ch != ASCLL_SPACE) {
-				state = CMD_PARSE_STATE_CMD;
-				plsh.cmd_buffer[i++] = ch;
-			}
-			break;
-
-		default:
-			break;
-		}
-	}
+	sh->cmd_argc = 0;
+	sh->cmd_argv[0] = '\0';
+	sh->cmd_buffer_idx = 0;
+	sh->state = CMD_PARSE_STATE_INIT;
 }
-
 /*************************************************************************************
- * @breaf: parse the cmd.
+ * @breaf: exec the cmd.
  *
- * @param recv_fifo: fifo of receiving characters.
+ * @param work: work to be executed.
  *
- * @return: none.
+ * @return none.
  ************************************************************************************/
-static int plsh_cmd_parse(struct pl_kfifo *recv_fifo)
+static int plsh_exec_cmd_task(int argc, char *argv[])
 {
+	USED(argc);
+	USED(argv);
 	int ret;
+	char recv_ch;
+	struct pl_app_entry *app_entry;
+	struct pl_kfifo *recv_fifo = &(plsh.desc->recv_info.fifo);
 
-	/* copy cmd to plsh_cmd_buffer  */
-	plsh_copy_cmd_to_buffer(recv_fifo);
+	pl_syslog(PL_CFG_SHELL_PREFIX_NAME"# ");
+	plsh_cmd_reset(&plsh);
+	while (true) {
+		if (pl_kfifo_len(recv_fifo) == 0) {
+			pl_task_pend(NULL);
+			continue;
+		}
 
-	/* check argc */
-	if (plsh.cmd_argc > PL_CFG_SHELL_CMD_ARGC_MAX) {
-		pl_early_syslog_err("cmd argvs[%d] is too many, limited[%d]\r\n",
-		                     plsh.cmd_argc, PL_CFG_SHELL_CMD_ARGC_MAX);
-		return -ERANGE;
+		/* get char from recv_fifo */
+		recv_ch = recv_fifo->buff[recv_fifo->out & (recv_fifo->size - 1)];
+		pl_port_enter_critical();
+		recv_fifo->out++;
+		pl_port_exit_critical();
+
+		/* process char */
+		ret = plsh_process_received_chars(&plsh, recv_ch);
+		if (ret != ASCLL_ENTER)
+			continue;
+
+		/* get argvs */
+		ret = plsh_get_argvs_from_buffer(plsh.cmd_buffer, plsh.cmd_argc, plsh.cmd_argv);
+		if (ret < 0) {
+			plsh_cmd_reset(&plsh);
+			pl_syslog(PL_CFG_SHELL_PREFIX_NAME"# ");
+			continue;
+		}
+
+		/* find the app entry */
+		app_entry = plsh_find_app_entry(plsh.cmd_argv[0]);
+		if (app_entry == NULL) {
+			pl_syslog_err("app[%s] not found\r\n", plsh.cmd_argv[0]);
+			pl_syslog(PL_CFG_SHELL_PREFIX_NAME"# ");
+			plsh_cmd_reset(&plsh);
+			continue;
+		}
+
+		/* exec the cmd */
+		ret = app_entry->entry(plsh.cmd_argc, plsh.cmd_argv);
+		if (ret < 0)
+			pl_syslog_err("app[%s] exec cmd failed, ret:%d\r\n", app_entry->name, ret);
+
+		plsh_cmd_reset(&plsh);
+		pl_syslog(PL_CFG_SHELL_PREFIX_NAME"# ");
 	}
 
-	/* get the argvs from the buffer */
-	ret = plsh_get_argvs_from_buffer(plsh.cmd_buffer, plsh.cmd_argc, plsh.cmd_argv);
-	if (ret < 0) {
-		return ret;
-	}
-
-	return OK;
+	return EUNKNOWE;
 }
-
 /*************************************************************************************
  *
  * @brief: precess the received characters.
@@ -246,96 +263,9 @@ static int plsh_cmd_parse(struct pl_kfifo *recv_fifo)
  ************************************************************************************/
 static int plsh_recv_process(struct pl_kfifo *recv_fifo, char *chars, uint_t chars_len)
 {
-	uint_t i;
-	int need_callback = 0;
-	uint_t idx_mask = recv_fifo->size - 1;
-
-	for (i = 0; i < chars_len; i++) {
-		/* skip control characters */
-		if (chars[i] < ASCLL_SPACE &&
-		    chars[i] != ASCLL_BACKSPACE &&
-		    chars[i] != ASCLL_ENTER)
-			continue;
-
-		/* delete char */
-		if (chars[i] == ASCLL_BACKSPACE) {
-			if (pl_kfifo_len(recv_fifo) == 0)
-				continue;
-
-			pl_port_putc(chars[i]);
-			pl_port_putc('\033');
-			pl_port_putc('[');
-			pl_port_putc('P');
-			recv_fifo->in--;
-			continue;
-		}
-
-		/* put char to recv_fifo */
-		if (pl_kfifo_len(recv_fifo) >= recv_fifo->size) {
-			pl_early_syslog_err("recv fifo is full[%d], in:%u, out:%u\r\n",
-			                     pl_kfifo_len(recv_fifo), recv_fifo->in,
-			                     recv_fifo->out);
-			need_callback = 1;
-			break;
-		}
-
-		recv_fifo->buff[recv_fifo->in & idx_mask] = chars[i];
-		recv_fifo->in++;
-
-		/* skip enter key when put chars */
-		if (chars[i] == ASCLL_ENTER) {
-			need_callback = 1;
-			continue;
-		}
-
-		/* put chars */
-		pl_port_putc(chars[i]);
-	}
-
-	return need_callback;
-}
-
-/*************************************************************************************
- *
- * @brief: callback of serial port.
- * 
- * @param recv_fifo: fifo of receiving characters.
- *
- * @return none.
- ************************************************************************************/
-static void plsh_callback(struct pl_kfifo *recv_fifo)
-{
-	int ret;
-
-	pl_syslog("\r\n");
-	ret = plsh_cmd_parse(recv_fifo);
-	if (ret < 0) {
-		pl_syslog(PL_CFG_SHELL_PREFIX_NAME"# ");
-		return;
-	}
-
-	/* add cmd exec work to low priority work queue */
-	plsh.desc->ops->recv_disable(plsh.desc);
-	ret = pl_work_add(g_pl_sys_lowq_handle, &plsh.cmd_exec_work);
-	if (ret < 0)
-		pl_syslog_err("work quenen is too busy\r\n");
-
-}
-
-/*************************************************************************************
- *
- * @brief: shell initialization.
- *
- * @param serial: serial port descriptor.
- *
- * @return none.
- ************************************************************************************/
-static void pl_plsh_init(struct pl_serial_desc *serial)
-{
-	plsh.desc = serial;
-	plsh.cmd_argc = 0;
-	plsh.cmd_exec_work.fun = plsh_exec_work;
-	plsh.cmd_exec_work.priv_data = &plsh;
+	pl_kfifo_put(recv_fifo, chars, chars_len);
+	pl_task_resume(plsh.cmd_task);
+	return SERIAL_PROCESS_NOT_CALL;
 }
 /*************************************************************************************
  *
@@ -352,28 +282,27 @@ static int pl_shell_init(void)
 
 	serial = pl_serial_find_desc(0);
 	if (serial == NULL) {
-		pl_syslog_err("plsh init failed\r\n");
-		return -EFAULT;
+		pl_syslog_err("serial not found for %s\r\n", PL_CFG_SHELL_PREFIX_NAME);
+		return OK;
 	}
 
 	ret = pl_serial_register_recv_process(serial, plsh_recv_process);
 	if (ret < 0) {
-		pl_syslog_err("plsh init failed, ret:%d\r\n", ret);
-		return ret;
+		pl_syslog_err("serial register failed, ret:%d\r\n", ret);
+		return OK;
 	}
 
-	ret = pl_serial_register_recv_callback(serial, plsh_callback);
-	if (ret < 0) {
-		pl_syslog_err("plsh init failed, ret:%d\r\n", ret);
-		return ret;
+	plsh.cmd_task = pl_task_create(PL_CFG_SHELL_PREFIX_NAME, plsh_exec_cmd_task,
+	                               PL_CFG_SHELL_CMD_EXEC_TASK_PRIORITY,
+	                               PL_CFG_SHELL_CMD_EXEC_TASK_STACK_SIZE, 0, NULL);
+	if (plsh.cmd_task == NULL) {
+		pl_syslog_err("%s task create failed\r\n", PL_CFG_SHELL_PREFIX_NAME);
+		return OK;
 	}
 
-	pl_plsh_init(serial);
-	serial->ops->recv_enable(serial);
-
+	plsh.desc = serial;
+	plsh.cmd_argc = 0;
 	pl_syslog_info("plainos shell init done\r\n");
-	pl_syslog(PL_CFG_SHELL_PREFIX_NAME"# ");
-
 	return OK;
 }
 pl_late_initcall(pl_shell_init);

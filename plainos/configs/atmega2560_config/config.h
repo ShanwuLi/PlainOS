@@ -34,6 +34,8 @@ SOFTWARE.
 #define PL_CFG_SHELL_PREFIX_NAME                          "plsh"
 #define PL_CFG_SHELL_CMD_BUFF_MAX                         (512)
 #define PL_CFG_SHELL_CMD_ARGC_MAX                         (20)
+#define PL_CFG_SHELL_CMD_EXEC_TASK_PRIORITY               (5)
+#define PL_CFG_SHELL_CMD_EXEC_TASK_STACK_SIZE             (1024)
 #define PL_CFG_SYSTICK_TIME_SLICE_US                      (100)
 #define PL_CFG_DEFAULT_MEMPOOL_SIZE                       (3900)
 #define PL_CFG_DEFAULT_MEMPOOL_GRAIN_ORDER                (4)

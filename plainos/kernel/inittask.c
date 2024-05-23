@@ -50,7 +50,7 @@ static int init_task(int argc, char *argv[])
 	ret = pl_sys_wq_init();
 	pl_assert(ret == 0);
 	pl_do_initcalls();
-
+	pl_syslog_info("init task done\r\n");
 	return 0;
 }
 

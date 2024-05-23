@@ -32,6 +32,8 @@ SOFTWARE.
 #define PL_CFG_SHELL_PREFIX_NAME                          "plsh"
 #define PL_CFG_SHELL_CMD_BUFF_MAX                         (128)
 #define PL_CFG_SHELL_CMD_ARGC_MAX                         (20)
+#define PL_CFG_SHELL_CMD_EXEC_TASK_PRIORITY               (90)
+#define PL_CFG_SHELL_CMD_EXEC_TASK_STACK_SIZE             (1024)
 #define PL_CFG_SYSTICK_TIME_SLICE_US                      (10)
 #define PL_CFG_DEFAULT_MEMPOOL_SIZE                       (14 * 1024)
 #define PL_CFG_DEFAULT_MEMPOOL_GRAIN_ORDER                (5)
@@ -44,7 +46,7 @@ SOFTWARE.
 #define PL_CFG_SOFTTIMER_DAEMON_TASK_STACK_SIZE           (512)
 #define PL_CFG_HI_WORKQUEUE_TASK_STACK_SIZE               (512)
 #define PL_CFG_HI_WORKQUEUE_FIFO_CAPACITY                 (128)
-#define PL_CFG_LO_WORKQUEUE_TASK_STACK_SIZE               (1024)
+#define PL_CFG_LO_WORKQUEUE_TASK_STACK_SIZE               (512)
 #define PL_CFG_LO_WORKQUEUE_TASK_PRIORITY                 (PL_CFG_TASK_PRIORITIES_MAX)
 #define PL_CFG_LO_WORKQUEUE_FIFO_CAPACITY                 (128)
 //#define PL_CFG_SYSLOG_ANSI_COLOR

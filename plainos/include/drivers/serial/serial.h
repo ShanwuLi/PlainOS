@@ -72,8 +72,6 @@ struct pl_serial_ops {
 	int (*send_char)(struct pl_serial_desc *desc, char c);
 	int (*recv_char)(struct pl_serial_desc *desc, char *c);
 	int (*send_str)(struct pl_serial_desc *desc, char *str);
-	int (*recv_enable)(struct pl_serial_desc *desc);
-	int (*recv_disable)(struct pl_serial_desc *desc);
 };
 
 /*************************************************************************************
