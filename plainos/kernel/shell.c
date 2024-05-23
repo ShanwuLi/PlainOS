@@ -90,8 +90,11 @@ static int plsh_process_received_chars(struct pl_shell *sh, char recv_ch)
 
 	/* delete char */
 	if (recv_ch == ASCLL_BACKSPACE) {
-		if (sh->cmd_buffer_idx == 0)
+		if (sh->cmd_buffer_idx == 0) {
+			sh->cmd_argc = 0;
+			sh->state = CMD_PARSE_STATE_INIT;
 			return CMD_PARSE_STATE_NORMAL;
+		}
 
 		--sh->cmd_buffer_idx;
 		pl_port_putc(recv_ch);
