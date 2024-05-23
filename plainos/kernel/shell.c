@@ -249,7 +249,7 @@ static int plsh_exec_cmd_task(int argc, char *argv[])
 		pl_syslog(PL_CFG_SHELL_PREFIX_NAME"# ");
 	}
 
-	return EUNKNOWE;
+	return -EUNKNOWE;
 }
 /*************************************************************************************
  *
