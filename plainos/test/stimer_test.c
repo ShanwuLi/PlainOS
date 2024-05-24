@@ -14,11 +14,10 @@ static void stimer_callback(struct pl_stimer *timer)
 	int ret;
 	void *data;
 	USED(timer);
-	struct count c = {.hi32 = 0, .lo32 = 90};
 
 	pl_softtimer_get_private_data(timer, &data);
 	pl_port_putc('A');
-	ret = pl_softtimer_reload(timer, true, stimer_callback, &c, data);
+	ret = pl_softtimer_reload(timer, true, stimer_callback, 20, data);
 	if (ret < 0) {
 		pl_syslog_err("pl_softtimer_add failed, ret:%d\r\n", ret);
 	}
@@ -29,7 +28,6 @@ static void stimer_callback2(struct pl_stimer *timer)
 	int ret;
 	static u8_t cnt = 0;
 	void *data;
-	struct count c = {.hi32 = 0, .lo32 = 200};
 
 	(void)pl_gpio_set_io_one(gpio_desc, 15, GPIO_SET_VALUE, cnt);
 
@@ -37,7 +35,7 @@ static void stimer_callback2(struct pl_stimer *timer)
 
 	pl_softtimer_get_private_data(timer, &data);
 	pl_port_putc('B');
-	ret = pl_softtimer_reload(timer, true, stimer_callback2, &c, data);
+	ret = pl_softtimer_reload(timer, true, stimer_callback2, 10, data);
 	if (ret < 0) {
 		pl_syslog_err("pl_softtimer_add failed, ret:%d\r\n", ret);
 		return;
@@ -47,7 +45,6 @@ static void stimer_callback2(struct pl_stimer *timer)
 static int stimer_test(void)
 {
 	int ret;
-	struct count c = {.hi32 = 0, .lo32 = 200};
 
 	pl_syslog_info("stimer_test\r\n");
 	stimer = pl_softtimer_request("timer1");
@@ -57,7 +54,8 @@ static int stimer_test(void)
 	}
 
 	pl_syslog_info("pl_softtimer_add\r\n");
-	ret = pl_softtimer_start(stimer, stimer_callback, &c, (void *)"111111111111111111111");
+	pl_softtimer_timer_init(stimer, stimer_callback, 90, (void *)"111111111111111111111");
+	ret = pl_softtimer_start(stimer);
 	if (ret < 0) {
 		pl_syslog_err("pl_softtimer_add failed, ret:%d\r\n", ret);
 		return -1;
@@ -70,7 +68,8 @@ static int stimer_test(void)
 	}
 
 	pl_syslog_info("pl_softtimer_add\r\n");
-	ret = pl_softtimer_start(stimer2, stimer_callback2, &c, (void *)"222222222222222222222");
+	pl_softtimer_timer_init(stimer2, stimer_callback2, 100, (void *)"111111111111111111111");
+	ret = pl_softtimer_start(stimer2);
 	if (ret < 0) {
 		pl_syslog_err("pl_softtimer_add failed, ret:%d\r\n", ret);
 		return -1;

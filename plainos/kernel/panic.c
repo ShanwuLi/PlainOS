@@ -50,8 +50,7 @@ static void pl_task_dump(struct tcb *tcb)
 	pl_early_syslog_err("task->sp_min:          0x%x\r\n", tcb->context_sp_min);
 	pl_early_syslog_err("task->sp_max:          0x%x\r\n", tcb->context_sp_max);
 	pl_early_syslog_err("task->wait_for_ret:    %d\r\n", tcb->wait_for_task_ret);
-	pl_early_syslog_err("task->delay_ticks.lo32:%u\r\n", tcb->delay_ticks.lo32);
-	pl_early_syslog_err("task->delay_ticks.hi32:%u\r\n", tcb->delay_ticks.hi32);
+	pl_early_syslog_err("task->delay_ticks:     %lu\r\n", tcb->delay_ticks);
 }
 
 /*************************************************************************************

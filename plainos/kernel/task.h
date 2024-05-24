@@ -84,7 +84,7 @@ struct tcb {
 	struct list_node node;
 	u8_t curr_state;
 	u16_t prio;
-	struct count delay_ticks;
+	u64_t delay_ticks;
 };
 
 typedef void (*task_entry_t)(struct tcb *tcb);

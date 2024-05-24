@@ -22,4 +22,4 @@
 
 CXX_SRCS += $(APPS_DIR)/calculator/Calculator.cpp
 CXX_SRCS += $(APPS_DIR)/calculator/Stack.cpp
-CXX_SRCS += $(APPS_DIR)/calculator/calculator_main.cpp
+C_SRCS += $(APPS_DIR)/calculator/calculator_main.c

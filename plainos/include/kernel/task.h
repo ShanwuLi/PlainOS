@@ -216,7 +216,7 @@ int pl_task_kill(pl_tid_t tid);
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_task_get_syscount(struct count *c);
+int pl_task_get_syscount(u64_t *c);
 
 /*************************************************************************************
  * Function Name: pl_task_get_cpu_rate_count

@@ -121,7 +121,7 @@ void pl_syslog_put_chars(int (*putc)(const char c), const char *start, const cha
  *  void.
  ************************************************************************************/
 #define pl_early_syslog_info(fmt, ...)  \
-	pl_put_format_log_locked(pl_port_putc, "[info]"fmt, ## __VA_ARGS__)
+	pl_put_format_log_locked(pl_port_putc, "[info] "fmt, ## __VA_ARGS__)
 
 /*************************************************************************************
  * Function Name: pl_early_syslog_warn
@@ -140,7 +140,7 @@ void pl_syslog_put_chars(int (*putc)(const char c), const char *start, const cha
  *  void.
  ************************************************************************************/
 #define pl_early_syslog_warn(fmt, ...)  \
-	pl_put_format_log_locked(pl_port_putc, PL_EARLY_SYSLOG_WARN_ANSI_COLOR"[warn]"fmt \
+	pl_put_format_log_locked(pl_port_putc, PL_EARLY_SYSLOG_WARN_ANSI_COLOR"[warn] "fmt \
 	PL_EARLY_SYSLOG_ANSI_COLOR_RESET, ## __VA_ARGS__)
 
 /*************************************************************************************
@@ -160,7 +160,7 @@ void pl_syslog_put_chars(int (*putc)(const char c), const char *start, const cha
  *  void.
  ************************************************************************************/
 #define pl_early_syslog_err(fmt, ...)  \
-	pl_put_format_log_locked(pl_port_putc, PL_EARLY_SYSLOG_ERR_ANSI_COLOR"[erro]"fmt \
+	pl_put_format_log_locked(pl_port_putc, PL_EARLY_SYSLOG_ERR_ANSI_COLOR"[erro] "fmt \
 	PL_EARLY_SYSLOG_ANSI_COLOR_RESET, ## __VA_ARGS__)
 
 /*************************************************************************************
@@ -228,7 +228,7 @@ int pl_syslog_redirect(int (*put_char)(char c));
  *  void.
  ************************************************************************************/
 #define pl_syslog_info(fmt, ...)   \
-	pl_put_format_log("[info]"fmt, ## __VA_ARGS__)
+	pl_put_format_log("[info] "fmt, ## __VA_ARGS__)
 
 /*************************************************************************************
  * Function Name: pl_syslog_warn
@@ -247,7 +247,7 @@ int pl_syslog_redirect(int (*put_char)(char c));
  *  void.
  ************************************************************************************/
 #define pl_syslog_warn(fmt, ...)   \
-	pl_put_format_log(PL_SYSLOG_WARN_ANSI_COLOR"[warn]"fmt \
+	pl_put_format_log(PL_SYSLOG_WARN_ANSI_COLOR"[warn] "fmt \
 	PL_SYSLOG_ANSI_COLOR_RESET, ## __VA_ARGS__)
 
 /*************************************************************************************
@@ -267,7 +267,7 @@ int pl_syslog_redirect(int (*put_char)(char c));
  *  void.
  ************************************************************************************/
 #define pl_syslog_err(fmt, ...)   \
-	pl_put_format_log(PL_SYSLOG_ERR_ANSI_COLOR"[erro]"fmt \
+	pl_put_format_log(PL_SYSLOG_ERR_ANSI_COLOR"[erro] "fmt \
 	PL_SYSLOG_ANSI_COLOR_RESET, ## __VA_ARGS__)
 
 #ifdef __cplusplus

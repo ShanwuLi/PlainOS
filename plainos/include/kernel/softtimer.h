@@ -36,8 +36,8 @@ struct pl_stimer {
 	const char *name;
 	pl_stimer_fun_t fun;
 	void *priv_data;
-	struct count timing_cnt;
-	struct count reach_cnt;
+	u64_t timing_cnt;
+	u64_t reach_cnt;
 	bool reload;
 };
 
@@ -75,10 +75,10 @@ struct pl_stimer *pl_softtimer_request(const char *name);
 int pl_softtimer_get_private_data(struct pl_stimer *timer, void **data);
 
 /*************************************************************************************
- * Function Name: pl_softtimer_start
+ * Function Name: pl_softtimer_timer_init
  *
  * Description:
- *   start soft timer.
+ *   init soft timer.
  * 
  * Parameters:
  *  @timer: handle of soft timer requested.
@@ -87,10 +87,24 @@ int pl_softtimer_get_private_data(struct pl_stimer *timer, void **data);
  *  @priv_data: private data.
  *
  * Return:
+ *  void.
+ ************************************************************************************/
+void pl_softtimer_timer_init(struct pl_stimer *stimer, pl_stimer_fun_t fun,
+                                         u64_t timing_cnt, void *priv_data);
+
+/*************************************************************************************
+ * Function Name: pl_softtimer_start
+ *
+ * Description:
+ *   start soft timer.
+ * 
+ * Parameters:
+ *  @timer: handle of soft timer requested.
+ *
+ * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_softtimer_start(struct pl_stimer *timer, pl_stimer_fun_t fun,
-                       struct count *timing_cnt, void *priv_data);
+int pl_softtimer_start(struct pl_stimer *timer);
 
 /*************************************************************************************
  * Function Name: pl_softtimer_reload
@@ -109,7 +123,7 @@ int pl_softtimer_start(struct pl_stimer *timer, pl_stimer_fun_t fun,
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
 int pl_softtimer_reload(struct pl_stimer *timer, bool reload, pl_stimer_fun_t fun,
-                                      struct count *timing_cnt, void *priv_data);
+                                               u64_t timing_cnt, void *priv_data);
 
 /*************************************************************************************
  * Function Name: pl_softtimer_cancel

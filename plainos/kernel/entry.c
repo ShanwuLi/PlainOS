@@ -41,8 +41,8 @@ void pl_callee_entry(void)
 	if (ret < 0)
 		while(1);
 
-	pl_early_syslog("PlainOS is starting...\r\n");
 	pl_dis_os_char_logo();
+	pl_early_syslog("PlainOS is starting...\r\n");
 
 	ret = pl_default_mempool_init();
 	pl_assert(ret == 0);

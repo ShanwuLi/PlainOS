@@ -10,6 +10,38 @@
 #include <math.h>
 #include <kernel/mempool.h>
 
+#include "Stack.h"
+#include <stdlib.h>
+
+
+/***----------------------------------------------------------------------------------------
+类名：INFIX_INTO_SUFFIX
+方法：1.中缀转后缀方法：        Convert(中缀表达式输入流, 后缀表达式输出流);
+      2.中缀表达式合法性检查：  bool  CheckLegal(中缀表达式输入流);
+        合法返回true ，非法返回false
+------------------------------------------------------------------------------------------**/
+class  INFIX_INTO_SUFFIX
+{
+   private:
+     int ISP(const char symbol);
+     int OSP(const char symbol);
+   public:
+     INFIX_INTO_SUFFIX(void);
+     void  Convert(const  char *InStream, char *OutStream);
+     bool  CheckLegal(const  char *InStream);
+};
+
+/***----------------------------------------------------------------------------------------
+类名：CALCULATE_SUFFIX
+方法：double calculate(后缀表达式输入流);
+      返回计算结果
+-----------------------------------------------------------------------------------------**/
+class  CALCULATE_SUFFIX
+{
+   public:
+     double calculate(const char *Str);
+};
+
 INFIX_INTO_SUFFIX::INFIX_INTO_SUFFIX(void)
 {
    ;
@@ -220,3 +252,21 @@ double CALCULATE_SUFFIX::calculate(const char *Str)
 
 }
 
+int pl_calculator(int argc, char **argv, float *result)
+{
+	if (argc != 2)
+		return -1;
+
+	char str[50]={0};
+
+    INFIX_INTO_SUFFIX InfixIntoSuffix;
+    CALCULATE_SUFFIX  cal;
+
+    if(!InfixIntoSuffix.CheckLegal(argv[1]))
+       return -2;
+
+     InfixIntoSuffix.Convert(argv[1], str);
+    *result = cal.calculate(str);
+    
+    return 0;
+}

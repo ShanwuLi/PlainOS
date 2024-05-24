@@ -31,7 +31,7 @@ TEMP_FLAGS += $(DEFINE) -Wall -Wextra -Wwrite-strings -Wformat=2 \
 
 C_FLAGS   += $(TEMP_FLAGS) -xc -Wmissing-prototypes -Werror=old-style-declaration \
                            -std=c99
-CXX_FLAGS += $(TEMP_FLAGS) -xc++ -std=c++99
+CXX_FLAGS += $(TEMP_FLAGS) -xc++ -std=c++98
 ASM_FLAGS += -x assembler-with-cpp
 LDFLAGS   += -Wl,--gc-sections
 

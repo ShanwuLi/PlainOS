@@ -14,7 +14,7 @@ static int my_app_main(int argc, char *argv[])
 	for (i = 0; i < argc; i++)
 		pl_syslog_info("argv[%d]:%s\r\n", i, argv[i]);
 
-	for (volatile int j = 0; j < 2327470; j++)
+	for (volatile int j = 0; j < 35; j++)
 	;
 
 	return -5;

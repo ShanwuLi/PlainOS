@@ -48,11 +48,6 @@ SOFTWARE.
 
 typedef int (*main_t)(int argc, char *argv[]);
 
-struct count {
-	u32_t hi32;
-	u32_t lo32;
-};
-
 #define pl_is_power_of_2(x)                    ((x) != 0 && (((x) & ((x) - 1)) == 0))
 #define min(a, b)                              (((a) < (b)) ? (a) : (b))
 #define max(a, b)                              (((a) > (b)) ? (a) : (b))
@@ -88,35 +83,6 @@ void* pl_align_address(void* addr, uchar_t align);
  *   Aligned size.
  ************************************************************************************/
 size_t pl_align_size(size_t size, uchar_t align);
-
-/*************************************************************************************
- * Function Name: pl_count_cmp
- * Description: compare count1 with count2.
- *
- * Parameters:
- *   @c1: count1.
- *   @c2: count2.
- *
- * Return:
- *   if c1  > c2: return > 0;
- *   if c1  < c2: return < 0;
- *   if c1 == c2: return 0.
- ************************************************************************************/
-s32_t pl_count_cmp(struct count *c1, struct count *c2);
-
-/*************************************************************************************
- * Function Name: pl_count_add
- * Description: add count1 and count2 to return.
- *
- * Parameters:
- *   @c: result = c1 + c2.
- *   @c1: count1.
- *   @c2: count2.
- *
- * Return:
- *   count added.
- ************************************************************************************/
-int pl_count_add(struct count *c, struct count *c1, struct count *c2);
 
 #ifdef __cplusplus
 }

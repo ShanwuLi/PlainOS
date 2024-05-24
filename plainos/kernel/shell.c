@@ -239,7 +239,7 @@ static int plsh_exec_cmd_task(int argc, char *argv[])
 		/* find the app entry */
 		app_entry = plsh_find_app_entry(plsh.cmd_argv[0]);
 		if (app_entry == NULL) {
-			pl_syslog_err("app[%s] not found\r\n", plsh.cmd_argv[0]);
+			pl_syslog_err("%s not found\r\n", plsh.cmd_argv[0]);
 			pl_syslog(PL_CFG_SHELL_PREFIX_NAME"# ");
 			plsh_cmd_reset(&plsh);
 			continue;

@@ -93,8 +93,11 @@ static int softtimer_daemon_task(int argc, char **argv)
 			stimer_fun(first);
 
 		/* reload softtimer */
-		if (first->reload)
-			pl_softtimer_start(first, first->fun, &first->timing_cnt, first->priv_data);
+		if (first->reload) {
+			pl_softtimer_timer_init(first, first->fun, first->timing_cnt,
+			                        first->priv_data);
+			pl_softtimer_start(first);
+		}
 	}
 
 	return 0;
@@ -168,13 +171,13 @@ int pl_softtimer_get_private_data(struct pl_stimer *timer, void **data)
  * Return:
  *  void.
  ************************************************************************************/
-static void pl_softtimer_timer_init(struct pl_stimer *stimer, pl_stimer_fun_t fun,
-                                    struct count *timing_cnt, void *priv_data)
+void pl_softtimer_timer_init(struct pl_stimer *stimer, pl_stimer_fun_t fun,
+                                         u64_t timing_cnt, void *priv_data)
 {
 	stimer->fun = fun;
 	stimer->priv_data = priv_data;
-	stimer->timing_cnt.hi32 = timing_cnt->hi32;
-	stimer->timing_cnt.lo32 = timing_cnt->lo32;
+	stimer->timing_cnt = timing_cnt;
+	stimer->reach_cnt = 0;
 }
 
 /*************************************************************************************
@@ -185,29 +188,24 @@ static void pl_softtimer_timer_init(struct pl_stimer *stimer, pl_stimer_fun_t fu
  * 
  * Parameters:
  *  @timer: handle of soft timer requested.
- *  @fun: callback function.
- *  @timing_cnt: the count of timing.
- *  @priv_data: private data.
  *
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_softtimer_start(struct pl_stimer *timer, pl_stimer_fun_t fun,
-                       struct count *timing_cnt, void *priv_data)
+int pl_softtimer_start(struct pl_stimer *timer)
 {
+	u64_t syscount;
 	struct pl_stimer *pos;
-	struct count syscount;
 	struct list_node *timer_list = pl_task_get_timer_list();
 
-	if (timer == NULL || fun == NULL || timing_cnt == NULL)
+	if (timer == NULL)
 		return -EFAULT;
 
 	if (!list_is_empty(&timer->node))
 		return -EBUSY;
 
 	pl_task_get_syscount(&syscount);
-	pl_softtimer_timer_init(timer, fun, timing_cnt, priv_data);
-	pl_count_add(&timer->reach_cnt, &syscount, timing_cnt);
+	timer->reach_cnt = syscount + timer->timing_cnt;
 
 	pl_port_enter_critical();
 	if (list_is_empty(timer_list)) {
@@ -216,7 +214,7 @@ int pl_softtimer_start(struct pl_stimer *timer, pl_stimer_fun_t fun,
 	}
 
 	list_for_each_entry(pos, timer_list, struct pl_stimer, node) {
-		if (pl_count_cmp(&timer->reach_cnt, &pos->reach_cnt) < 0)
+		if (timer->reach_cnt < pos->reach_cnt)
 			break;
 	}
 
@@ -243,9 +241,9 @@ out:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
 int pl_softtimer_reload(struct pl_stimer *timer, bool reload, pl_stimer_fun_t fun,
-                                      struct count *timing_cnt, void *priv_data)
+                                                u64_t timing_cnt, void *priv_data)
 {
-	if (timer == NULL || fun == NULL || timing_cnt == NULL)
+	if (timer == NULL || fun == NULL || timing_cnt == 0)
 		return -EFAULT;
 
 	pl_softtimer_timer_init(timer, fun, timing_cnt, priv_data);

@@ -80,7 +80,7 @@ struct task_core_blk {
 	struct list_node timer_list;
 	struct pl_work exit_free;
 	struct tcb *curr_tcb;
-	struct count systicks;
+	u64_t systicks;
 	u32_t cpu_rate_base;
 	u32_t cpu_rate_useful;
 	uint_t sched_lock_ref;
@@ -338,7 +338,7 @@ void pl_task_insert_tcb_to_delaylist(struct tcb *tcb)
 
 	tcb->curr_state = PL_TASK_STATE_DELAY;
 	list_for_each_entry(pos, &delaylist->head->node, struct tcb, node) {
-		if (pl_count_cmp(&tcb->delay_ticks, &pos->delay_ticks) < 0)
+		if (tcb->delay_ticks < pos->delay_ticks)
 			break;
 	}
 
@@ -626,8 +626,7 @@ static void task_init_tcb(const char *name, main_t task, u16_t prio,
 	tcb->task = task;
 	tcb->argc = argc;
 	tcb->argv = argv;
-	tcb->delay_ticks.hi32 = 0;
-	tcb->delay_ticks.lo32 = 0;
+	tcb->delay_ticks = 0;
 	tcb->wait_for_task_ret = -EUNKNOWE;
 	list_init(&tcb->wait_head);
 }
@@ -959,22 +958,14 @@ int pl_task_kill(pl_tid_t tid)
  ************************************************************************************/
 void pl_task_delay_ticks(u32_t ticks)
 {
-	u32_t end_ticks_lo32;
-	u32_t end_ticks_hi32;
+	u32_t end_ticks;
 
 	if (ticks == 0)
 		return;
 
 	pl_port_enter_critical();
-	end_ticks_lo32 = g_task_core_blk.systicks.lo32;
-	end_ticks_hi32 = g_task_core_blk.systicks.hi32;
-
-	ticks += end_ticks_lo32;
-	if (ticks < end_ticks_lo32)
-		++end_ticks_hi32;
-
-	g_task_core_blk.curr_tcb->delay_ticks.hi32 = end_ticks_hi32;
-	g_task_core_blk.curr_tcb->delay_ticks.lo32 = ticks;
+	end_ticks = g_task_core_blk.systicks + ticks;
+	g_task_core_blk.curr_tcb->delay_ticks = end_ticks;
 	pl_task_remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
 	pl_task_insert_tcb_to_delaylist(g_task_core_blk.curr_tcb);
 	pl_port_exit_critical();
@@ -984,9 +975,7 @@ void pl_task_delay_ticks(u32_t ticks)
 static void update_systick(void)
 {
 	/* update systick */
-	++g_task_core_blk.systicks.lo32;
-	if (g_task_core_blk.systicks.lo32 == 0)
-		++g_task_core_blk.systicks.hi32;
+	++g_task_core_blk.systicks;
 }
 
 /*************************************************************************************
@@ -1034,7 +1023,7 @@ static void update_delay_task_list(void)
 	list_for_each_entry_safe(pos, tmp, &g_task_core_blk.delay_list.head->node,
 		struct tcb, node) {
 
-		if (pl_count_cmp(&pos->delay_ticks, &g_task_core_blk.systicks) > 0)
+		if (pos->delay_ticks > g_task_core_blk.systicks)
 			break;
 
 		pl_task_remove_tcb_from_delaylist(pos);
@@ -1070,13 +1059,13 @@ static void update_softtimer_list(void)
 
 	/* Get the first entry of timer list node, We can know if the timer has timed out */
 	first = list_first_entry(&g_task_core_blk.timer_list, struct pl_stimer, node);
-	if (pl_count_cmp(&first->reach_cnt, &g_task_core_blk.systicks) > 0) {
+	if (first->reach_cnt > g_task_core_blk.systicks) {
 		return;
 	}
 
 	/* update soft timer list */
 	list_for_each_entry(pos, &g_task_core_blk.timer_list, struct pl_stimer, node) {
-		if (pl_count_cmp(&pos->reach_cnt, &g_task_core_blk.systicks) > 0)
+		if (pos->reach_cnt > g_task_core_blk.systicks)
 			break;
 	}
 
@@ -1145,14 +1134,13 @@ void pl_callee_systick_expiration(void)
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_task_get_syscount(struct count *c)
+int pl_task_get_syscount(u64_t *c)
 {
 	if (c == NULL)
 		return -EFAULT;
 
 	pl_port_enter_critical();
-	c->hi32 = g_task_core_blk.systicks.hi32;
-	c->lo32 = g_task_core_blk.systicks.lo32;
+	*c = g_task_core_blk.systicks;
 	pl_port_exit_critical();
 
 	return OK;
@@ -1239,8 +1227,7 @@ static void pl_task_init_dummy_tcb(struct tcb *delay_dummy_tcb,
 {
 	/* init delay tcb */
 	list_init(&delay_dummy_tcb->node);
-	delay_dummy_tcb->delay_ticks.hi32 = UINT32_MAX;
-	delay_dummy_tcb->delay_ticks.lo32 = UINT32_MAX;
+	delay_dummy_tcb->delay_ticks = UINT64_MAX;
 	delay_dummy_tcb->name = "delay_head";
 
 	/* init first dummy tcb */
@@ -1279,8 +1266,7 @@ int pl_task_core_init(void)
 
 	/* init task core block */
 	g_task_core_blk.curr_tcb = &first_dummy_tcb;
-	g_task_core_blk.systicks.hi32 = 0;
-	g_task_core_blk.systicks.lo32 = 0;
+	g_task_core_blk.systicks = 0;
 	g_task_core_blk.cpu_rate_base = PL_CFG_CPU_RATE_INTERVAL_TICKS;
 	g_task_core_blk.cpu_rate_useful = PL_CFG_CPU_RATE_INTERVAL_TICKS;
 	g_task_core_blk.sched_lock_ref = 0;
