@@ -17,7 +17,7 @@ static void stimer_callback(struct pl_stimer *timer)
 
 	pl_softtimer_get_private_data(timer, &data);
 	pl_port_putc('A');
-	ret = pl_softtimer_reload(timer, true, stimer_callback, 20, data);
+	ret = pl_softtimer_reload(timer, true, stimer_callback, 200, data);
 	if (ret < 0) {
 		pl_syslog_err("pl_softtimer_add failed, ret:%d\r\n", ret);
 	}
@@ -35,7 +35,7 @@ static void stimer_callback2(struct pl_stimer *timer)
 
 	pl_softtimer_get_private_data(timer, &data);
 	pl_port_putc('B');
-	ret = pl_softtimer_reload(timer, true, stimer_callback2, 10, data);
+	ret = pl_softtimer_reload(timer, true, stimer_callback2, 99, data);
 	if (ret < 0) {
 		pl_syslog_err("pl_softtimer_add failed, ret:%d\r\n", ret);
 		return;
