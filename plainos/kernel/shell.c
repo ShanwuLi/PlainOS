@@ -85,9 +85,10 @@ static struct pl_app_entry *plsh_find_app_entry(char *name)
 static int plsh_process_received_chars(struct pl_shell *sh, char recv_ch)
 {
 	/* skip control characters */
-	if (recv_ch < ASCLL_SPACE && recv_ch != ASCLL_BACKSPACE && recv_ch != ASCLL_ENTER)
+	if (recv_ch < ASCLL_SPACE && recv_ch != ASCLL_ENTER)
 		return CMD_PARSE_STATE_NORMAL;
 
+#if 0
 	/* delete char */
 	if (recv_ch == ASCLL_BACKSPACE) {
 		if (sh->cmd_buffer_idx == 0) {
@@ -101,6 +102,7 @@ static int plsh_process_received_chars(struct pl_shell *sh, char recv_ch)
 		pl_syslog(ANSI_BACKSPACE);
 		return CMD_PARSE_STATE_NORMAL;
 	}
+#endif
 
 	pl_port_putc(recv_ch);
 	/* check ending condition */
