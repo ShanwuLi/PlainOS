@@ -116,6 +116,18 @@ void pl_port_enter_critical(void);
 void pl_port_exit_critical(void);
 
 /*************************************************************************************
+ * Function Name: void pl_port_system_reset(void)
+ * Description: reset system.
+ *
+ * Parameters:
+ *   none
+ *
+ * Return:
+ *   void.
+ ************************************************************************************/
+void pl_port_system_reset(void);
+
+/*************************************************************************************
  * Function Name: pl_port_putc_init
  *
  * Description:

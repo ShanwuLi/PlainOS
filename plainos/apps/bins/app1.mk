@@ -23,3 +23,4 @@
 C_SRCS += $(APPS_DIR)/bins/app1.c
 C_SRCS += $(APPS_DIR)/bins/pl_ls.c
 C_SRCS += $(APPS_DIR)/bins/pl_clear.c
+C_SRCS += $(APPS_DIR)/bins/pl_reboot.c
