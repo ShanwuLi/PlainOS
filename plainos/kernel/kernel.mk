@@ -36,7 +36,4 @@ C_SRCS += $(KERNEL_DIR)/semaphore.c
 C_SRCS += $(KERNEL_DIR)/softtimer.c
 C_SRCS += $(KERNEL_DIR)/kfifo.c
 C_SRCS += $(KERNEL_DIR)/workqueue.c
-
-ifeq ($(PL_MK_CFG_OS_SHELL), y)
 C_SRCS += $(KERNEL_DIR)/shell.c
-endif
