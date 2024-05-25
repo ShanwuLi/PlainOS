@@ -25,7 +25,7 @@ SOFTWARE.
 
 #include "errno.h"
 
-#define CONST_SECTION               *(pl_const)
+#define PL_CONST_SECTION            *(pl_const)
 
 #define INIT_CALLS_LEVEL(level)     __initcall##level##_start = .; \
 	                                KEEP(*(.pl_initcall##level##.init)) \

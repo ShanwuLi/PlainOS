@@ -57,9 +57,10 @@ void pl_port_exit_critical(void)
 #define SYS_RESET      ((0x5FA << 16) | (1 << 2))
 void pl_port_system_reset(void)
 {
-	pl_port_cpu_dsb();
-	*((volatile u32_t *)SCB_AIRCR) = SYS_RESET;
-	pl_port_cpu_dsb();
+	// pl_port_cpu_dsb();
+	// *((volatile u32_t *)SCB_AIRCR) = SYS_RESET;
+	// pl_port_cpu_dsb();
+	NVIC_SystemReset();
 	while(1);
 }
 

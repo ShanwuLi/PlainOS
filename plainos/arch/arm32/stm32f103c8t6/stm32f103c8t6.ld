@@ -67,7 +67,7 @@ SECTIONS
     KEEP (*(.fini))
 
     . = ALIGN(4);
-    CONST_SECTION      /* add const section */
+    PL_CONST_SECTION      /* add const section */
     . = ALIGN(4);
     _etext = .;        /* define a global symbols at end of code */
   } >FLASH
@@ -96,14 +96,14 @@ SECTIONS
     . = ALIGN(4);
   } >FLASH
 
-  .initcall.init :
+  .pl_initcall.init :
   {
     . = ALIGN(4);
     PL_INIT_CALLS_SECTION
     . = ALIGN(4);
   } >FLASH
 
-  .appcall.app :
+  .pl_appcall.app :
   {
     . = ALIGN(4);
     PL_APPS_CALLS_SECTION

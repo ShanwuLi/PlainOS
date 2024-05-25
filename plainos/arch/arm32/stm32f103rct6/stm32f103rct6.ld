@@ -27,7 +27,7 @@ SOFTWARE.
 ENTRY(Reset_Handler)
 
 /* Highest address of the user mode stack */
-_estack = 0x20005000;    /* end of 20K RAM */
+_estack = 0x2000C000;    /* end of 48K RAM */
 
 /* Generate a link error if heap and stack don't fit into RAM */
 _Min_Heap_Size = 0;      /* required amount of heap  */
@@ -67,7 +67,7 @@ SECTIONS
     KEEP (*(.fini))
 
     . = ALIGN(4);
-    CONST_SECTION      /* add const section */
+    PL_CONST_SECTION      /* add const section */
     . = ALIGN(4);
     _etext = .;        /* define a global symbols at end of code */
   } >FLASH
