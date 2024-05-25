@@ -76,8 +76,6 @@ static struct pl_app_entry *plsh_find_app_entry(char *name)
 {
 	struct pl_app_entry *entry;
 
-	return NULL;
-
 	for (entry = __appcall_start; entry < __appcall_end; entry++) {
 		if (strcmp(entry->name, name) == 0) {
 			return entry;
