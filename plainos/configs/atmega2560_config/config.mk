@@ -33,7 +33,6 @@ ARCH     := avr
 MCU      := -mmcu=atmega2560
 CHIP     := atmega2560
 
-PL_MK_CFG_OS_SHELL = n
 PL_MK_CFG_OS_TEST = y
 PL_MK_CFG_OS_MEMPOOL_TEST = n
 PL_MK_CFG_OS_TASK_TEST = y
