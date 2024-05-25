@@ -379,7 +379,7 @@ int pl_serial_send_str(struct pl_serial_desc *desc, char *str)
 		return -EFAULT;
 
 	if (desc->ops == NULL || (desc->ops->send_char == NULL &&
-	    &desc->ops->send_str == NULL))
+		desc->ops->send_str == NULL))
 		return -EACCES;
 
 	pl_semaphore_wait(&desc->sem);
