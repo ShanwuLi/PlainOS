@@ -73,7 +73,7 @@ SECTIONS
     . = ALIGN(2);
     PL_INIT_SECTION
     . = ALIGN(2);
-    CONST_SECTION
+    PL_CONST_SECTION
     . = ALIGN(2);
     *(.fini9)  /* _exit() starts here.  */
     KEEP (*(.fini9))
