@@ -90,6 +90,11 @@ void pl_port_exit_critical(void)
 	pl_port_cpu_isb();
 }
 
+void pl_port_system_reset(void)
+{
+	
+}
+
 void *pl_port_task_stack_init(void *task, void *task_stack, size_t stack_size,
                               void **context_top_sp, void *param)
 {

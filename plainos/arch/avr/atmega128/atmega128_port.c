@@ -35,3 +35,8 @@ int pl_port_putc(const char c)
 	USART1.transmit_data(&USART1, c);
 	return 0;
 }
+
+void pl_port_system_reset(void)
+{
+	
+}
