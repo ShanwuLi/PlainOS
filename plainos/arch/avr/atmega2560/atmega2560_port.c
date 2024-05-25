@@ -43,7 +43,7 @@ int pl_port_systick_init(void)
     OCR1AH = 0XFF;
     OCR1AL = 0XFF;
     TIFR1  = 0X00;
-    pl_port_unmask_interrupts();
+    SREG &= (u8_t)(~(1<<7));     /*< 关中断 */
 	TIMSK1 |= (u8_t)(1<<0);
 
 	pl_port_putc('S');
@@ -53,16 +53,6 @@ int pl_port_systick_init(void)
 ISR(TIMER1_OVF_vect)
 {
 	pl_callee_systick_expiration();
-}
-
-void pl_port_mask_interrupts(void)
-{
-	SREG &= (u8_t)(~(1<<7));     /*< 关中断 */
-}
-
-void pl_port_unmask_interrupts(void)
-{
-	SREG |= (u8_t)(1<<7);     /*< 开中断 */
 }
 
 /*************************************************************************************
@@ -77,7 +67,7 @@ void pl_port_unmask_interrupts(void)
  ************************************************************************************/
 void pl_port_enter_critical(void)
 {
-	pl_port_mask_interrupts();
+	SREG &= (u8_t)(~(1<<7));     /*< 关中断 */
 	++pl_critical_ref;
 	pl_port_cpu_isb();
 }
@@ -96,7 +86,7 @@ void pl_port_exit_critical(void)
 {
 	--pl_critical_ref;
 	if (pl_critical_ref == 0)
-		pl_port_unmask_interrupts();
+		SREG |= (u8_t)(1<<7);     /*< 开中断 */
 	pl_port_cpu_isb();
 }
 

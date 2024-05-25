@@ -196,7 +196,7 @@ int pl_softtimer_start(struct pl_stimer *timer)
 {
 	u64_t syscount;
 	struct pl_stimer *pos;
-	struct list_node *timer_list = pl_task_get_timer_list();
+	struct list_node *timer_list;
 
 	if (timer == NULL)
 		return -EFAULT;
@@ -204,10 +204,11 @@ int pl_softtimer_start(struct pl_stimer *timer)
 	if (!list_is_empty(&timer->node))
 		return -EBUSY;
 
+	pl_port_enter_critical();
 	pl_task_get_syscount(&syscount);
 	timer->reach_cnt = syscount + timer->timing_cnt;
+	timer_list = pl_task_get_timer_list();
 
-	pl_port_enter_critical();
 	if (list_is_empty(timer_list)) {
 		list_add_node_at_tail(timer_list, &timer->node);
 		goto out;

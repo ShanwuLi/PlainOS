@@ -115,12 +115,17 @@ LoopFillZerobss:
 */
   .section	.text.Default_Handler,"ax",%progbits
 Default_Handler:
+	b Default_Handler
+
+
+  .section	.text.Exception_Handler,"ax",%progbits
+Exception_Handler:
 	tst lr, #4  //将LR的值与4按位相与
 	ite eq      //若为0则是MSP，否则是PSP
 	mrseq r0, msp
 	mrsne r0, psp
 	b pl_sys_dump  //这个是C语言编写的函数
-	.size	Default_Handler, .-Default_Handler
+	.size	Exception_Handler, .-Exception_Handler
 /******************************************************************************
 *
 * The minimal vector table for a Cortex M3.  Note that the proper constructs
@@ -212,19 +217,19 @@ g_pfnVectors:
 *******************************************************************************/
 
   .weak	NMI_Handler
-	.thumb_set NMI_Handler,Default_Handler
+	.thumb_set NMI_Handler,Exception_Handler
 
   .weak	HardFault_Handler
-	.thumb_set HardFault_Handler,Default_Handler
+	.thumb_set HardFault_Handler,Exception_Handler
 
   .weak	MemManage_Handler
-	.thumb_set MemManage_Handler,Default_Handler
+	.thumb_set MemManage_Handler,Exception_Handler
 
   .weak	BusFault_Handler
-	.thumb_set BusFault_Handler,Default_Handler
+	.thumb_set BusFault_Handler,Exception_Handler
 
 	.weak	UsageFault_Handler
-	.thumb_set UsageFault_Handler,Default_Handler
+	.thumb_set UsageFault_Handler,Exception_Handler
 
 	.weak	SVC_Handler
 	.thumb_set SVC_Handler,Default_Handler

@@ -73,6 +73,8 @@ static struct pl_app_entry *plsh_find_app_entry(char *name)
 {
 	struct pl_app_entry *entry;
 
+	return NULL;
+
 	for (entry = __appcall_start; entry < __appcall_end; entry++) {
 		if (strcmp(entry->name, name) == 0) {
 			return entry;
@@ -88,8 +90,8 @@ static int plsh_process_received_chars(struct pl_shell *sh, char recv_ch)
 	if (recv_ch < ASCLL_SPACE && recv_ch != ASCLL_ENTER)
 		return CMD_PARSE_STATE_NORMAL;
 
+	/* not support to delete char */
 #if 0
-	/* delete char */
 	if (recv_ch == ASCLL_BACKSPACE) {
 		if (sh->cmd_buffer_idx == 0) {
 			sh->cmd_argc = 0;
@@ -106,12 +108,13 @@ static int plsh_process_received_chars(struct pl_shell *sh, char recv_ch)
 
 	pl_port_putc(recv_ch);
 	/* check ending condition */
-	if (sh->cmd_buffer_idx == PL_CFG_SHELL_CMD_BUFF_MAX - 1 ||
+	if (sh->cmd_buffer_idx >= (PL_CFG_SHELL_CMD_BUFF_MAX - 1) ||
 		recv_ch == ASCLL_ENTER) {
 		if (sh->state == CMD_PARSE_STATE_CMD)
 			sh->cmd_argc++;
 
 		sh->cmd_buffer[sh->cmd_buffer_idx] = '\0';
+		sh->cmd_buffer_idx = 0;
 		pl_syslog("\r\n");
 		return ASCLL_ENTER;
 	}
@@ -209,10 +212,9 @@ static int plsh_exec_cmd_task(int argc, char *argv[])
 	struct pl_app_entry *app_entry;
 	struct pl_kfifo *recv_fifo = &(plsh.desc->recv_info.fifo);
 
-	pl_syslog(PL_CFG_SHELL_PREFIX_NAME"# ");
+	pl_early_syslog(PL_CFG_SHELL_PREFIX_NAME"# ");
 	plsh_cmd_reset(&plsh);
 	while (true) {
-		pl_syslog(PL_CFG_SHELL_PREFIX_NAME"# ");
 		if (pl_kfifo_len(recv_fifo) == 0) {
 			pl_task_pend(NULL);
 			continue;
@@ -233,15 +235,15 @@ static int plsh_exec_cmd_task(int argc, char *argv[])
 		ret = plsh_get_argvs_from_buffer(plsh.cmd_buffer, plsh.cmd_argc, plsh.cmd_argv);
 		if (ret < 0) {
 			plsh_cmd_reset(&plsh);
-			pl_syslog(PL_CFG_SHELL_PREFIX_NAME"# ");
+			pl_early_syslog(PL_CFG_SHELL_PREFIX_NAME"# ");
 			continue;
 		}
 
 		/* find the app entry */
 		app_entry = plsh_find_app_entry(plsh.cmd_argv[0]);
 		if (app_entry == NULL) {
-			pl_syslog_err("%s not found\r\n", plsh.cmd_argv[0]);
-			pl_syslog(PL_CFG_SHELL_PREFIX_NAME"# ");
+			pl_early_syslog_err("%s not found\r\n", plsh.cmd_argv[0]);
+			pl_early_syslog(PL_CFG_SHELL_PREFIX_NAME"# ");
 			plsh_cmd_reset(&plsh);
 			continue;
 		}
@@ -249,10 +251,10 @@ static int plsh_exec_cmd_task(int argc, char *argv[])
 		/* exec the cmd */
 		ret = app_entry->entry(plsh.cmd_argc, plsh.cmd_argv);
 		if (ret < 0)
-			pl_syslog_err("app[%s] exec cmd failed, ret:%d\r\n", app_entry->name, ret);
+			pl_early_syslog_err("app[%s] exec cmd failed, ret:%d\r\n", app_entry->name, ret);
 
 		plsh_cmd_reset(&plsh);
-		pl_syslog(PL_CFG_SHELL_PREFIX_NAME"# ");
+		pl_early_syslog(PL_CFG_SHELL_PREFIX_NAME"# ");
 	}
 
 	return -EUNKNOWE;

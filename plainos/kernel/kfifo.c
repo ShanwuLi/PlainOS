@@ -120,23 +120,10 @@ void pl_kfifo_destroy(struct pl_kfifo *kfifo)
  ************************************************************************************/
 uint_t pl_kfifo_len(struct pl_kfifo *kfifo)
 {
-	return (kfifo->in - kfifo->out);
-}
+	if (kfifo == NULL)
+		return 0;
 
-/*************************************************************************************
- * Function Name: pl_kfifo_back
- * Description: back the kfifo
- *
- * Param:
- *   @fifo: kfifo handle.
- *
- * Return:
- *   none.
- ************************************************************************************/
-void pl_kfifo_back(struct pl_kfifo *kfifo)
-{
-	if (pl_kfifo_len(kfifo) > 0)
-		--kfifo->in;
+	return (kfifo->in - kfifo->out);
 }
 
 /*************************************************************************************
@@ -154,8 +141,12 @@ void pl_kfifo_back(struct pl_kfifo *kfifo)
 uint_t pl_kfifo_get(struct pl_kfifo *kfifo, char *data, uint_t data_len)
 {
 	uint_t len;
-	uint_t size = min(data_len, kfifo->in - kfifo->out);
+	uint_t size;
 
+	if (kfifo == NULL || pl_kfifo_len(kfifo) == 0)
+		return 0;
+
+	size = min(data_len, kfifo->in - kfifo->out);
 	pl_port_cpu_dmb();
 	/* first get the data from fifo->out until the end of the buffer */
 	len = min(size, kfifo->size - (kfifo->out & (kfifo->size - 1)));
@@ -184,8 +175,12 @@ uint_t pl_kfifo_get(struct pl_kfifo *kfifo, char *data, uint_t data_len)
 uint_t pl_kfifo_put(struct pl_kfifo *kfifo, char *data, uint_t data_len)
 {
 	uint_t len;
-	uint_t size = min(data_len, kfifo->size - kfifo->in + kfifo->out);
+	uint_t size;
 
+	if (kfifo == NULL || pl_kfifo_len(kfifo) >= kfifo->size)
+		return 0;
+
+	size = min(data_len, kfifo->size - kfifo->in + kfifo->out);
 	pl_port_cpu_dmb();
 	/* first put the data starting from fifo->in to buffer end */
 	len  = min(size, kfifo->size - (kfifo->in & (kfifo->size - 1)));

@@ -307,7 +307,6 @@ void pl_task_insert_tcb_to_rdylist(struct tcb *tcb)
 	u16_t prio = tcb->prio;
 	struct task_list *rdylist = &g_task_core_blk.ready_list[prio];
 
-	tcb->curr_state = PL_TASK_STATE_READY;
 	if (rdylist->head == NULL) {
 		list_init(&tcb->node);
 		rdylist->head = tcb;
@@ -316,6 +315,7 @@ void pl_task_insert_tcb_to_rdylist(struct tcb *tcb)
 	}
 
 	++rdylist->num;
+	tcb->curr_state = PL_TASK_STATE_READY;
 	set_bit_of_hiprio_bitmap(prio);
 }
 
@@ -333,7 +333,6 @@ void pl_task_insert_tcb_to_delaylist(struct tcb *tcb)
 	struct task_list *delaylist = &g_task_core_blk.delay_list;
 	struct tcb *pos = delaylist->head;
 
-	tcb->curr_state = PL_TASK_STATE_DELAY;
 	list_for_each_entry(pos, &delaylist->head->node, struct tcb, node) {
 		if (tcb->delay_ticks < pos->delay_ticks)
 			break;
@@ -341,6 +340,7 @@ void pl_task_insert_tcb_to_delaylist(struct tcb *tcb)
 
 	pos = list_prev_entry(pos, struct tcb, node);
 	++delaylist->num;
+	tcb->curr_state = PL_TASK_STATE_DELAY;
 	list_add_node_behind(&pos->node, &tcb->node);
 }
 
@@ -850,13 +850,15 @@ void pl_task_pend(pl_tid_t tid)
 {
 	struct tcb *tcb = (struct tcb *)tid;
 
+	pl_port_enter_critical();
 	if (tcb == NULL)
 		tcb = g_task_core_blk.curr_tcb;
 
-	if (tcb->curr_state == PL_TASK_STATE_PENDING)
+	if (tcb->curr_state == PL_TASK_STATE_PENDING) {
+		pl_port_exit_critical();
 		return;
+	}
 
-	pl_port_enter_critical();
 	pl_task_remove_tcb_from_rdylist(tcb);
 	pl_task_insert_tcb_to_pendlist(tcb);
 	pl_port_exit_critical();
@@ -882,14 +884,16 @@ void pl_task_resume(pl_tid_t tid)
 {
 	struct tcb *tcb = (struct tcb *)tid;
 
-	if (tcb == NULL || tcb->curr_state == PL_TASK_STATE_READY)
+	if (tcb == NULL)
 		return;
 
-	pl_port_enter_critical();
-	list_del_node(&tcb->node);
-	pl_task_insert_tcb_to_rdylist(tcb);
-	pl_port_exit_critical();
-	pl_task_context_switch();
+	if (tcb->curr_state == PL_TASK_STATE_PENDING) {
+		pl_port_enter_critical();
+		list_del_node(&tcb->node);
+		pl_task_insert_tcb_to_rdylist(tcb);
+		pl_port_exit_critical();
+		pl_task_context_switch();
+	}
 }
 
 /*************************************************************************************

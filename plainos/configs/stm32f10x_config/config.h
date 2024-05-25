@@ -29,7 +29,7 @@ SOFTWARE.
 #define PL_CFG_ASSERT
 #define PL_CFG_OS_CHAR_LOGO
 #define PL_CFG_CHECK_STACK_OVERFLOW
-#define PL_CFG_CHECK_STACK_OVERFLOW_MAGIC                 (0xabadc0de)
+#define PL_CFG_CHECK_STACK_OVERFLOW_MAGIC                 ((uintptr_t)(0xabadc0de))
 #define PL_CFG_SHELL_PREFIX_NAME                          "plsh"
 #define PL_CFG_SHELL_CMD_BUFF_MAX                         (128)
 #define PL_CFG_SHELL_CMD_ARGC_MAX                         (20)
