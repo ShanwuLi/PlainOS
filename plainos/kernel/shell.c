@@ -212,6 +212,7 @@ static int plsh_exec_cmd_task(int argc, char *argv[])
 	pl_syslog(PL_CFG_SHELL_PREFIX_NAME"# ");
 	plsh_cmd_reset(&plsh);
 	while (true) {
+		pl_syslog(PL_CFG_SHELL_PREFIX_NAME"# ");
 		if (pl_kfifo_len(recv_fifo) == 0) {
 			pl_task_pend(NULL);
 			continue;

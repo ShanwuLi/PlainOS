@@ -37,13 +37,12 @@ enum panic_reason {
  * Description: dump task info when system panic.
  *
  * Param:
- *   @panic_tcb: tcb of panic task.
  *   @panic_reason: reason for panic.
  *   @arg: argument.
  *
  * Return:
  *   void.
  ************************************************************************************/
-void pl_panic_dump(struct tcb *panic_tcb, u32_t panic_reason, void *arg);
+void pl_panic_dump(u32_t panic_reason, void *arg);
 
 #endif /* __KERNEL_PANIC_PRIVATE_H__ */

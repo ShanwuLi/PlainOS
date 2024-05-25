@@ -20,16 +20,6 @@ int pl_port_putc(char c)
 	return ret;
 }
 
-void pl_port_mask_interrupts(void)
-{
-	__asm__ volatile("cpsid	i\n\t");     /*< 关中断 */
-}
-
-void pl_port_unmask_interrupts(void)
-{
-	__asm__ volatile("cpsie	i\n\t");     /*< 开中断 */
-}
-
 /*************************************************************************************
  * Function Name: void pl_port_enter_critical(void)
  * Description: enter critical area.
@@ -42,7 +32,7 @@ void pl_port_unmask_interrupts(void)
  ************************************************************************************/
 void pl_port_enter_critical(void)
 {
-	pl_port_mask_interrupts();
+	__asm__ volatile("cpsid	i\n\t");
 	++pl_critical_ref;
 }
 
@@ -60,7 +50,7 @@ void pl_port_exit_critical(void)
 {
 	--pl_critical_ref;
 	if (pl_critical_ref == 0)
-		pl_port_unmask_interrupts();
+		__asm__ volatile("cpsie	i\n\t");     /*< 开中断 */
 }
 
 //RTS OS滴答定时器初始化，移植时需要用户自己实现
@@ -82,13 +72,11 @@ void SysTick_Handler(void)
 }
 
 void *pl_port_task_stack_init(void *task, void *task_stack, size_t stack_size,
-                    void **context_sp_min, void **context_sp_max, void *param)
+                              void **context_top_sp, void *param)
 {
 	u32_t *stack = (u32_t *)task_stack;
-
-	*context_sp_min = stack;
+	*context_top_sp = stack;
 	stack       +=  stack_size / sizeof(u32_t);
-	*context_sp_max = stack;
 
 	*(--stack)  = (u32_t)(1<<24);  /* XPSR */
 	*(--stack)  = (u32_t)task;     /* PC */

@@ -101,13 +101,12 @@ void pl_port_exit_critical(void)
 }
 
 void *pl_port_task_stack_init(void *task, void *task_stack, size_t stack_size,
-                    void **context_sp_min, void **context_sp_max, void *param)
+                              void **context_top_sp, void *param)
 {
 	char *stack = task_stack;
 
-    *context_sp_min = stack;
+    *context_top_sp = stack;
     stack       +=  stack_size - 1;
-    *context_sp_max = stack;
 
     *(stack--)  =   (u8_t)((u16_t)task);
     *(stack--)  =   (u8_t)((u16_t)task>>8);

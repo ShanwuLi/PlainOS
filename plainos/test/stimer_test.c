@@ -17,7 +17,7 @@ static void stimer_callback(struct pl_stimer *timer)
 
 	pl_softtimer_get_private_data(timer, &data);
 	pl_port_putc('A');
-	ret = pl_softtimer_reload(timer, true, stimer_callback, 200, data);
+	ret = pl_softtimer_reload(timer, true, stimer_callback, 20, data);
 	if (ret < 0) {
 		pl_syslog_err("pl_softtimer_add failed, ret:%d\r\n", ret);
 	}
@@ -29,7 +29,7 @@ static void stimer_callback2(struct pl_stimer *timer)
 	static u8_t cnt = 0;
 	void *data;
 
-	(void)pl_gpio_set_io_one(gpio_desc, 15, GPIO_SET_VALUE, cnt);
+	pl_gpio_set_io_one(gpio_desc, 15, GPIO_SET_VALUE, cnt);
 
 	cnt = ~cnt;
 

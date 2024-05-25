@@ -47,8 +47,8 @@ static void pl_task_dump(struct tcb *tcb)
 	pl_early_syslog_err("task->argc:            %d\r\n", tcb->argc);
 	pl_early_syslog_err("task->argv:            0x%x\r\n", tcb->argv);
 	pl_early_syslog_err("task->sp:              0x%x\r\n", tcb->context_sp);
-	pl_early_syslog_err("task->sp_min:          0x%x\r\n", tcb->context_sp_min);
-	pl_early_syslog_err("task->sp_max:          0x%x\r\n", tcb->context_sp_max);
+	pl_early_syslog_err("task->top_sp:          0x%x\r\n", tcb->context_top_sp);
+	pl_early_syslog_err("task->init_sp:         0x%x\r\n", tcb->context_init_sp);
 	pl_early_syslog_err("task->wait_for_ret:    %d\r\n", tcb->wait_for_task_ret);
 	pl_early_syslog_err("task->delay_ticks:     %lu\r\n", tcb->delay_ticks);
 }
@@ -65,8 +65,12 @@ static void pl_task_dump(struct tcb *tcb)
  * Return:
  *   void.
  ************************************************************************************/
-void pl_panic_dump(struct tcb *panic_tcb, u32_t panic_reason, void *arg)
+void pl_panic_dump(u32_t panic_reason, void *arg)
 {
+	USED(arg);
+
+	struct tcb *panic_tcb = pl_task_get_curr_tcb();
+
 	if (panic_tcb == NULL)
 		return;
 
@@ -79,7 +83,7 @@ void pl_panic_dump(struct tcb *panic_tcb, u32_t panic_reason, void *arg)
 	pl_early_syslog_err("PANIC REASON:\r\n");
 	switch (panic_reason) {
 	case PL_PANIC_REASON_STACKOVF:
-		pl_early_syslog_err("[stack overflow] size of overflow:%d\r\n", (int)arg);
+		pl_early_syslog_err("[stack overflow] size of overflow\r\n");
 		break;
 
 	default:

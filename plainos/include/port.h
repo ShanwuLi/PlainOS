@@ -92,34 +92,6 @@ void pl_port_cpu_dsb(void);
 void pl_port_cpu_isb(void);
 
 /*************************************************************************************
- * Function Name: pl_port_mask_interrupts
- *
- * Description:
- *   The function is used to mask all interrupt.
- *
- * Parameters:
- *   none.
- *
- * Return:
- *   void.
- ************************************************************************************/
-void pl_port_mask_interrupts(void);
-
-/*************************************************************************************
- * Function Name: pl_port_mask_interrupts
- *
- * Description:
- *   The function is used to unmask all interrupt.
- *
- * Parameters:
- *   none.
- *
- * Return:
- *   void.
- ************************************************************************************/
-void pl_port_unmask_interrupts(void);
-
-/*************************************************************************************
  * Function Name: void pl_port_enter_critical(void)
  * Description: enter critical area.
  *
@@ -316,26 +288,25 @@ void pl_port_switch_context(void);
  *
  * Description:
  *   The function is used to initialize stack of the task.
- *            _______________________________________________________
- * stack top |                   |                                   | stack bottom
- *           |___________________|___________________________________|
- *           A                   A                                   A
- *           |                   |                                   |
- *       task_stack       task_stack + regs                task_stack + stack_size
+ *               _______________________________________________________
+ * stack bottom |                   |                                   | stack top
+ *              |___________________|___________________________________|
+ *              A                   A                                   A
+ *              |                   |                                   |
+ *          task_stack       task_stack + regs                task_stack + stack_size
  
  * Parameters:
  *  @task: the task entry of initialization.
  *  @task_stack: task stack.
- *  @context_sp_min: minimum stack pointer used to check stack overflow.
- *  @context_sp_max: maximum stack pointer used to check stack overflow.
  *  @stack_size: stack size.
+ *  @context_top_sp: top stack pointer used to check stack overflow.
  *  @param: parameter passed.
  *
  * Return:
  *  pointer to the task_stack + regs.
  ************************************************************************************/
 void *pl_port_task_stack_init(void *task, void *task_stack, size_t stack_size,
-                    void **context_sp_min, void **context_sp_max, void *param);
+                              void **context_top_sp, void *param);
 
 
 #endif /* __PLAINOS_PORT_H__ */

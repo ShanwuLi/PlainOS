@@ -204,15 +204,13 @@ static u16_t get_hiprio(void)
  *   not zero: stack overflow.
  *   zero: not overflow.
  ************************************************************************************/
-static int pl_check_stack_overflow(void *context_sp, struct tcb *tcb)
+static bool pl_check_stack_overflow(void *context_sp, struct tcb *tcb)
 {
-	if (context_sp < tcb->context_sp_min)
-		return context_sp - tcb->context_sp_min;
+	if (((*(uintptr_t *)(tcb->context_top_sp)) == PL_CFG_CHECK_STACK_OVERFLOW_MAGIC)
+	    || context_sp < tcb->context_top_sp)
+		return false;
 
-	if (context_sp > tcb->context_sp_max)
-		return context_sp - tcb->context_sp_max;
-
-	return 0;
+	return true;
 }
 #endif /* PL_CFG_CHECK_STACK_OVERFLOW */
 
@@ -232,9 +230,8 @@ void pl_callee_save_curr_context_sp(void *context_sp)
 
 #ifdef PL_CFG_CHECK_STACK_OVERFLOW
 	/* check stack overflow */
-	int stack_overflow = pl_check_stack_overflow(context_sp, tcb);
-	if (stack_overflow != 0)
-		pl_panic_dump(tcb, PL_PANIC_REASON_STACKOVF, (void *)stack_overflow);
+	if (pl_check_stack_overflow(context_sp, tcb))
+		pl_panic_dump(PL_PANIC_REASON_STACKOVF, NULL);
 #endif /* PL_CFG_CHECK_STACK_OVERFLOW */
 
 	tcb->context_sp = context_sp;
@@ -623,12 +620,14 @@ static void task_init_tcb(const char *name, main_t task, u16_t prio,
 	tcb->parent = g_task_core_blk.curr_tcb;
 	tcb->prio = prio;
 	tcb->context_sp = stack;
+	tcb->context_init_sp = stack;
 	tcb->task = task;
 	tcb->argc = argc;
 	tcb->argv = argv;
 	tcb->delay_ticks = 0;
 	tcb->wait_for_task_ret = -EUNKNOWE;
 	list_init(&tcb->wait_head);
+	*((uintptr_t *)(tcb->context_top_sp)) = PL_CFG_CHECK_STACK_OVERFLOW_MAGIC;
 }
 
 /*************************************************************************************
@@ -652,8 +651,8 @@ static void task_init_and_create(const char *name, main_t task, u16_t prio,
                                  struct tcb *tcb, void *stack, size_t stack_size,
                                  int argc, char *argv[])
 {
-	stack = pl_port_task_stack_init(task_entry, stack, stack_size, &tcb->context_sp_min,
-	                                &tcb->context_sp_max, tcb);
+	stack = pl_port_task_stack_init(task_entry, stack, stack_size,
+	                                &tcb->context_top_sp, tcb);
 	task_init_tcb(name, task, prio, tcb, stack, argc, argv);
 
 	pl_port_enter_critical();
@@ -1046,7 +1045,6 @@ static void update_delay_task_list(void)
 static void update_softtimer_list(void)
 {
 	bool list_empty;
-	struct tcb *timer_tcb;
 	struct pl_stimer *pos;
 	struct pl_stimer *first;
 	struct pl_stimer_ctrl *timer_ctrl;
@@ -1072,11 +1070,7 @@ static void update_softtimer_list(void)
 	/* insert timer node to daemon list and wakeup the daemon task */
 	list_move_chain_to_node_behind(&timer_ctrl->head, g_task_core_blk.timer_list.next,
 	                                pos->node.prev);
-	timer_tcb = (struct tcb *)(timer_ctrl->daemon);
-	if (timer_tcb->curr_state == PL_TASK_STATE_PENDING) {
-		list_del_node(&timer_tcb->node);
-		pl_task_insert_tcb_to_rdylist(timer_tcb);
-	}
+	pl_task_resume(timer_ctrl->daemon);
 }
 
 /*************************************************************************************
@@ -1098,14 +1092,16 @@ void pl_callee_systick_expiration(void)
 	struct tcb *curr_tcb;
 	struct task_list *rdy_list;
 
+	/* update counter of utilization rate */
+	update_counter_of_cpu_rate();
+
+	pl_port_enter_critical();
 	/* update systick */
 	update_systick();
 	/* update ready list */
 	update_delay_task_list();
 	/* update soft timer list */
 	update_softtimer_list();
-	/* update counter of utilization rate */
-	update_counter_of_cpu_rate();
 
 	/* do not to switch task when state of curr_tcb is not ready. */
 	curr_tcb = g_task_core_blk.curr_tcb;
@@ -1119,6 +1115,7 @@ void pl_callee_systick_expiration(void)
 		/* switch task */
 		pl_task_context_switch();
 	}
+	pl_port_exit_critical();
 }
 
 /*************************************************************************************
@@ -1225,6 +1222,8 @@ int pl_task_get_cpu_rate(u32_t *int_part, u32_t *deci_part)
 static void pl_task_init_dummy_tcb(struct tcb *delay_dummy_tcb,
                                    struct tcb *first_dummy_tcb)
 {
+	static uintptr_t dummy_sp = PL_CFG_CHECK_STACK_OVERFLOW_MAGIC;
+
 	/* init delay tcb */
 	list_init(&delay_dummy_tcb->node);
 	delay_dummy_tcb->delay_ticks = UINT64_MAX;
@@ -1234,8 +1233,7 @@ static void pl_task_init_dummy_tcb(struct tcb *delay_dummy_tcb,
 	list_init(&first_dummy_tcb->node);
 	first_dummy_tcb->argc = 0;
 	first_dummy_tcb->argv = NULL;
-	first_dummy_tcb->context_sp_min = NULL;
-	first_dummy_tcb->context_sp_max = (void *)UINTPTR_T_MAX;
+	first_dummy_tcb->context_top_sp = &dummy_sp;
 	first_dummy_tcb->name = "first_dummy";
 }
 

@@ -29,12 +29,13 @@ SOFTWARE.
 #define PL_CFG_ASSERT
 #define PL_CFG_OS_CHAR_LOGO
 #define PL_CFG_CHECK_STACK_OVERFLOW
+#define PL_CFG_CHECK_STACK_OVERFLOW_MAGIC                 (0xabadc0de)
 #define PL_CFG_SHELL_PREFIX_NAME                          "plsh"
 #define PL_CFG_SHELL_CMD_BUFF_MAX                         (128)
 #define PL_CFG_SHELL_CMD_ARGC_MAX                         (20)
 #define PL_CFG_SHELL_CMD_EXEC_TASK_PRIORITY               (90)
 #define PL_CFG_SHELL_CMD_EXEC_TASK_STACK_SIZE             (1024)
-#define PL_CFG_SYSTICK_TIME_SLICE_US                      (10)
+#define PL_CFG_SYSTICK_TIME_SLICE_US                      (15)
 #define PL_CFG_DEFAULT_MEMPOOL_SIZE                       (14 * 1024)
 #define PL_CFG_DEFAULT_MEMPOOL_GRAIN_ORDER                (5)
 #define PL_CFG_MAX_TASKS_NUM                              (900u)

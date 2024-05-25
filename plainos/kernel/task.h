@@ -57,8 +57,8 @@ enum task_state {
  *
  * Members:
  *   @context_sp: task stack pointer.
- *   @context_sp_min: minimum stack pointer used to check stack overflow.
- *   @context_sp_max: maximum stack pointer used to check stack overflow.
+ *   @context_top_sp: top stack pointer used to check stack overflow.
+ *   @context_init_sp: init stack pointer used to restart task.
  *   @name: task name.
  *   @parent: pointer to parent task.
  *   @task: task routine.
@@ -72,8 +72,8 @@ enum task_state {
  ************************************************************************************/
 struct tcb {
 	void *context_sp;
-	void *context_sp_min;
-	void *context_sp_max;
+	void *context_top_sp;
+	void *context_init_sp;
 	const char *name;
 	struct tcb *parent;
 	main_t task;
