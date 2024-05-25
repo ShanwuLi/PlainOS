@@ -14,7 +14,7 @@ static int pl_calculator_main(int argc, char *argv[])
 		return ret;
 	}
 
-	pl_syslog("%s = %d.%d\r\n", argv[1], (int)result, (int)(result*1000) - ((int)result) * 1000);
+	pl_syslog("%s = %d.%d\r\n", argv[1], (int)result, (int)result);
 	return 0;
 }
 pl_app_register(pl_calculator_main, "calculator");
