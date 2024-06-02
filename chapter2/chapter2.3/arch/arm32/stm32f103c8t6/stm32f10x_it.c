@@ -23,6 +23,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
+#include <early_setup/early_uart.h>
+#include <task.h>
 
 /** @addtogroup STM32F10x_StdPeriph_Examples
   * @{
@@ -130,12 +132,18 @@ void DebugMon_Handler(void)
   * @retval None
   */
 
-
 /**
   * @brief  This function handles SysTick Handler.
   * @param  None
   * @retval None
   */
+void SysTick_Handler(void)
+{
+	USART1_PrintChar('R');
+	__asm__ volatile("cpsid	i\n\t");     /*< 关中断 */
+	pl_task_context_switch();
+	__asm__ volatile("cpsie	i\n\t");     /*< 开中断 */
+}
 
 
 /******************************************************************************/
@@ -161,5 +169,7 @@ void DebugMon_Handler(void)
 /**
   * @}
   */ 
+
+
 
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/

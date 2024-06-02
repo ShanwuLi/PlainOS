@@ -22,5 +22,8 @@
 
 KERNEL_DIR := $(COMDIR)/kernel
 
+INC += -I$(KERNEL_DIR)#-I选项将$(COMDIR)/include路径告诉编译器
+
 C_SRCS += $(KERNEL_DIR)/entry.c
+C_SRCS += $(KERNEL_DIR)/task.c
 
