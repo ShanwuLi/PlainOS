@@ -5,29 +5,29 @@
 
 void USART1_Init(uint_t USART1_BaudRate)
 {
-   unsigned int integer;                   //����һ���������洢��������
-   float   decimal;                        //����һ���������洢С������
-   RCC->APB2ENR|=(1<<14)|(1<<2);           //����USART1ʱ�Ӻ�GPIOAʱ��
-	 RCC->APB2RSTR|=(1<<14);                 //��λ����USART1
-	 RCC->APB2RSTR&=(~(1<<14));              //ֹͣ��λ
+   unsigned int integer;                   //将IOPA时钟和USART1外设时钟使能
+   float   decimal;                        //将USART1外设复位 
+   RCC->APB2ENR|=(1<<14)|(1<<2);           //将IOPA时钟和USART1外设时钟使能
+	RCC->APB2RSTR|=(1<<14);                 //将USART1外设复位 
+	RCC->APB2RSTR&=(~(1<<14));              //将USART1外设复位状态解除 
 	 
-	 GPIOA->CRH&=0XFFFFF00F;                 //���֮ǰ����PA10��PA9
-	 GPIOA->CRH|=0X000008B0;                 //����PA10Ϊ�������룬����PA9Ϊ�����������
+	GPIOA->CRH&=0XFFFFF00F;                 //将GPIOA A9和A10引脚输出模式清零       
+	GPIOA->CRH|=0X000008B0;                 //将GPIOA A9设置为上拉/下拉输入模式，A10引脚设置为复用推挽输出50MHz时钟模式    
 	
 	
-   USART1->CR1|=(1<<13);                   //ʹ��USARTģ��
-   USART1->CR1|=(1<<2);                    //ʹ�ܽ���
-	 USART1->CR1|=(1<<5);                    //���ж�
-   USART1->CR1|=(1<<3);                    //ʹ�ܷ���	
+   USART1->CR1|=(1<<13);                   //使能USART外设        
+   USART1->CR1|=(1<<2);                    //USART接收被使能     
+	USART1->CR1|=(1<<5);                    //缓冲区非空中断使能      
+   USART1->CR1|=(1<<3);                    //USART发送被使能           
 	 
 	
-   integer=128*1000*1000/(USART1_BaudRate*16);         //ȡ����������
-   decimal=(float)(128*1000*1000/(USART1_BaudRate*16))-integer;   //ȡ��С������
-   USART1->BRR=(integer<<4)|((unsigned int)decimal*16);  //��ת�����ֵ����BRR�Ĵ���
+   integer=128*1000*1000/(USART1_BaudRate*16);         
+   decimal=(float)(128*1000*1000/(USART1_BaudRate*16))-integer;   
+   USART1->BRR=(integer<<4)|((unsigned int)decimal*16);  
    
-   //NVIC_SetPriorityGrouping(1);            //�������ȼ�����1
-   //NVIC_SetPriority(USART1_IRQn, NVIC_EncodePriority(1,2,1));     //������ռ���ȼ�Ϊ1�������ȼ�Ϊ1
-   NVIC_EnableIRQ(USART1_IRQn);            //ʹ��USART�ж�
+   //NVIC_SetPriorityGrouping(1);            
+   //NVIC_SetPriority(USART1_IRQn, NVIC_EncodePriority(1,2,1));     
+   NVIC_EnableIRQ(USART1_IRQn);            
 }
 
 int USART1_PrintChar(char c)
