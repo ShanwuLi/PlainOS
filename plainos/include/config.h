@@ -26,7 +26,7 @@ SOFTWARE.
 /*************************************************************************************
  * kernel definitions
  *************************************************************************************/
-#define PL_CFG_ASSERT
+#define PL_CFG_ASSERT                                     
 #define PL_CFG_OS_CHAR_LOGO
 #define PL_CFG_CHECK_STACK_OVERFLOW
 #define PL_CFG_CHECK_STACK_OVERFLOW_MAGIC                 ((uintptr_t)(0xabadc0de))

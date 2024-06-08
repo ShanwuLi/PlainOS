@@ -55,7 +55,7 @@ struct task_list {
 static u32_t cpu_rate_base;
 static u32_t cpu_rate_idle;
 /*************************************************************************************
- * Structure Name: task_core_blk
+ * Structure Name: task_core_blk，任务内核控制块
  * Description: task core block.
  *
  * Members:
@@ -1022,7 +1022,7 @@ static void update_delay_task_list(void)
 	struct tcb *pos;
 	struct tcb *tmp;
 
-	/* update delay list which can't be empty because of having a dummy node */
+	/* update delay list which can't be empty because of having a dummy node *///遍历延迟链表
 	list_for_each_entry_safe(pos, tmp, &g_task_core_blk.delay_list.head->node,
 		struct tcb, node) {
 
@@ -1114,10 +1114,10 @@ void pl_callee_systick_expiration(void)
 		/* round robin */
 		prio = curr_tcb->prio;
 		rdy_list = &g_task_core_blk.ready_list[prio];
-		rdy_list->head = list_next_entry(curr_tcb, struct tcb, node);
+		rdy_list->head = list_next_entry(curr_tcb, struct tcb, node);	//任务轮询调度
 
 		/* switch task */
-		pl_task_context_switch();
+		pl_task_context_switch();	//优先级抢占
 	}
 	pl_port_exit_critical();
 }
