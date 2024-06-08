@@ -3,31 +3,40 @@
 #include <types.h>
 #include "early_uart.h"
 
+/**
+ * 初始化USART1，设置波特率和相关配置
+ * @param USART1_BaudRate 波特率，指定USART1的通信速度
+ */
 void USART1_Init(uint_t USART1_BaudRate)
 {
-   unsigned int integer;                   //将IOPA时钟和USART1外设时钟使能
-   float   decimal;                        //将USART1外设复位 
-   RCC->APB2ENR|=(1<<14)|(1<<2);           //将IOPA时钟和USART1外设时钟使能
-	RCC->APB2RSTR|=(1<<14);                 //将USART1外设复位 
-	RCC->APB2RSTR&=(~(1<<14));              //将USART1外设复位状态解除 
-	 
-	GPIOA->CRH&=0XFFFFF00F;                 //将GPIOA A9和A10引脚输出模式清零       
-	GPIOA->CRH|=0X000008B0;                 //将GPIOA A9设置为上拉/下拉输入模式，A10引脚设置为复用推挽输出50MHz时钟模式    
-	
-	
-   USART1->CR1|=(1<<13);                   //使能USART外设        
-   USART1->CR1|=(1<<2);                    //USART接收被使能     
-	USART1->CR1|=(1<<5);                    //缓冲区非空中断使能      
-   USART1->CR1|=(1<<3);                    //USART发送被使能           
-	 
-	
-   integer=128*1000*1000/(USART1_BaudRate*16);         
-   decimal=(float)(128*1000*1000/(USART1_BaudRate*16))-integer;   
-   USART1->BRR=(integer<<4)|((unsigned int)decimal*16);  
-   
-   //NVIC_SetPriorityGrouping(1);            
-   //NVIC_SetPriority(USART1_IRQn, NVIC_EncodePriority(1,2,1));     
-   NVIC_EnableIRQ(USART1_IRQn);            
+   // 以下两行声明了整型和浮点型变量，用于计算USART的时钟配置
+   unsigned int integer;
+   float decimal;
+
+   // 启用GPIOA和USART1的时钟，并对USART1进行复位
+   RCC->APB2ENR|=(1<<14)|(1<<2);
+   RCC->APB2RSTR|=(1<<14);
+   RCC->APB2RSTR&=(~(1<<14));
+
+   // 配置GPIOA的CRH寄存器，为USART1的TX和RX引脚设置合适的模式
+   GPIOA->CRH&=0XFFFFF00F;
+   GPIOA->CRH|=0X000008B0;
+
+   // 启用USART1的多种功能，包括接收、发送和中断
+   USART1->CR1|=(1<<13);
+   USART1->CR1|=(1<<2);
+   USART1->CR1|=(1<<5);
+   USART1->CR1|=(1<<3);
+
+   // 计算并设置USART的波特率发生器，以达到指定的波特率
+   integer = 128 * 1000 * 1000 / (USART1_BaudRate * 16);
+   decimal = (float)(128 * 1000 * 1000 / (USART1_BaudRate * 16)) - integer;
+   USART1->BRR = (integer << 4) | ((unsigned int)decimal * 16);
+
+   // 启用USART1的中断，以便在数据发送和接收时得到通知
+   // NVIC_SetPriorityGrouping(1);
+   // NVIC_SetPriority(USART1_IRQn, NVIC_EncodePriority(1,2,1));
+   NVIC_EnableIRQ(USART1_IRQn);
 }
 
 int USART1_PrintChar(char c)

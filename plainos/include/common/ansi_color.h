@@ -23,18 +23,15 @@ SOFTWARE.
 #ifndef __COMMON_ANSI_COLOR_H__
 #define __COMMON_ANSI_COLOR_H__
 
-/*************************************************************************************
- * NOTE:
- *    ANSI escape codes are a standard for in-band signaling to control the cursor
- * location, color, and other options on text terminals. The ANSI x3.64 standard
- * was released in 1979 and later updated by the 5th edition ECMA-48 standard in 1991,
- * ISO/IEC 6429 in 1992, and ISO-8613-3 in 1995.
- *    ANSI escape codes are started using \e[ and contain numeric codes separated by
- * semicolons. The escape code is terminated with an 'm'.
+/*****************************************************************************
+ * 注意：
+ *    ANSI转义码是用于控制文本终端中光标位置、颜色及其它属性的一种标准信号序列。该标准源自1979年发布的ANSI x3.64规范，
+ * 并在随后的1991年第五版ECMA-48标准、1992年的ISO/IEC 6429标准及1995年的ISO-8613-3中得到更新和完善。
+ *    ANSI转义码序列以`\e[`开头，序列中可包含由分号分隔的多个数字代码，最后以字符'm'结束以标志序列的终止。
  *
- * This header file is reference to https://tintin.mudhalla.net/info/ansicolor/
+ * 本头部文件参考来源于：https://tintin.mudhalla.net/info/ansicolor/
  *
- ************************************************************************************/
+ *****************************************************************************/
 #define ANSI_COLOR_RESET               "\033[0m"  /* Set color and display state to default */
 #define ANSI_COLOR_BOLD                "\033[1m"  /* Set color intensity to bold */
 #define ANSI_COLOR_FAINT               "\033[2m"  /* Set color intensity to faint */

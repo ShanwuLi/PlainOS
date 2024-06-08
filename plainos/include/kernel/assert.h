@@ -31,14 +31,15 @@ SOFTWARE.
 #include <kernel/kernel.h>
 
 /*************************************************************************************
- * Function Name: pl_assert
- * Description: assertion for PlainOS.
+ * 函数名称: pl_assert
+ * 功能描述:
+ *   平台断言函数。当给定的条件不满足时，程序会在此处挂起当前任务，通常用于调试期间检测代码逻辑错误.
  *
- * Parameters:
- *   @assertion: if assertion is false, current task will be block here.
+ * 参数:
+ *   @assertion: 断言条件，如果为假（即条件不满足），则执行断言操作，可能导致当前任务被阻塞或触发错误处理.
  *
- * Return:
- *   void.
+ * 返回值:
+ *   无返回值，因为断言失败通常会导致程序中断或进入调试模式.
  ************************************************************************************/
 #ifdef PL_CFG_ASSERT
 #define pl_assert(assertion)    \

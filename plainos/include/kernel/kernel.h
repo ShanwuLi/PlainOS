@@ -33,15 +33,20 @@ SOFTWARE.
 #define ARRAY_SIZE(a)                   (sizeof(a) / sizeof(a[0]))
 
 /*************************************************************************************
- * Function Name: container_of
- * Description: Get the address of the structure instance.
+ * 函数名称: container_of
+ * 功能描述:
+ *   通过结构体成员地址获取结构体实例的地址。这是一个宏，常用于链表操作或其他数据结构的遍历，帮助从已知成员追踪到其所属的结构体.
  *
- * Param:
- *   @ptr: address of the structure member.
- *   @struct_type: type of the structure.
- *   @member: member name of the ptr in structure.
- * Return:
- *   void
+ * 参数:
+ *   @ptr: 结构体中某个成员的地址.
+ *   @struct_type: 结构体的类型.
+ *   @member: 在结构体中成员的名字，传入的是成员的名称而非成员的值或地址.
+ *
+ * 返回值:
+ *   返回结构体实例的地址，类型为`struct_type *`.
+ *
+ * 注意:
+ *   此处的"void"应修正为正确的返回类型说明，实际上`container_of`宏的返回类型应该是基于传入的`struct_type`.
  ************************************************************************************/
 #define container_of(ptr, struct_type, member) \
 	((struct_type *)((char *)(ptr) - (char *)(&(((struct_type *)0)->member))))
@@ -57,30 +62,30 @@ extern "C" {
 #endif
 
 /*************************************************************************************
- * Function Name: pl_align_address
- * Description:
- *    Calculate the aligned address based on memory address and alignment coefficient.
+ * 函数名称: pl_align_address
+ * 功能描述:
+ *   计算内存地址对齐后的地址。根据给定的内存地址和对齐系数，确保返回的地址满足指定的对齐要求.
  *
- * Param:
- *   @addr: the address of memory.
- *   @align: alignment coefficient.
+ * 参数:
+ *   @addr: 待对齐的内存地址.
+ *   @align: 对齐系数，通常为2的幂，如4（字节对齐）、8（双字对齐）等.
  *
- * Return:
- *   Aligned address.
+ * 返回值:
+ *   对齐后的内存地址，满足给定的对齐系数.
  ************************************************************************************/
 void* pl_align_address(void* addr, uchar_t align);
 
 /*************************************************************************************
- * Function Name: pl_align_size
- * Description:
- *    Calculate the aligned size.
+ * 函数名称: pl_align_size
+ * 功能描述:
+ *   计算大小对齐后的结果。确保所提供的数据大小能够满足特定的对齐约束，通常用于分配内存时保证分配的内存区域按需对齐.
  *
- * Param:
- *   @size: the size of need to align.
- *   @align: alignment coefficient.
+ * 参数:
+ *   @size: 需要对齐的原始大小.
+ *   @align: 对齐系数，通常为2的幂次方数，例如4、8、16等，表示字节对齐的粒度.
  *
- * Return:
- *   Aligned size.
+ * 返回值:
+ *   对齐后的大小，确保是align的倍数且不小于原大小.
  ************************************************************************************/
 size_t pl_align_size(size_t size, uchar_t align);
 

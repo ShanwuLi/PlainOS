@@ -1,54 +1,32 @@
 /**
-  ******************************************************************************
-  * @file    system_stm32f10x.c
-  * @author  MCD Application Team
-  * @version V3.5.0
-  * @date    11-March-2011
-  * @brief   CMSIS Cortex-M3 Device Peripheral Access Layer System Source File.
-  * 
-  * 1.  This file provides two functions and one global variable to be called from 
-  *     user application:
-  *      - SystemInit(): Setups the system clock (System clock source, PLL Multiplier
-  *                      factors, AHB/APBx prescalers and Flash settings). 
-  *                      This function is called at startup just after reset and 
-  *                      before branch to main program. This call is made inside
-  *                      the "startup_stm32f10x_xx.s" file.
-  *
-  *      - SystemCoreClock variable: Contains the core clock (HCLK), it can be used
-  *                                  by the user application to setup the SysTick 
-  *                                  timer or configure other parameters.
-  *                                     
-  *      - SystemCoreClockUpdate(): Updates the variable SystemCoreClock and must
-  *                                 be called whenever the core clock is changed
-  *                                 during program execution.
-  *
-  * 2. After each device reset the HSI (8 MHz) is used as system clock source.
-  *    Then SystemInit() function is called, in "startup_stm32f10x_xx.s" file, to
-  *    configure the system clock before to branch to main program.
-  *
-  * 3. If the system clock source selected by user fails to startup, the SystemInit()
-  *    function will do nothing and HSI still used as system clock source. User can 
-  *    add some code to deal with this issue inside the SetSysClock() function.
-  *
-  * 4. The default value of HSE crystal is set to 8 MHz (or 25 MHz, depedning on
-  *    the product used), refer to "HSE_VALUE" define in "stm32f10x.h" file. 
-  *    When HSE is used as system clock source, directly or through PLL, and you
-  *    are using different crystal you have to adapt the HSE value to your own
-  *    configuration.
-  *        
-  ******************************************************************************
-  * @attention
-  *
-  * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
-  * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
-  * TIME. AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY
-  * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
-  * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
-  * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
-  *
-  * <h2><center>&copy; COPYRIGHT 2011 STMicroelectronics</center></h2>
-  ******************************************************************************
-  */
+ * @file    system_stm32f10x.c
+ * @作者    MCD应用团队
+ * @版本    V3.5.0
+ * @日期    2011年3月11日
+ * @简介    CMSIS Cortex-M3设备外设访问层系统源文件。
+ *
+ * 1. 本文件为用户应用程序提供了两个函数和一个全局变量：
+ *     - SystemInit()：设置系统时钟（系统时钟源、PLL乘法因子、AHB/APBx预分频器及Flash设置）。
+ *                     此函数在复位后启动前调用，调用位置在"startup_stm32f10x_xx.s"文件中。
+ *     - SystemCoreClock变量：包含核心时钟频率（HCLK），可用于应用程序设置SysTick定时器或其他参数配置。
+ *     - SystemCoreClockUpdate()：更新SystemCoreClock变量，当程序执行期间核心时钟改变时必须调用。
+ *
+ * 2. 每次设备复位后，HSI（8 MHz）作为系统时钟源。然后，在跳转到主程序之前，通过"startup_stm32f10x_xx.s"文件调用SystemInit()函数来配置系统时钟。
+ *
+ * 3. 如果用户选择的系统时钟源无法启动，SystemInit()函数将不执行任何操作，继续使用HSI作为时钟源。用户可以在SetSysClock()函数中添加处理这种情况的代码。
+ *
+ * 4. HSE晶振的默认值设定为8 MHz（或根据产品不同为25 MHz），请参考"stm32f10x.h"中的"HSE_VALUE"定义。
+ *    当直接或通过PLL使用HSE作为系统时钟源，且采用不同的晶振时，需根据实际情况调整HSE_VALUE的值。
+ *        
+ ******************************************************************************
+ * @注意
+ *
+ * 本固件仅用于指导，旨在通过提供产品相关的编程信息帮助客户节省编码时间。
+ * 因此，意法半导体不对因使用本固件内容或与产品结合使用本固件中的编码信息所引起的任何直接、间接或附带损失承担责任。
+ *
+ * <h2><center>版权所有 &copy; 2011 STMicroelectronics</center></h2>
+ ******************************************************************************
+ */
 
 /** @addtogroup CMSIS
   * @{
@@ -209,58 +187,80 @@ static void SetSysClock(void);
   * @param  None
   * @retval None
   */
+ 
+/**
+ * @brief 系统初始化函数
+ * 
+ * 该函数对系统进行必要的初始化，包括RCU（Reset and Clock Control Unit）配置、系统时钟设置和Vector Table的定位。
+ * 它是程序启动后的第一个执行的函数，用于设置系统的基础运行环境。
+ * 
+ * 注意：该函数的具体实现依赖于不同的STM32系列和配置选项，这里展示的注释是通用的指导思想。
+ */
 void SystemInit (void)
 {
+  /* 启用内部RC时钟 */
   /* Reset the RCC clock configuration to the default reset state(for debug purpose) */
   /* Set HSION bit */
   RCC->CR |= (uint32_t)0x00000001;
 
-  /* Reset SW, HPRE, PPRE1, PPRE2, ADCPRE and MCO bits */
+  /* 配置RCU预分频器和其他相关位，具体配置取决于STM32系列 */
 #ifndef STM32F10X_CL
   RCC->CFGR &= (uint32_t)0xF8FF0000;
 #else
   RCC->CFGR &= (uint32_t)0xF0FF0000;
 #endif /* STM32F10X_CL */   
-  
+
+  /* 关闭HSE、CSS和PLL时钟 */
   /* Reset HSEON, CSSON and PLLON bits */
   RCC->CR &= (uint32_t)0xFEF6FFFF;
 
+  /* 关闭HSE旁路 */
   /* Reset HSEBYP bit */
   RCC->CR &= (uint32_t)0xFFFBFFFF;
 
+  /* 配置PLL源和其他相关位 */
   /* Reset PLLSRC, PLLXTPRE, PLLMUL and USBPRE/OTGFSPRE bits */
   RCC->CFGR &= (uint32_t)0xFF80FFFF;
 
 #ifdef STM32F10X_CL
+  /* 关闭PLL2和PLL3时钟 */
   /* Reset PLL2ON and PLL3ON bits */
   RCC->CR &= (uint32_t)0xEBFFFFFF;
 
+  /* 关闭所有RCU中断和清除pending状态 */
   /* Disable all interrupts and clear pending bits  */
   RCC->CIR = 0x00FF0000;
 
+  /* 重置CFGR2寄存器 */
   /* Reset CFGR2 register */
   RCC->CFGR2 = 0x00000000;
 #elif defined (STM32F10X_LD_VL) || defined (STM32F10X_MD_VL) || (defined STM32F10X_HD_VL)
+  /* 关闭所有RCU中断和清除pending状态 */
   /* Disable all interrupts and clear pending bits  */
   RCC->CIR = 0x009F0000;
 
+  /* 重置CFGR2寄存器 */
   /* Reset CFGR2 register */
   RCC->CFGR2 = 0x00000000;      
 #else
+  /* 关闭所有RCU中断和清除pending状态 */
   /* Disable all interrupts and clear pending bits  */
   RCC->CIR = 0x009F0000;
 #endif /* STM32F10X_CL */
-    
+
 #if defined (STM32F10X_HD) || (defined STM32F10X_XL) || (defined STM32F10X_HD_VL)
   #ifdef DATA_IN_ExtSRAM
+    /* 如果数据存储在外部SRAM中，初始化外部内存控制器 */
     SystemInit_ExtMemCtl(); 
   #endif /* DATA_IN_ExtSRAM */
 #endif 
 
+  /* 配置系统时钟、HCLK、PCLK2和PCLK1的预分频器，以及Flash的等待状态和预取缓冲器 */
   /* Configure the System clock frequency, HCLK, PCLK2 and PCLK1 prescalers */
   /* Configure the Flash Latency cycles and enable prefetch buffer */
   SetSysClock();
 
+  /* 根据配置定位Vector Table到SRAM或FLASH */
 #ifdef VECT_TAB_SRAM
   SCB->VTOR = SRAM_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal SRAM. */
 #else
@@ -303,53 +303,72 @@ void SystemInit (void)
   * @param  None
   * @retval None
   */
+/**
+  * @brief 更新系统核心时钟频率
+  * 
+  * 该函数根据当前的系统时钟配置，计算并更新系统核心时钟（SystemCoreClock）的频率。
+  * 它读取 RCC（Reset and Clock Control）寄存器的值，以确定系统时钟的来源和倍频因子。
+  * 根据不同的芯片系列和配置，系统时钟可以由HSI、HSE、PLL等提供。
+  * 更新后的系统核心时钟频率存储在全局变量SystemCoreClock中，供其他函数使用。
+  */
 void SystemCoreClockUpdate (void)
 {
+  /* 初始化变量，用于后续计算系统时钟频率 */
   uint32_t tmp = 0, pllmull = 0, pllsource = 0;
 
 #ifdef  STM32F10X_CL
+  /* 针对STM32F10X_CL系列，初始化额外的变量，用于PLL2和PREDIV1的配置 */
   uint32_t prediv1source = 0, prediv1factor = 0, prediv2factor = 0, pll2mull = 0;
 #endif /* STM32F10X_CL */
 
 #if defined (STM32F10X_LD_VL) || defined (STM32F10X_MD_VL) || (defined STM32F10X_HD_VL)
+  /* 针对STM32F10X_LD_VL、STM32F10X_MD_VL和STM32F10X_HD_VL系列，初始化预分频器因子 */
   uint32_t prediv1factor = 0;
 #endif /* STM32F10X_LD_VL or STM32F10X_MD_VL or STM32F10X_HD_VL */
     
+  /* 读取系统时钟源选择 */
   /* Get SYSCLK source -------------------------------------------------------*/
   tmp = RCC->CFGR & RCC_CFGR_SWS;
   
+  /* 根据系统时钟源的不同情况，计算系统核心时钟频率 */
   switch (tmp)
   {
-    case 0x00:  /* HSI used as system clock */
+    case 0x00:  /* HSI用作系统时钟 */
       SystemCoreClock = HSI_VALUE;
       break;
-    case 0x04:  /* HSE used as system clock */
+    case 0x04:  /* HSE用作系统时钟 */
       SystemCoreClock = HSE_VALUE;
       break;
-    case 0x08:  /* PLL used as system clock */
+    case 0x08:  /* PLL用作系统时钟 */
 
+      /* 获取PLL倍频器和时钟源配置 */
       /* Get PLL clock source and multiplication factor ----------------------*/
       pllmull = RCC->CFGR & RCC_CFGR_PLLMULL;
       pllsource = RCC->CFGR & RCC_CFGR_PLLSRC;
       
 #ifndef STM32F10X_CL      
+      /* 根据不同的PLL输入源和倍频因子，计算系统时钟频率 */
       pllmull = ( pllmull >> 18) + 2;
       
       if (pllsource == 0x00)
       {
+        /* HSI振荡器时钟被除以2作为PLL输入 */
         /* HSI oscillator clock divided by 2 selected as PLL clock entry */
         SystemCoreClock = (HSI_VALUE >> 1) * pllmull;
       }
       else
       {
  #if defined (STM32F10X_LD_VL) || defined (STM32F10X_MD_VL) || (defined STM32F10X_HD_VL)
+       /* 对于STM32F10X_LD_VL、STM32F10X_MD_VL和STM32F10X_HD_VL系列，使用PREDIV1配置计算系统时钟 */
        prediv1factor = (RCC->CFGR2 & RCC_CFGR2_PREDIV1) + 1;
+       /* HSE振荡器时钟被选为PREDIV1的输入 */
        /* HSE oscillator clock selected as PREDIV1 clock entry */
        SystemCoreClock = (HSE_VALUE / prediv1factor) * pllmull; 
  #else
+        /* 使用HSE作为PLL的输入源 */
         /* HSE selected as PLL clock entry */
         if ((RCC->CFGR & RCC_CFGR_PLLXTPRE) != (uint32_t)RESET)
-        {/* HSE oscillator clock divided by 2 */
+        {/* HSE振荡器时钟被除以2 */
           SystemCoreClock = (HSE_VALUE >> 1) * pllmull;
         }
         else
@@ -359,6 +378,7 @@ void SystemCoreClockUpdate (void)
  #endif
       }
 #else
+      /* 对于STM32F10X_CL系列，处理PLL配置的特殊情形 */
       pllmull = pllmull >> 18;
       
       if (pllmull != 0x0D)
@@ -366,30 +386,34 @@ void SystemCoreClockUpdate (void)
          pllmull += 2;
       }
       else
-      { /* PLL multiplication factor = PLL input clock * 6.5 */
+      { /* PLL乘数因子 = PLL输入时钟 * 6.5 */
         pllmull = 13 / 2; 
       }
             
       if (pllsource == 0x00)
       {
+        /* HSI振荡器时钟被除以2作为PLL输入 */
         /* HSI oscillator clock divided by 2 selected as PLL clock entry */
         SystemCoreClock = (HSI_VALUE >> 1) * pllmull;
       }
       else
-      {/* PREDIV1 selected as PLL clock entry */
+      {/* PREDIV1被选为PLL的输入源 */
         
+        /* 获取PREDIV1的时钟源和分频因子 */
         /* Get PREDIV1 clock source and division factor */
         prediv1source = RCC->CFGR2 & RCC_CFGR2_PREDIV1SRC;
         prediv1factor = (RCC->CFGR2 & RCC_CFGR2_PREDIV1) + 1;
         
         if (prediv1source == 0)
         { 
+          /* HSE振荡器时钟被选为PREDIV1的输入 */
           /* HSE oscillator clock selected as PREDIV1 clock entry */
           SystemCoreClock = (HSE_VALUE / prediv1factor) * pllmull;          
         }
         else
-        {/* PLL2 clock selected as PREDIV1 clock entry */
+        {/* PLL2的输出被选为PREDIV1的输入 */
           
+          /* 获取PREDIV2的分频因子和PLL2的乘数因子 */
           /* Get PREDIV2 division factor and PLL2 multiplication factor */
           prediv2factor = ((RCC->CFGR2 & RCC_CFGR2_PREDIV2) >> 4) + 1;
           pll2mull = ((RCC->CFGR2 & RCC_CFGR2_PLL2MUL) >> 8 ) + 2; 
@@ -400,13 +424,17 @@ void SystemCoreClockUpdate (void)
       break;
 
     default:
+      /* 如果无法识别系统时钟源，则默认使用HSI */
       SystemCoreClock = HSI_VALUE;
       break;
   }
   
+  /* 计算HCLK时钟频率 */
   /* Compute HCLK clock frequency ----------------*/
+  /* 获取HCLK的预分频器设置 */
   /* Get HCLK prescaler */
   tmp = AHBPrescTable[((RCC->CFGR & RCC_CFGR_HPRE) >> 4)];
+  /* 根据预分频器设置调整系统核心时钟频率 */
   /* HCLK clock frequency */
   SystemCoreClock >>= tmp;  
 }
