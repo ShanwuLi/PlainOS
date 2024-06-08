@@ -89,7 +89,7 @@ struct list_node {
 	container_of((head)->next, entry_type, member)
 
 /*************************************************************************************
- * Function Name: list_next_entry
+ * Function Name: list_prev_entry
  * Description: Return the next entry of specific node.
  *
  * Param:
@@ -98,7 +98,7 @@ struct list_node {
  *   @member: the name of the list_head within the struct.
  *
  * Return:
- *   @entry_type: next entry of specific entry.
+ *   @entry_type: previous entry of specific entry.
  ************************************************************************************/
 #define list_prev_entry(entry, entry_type, member) \
 	container_of((entry)->member.prev, entry_type, member)
