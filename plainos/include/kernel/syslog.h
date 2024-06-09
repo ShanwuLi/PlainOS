@@ -51,221 +51,221 @@ SOFTWARE.
 extern "C" {
 #endif
 
-/*************************************************************************************
- * Function Name: pl_put_format_log_locked
+/**********************************************************************************
+ * 函数名称: pl_put_format_log_locked
+ * 
+ * 描述:
+ *   格式化字符串输出（在PlainOS未启动的情况下）。
  *
- * Description:
- *   format string output (PlainOS has not start).
+ * 输出格式:
+ *   [$(前缀)][$(格式内容)][$(后缀)]
  *
- * put format:
- *   [$(front)][$(fmt)][$(rear)]
+ * 参数:
+ *  @rear: 格式内容后的字符串。
+ *  @fmt: 需要格式化的字符串。
  *
- * Parameters:
- *  @rear: rear string of fmt.
- *  @fmt: format string.
- *
- * Return:
- *  void.
- ************************************************************************************/
+ * 返回值:
+ *   无。
+ ***********************************************************************************/
 void pl_put_format_log_locked(int (*putc)(const char c), const char *fmt, ...);
 
-/*************************************************************************************
- * Function Name: pl_syslog_put_chars
- *
- * Description:
- *   put chars using puc.
- *
- * Param:
- *   @putc: putc function.
- *   @start: start char.
- *   @end: end char.
+/**********************************************************************************
+ * 函数名称: pl_syslog_put_chars
  * 
- * Return:
- *   none.
- ************************************************************************************/
+ * 描述:
+ *   使用putc功能输出字符序列。
+ *
+ * 参数:
+ *   @putc: 字符输出函数指针。
+ *   @start: 开始字符。
+ *   @end: 结束字符。
+ * 
+ * 返回值:
+ *   无。
+ ***********************************************************************************/
 void pl_syslog_put_chars(int (*putc)(const char c), const char *start, const char *end);
 
-/*************************************************************************************
- * Function Name: pl_early_syslog
+/**********************************************************************************
+ * 函数名称: pl_early_syslog
+ * 
+ * 描述:
+ *   早期系统日志记录（在PlainOS尚未启动时）。
  *
- * Description:
- *   early syslog (PlainOS has not start).
+ * 输出格式:
+ *   [$(格式字符串内容)]
  *
- * put format:
- *   [$(fmt)]
+ * 参数:
+ *  @fmt: 格式化字符串。
+ *  @...: 可变参数列表。
  *
- * Parameters:
- *  @fmt: format string.
- *  @...: variable parameters.
- *
- * Return:
- *  void.
- ************************************************************************************/
+ * 返回值:
+ *   无。
+ ***********************************************************************************/
 #define pl_early_syslog(fmt, ...)  \
 	pl_put_format_log_locked(pl_port_putc, fmt, ## __VA_ARGS__)
 
-/*************************************************************************************
- * Function Name: pl_early_syslog_info
+/**********************************************************************************
+ * 函数名称: pl_early_syslog_info
+ * 
+ * 描述:
+ *   早期系统日志信息记录（PlainOS未启动时）。
  *
- * Description:
- *   early syslog_info (PlainOS has not start).
+ * 输出格式:
+ *   [info][$(格式字符串内容)]
  *
- * put format:
- *   [info][$(fmt)]
+ * 参数:
+ *  @fmt: 格式化字符串。
+ *  @...: 可变参数列表。
  *
- * Parameters:
- *  @fmt: format string.
- *  @...: variable parameters.
- *
- * Return:
- *  void.
- ************************************************************************************/
+ * 返回值:
+ *   无。
+ ***********************************************************************************/
 #define pl_early_syslog_info(fmt, ...)  \
 	pl_put_format_log_locked(pl_port_putc, "[info] "fmt, ## __VA_ARGS__)
 
-/*************************************************************************************
- * Function Name: pl_early_syslog_warn
+/**********************************************************************************
+ * 函数名称: pl_early_syslog_warn
+ * 
+ * 描述:
+ *   早期警告系统日志记录（PlainOS未启动时）。
  *
- * Description:
- *   early syslog_warn (PlainOS has not start).
+ * 输出格式:
+ *   [warn][$(格式字符串内容)]
  *
- * put format:
- *   [warn][$(fmt)]
+ * 参数:
+ *  @fmt: 格式化字符串。
+ *  @...: 可变参数列表。
  *
- * Parameters:
- *  @fmt: format string.
- *  @...: variable parameters.
- *
- * Return:
- *  void.
- ************************************************************************************/
+ * 返回值:
+ *   无。
+ ***********************************************************************************/
 #define pl_early_syslog_warn(fmt, ...)  \
 	pl_put_format_log_locked(pl_port_putc, PL_EARLY_SYSLOG_WARN_ANSI_COLOR"[warn] "fmt \
 	PL_EARLY_SYSLOG_ANSI_COLOR_RESET, ## __VA_ARGS__)
 
-/*************************************************************************************
- * Function Name: pl_early_syslog_err
+/**********************************************************************************
+ * 函数名称: pl_early_syslog_err
+ * 
+ * 描述:
+ *   早期错误系统日志记录（PlainOS未启动时）。
  *
- * Description:
- *   early syslog_err (PlainOS has not start).
+ * 输出格式:
+ *   [erro][$(格式字符串内容)]
  *
- * put format:
- *   [erro][$(fmt)]
+ * 参数:
+ *  @fmt: 格式化字符串。
+ *  @...: 可变参数列表。
  *
- * Parameters:
- *  @fmt: format string.
- *  @...: variable parameters.
- *
- * Return:
- *  void.
- ************************************************************************************/
+ * 返回值:
+ *   无。
+ ***********************************************************************************/
 #define pl_early_syslog_err(fmt, ...)  \
 	pl_put_format_log_locked(pl_port_putc, PL_EARLY_SYSLOG_ERR_ANSI_COLOR"[erro] "fmt \
 	PL_EARLY_SYSLOG_ANSI_COLOR_RESET, ## __VA_ARGS__)
 
-/*************************************************************************************
- * Function Name: pl_put_format_log
+/**********************************************************************************
+ * 函数名称: pl_put_format_log
+ * 
+ * 描述:
+ *   格式化输出日志（PlainOS已启动后使用）。
  *
- * Description:
- *   put format log (PlainOS has started).
+ * 参数:
+ *  @fmt: 格式化字符串。
+ *  @...: 可变参数列表。
  *
- * Parameters:
- *  @fmt: format string.
- *  @...: variable parameters.
- *
- * Return:
- *  void.
- ************************************************************************************/
+ * 返回值:
+ *   无。
+ ***********************************************************************************/
 void pl_put_format_log(const char *fmt, ...);
 
-/*************************************************************************************
- * Function Name: pl_syslog_redirect
- *
- * Description:
- *   syslog redirect to put_char of user provided.
+/**********************************************************************************
+ * 函数名称: pl_syslog_redirect
  * 
- * Parameters:
- *  @put_char: redirect to put_char.
+ * 描述:
+ *   系统日志重定向到用户提供的字符输出函数。
  *
- * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
+ * 参数:
+ *  @put_char: 用户自定义的字符输出函数指针。
+ *
+ * 返回值:
+ *  成功时返回大于等于0的值，失败时返回小于0的值。
+ ***********************************************************************************/
 int pl_syslog_redirect(int (*put_char)(char c));
 
-/*************************************************************************************
- * Function Name: pl_syslog
+/**********************************************************************************
+ * 函数名称: pl_syslog
+ * 
+ * 描述:
+ *   系统日志记录（PlainOS已经启动后使用）。
  *
- * Description:
- *   syslog (PlainOS has started).
+ * 输出格式:
+ *   [$(格式字符串内容)]
  *
- * put format:
- *   [$(fmt)]
+ * 参数:
+ *  @fmt: 格式化字符串。
+ *  @...: 可变参数列表。
  *
- * Parameters:
- *  @fmt: format string.
- *  @...: variable parameters.
- *
- * Return:
- *  void.
- ************************************************************************************/
+ * 返回值:
+ *   无。
+ ***********************************************************************************/
 #define pl_syslog(fmt, ...)   \
 	pl_put_format_log(fmt, ## __VA_ARGS__)
 
-/*************************************************************************************
- * Function Name: pl_syslog_info
+/**********************************************************************************
+ * 函数名称: pl_syslog_info
+ * 
+ * 描述:
+ *   信息级别系统日志记录（PlainOS已启动）。
  *
- * Description:
- *   syslog_info (PlainOS has started).
+ * 输出格式:
+ *   [info][$(格式字符串内容)]
  *
- * put format:
- *   [info][$(fmt)]
+ * 参数:
+ *  @fmt: 格式化字符串。
+ *  @...: 可变参数列表。
  *
- * Parameters:
- *  @fmt: format string.
- *  @...: variable parameters.
- *
- * Return:
- *  void.
- ************************************************************************************/
+ * 返回值:
+ *   无。
+ ***********************************************************************************/
 #define pl_syslog_info(fmt, ...)   \
 	pl_put_format_log("[info] "fmt, ## __VA_ARGS__)
 
-/*************************************************************************************
- * Function Name: pl_syslog_warn
+/**********************************************************************************
+ * 函数名称: pl_syslog_warn
+ * 
+ * 描述:
+ *   警告级别系统日志记录（PlainOS已启动）。
  *
- * Description:
- *   syslog_warn (PlainOS has started).
+ * 输出格式:
+ *   [warn][$(格式字符串内容)]
  *
- * put format:
- *   [warn][$(fmt)]
+ * 参数:
+ *  @fmt: 格式化字符串。
+ *  @...: 可变参数列表。
  *
- * Parameters:
- *  @fmt: format string.
- *  @...: variable parameters.
- *
- * Return:
- *  void.
- ************************************************************************************/
+ * 返回值:
+ *   无。
+ ***********************************************************************************/
 #define pl_syslog_warn(fmt, ...)   \
 	pl_put_format_log(PL_SYSLOG_WARN_ANSI_COLOR"[warn] "fmt \
 	PL_SYSLOG_ANSI_COLOR_RESET, ## __VA_ARGS__)
 
-/*************************************************************************************
- * Function Name: pl_syslog_err
+/**********************************************************************************
+ * 函数名称: pl_syslog_err
+ * 
+ * 描述:
+ *   错误级别系统日志记录（PlainOS已启动）。
  *
- * Description:
- *   syslog_err (PlainOS has started).
+ * 输出格式:
+ *   [erro][$(格式字符串内容)]
  *
- * put format:
- *   [erro][$(fmt)]
+ * 参数:
+ *  @fmt: 格式化字符串。
+ *  @...: 可变参数列表。
  *
- * Parameters:
- *  @fmt: format string.
- *  @...: variable parameters.
- *
- * Return:
- *  void.
- ************************************************************************************/
+ * 返回值:
+ *   无。
+ ***********************************************************************************/
 #define pl_syslog_err(fmt, ...)   \
 	pl_put_format_log(PL_SYSLOG_ERR_ANSI_COLOR"[erro] "fmt \
 	PL_SYSLOG_ANSI_COLOR_RESET, ## __VA_ARGS__)

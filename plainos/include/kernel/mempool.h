@@ -34,133 +34,133 @@ extern pl_mempool_handle_t g_pl_default_mempool;
 extern "C" {
 #endif
 
-/*************************************************************************************
- * Function Name: pl_mempool_calloc
+/**********************************************************************************
+ * 函数名称: pl_mempool_calloc
  *
- * Description:
- *   Alloca memory interface of array method.
- *   The value of memory will set to zero.
+ * 描述:
+ *   数组方法的内存分配接口。
+ *   分配的内存值将被设置为零。
  *
- * Param:
- *   none
+ * 参数:
+ *   无
  *
- * Return:
- *   Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
+ * 返回值:
+ *   成功时返回大于等于0的值，失败时返回小于0的值。
+ **********************************************************************************/
 int pl_default_mempool_init(void);
 
-/*************************************************************************************
- * Function Name: pl_mempool_init
+/**********************************************************************************
+ * 函数名称: pl_mempool_init
  * 
- * Description:
- *    Memory pool initialization interface.
+ * 描述:
+ *   内存池初始化接口。
  *
- * Param:
- *   @pool: user provided memory block required.
- *   @id: memory pool identification number.
- *   @pool_size: user provided memory block size required.
- *   @grain_order: the minimum granularity that memory allocators need to manage.
- *                 grain_order_size = (1 << grain_order).
+ * 参数:
+ *   @pool: 用户提供的必需内存块。
+ *   @id: 内存池标识号。
+ *   @pool_size: 用户提供的内存块所需大小。
+ *   @grain_order: 内存分配器需要管理的最小粒度。
+ *                粒度大小 = (1 << grain_order)，即粒度大小等于2的grain_order次方。
  * 
- * Return:
- *   handle of memory pool.
- ************************************************************************************/
+ * 返回值:
+ *   内存池的句柄。
+ ***********************************************************************************/
 pl_mempool_handle_t pl_mempool_init(void *pool, ushrt_t id,
                                   size_t pool_size, uchar_t grain_order);
 
-/*************************************************************************************
- * Function Name: pl_mempool_malloc
- *
- * Description:
- *   Update bitmap when memory is allocated or free.
- *
- * Param:
- *   @mempool: memory pool.
- *   @size: memory size to require.
+/**********************************************************************************
+ * 函数名称: pl_mempool_malloc
  * 
- * Return:
- *   address of memory.
- ************************************************************************************/
+ * 描述:
+ *   在分配或释放内存时更新位图。
+ *
+ * 参数:
+ *   @mempool: 内存池实例。
+ *   @size: 所需的内存大小。
+ * 
+ * 返回值:
+ *   内存地址。
+ ***********************************************************************************/
 void *pl_mempool_malloc(pl_mempool_handle_t mempool, size_t size);
 
-/*************************************************************************************
- * Function Name: pl_mempool_free
- *
- * Description:
- *   Free memory interface.
- *
- * Param:
- *   @mempool: memory pool.
- *   @p: memory address.
+/**********************************************************************************
+ * 函数名称: pl_mempool_free
  * 
- * Return:
- *   void.
- ************************************************************************************/
+ * 描述:
+ *   内存释放接口。
+ *
+ * 参数:
+ *   @mempool: 内存池对象。
+ *   @p: 待释放的内存地址。
+ * 
+ * 返回值:
+ *   无。
+ ***********************************************************************************/
 void pl_mempool_free(pl_mempool_handle_t mempool, void *p);
 
-/*************************************************************************************
- * Function Name: pl_mempool_get_free_bytes
- *
- * Description:
- *   Get the remaining memory of the memory block interface.
- *
- * Param:
- *   @mempool: memory pool.
+/**********************************************************************************
+ * 函数名称: pl_mempool_get_free_bytes
  * 
- * Return:
- *   remaining size of memory pool.
- ************************************************************************************/
+ * 描述:
+ *   获取内存池剩余内存大小的接口。
+ *
+ * 参数:
+ *   @mempool: 内存池实例。
+ * 
+ * 返回值:
+ *   内存池的剩余容量。
+ ***********************************************************************************/
 size_t pl_mempool_get_free_bytes(pl_mempool_handle_t mempool);
 
 
-/*************************************************************************************
- * Function Name: pl_mempool_set
- *
- * Description:
- *   set value of memory block.
- *
- * Param:
- *   @mempool: memory pool.
- *   @p: address of memory
- *   @val: set value required.
- *   @size: the sizeof memory.
+/**********************************************************************************
+ * 函数名称: pl_mempool_set
  * 
- * Return:
- *   the end of setting value address.
- ************************************************************************************/
+ * 描述:
+ *   设置内存块的值。
+ *
+ * 参数:
+ *   @mempool: 内存池对象。
+ *   @p: 内存地址。
+ *   @val: 需要设置的值。
+ *   @size: 内存大小。
+ * 
+ * 返回值:
+ *   设置值结束之后的地址，即`p + size`。
+ ***********************************************************************************/
 void *pl_mempool_set(pl_mempool_handle_t mempool, void *p, uint8_t val, size_t size);
 
-/*************************************************************************************
- * Function Name: pl_mempool_zalloc
- *
- * Description:
- *   Alloca memory interface of zero value.
- *   The value of memory will set to zero.
- *
- * Param:
- *   @mempool: memory pool.
- *   @size: the size of alloacte required.
+/**********************************************************************************
+ * 函数名称: pl_mempool_zalloc
  * 
- * Return:
- *   memory address.
- ************************************************************************************/
+ * 描述:
+ *   零值内存分配接口。
+ *   分配的内存将会被初始化为零。
+ *
+ * 参数:
+ *   @mempool: 内存池实例。
+ *   @size: 所需分配的内存大小。
+ * 
+ * 返回值:
+ *   分配的内存地址。
+ ***********************************************************************************/
 void *pl_mempool_zalloc(pl_mempool_handle_t mempool, size_t size);
 
-/*************************************************************************************
- * Function Name: pl_mempool_calloc
- *
- * Description:
- *   Alloca memory interface of array method.
- *   The value of memory will set to zero.
- *
- * Param:
- *   @mempool: memory pool.
- *   @num: number of memory.
- *   @size: size of each memory block.
+/**********************************************************************************
+ * 函数名称: pl_mempool_calloc
  * 
- * Return:
- *   memory address.
- ************************************************************************************/
+ * 描述:
+ *   数组方式的内存分配接口。
+ *   分配的内存区域将被初始化为零。
+ *
+ * 参数:
+ *   @mempool: 内存池对象。
+ *   @num: 内存块的数量。
+ *   @size: 每个内存块的大小。
+ * 
+ * 返回值:
+ *   分配的内存起始地址。
+ ***********************************************************************************/
 void *pl_mempool_calloc(pl_mempool_handle_t mempool, size_t num, size_t size);
 
 #ifdef __cplusplus

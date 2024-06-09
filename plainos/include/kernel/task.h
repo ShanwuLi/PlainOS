@@ -34,220 +34,200 @@ typedef void *pl_tid_t;
 extern "C" {
 #endif
 
-/*************************************************************************************
- * Function Name: pl_task_schedule_lock
- * Description: disable scheduler.
+/**********************************************************************************
+ * 函数名称: pl_task_schedule_lock
+ * 描述: 禁用任务调度器。
  *
- * Parameters:
- *   none
+ * 参数:
+ *   无
  *
- * Return:
- *   none
- ************************************************************************************/
+ * 返回值:
+ *   无
+ ***********************************************************************************/
 void pl_task_schedule_lock(void);
 
-/*************************************************************************************
- * Function Name: pl_task_schedule_unlock
- * Description: enable scheduler.
+/**********************************************************************************
+ * 函数名称: pl_task_schedule_unlock
+ * 描述: 启用任务调度器。
  *
- * Parameters:
- *   none
+ * 参数:
+ *   无
  *
- * Return:
- *   none
- ************************************************************************************/
+ * 返回值:
+ *   无
+ ***********************************************************************************/
 void pl_task_schedule_unlock(void);
 
-/*************************************************************************************
- * Function Name: pl_task_create_with_stack
- * Description: create a task with stack that must be provided.
+/**********************************************************************************
+ * 函数名称: pl_task_create_with_stack
+ * 描述: 使用指定的栈空间创建一个任务。
  *
- * Parameters:
- *   @name: name of the task (optional).
- *   @task: task, prototype is "int task(int argc, char *argv[])"
- *   @prio: priority of the task, if is 0, it will be its parent's priority (optional).
- *   @stack: stack of the task (must provide).
- *   @stack_size: size of the stack (must specify).
- *   @argc: the count of argv (optional).
- *   @argv: argv[] (optional).
+ * 参数:
+ *   @name: 任务名称（可选）。
+ *   @task: 任务函数原型，形如 "int task(int argc, char *argv[])"。
+ *   @prio: 任务优先级，若为0则采用其父任务的优先级（可选）。
+ *   @stack: 任务的栈空间（必须提供）。
+ *   @stack_size: 栈大小（必须指定）。
+ *   @argc: 参数个数（可选）。
+ *   @argv: 参数数组（可选）。
  *
- * Return:
- *   task id.
- ************************************************************************************/
+ * 返回值:
+ *   任务ID。
+ ***********************************************************************************/
 pl_tid_t pl_task_create_with_stack(const char *name, main_t task, u16_t prio,
                                    void *stack, size_t stack_size,
                                    int argc, char *argv[]);
 
-/*************************************************************************************
- * Function Name: pl_task_create
- * Description: create a task.
+/**********************************************************************************
+ * 函数名称: pl_task_create
+ * 描述: 创建一个任务并自动分配栈空间。
  *
- * Parameters:
- *   @name: name of the task (optional).
- *   @task: task, prototype is "int task(int argc, char *argv[])"
- *   @prio: priority of the task, if is 0, it will be its parent's priority (optional).
- *   @stack_size: size of the stack (must specify).
- *   @argc: the count of argv (optional).
- *   @argv: argv[] (optional).
+ * 参数:
+ *   @name: 任务名称（可选）。
+ *   @task: 任务函数原型，形式为 "int task(int argc, char *argv[])"。
+ *   @prio: 任务优先级，若为0则继承其父任务的优先级（可选）。
+ *   @stack_size: 栈大小（必须指定）。
+ *   @argc: 参数数量（可选）。
+ *   @argv: 参数列表（可选）。
  *
- * Return:
- *   task id.
- ************************************************************************************/
+ * 返回值:
+ *   任务ID。
+ ***********************************************************************************/
 pl_tid_t pl_task_create(const char *name, main_t task, u16_t prio,
                         size_t stack_size, int argc, char *argv[]);
 
-/*************************************************************************************
- * Function Name: pl_task_delay_ticks
+/**********************************************************************************
+ * 函数名称: pl_task_delay_ticks
+ * 描述: 延迟指定的时钟周期函数。
  *
- * Description:
- *   Delay ticks function.
- * 
- * Parameters:
- *  @ticks: delay ticks;
+ * 参数:
+ *  @ticks: 需要延迟的时钟周期数。
  *
- * Return:
- *  none.
- ************************************************************************************/
+ * 返回值:
+ *  无。
+ ***********************************************************************************/
 void pl_task_delay_ticks(u32_t ticks);
 
-/*************************************************************************************
- * Function Name: pl_task_join
+/**********************************************************************************
+ * 函数名称: pl_task_join
+ * 描述: 等待指定任务退出。
  *
- * Description:
- *   wait for task exit.
- * 
- * Parameters:
- *  @tid: task id;
- *  @ret: return value of waitting task.
+ * 参数:
+ *  @tid: 任务ID。
+ *  @ret: 等待任务的返回值（传出参数）。
  *
- * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
+ * 返回值:
+ *  成功时返回大于等于0的值，失败时返回小于0的值。
+ ***********************************************************************************/
 int pl_task_join(pl_tid_t tid, int *ret);
 
-/*************************************************************************************
- * Function Name: pl_task_pend
+/**********************************************************************************
+ * 函数名称: pl_task_pend
+ * 描述: 挂起任务。
  *
- * Description:
- *   pend task.
- * 
- * NOTE:
- *   Do not use it in pl_port_enter_critical.
+ * 注意:
+ *   不应在临界区保护函数`pl_port_enter_critical`内部使用此函数。
  *
- * Parameters:
- *  @tid: task id, if tid is NULL, it will pend himself.
+ * 参数:
+ *  @tid: 任务ID，如果为NULL，则挂起当前任务自身。
  *
- * Return:
- *  void.
- ************************************************************************************/
+ * 返回值:
+ *   无。
+ ***********************************************************************************/
 void pl_task_pend(pl_tid_t tid);
 
-/*************************************************************************************
- * Function Name: pl_task_resume
+/**********************************************************************************
+ * 函数名称: pl_task_resume
+ * 描述: 恢复任务执行。
  *
- * Description:
- *   resume task.
+ * 注意:
+ *   不应在临界区保护函数`pl_port_enter_critical`内部使用此函数。
  *
- * NOTE:
- *   Do not use it in pl_port_enter_critical.
- * 
- * Parameters:
- *  @tid: task id;
+ * 参数:
+ *  @tid: 任务ID。
  *
- * Return:
- *  void.
- ************************************************************************************/
+ * 返回值:
+ *   无。
+ ***********************************************************************************/
 void pl_task_resume(pl_tid_t tid);
 
-/*************************************************************************************
- * Function Name: pl_task_restart
+/**********************************************************************************
+ * 函数名称: pl_task_restart
+ * 描述: 重启一个任务。
  *
- * Description:
- *   restart a task.
+ * 注意:
+ *   不应在临界区保护函数`pl_port_enter_critical`内部使用此函数。
  *
- * NOTE:
- *   Do not use it in pl_port_enter_critical.
- * 
- * Parameters:
- *  @tid: task id;
+ * 参数:
+ *  @tid: 任务ID。
  *
- * Return:
- *  void.
- ************************************************************************************/
+ * 返回值:
+ *   无。
+ ***********************************************************************************/
 void pl_task_restart(pl_tid_t tid);
 
-/*************************************************************************************
- * Function Name: Check if the specified task has exited.
+/**********************************************************************************
+ * 函数名称: pl_task_has_exited
+ * 描述: 检查指定任务是否已退出。
  *
- * Description: specified task.
- * 
- * Parameters:
- *  @tid: The identifier of the task, of type pl_tid_t.;
+ * 参数:
+ *  @tid: 任务标识符，类型为 pl_tid_t。
  *
- * Return:
- *  true if the task has exited; otherwise, returns false.
- ************************************************************************************/
+ * 返回值:
+ *  若任务已退出则返回true，否则返回false。
+ ***********************************************************************************/
 bool pl_task_is_exit(pl_tid_t tid);
 
-/*************************************************************************************
- * Function Name: pl_task_kill
+/**********************************************************************************
+ * 函数名称: pl_task_kill
+ * 描述: 终止一个任务。
  *
- * Description:
- *   kill a task.
- * 
- * Parameters:
- *  @tid: task id;
+ * 参数:
+ *  @tid: 任务ID。
  *
- * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
+ * 返回值:
+ *  成功时返回大于等于0的值，失败时返回小于0的值。
+ ***********************************************************************************/
 int pl_task_kill(pl_tid_t tid);
 
-/*************************************************************************************
- * Function Name: pl_task_get_syscount
+/**********************************************************************************
+ * 函数名称: pl_task_get_syscount
+ * 描述: 获取系统计数器（syscount）的值，通常与系统时钟节拍（systick）相关。
  *
- * Description:
- *   The function is used to get syscount.
- *   on systick system.
- * 
- * Parameters:
- *  @c: count wanted to get.
+ * 参数:
+ *  @c: 想要获取的计数器类型或具体计数。
  *
- * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
+ * 返回值:
+ *  成功时返回大于等于0的计数值，失败时返回小于0的值。
+ ***********************************************************************************/
 int pl_task_get_syscount(u64_t *c);
 
-/*************************************************************************************
- * Function Name: pl_task_get_cpu_rate_count
+/**********************************************************************************
+ * 函数名称: pl_task_get_cpu_rate_count
+ * 描述: 获取CPU利用率统计信息。
+ *   运行在基于systick的系统上。
  *
- * Description:
- *   The function is used to get cpu utilization rate.
- *   on systick system.
- * 
- * Parameters:
- *  @cup_rate_base: base count of cpu utilization rate.
- *  @rate_useful: useful count of cpu utilization rate.
+ * 参数:
+ *  @cup_rate_base: CPU利用率计算的基础计数。
+ *  @rate_useful: CPU有效使用率的计数。
  *
- * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
+ * 返回值:
+ *  成功时返回大于等于0的值表示成功获取数据，失败时返回小于0的值。
+ ***********************************************************************************/
 int pl_task_get_cpu_rate_count(u32_t *rate_base, u32_t *rate_useful);
 
-/*************************************************************************************
- * Function Name: pl_task_get_cpu_rate
+/**********************************************************************************
+ * 函数名称: pl_task_get_cpu_rate
+ * 描述: 计算并获取CPU利用率。
+ *   应用于基于systick的系统环境。
  *
- * Description:
- *   The function is used to get cpu utilization rate.
- *   on systick system.
- * 
- * Parameters:
- *  @int_part: integer part of cpu utilization rate.
- *  @deci_part: decimal part of cpu utilization rate.
+ * 参数:
+ *  @int_part: CPU利用率的整数部分。
+ *  @deci_part: CPU利用率的小数部分。
  *
- * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
+ * 返回值:
+ *  成功时返回大于等于0的值，表示CPU利用率获取成功；失败时返回小于0的值。
+ ***********************************************************************************/
 int pl_task_get_cpu_rate(u32_t *int_part, u32_t *deci_part);
 
 #ifdef __cplusplus

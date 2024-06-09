@@ -46,105 +46,93 @@ struct pl_workqueue {
 };
 
 uint_t wq_get_work_num(void);
-/*************************************************************************************
- * Function Name: pl_workqueue_create
- *  @g_pl_sys_hiwq_handle: handle of the hight priority workqueue.
- *  @g_pl_sys_lowq_handle: handle of the low priority workqueue.
+/**********************************************************************************
+ * 函数名称: pl_workqueue_create
+ *  @g_pl_sys_hiwq_handle: 高优先级工作队列的句柄。
+ *  @g_pl_sys_lowq_handle: 低优先级工作队列的句柄。
  *
- * Description:
- *   create a workqueue.
- ************************************************************************************/
+ * 描述:
+ *   创建一个工作队列，包含高优先级和低优先级两个队列。
+ ***********************************************************************************/
 extern struct pl_workqueue *g_pl_sys_hiwq_handle;
 extern struct pl_workqueue *g_pl_sys_lowq_handle;
 
-/*************************************************************************************
- * Function Name: pl_workqueue_create
+/**********************************************************************************
+ * 函数名称: pl_workqueue_create
+ * 描述: 创建一个具有指定属性的工作队列。
  *
- * Description:
- *   create a workqueue.
- * 
- * Parameters:
- *  @name: workqueue name.
- *  @proi: priority of workqueue.
- *  @wq_stack_sz: workqueue task stack size.
- *  @wq_fifo_cap: capacity of workqueue fifo.
+ * 参数:
+ *  @name: 工作队列的名称。
+ *  @proi: 工作队列的优先级。
+ *  @wq_stack_sz: 工作队列任务的栈大小。
+ *  @wq_fifo_cap: 工作队列FIFO的容量。
  *
- * Return:
- *  @struct pl_workqueue*: handle of workqueue requested.
- ************************************************************************************/
+ * 返回值:
+ *  @struct pl_workqueue*: 创建的工作队列的句柄。
+ ***********************************************************************************/
 struct pl_workqueue *pl_workqueue_create(const char *name, u16_t prio,
                                          size_t wq_stack_sz, u32_t wq_fifo_cap);
 
-/*************************************************************************************
- * Function Name: pl_workqueue_destroy
+/**********************************************************************************
+ * 函数名称: pl_workqueue_destroy
+ * 描述: 销毁一个工作队列。
  *
- * Description:
- *   destroy a workqueue.
- * 
- * Parameters:
- *  @workqueue: workqueue handle.
+ * 参数:
+ *  @workqueue: 要销毁的工作队列的句柄。
  *
- * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
+ * 返回值:
+ *  成功时返回大于等于0的值，失败时返回小于0的值。
+ ***********************************************************************************/
 int pl_workqueue_destroy(struct pl_workqueue *workqueue);
 
-/*************************************************************************************
- * Function Name: pl_work_init
+/**********************************************************************************
+ * 函数名称: pl_work_init
+ * 描述: 初始化一个工作项（work）结构体。
  *
- * Description:
- *   initialize a work.
- * 
- * Parameters:
- *  @work: work.
+ * 参数:
+ *  @work: 工作项的指针，需要被初始化。
  *
- * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
+ * 返回值:
+ *  成功时返回大于等于0的值，失败时返回小于0的值。
+ ***********************************************************************************/
 int pl_work_init(struct pl_work *work, pl_work_fun_t fun, void *priv_data);
 
-/*************************************************************************************
- * Function Name: pl_work_add
+/**********************************************************************************
+ * 函数名称: pl_work_add
+ * 描述: 将一个工作项添加到工作队列中。
  *
- * Description:
- *   add a work to the workqueue.
- * 
- * Parameters:
- *  @workqueue: workqueue handle.
- *  @work: work.
+ * 参数:
+ *  @workqueue: 工作队列的句柄。
+ *  @work: 要添加的工作项。
  *
- * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
+ * 返回值:
+ *  成功时返回大于等于0的值，失败时返回小于0的值。
+ ***********************************************************************************/
 int pl_work_add(struct pl_workqueue *workqueue, struct pl_work *work);
 
-/*************************************************************************************
- * Function Name: pl_work_cancel
+/**********************************************************************************
+ * 函数名称: pl_work_cancel
+ * 描述: 取消工作队列中的一个工作项。
  *
- * Description:
- *   cancel a work int the workqueue.
- * 
- * Parameters:
- *  @workqueue: workqueue handle.
- *  @work: work.
+ * 参数:
+ *  @workqueue: 工作队列的句柄。
+ *  @work: 要取消的工作项。
  *
- * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
+ * 返回值:
+ *  成功时返回大于等于0的值，失败时返回小于0的值。
+ ***********************************************************************************/
 int pl_work_cancel(struct pl_workqueue *workqueue, struct pl_work *work);
 
-/*************************************************************************************
- * Function Name: pl_work_get_private_data
+/**********************************************************************************
+ * 函数名称: pl_work_get_private_data
+ * 描述: 获取工作项的私有数据。
  *
- * Description:
- *   get the private data of work.
- * 
- * Parameters:
- *  @work: work.
+ * 参数:
+ *  @work: 工作项的指针。
  *
- * Return:
- *   private data of the work.
- ************************************************************************************/
+ * 返回值:
+ *   工作项所关联的私有数据。
+ ***********************************************************************************/
 void *pl_work_get_private_data(struct pl_work *work);
 
 #endif /* __KERNEL_WORKQUEUE_H__ */

@@ -45,112 +45,112 @@ struct pl_stimer {
 extern "C" {
 #endif
 
-/*************************************************************************************
- * Function Name: pl_softtimer_request
- *
- * Description:
- *   request a soft timer.
+/**********************************************************************************
+ * 函数名称: pl_softtimer_request
  * 
- * Parameters:
- *  @name: timer name.
+ * 描述:
+ *   请求一个软定时器。
+ * 
+ * 参数:
+ *  @name: 定时器名称。
  *
- * Return:
- *  @struct pl_stimer*: handle of soft timer requested.
- ************************************************************************************/
+ * 返回值:
+ *  软定时器的句柄（@struct pl_stimer*）。
+ ***********************************************************************************/
 struct pl_stimer *pl_softtimer_request(const char *name);
 
-/*************************************************************************************
- * Function Name: pl_softtimer_get_private_data
- *
- * Description:
- *   get private data of soft timer.
+/**********************************************************************************
+ * 函数名称: pl_softtimer_get_private_data
  * 
- * Parameters:
- *  @timer: handle of soft timer requested.
- *  @data: private data addr.
+ * 描述:
+ *   获取软定时器的私有数据。
+ * 
+ * 参数:
+ *  @timer: 软定时器的句柄。
+ *  @data: 私有数据的地址指针。
  *
- * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
+ * 返回值:
+ *  成功时返回大于等于0的值，失败时返回小于0的值。
+ ***********************************************************************************/
 int pl_softtimer_get_private_data(struct pl_stimer *timer, void **data);
 
-/*************************************************************************************
- * Function Name: pl_softtimer_timer_init
- *
- * Description:
- *   init soft timer.
+/**********************************************************************************
+ * 函数名称: pl_softtimer_timer_init
  * 
- * Parameters:
- *  @timer: handle of soft timer requested.
- *  @fun: callback function.
- *  @timing_cnt: the count of timing.
- *  @priv_data: private data.
+ * 描述:
+ *   初始化软定时器。
+ * 
+ * 参数:
+ *  @timer: 软定时器的句柄。
+ *  @fun: 回调函数指针。
+ *  @timing_cnt: 定时次数。
+ *  @priv_data: 私有数据。
  *
- * Return:
- *  void.
- ************************************************************************************/
+ * 返回值:
+ *   无。
+ ***********************************************************************************/
 void pl_softtimer_timer_init(struct pl_stimer *stimer, pl_stimer_fun_t fun,
                                          u64_t timing_cnt, void *priv_data);
 
-/*************************************************************************************
- * Function Name: pl_softtimer_start
- *
- * Description:
- *   start soft timer.
+/**********************************************************************************
+ * 函数名称: pl_softtimer_start
  * 
- * Parameters:
- *  @timer: handle of soft timer requested.
+ * 描述:
+ *   启动软定时器。
+ * 
+ * 参数:
+ *  @timer: 软定时器的句柄。
  *
- * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
+ * 返回值:
+ *  成功时返回大于等于0的值，失败时返回小于0的值。
+ ***********************************************************************************/
 int pl_softtimer_start(struct pl_stimer *timer);
 
-/*************************************************************************************
- * Function Name: pl_softtimer_reload
- *
- * Description:
- *   reload soft timer.
+/**********************************************************************************
+ * 函数名称: pl_softtimer_reload
  * 
- * Parameters:
- *  @timer: handle of soft timer requested.
- *  @reload: reload whether or not.
- *  @fun: callback function.
- *  @timing_cnt: the count of timing.
- *  @priv_data: private data.
+ * 描述:
+ *   重载软定时器。
+ * 
+ * 参数:
+ *  @timer: 软定时器的句柄。
+ *  @reload: 是否重载标志。
+ *  @fun: 回调函数指针。
+ *  @timing_cnt: 定时次数。
+ *  @priv_data: 私有数据。
  *
- * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
+ * 返回值:
+ *  成功时返回大于等于0的值，失败时返回小于0的值。
+ ***********************************************************************************/
 int pl_softtimer_reload(struct pl_stimer *timer, bool reload, pl_stimer_fun_t fun,
                                                u64_t timing_cnt, void *priv_data);
 
-/*************************************************************************************
- * Function Name: pl_softtimer_cancel
- *
- * Description:
- *   cancel soft timer.
+/**********************************************************************************
+ * 函数名称: pl_softtimer_cancel
  * 
- * Parameters:
- *  @timer: handle of soft timer requested.
+ * 描述:
+ *   取消软定时器。
+ * 
+ * 参数:
+ *  @timer: 软定时器的句柄。
  *
- * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
+ * 返回值:
+ *  成功时返回大于等于0的值，失败时返回小于0的值。
+ ***********************************************************************************/
 int pl_softtimer_cancel(struct pl_stimer *timer);
 
-/*************************************************************************************
- * Function Name: pl_softtimer_cancel
- *
- * Description:
- *   cancel soft timer.
+/**********************************************************************************
+ * 函数名称: pl_softtimer_cancel
  * 
- * Parameters:
- *  @timer: handle of soft timer requested.
+ * 描述:
+ *   取消软定时器。
+ * 
+ * 参数:
+ *  @timer: 软定时器的句柄。
  *
- * Return:
- *  void.
- ************************************************************************************/
+ * 返回值:
+ *   无。
+ ***********************************************************************************/
 void pl_softtimer_release(struct pl_stimer *timer);
 
 #ifdef __cplusplus
