@@ -1,5 +1,5 @@
-#include <port.h>
 #include <config.h>
+#include <port/port.h>
 #include <kernel/initcall.h>
 #include "early_setup/early_uart.h"
 #include "stm32f10x.h"

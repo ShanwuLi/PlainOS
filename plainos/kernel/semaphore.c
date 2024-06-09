@@ -23,7 +23,7 @@ SOFTWARE.
 
 #include <config.h>
 #include <errno.h>
-#include <port.h>
+#include <port/port.h>
 #include <kernel/list.h>
 #include <kernel/kernel.h>
 #include <kernel/semaphore.h>

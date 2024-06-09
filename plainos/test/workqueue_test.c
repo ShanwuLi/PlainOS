@@ -1,7 +1,8 @@
-#include <kernel/initcall.h>
-#include "errno.h"
-#include <port.h>
+#include <config.h>
+#include <errno.h>
 #include <types.h>
+#include <kernel/initcall.h>
+#include <port/port.h>
 #include <kernel/syslog.h>
 #include <kernel/workqueue.h>
 

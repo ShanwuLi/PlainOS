@@ -22,7 +22,7 @@ SOFTWARE.
 */
 
 #include <errno.h>
-#include <port.h>
+#include <port/port.h>
 #include <kernel/initcall.h>
 #include <kernel/assert.h>
 #include "initcall.h"

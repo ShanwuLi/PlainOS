@@ -24,7 +24,7 @@ SOFTWARE.
 #include <errno.h>
 #include <types.h>
 #include <string.h>
-#include <port.h>
+#include <port/port.h>
 #include <kernel/kernel.h>
 #include <kernel/mempool.h>
 #include <kernel/kfifo.h>
