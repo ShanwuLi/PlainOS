@@ -22,8 +22,6 @@ SOFTWARE.
 */
 
 #include <config.h>
-#ifdef CONFIG_PL_CFG_SHELL_SUPPORT
-
 #include <types.h>
 #include <errno.h>
 #include <config.h>
@@ -315,5 +313,3 @@ static int pl_shell_init(void)
 	return OK;
 }
 pl_late_initcall(pl_shell_init);
-
-#endif /* CONFIG_PL_CFG_SHELL_SUPPORT */
