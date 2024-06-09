@@ -45,7 +45,6 @@ struct pl_workqueue {
 	struct pl_work **fifo;
 };
 
-uint_t wq_get_work_num(void);
 /*************************************************************************************
  * Function Name: pl_workqueue_create
  *  @g_pl_sys_hiwq_handle: handle of the hight priority workqueue.
@@ -73,7 +72,7 @@ extern struct pl_workqueue *g_pl_sys_lowq_handle;
  *  @struct pl_workqueue*: handle of workqueue requested.
  ************************************************************************************/
 struct pl_workqueue *pl_workqueue_create(const char *name, u16_t prio,
-                                         size_t wq_stack_sz, u32_t wq_fifo_cap);
+                               size_t wq_stack_sz, u32_t wq_fifo_cap);
 
 /*************************************************************************************
  * Function Name: pl_workqueue_destroy

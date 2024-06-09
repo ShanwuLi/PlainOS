@@ -1,42 +1,42 @@
-#  MIT License
-#
-# Copyright (c) 2023 PlainOS
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
-# please replace the toolchain to your own.
-CROSS_COMPILE := arm-none-eabi-#avr
-CC       := $(CROSS_COMPILE)gcc
-OBJDUMP  := $(CROSS_COMPILE)objdump
-CP       := $(CROSS_COMPILE)objcopy
-SIZE     := $(CROSS_COMPILE)size
+CROSS_COMPILE := arm-none-eabi-
+CC := $(CROSS_COMPILE)gcc
+OBJDUMP := $(CROSS_COMPILE)objdump
+CP := $(CROSS_COMPILE)objcopy
+SIZE := $(CROSS_COMPILE)size
 OPTIMIZE := -O3
-DEBUG    := -g#-DNDEBUG to close debug in DEFINE.
-
-ARCH     := arm32
-MCU      := -mcpu=cortex-m3#-mmcu=atmega2560
-CHIP     := stm32f103c8t6#atmega2560
-
-# TEST CONFIGURATIONS
-PL_MK_CFG_OS_TEST = n
-PL_MK_CFG_OS_MEMPOOL_TEST = y
-PL_MK_CFG_OS_TASK_TEST = y
-PL_MK_CFG_OS_SOFTTIMER_TEST = y
-PL_MK_CFG_OS_KFIFO_TEST = y
-PL_MK_CFG_OS_WORKQUEUE_TEST = y
+DEBUG := -g
+ARCH := arm32
+MCU := -mcpu=cortex-m3
+CHIP := stm32f103c8t6
+PL_CFG_ASSERT = y
+PL_CFG_OS_CHAR_LOGO = y
+PL_CFG_CHECK_STACK_OVERFLOW = y
+PL_CFG_CHECK_STACK_OVERFLOW_MAGIC = ((uintptr_t)(0xabadc0de))
+PL_CFG_SHELL_SUPPORT = y
+PL_CFG_SHELL_PREFIX_NAME = "plsh"
+PL_CFG_SHELL_CMD_BUFF_MAX = (128)
+PL_CFG_SHELL_CMD_ARGC_MAX = (20)
+PL_CFG_SHELL_CMD_EXEC_TASK_PRIORITY = (90)
+PL_CFG_SHELL_CMD_EXEC_TASK_STACK_SIZE = (1024)
+PL_CFG_SYSTICK_TIME_SLICE_US = (15)
+PL_CFG_DEFAULT_MEMPOOL_SIZE = (14*1024)
+PL_CFG_DEFAULT_MEMPOOL_GRAIN_ORDER = (5)
+PL_CFG_MAX_TASKS_NUM = (900u)
+PL_CFG_SYS_RSVD_HIGHEST_PRIOTITY = (2u)
+PL_CFG_TASK_PRIORITIES_MAX = (99u)
+PL_CFG_INIT_TASK_STACK_SIZE = (512)
+PL_CFG_IDLE_TASK_STACK_SIZE = (512)
+PL_CFG_CPU_RATE_INTERVAL_TICKS = (102400)
+PL_CFG_SOFTTIMER_DAEMON_TASK_STACK_SIZE = (512)
+PL_CFG_HI_WORKQUEUE_TASK_STACK_SIZE = (512)
+PL_CFG_HI_WORKQUEUE_FIFO_CAPACITY = (128)
+PL_CFG_LO_WORKQUEUE_TASK_STACK_SIZE = (1024)
+PL_CFG_LO_WORKQUEUE_TASK_PRIORITY = (CONFIG_PL_CFG_TASK_PRIORITIES_MAX)
+PL_CFG_LO_WORKQUEUE_FIFO_CAPACITY = (128)
+PL_CFG_SYSLOG_ANSI_COLOR = n
+PL_MK_CFG_OS_TEST := n
+PL_MK_CFG_OS_MEMPOOL_TEST := y
+PL_MK_CFG_OS_TASK_TEST := y
+PL_MK_CFG_OS_SOFTTIMER_TEST := y
+PL_MK_CFG_OS_KFIFO_TEST := y
+PL_MK_CFG_OS_WORKQUEUE_TEST := y

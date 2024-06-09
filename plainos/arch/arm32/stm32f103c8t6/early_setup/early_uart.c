@@ -19,12 +19,11 @@ void USART1_Init(uint_t USART1_BaudRate)
    USART1->CR1|=(1<<2);                    //USART接收被使能     
 	USART1->CR1|=(1<<5);                    //缓冲区非空中断使能      
    USART1->CR1|=(1<<3);                    //USART发送被使能           
-	 
-	
-   integer=128*1000*1000/(USART1_BaudRate*16);         
-   decimal=(float)(128*1000*1000/(USART1_BaudRate*16))-integer;   
-   USART1->BRR=(integer<<4)|((unsigned int)decimal*16);  
-   
+
+   integer=72*1000*1000/(USART1_BaudRate*16);
+   decimal=(float)(72*1000*1000/(USART1_BaudRate*16))-integer;
+   USART1->BRR=(integer<<4)|((unsigned int)decimal*16);
+
    //NVIC_SetPriorityGrouping(1);            
    //NVIC_SetPriority(USART1_IRQn, NVIC_EncodePriority(1,2,1));     
    NVIC_EnableIRQ(USART1_IRQn);            

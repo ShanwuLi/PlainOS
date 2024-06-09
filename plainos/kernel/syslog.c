@@ -72,7 +72,7 @@ static void put_string(int (*putc)(const char c), const char *str)
 void pl_syslog_put_chars(int (*putc)(const char c), const char *start, const char *end)
 {
 	const char *ch;
- 
+
 	for (ch = start; ch <= end; ch++)
 		putc(*ch);
 }

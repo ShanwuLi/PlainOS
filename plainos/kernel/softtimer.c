@@ -72,12 +72,18 @@ static int softtimer_daemon_task(int argc, char **argv)
 {
 	USED(argc);
 	USED(argv);
+	bool is_empty;
 	struct pl_stimer *first;
 	pl_stimer_fun_t stimer_fun;
 
 	while (true) {
+		/* get the timer_ctrl_list status */
+		pl_port_enter_critical();
+		is_empty = list_is_empty(&pl_stimer_ctrl.head);
+		pl_port_exit_critical();
+
 		/* if list of softtimer is empty, we need to suspend daemon task */
-		if (list_is_empty(&pl_stimer_ctrl.head)) {
+		if (is_empty) {
 			pl_task_pend(NULL);
 			continue;
 		}
@@ -204,11 +210,11 @@ int pl_softtimer_start(struct pl_stimer *timer)
 	if (!list_is_empty(&timer->node))
 		return -EBUSY;
 
-	pl_port_enter_critical();
 	pl_task_get_syscount(&syscount);
 	timer->reach_cnt = syscount + timer->timing_cnt;
 	timer_list = pl_task_get_timer_list();
 
+	pl_port_enter_critical();
 	if (list_is_empty(timer_list)) {
 		list_add_node_at_tail(timer_list, &timer->node);
 		goto out;
@@ -275,9 +281,10 @@ int pl_softtimer_cancel(struct pl_stimer *timer)
 
 	pl_port_enter_critical();
 	list_del_node(&timer->node);
+	pl_port_exit_critical();
+
 	timer->fun = NULL;
 	timer->reload = false;
-	pl_port_exit_critical();
 	list_init(&timer->node);
 
 	return OK;
@@ -337,7 +344,7 @@ int pl_softtimer_core_init(void)
 	list_init(&pl_stimer_ctrl.head);
 	pl_stimer_ctrl.daemon = pl_task_sys_create("softtimer_daemon",
 	                        softtimer_daemon_task, 0,
-	                        PL_CFG_SOFTTIMER_DAEMON_TASK_STACK_SIZE, 0, NULL);
+	                        CONFIG_PL_CFG_SOFTTIMER_DAEMON_TASK_STACK_SIZE, 0, NULL);
 	if (pl_stimer_ctrl.daemon == NULL) {
 		pl_syslog_err("soft timer init failed\r\n");
 		return -EFAULT;
