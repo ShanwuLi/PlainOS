@@ -305,8 +305,14 @@ static void rdytask_list_init(void)
  ************************************************************************************/
 void pl_task_insert_tcb_to_rdylist(struct tcb *tcb)
 {
-	u16_t prio = tcb->prio;
-	struct task_list *rdylist = &g_task_core_blk.ready_list[prio];
+	u16_t prio;
+	struct task_list *rdylist;
+
+	if (tcb == NULL || tcb->curr_state == PL_TASK_STATE_READY)
+		return;
+
+	prio = tcb->prio;
+	rdylist = &g_task_core_blk.ready_list[prio];
 
 	if (rdylist->head == NULL) {
 		list_init(&tcb->node);
@@ -331,9 +337,14 @@ void pl_task_insert_tcb_to_rdylist(struct tcb *tcb)
  ************************************************************************************/
 void pl_task_insert_tcb_to_delaylist(struct tcb *tcb)
 {
-	struct task_list *delaylist = &g_task_core_blk.delay_list;
-	struct tcb *pos = delaylist->head;
+	struct tcb *pos;
+	struct task_list *delaylist;
 
+	if (tcb == NULL || tcb->curr_state == PL_TASK_STATE_DELAY)
+		return;
+
+	delaylist = &g_task_core_blk.delay_list;
+	pos = delaylist->head;
 	list_for_each_entry(pos, &delaylist->head->node, struct tcb, node) {
 		if (tcb->delay_ticks < pos->delay_ticks)
 			break;
@@ -356,6 +367,9 @@ void pl_task_insert_tcb_to_delaylist(struct tcb *tcb)
  ************************************************************************************/
 void pl_task_insert_tcb_to_exitlist(struct tcb *tcb)
 {
+	if (tcb == NULL || tcb->curr_state == PL_TASK_STATE_EXIT)
+		return;
+
 	tcb->curr_state = PL_TASK_STATE_EXIT;
 	list_add_node_at_tail(&g_task_core_blk.exit_list, &tcb->node);
 }
@@ -371,6 +385,9 @@ void pl_task_insert_tcb_to_exitlist(struct tcb *tcb)
  ************************************************************************************/
 void pl_task_insert_tcb_to_waitlist(struct list_node *wait_list, struct tcb *tcb)
 {
+	if (tcb == NULL || tcb->curr_state == PL_TASK_STATE_WAITING)
+		return;
+
 	tcb->curr_state = PL_TASK_STATE_WAITING;
 	list_add_node_at_tail(wait_list, &tcb->node);
 }
@@ -386,6 +403,9 @@ void pl_task_insert_tcb_to_waitlist(struct list_node *wait_list, struct tcb *tcb
  ************************************************************************************/
 void pl_task_insert_tcb_to_pendlist(struct tcb *tcb)
 {
+	if (tcb == NULL || tcb->curr_state == PL_TASK_STATE_PENDING)
+		return;
+
 	tcb->curr_state = PL_TASK_STATE_PENDING;
 	list_add_node_at_tail(&g_task_core_blk.pend_list, &tcb->node);
 }
@@ -401,8 +421,12 @@ void pl_task_insert_tcb_to_pendlist(struct tcb *tcb)
  ************************************************************************************/
 void pl_task_remove_tcb_from_delaylist(struct tcb *tcb)
 {
-	struct task_list *delaylist = &g_task_core_blk.delay_list;
+	struct task_list *delaylist;
 
+	if (tcb == NULL || tcb->curr_state != PL_TASK_STATE_DELAY)
+		return;
+
+	delaylist = &g_task_core_blk.delay_list;
 	--delaylist->num;
 	list_del_node(&tcb->node);
 }
@@ -418,9 +442,16 @@ void pl_task_remove_tcb_from_delaylist(struct tcb *tcb)
  ************************************************************************************/
 void pl_task_remove_tcb_from_rdylist(struct tcb *tcb)
 {
-	u16_t prio = tcb->prio;
-	struct task_list *rdylist = &g_task_core_blk.ready_list[prio];
-	u16_t num = rdylist->num;
+	u16_t num;
+	u16_t prio;
+	struct task_list *rdylist;
+
+	if (tcb == NULL || tcb->curr_state != PL_TASK_STATE_READY)
+		return;
+
+	prio = tcb->prio;
+	rdylist = &g_task_core_blk.ready_list[prio];
+	num = rdylist->num;
 
 	if(num == 1) {
 		clear_bit_of_hiprio_bitmap(prio);
@@ -618,7 +649,6 @@ static void task_init_tcb(const char *name, main_t task, u16_t prio,
                struct tcb *tcb, void *stack, int argc, char *argv[])
 {
 	tcb->name = name;
-	tcb->parent = g_task_core_blk.curr_tcb;
 	tcb->prio = prio;
 	tcb->context_sp = stack;
 	tcb->context_init_sp = stack;
@@ -626,6 +656,8 @@ static void task_init_tcb(const char *name, main_t task, u16_t prio,
 	tcb->argc = argc;
 	tcb->argv = argv;
 	tcb->delay_ticks = 0;
+	tcb->curr_state = PL_TASK_STATE_INITED;
+	tcb->parent = g_task_core_blk.curr_tcb;
 	tcb->wait_for_task_ret = -EUNKNOWE;
 	list_init(&tcb->wait_head);
 	*((uintptr_t *)(tcb->context_top_sp)) = CONFIG_PL_CFG_CHECK_STACK_OVERFLOW_MAGIC;
@@ -895,27 +927,6 @@ void pl_task_resume(pl_tid_t tid)
 		pl_port_exit_critical();
 		pl_task_context_switch();
 	}
-}
-
-/*************************************************************************************
- * Function Name: Check if the specified task has exited.
- *
- * Description: specified task.
- * 
- * Parameters:
- *  @tid: The identifier of the task, of type pl_tid_t.;
- *
- * Return:
- *  true if the task has exited; otherwise, returns false.
- ************************************************************************************/
-bool pl_task_is_exit(pl_tid_t tid)
-{
-	struct tcb *tcb = (struct tcb *)tid;
-
-	if (tcb == NULL || tcb->curr_state != PL_TASK_STATE_EXIT)
-		return false;
-
-	return true;
 }
 
 /*************************************************************************************
