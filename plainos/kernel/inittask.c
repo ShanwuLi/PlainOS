@@ -68,7 +68,7 @@ int pl_init_task_init(void)
 	pl_tid_t init_taskid;
 
 	init_taskid = pl_task_sys_create("init_task", init_task, 0,
-	                                 CONFIG_PL_CFG_INIT_TASK_STACK_SIZE, 0, NULL);
+	                                 CONFIG_PL_INIT_TASK_STACK_SIZE, 0, NULL);
 	if (init_taskid == NULL) {
 		pl_early_syslog_err("init task create failed\r\n");
 		return -1;

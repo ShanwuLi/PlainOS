@@ -59,8 +59,8 @@ struct pl_shell {
 	int cmd_buffer_idx;
 	pl_tid_t cmd_task;
 	struct pl_serial_desc *desc;
-	char *cmd_argv[CONFIG_PL_CFG_SHELL_CMD_ARGC_MAX];
-	char cmd_buffer[CONFIG_PL_CFG_SHELL_CMD_BUFF_MAX];
+	char *cmd_argv[CONFIG_PL_SHELL_CMD_ARGC_MAX];
+	char cmd_buffer[CONFIG_PL_SHELL_CMD_BUFF_MAX];
 };
 
 static struct pl_shell plsh;
@@ -107,7 +107,7 @@ static int plsh_process_received_chars(struct pl_shell *sh, char recv_ch)
 
 	pl_port_putc(recv_ch);
 	/* check ending condition */
-	if (sh->cmd_buffer_idx >= (CONFIG_PL_CFG_SHELL_CMD_BUFF_MAX - 1) ||
+	if (sh->cmd_buffer_idx >= (CONFIG_PL_SHELL_CMD_BUFF_MAX - 1) ||
 		recv_ch == ASCLL_ENTER) {
 		if (sh->state == CMD_PARSE_STATE_CMD)
 			sh->cmd_argc++;
@@ -211,7 +211,7 @@ static int plsh_exec_cmd_task(int argc, char *argv[])
 	struct pl_app_entry *app_entry;
 	struct pl_kfifo *recv_fifo = &(plsh.desc->recv_info.fifo);
 
-	pl_early_syslog(CONFIG_PL_CFG_SHELL_PREFIX_NAME"# ");
+	pl_early_syslog(CONFIG_PL_SHELL_PREFIX_NAME"# ");
 	plsh_cmd_reset(&plsh);
 	while (true) {
 		if (pl_kfifo_len(recv_fifo) == 0) {
@@ -234,7 +234,7 @@ static int plsh_exec_cmd_task(int argc, char *argv[])
 		ret = plsh_get_argvs_from_buffer(plsh.cmd_buffer, plsh.cmd_argc, plsh.cmd_argv);
 		if (ret < 0) {
 			plsh_cmd_reset(&plsh);
-			pl_early_syslog(CONFIG_PL_CFG_SHELL_PREFIX_NAME"# ");
+			pl_early_syslog(CONFIG_PL_SHELL_PREFIX_NAME"# ");
 			continue;
 		}
 
@@ -242,7 +242,7 @@ static int plsh_exec_cmd_task(int argc, char *argv[])
 		app_entry = plsh_find_app_entry(plsh.cmd_argv[0]);
 		if (app_entry == NULL) {
 			pl_early_syslog_err("%s not found\r\n", plsh.cmd_argv[0]);
-			pl_early_syslog(CONFIG_PL_CFG_SHELL_PREFIX_NAME"# ");
+			pl_early_syslog(CONFIG_PL_SHELL_PREFIX_NAME"# ");
 			plsh_cmd_reset(&plsh);
 			continue;
 		}
@@ -253,7 +253,7 @@ static int plsh_exec_cmd_task(int argc, char *argv[])
 			pl_early_syslog_err("app[%s] exec cmd failed, ret:%d\r\n", app_entry->name, ret);
 
 		plsh_cmd_reset(&plsh);
-		pl_early_syslog(CONFIG_PL_CFG_SHELL_PREFIX_NAME"# ");
+		pl_early_syslog(CONFIG_PL_SHELL_PREFIX_NAME"# ");
 	}
 
 	return -EUNKNOWE;
@@ -289,7 +289,7 @@ static int pl_shell_init(void)
 
 	serial = pl_serial_find_desc(0);
 	if (serial == NULL) {
-		pl_syslog_err("serial not found for %s\r\n", CONFIG_PL_CFG_SHELL_PREFIX_NAME);
+		pl_syslog_err("serial not found for %s\r\n", CONFIG_PL_SHELL_PREFIX_NAME);
 		return OK;
 	}
 
@@ -299,11 +299,11 @@ static int pl_shell_init(void)
 		return OK;
 	}
 
-	plsh.cmd_task = pl_task_create(CONFIG_PL_CFG_SHELL_PREFIX_NAME, plsh_exec_cmd_task,
-	                               CONFIG_PL_CFG_SHELL_CMD_EXEC_TASK_PRIORITY,
-	                               CONFIG_PL_CFG_SHELL_CMD_EXEC_TASK_STACK_SIZE, 0, NULL);
+	plsh.cmd_task = pl_task_create(CONFIG_PL_SHELL_PREFIX_NAME, plsh_exec_cmd_task,
+	                               CONFIG_PL_SHELL_CMD_EXEC_TASK_PRIORITY,
+	                               CONFIG_PL_SHELL_CMD_EXEC_TASK_STACK_SIZE, 0, NULL);
 	if (plsh.cmd_task == NULL) {
-		pl_syslog_err("%s task create failed\r\n", CONFIG_PL_CFG_SHELL_PREFIX_NAME);
+		pl_syslog_err("%s task create failed\r\n", CONFIG_PL_SHELL_PREFIX_NAME);
 		return OK;
 	}
 

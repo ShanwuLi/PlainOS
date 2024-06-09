@@ -44,8 +44,8 @@ static int idle_task1(int argc, char *argv[])
 	char *argvs2[2] = {(char *)"+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\r\n", NULL};
 	char *argvs3[2] = {(char *)"-----------------------------------------------------------\r\n", NULL};
 
-	tcb2 = pl_task_create("idle_task2", idle_task2, CONFIG_PL_CFG_TASK_PRIORITIES_MAX - 1, 256, 1, argvs2);
-	tcb3 = pl_task_create("idle_task3", idle_task2, CONFIG_PL_CFG_TASK_PRIORITIES_MAX - 2, 256, 1, argvs3);
+	tcb2 = pl_task_create("idle_task2", idle_task2, CONFIG_PL_TASK_PRIORITIES_MAX - 1, 256, 1, argvs2);
+	tcb3 = pl_task_create("idle_task3", idle_task2, CONFIG_PL_TASK_PRIORITIES_MAX - 2, 256, 1, argvs3);
 	if (tcb2 == NULL || tcb3 == NULL) {
 		pl_syslog_info("idle_task2 or idle_task3 create failed\r\n");
 		return -ENOMEM;
@@ -82,7 +82,7 @@ static int task_test(void)
 	pl_tid_t test_task;
 	pl_syslog_info("task test\r\n");
 
-	test_task = pl_task_create("idle_task1", idle_task1, CONFIG_PL_CFG_TASK_PRIORITIES_MAX - 1, 512, 0, NULL);
+	test_task = pl_task_create("idle_task1", idle_task1, CONFIG_PL_TASK_PRIORITIES_MAX - 1, 512, 0, NULL);
 	if (test_task == NULL) {
 		pl_syslog_err("test task create failed\r\n");
 		return 0;
