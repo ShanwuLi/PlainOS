@@ -27,7 +27,7 @@ SOFTWARE.
 #include <stdlib.h>
 #include <sys/stat.h>
 
-#define CFG_LINE_MAX_LEN        512
+#define CFG_LINE_MAX_LEN        1024
 #define CFG_HEADER_TITLE        "#ifndef __PLAINOS_CONFIG_H__\n#define __PLAINOS_CONFIG_H__\n\n"
 #define CFG_HEADER_TITLE_END    "\n#endif /* __PLAINOS_CONFIG_H__ */\n"
 #define CFG_HEADER_VAR_PREFIX   "#define CONFIG_"
@@ -413,6 +413,10 @@ static int plain_cfg_parse(char *cfg_chars_in)
 		} else {
 			cfg_file_col_num++;
 		}
+
+		/* check line length, don't allow more than CFG_LINE_MAX_LEN */
+		if (cfg_file_col_num >= CFG_LINE_MAX_LEN)
+			return -5;
 
 		next_state = plain_cfg_get_next_state(curr_state, *cfg_chars_in);
 		ret = plain_cfg_err_check(next_state);
