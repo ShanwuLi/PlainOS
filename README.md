@@ -90,3 +90,6 @@ plainos                                             PlainOS顶层目录
    make stm32f10x_config
    make 
 ```
+
+## PlainOS在线文档
+[plainos-doc]https://plainos-doc.readthedocs.io/zh/latest/
