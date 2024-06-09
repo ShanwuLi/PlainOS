@@ -27,7 +27,7 @@ SOFTWARE.
 #include <kernel/kernel.h>
 #include <common/oschlogo.h>
 
-#ifdef CONFIG_PL_CFG_OS_CHAR_LOGO
+#ifdef CONFIG_PL_OS_CHAR_LOGO
 static char pl_const pl_os_char_logo[] = \
 " ______   __            __             ______    ______  \r\n\
 /       \\ /  |          /  |           /      \\  /      \\ \r\n\
@@ -54,7 +54,7 @@ $$/       $$/  $$$$$$$/ $$/ $$/   $$/  $$$$$$/   $$$$$$/  \r\n\
  ************************************************************************************/
 void pl_dis_os_char_logo(void)
 {
-#ifdef CONFIG_PL_CFG_OS_CHAR_LOGO
+#ifdef CONFIG_PL_OS_CHAR_LOGO
 	int i = 0;
 	char c = pl_port_rodata_read8(&pl_os_char_logo[i]);
 

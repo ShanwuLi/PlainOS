@@ -93,7 +93,7 @@ static int softtimer_test(void)
 
 	pl_syslog_info("softtimer test\r\n");
 	pl_tid_t timer_task = 
-	pl_task_create("softtimer_task", softtimer_test_task, CONFIG_PL_CFG_TASK_PRIORITIES_MAX - 1, 512, 0, NULL);
+	pl_task_create("softtimer_task", softtimer_test_task, CONFIG_PL_TASK_PRIORITIES_MAX - 1, 512, 0, NULL);
 	if (timer_task == NULL) {
 		pl_syslog_err("softtimer test task failed\r\n");
 	}

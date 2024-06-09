@@ -23,30 +23,30 @@
 -include $(TOPDIR)/config.mk
 OSTEST_DIR := $(TOPDIR)/test
 
-ifeq ($(PL_MK_CFG_OS_TEST), y)
+ifeq ($(PL_OS_TEST), y)
 
 # mempool test
-ifeq ($(PL_MK_CFG_OS_MEMPOOL_TEST), y)
+ifeq ($(PL_OS_TEST_MEMPOOL), y)
 C_SRCS += $(OSTEST_DIR)/mempool_test.c
 endif
 
 # task test
-ifeq ($(PL_MK_CFG_OS_TASK_TEST), y)
+ifeq ($(PL_OS_TEST_TASK), y)
 C_SRCS += $(OSTEST_DIR)/task_test.c
 endif
 
 # soft timer test
-ifeq ($(PL_MK_CFG_OS_SOFTTIMER_TEST), y)
+ifeq ($(PL_OS_TEST_SOFTTIMER), y)
 C_SRCS += $(OSTEST_DIR)/stimer_test.c
 endif
 
 # datafifo test
-ifeq ($(PL_MK_CFG_OS_KFIFO_TEST), y)
+ifeq ($(PL_OS_TEST_KFIFO), y)
 C_SRCS += $(OSTEST_DIR)/kfifo_test.c
 endif
 
 # workqueue test
-ifeq ($(PL_MK_CFG_OS_WORKQUEUE_TEST), y)
+ifeq ($(PL_OS_TEST_WORKQUEUE), y)
 C_SRCS += $(OSTEST_DIR)/workqueue_test.c
 endif
 

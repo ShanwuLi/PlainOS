@@ -65,8 +65,8 @@ int pl_idle_task_init(void)
 	pl_tid_t idle_taskid;
 
 	idle_taskid = pl_task_sys_create("idle_task", idle_task,
-	                                 CONFIG_PL_CFG_TASK_PRIORITIES_MAX,
-	                                 CONFIG_PL_CFG_IDLE_TASK_STACK_SIZE, 0, NULL);
+	                                 CONFIG_PL_TASK_PRIORITIES_MAX,
+	                                 CONFIG_PL_IDLE_TASK_STACK_SIZE, 0, NULL);
 	if (idle_taskid == NULL) {
 		pl_early_syslog("idle task create failed\r\n");
 		return -1;
