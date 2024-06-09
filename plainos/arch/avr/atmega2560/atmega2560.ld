@@ -1,5 +1,5 @@
 /* Default linker script, for normal executables */
-#include <sections.h>
+#include <port/sections.h>
 
 OUTPUT_FORMAT("elf32-avr","elf32-avr","elf32-avr")
 OUTPUT_ARCH(avr:6)

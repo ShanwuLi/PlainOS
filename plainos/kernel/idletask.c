@@ -21,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include <port.h>
+#include <port/port.h>
 #include <kernel/assert.h>
 #include <kernel/kernel.h>
 #include <kernel/task.h>

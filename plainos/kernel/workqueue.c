@@ -22,9 +22,9 @@ SOFTWARE.
 */
 
 #include <errno.h>
-#include <port.h>
 #include <types.h>
 #include <config.h>
+#include <port/port.h>
 #include <kernel/mempool.h>
 #include <kernel/syslog.h>
 #include "workqueue.h"

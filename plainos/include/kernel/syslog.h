@@ -26,7 +26,7 @@ SOFTWARE.
 
 #include <config.h>
 #include <stdarg.h>
-#include <port.h>
+#include <port/port.h>
 #include "../common/ansi_color.h"
 
 

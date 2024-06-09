@@ -25,7 +25,7 @@ SOFTWARE.
 #define __KERNEL_ASSERT_H__
 
 #include <config.h>
-#include <port.h>
+#include <port/port.h>
 #include <kernel/task.h>
 #include <kernel/syslog.h>
 #include <kernel/kernel.h>

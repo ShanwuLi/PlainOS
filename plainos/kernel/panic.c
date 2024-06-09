@@ -23,7 +23,7 @@ SOFTWARE.
 
 #include <errno.h>
 #include <types.h>
-#include <port.h>
+#include <port/port.h>
 #include <kernel/syslog.h>
 #include "panic.h"
 
