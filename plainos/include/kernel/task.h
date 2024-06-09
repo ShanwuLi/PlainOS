@@ -177,19 +177,6 @@ void pl_task_resume(pl_tid_t tid);
 void pl_task_restart(pl_tid_t tid);
 
 /*************************************************************************************
- * Function Name: Check if the specified task has exited.
- *
- * Description: specified task.
- * 
- * Parameters:
- *  @tid: The identifier of the task, of type pl_tid_t.;
- *
- * Return:
- *  true if the task has exited; otherwise, returns false.
- ************************************************************************************/
-bool pl_task_is_exit(pl_tid_t tid);
-
-/*************************************************************************************
  * Function Name: pl_task_kill
  *
  * Description:
