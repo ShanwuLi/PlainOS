@@ -290,6 +290,8 @@ static int plain_cfg_get_next_state(int state, char c)
 			next_state = 17;
 			break;
 		}
+
+		next_state = CFG_PARSE_ERR_VAR_VALUE;
 		break;
 
 	case 17:
@@ -298,7 +300,12 @@ static int plain_cfg_get_next_state(int state, char c)
 			break;
 		}
 
-		next_state = 18;
+		if (c != '\n') {
+			next_state = 18;
+			break;
+		}
+
+		next_state = CFG_PARSE_ERR_VAR_VALUE;
 		break;
 
 	/* value end with state 18 */
