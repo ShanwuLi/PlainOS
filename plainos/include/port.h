@@ -268,7 +268,7 @@ u16_t pl_port_rodata_read16(void *addr);
 u32_t pl_port_rodata_read32(void *addr);
 
 /*************************************************************************************
- * Function Name: pl_port_rodata_read32
+ * Function Name: pl_port_rodata_read
  *
  * Description:
  *   The function is used to read only data of uintptr_t.
