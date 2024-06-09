@@ -40,7 +40,7 @@ SOFTWARE.
  * Return:
  *   void.
  ************************************************************************************/
-#ifdef PL_CFG_ASSERT
+#ifdef CONFIG_PL_CFG_ASSERT
 #define pl_assert(assertion)    \
 		do { \
 			if (!(assertion)) { \
@@ -53,7 +53,7 @@ SOFTWARE.
 		} while (false)
 #else
 #define pl_assert(assertion)   ((void)(assertion))
-#endif /* PL_CFG_ASSERT */
+#endif /* CONFIG_PL_CFG_ASSERT */
 
 
 #endif /* __KERNEL_ASSERT_H__ */

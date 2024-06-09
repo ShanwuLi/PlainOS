@@ -38,7 +38,8 @@ SOFTWARE.
 /*************************************************************************************
  * Description: Definitions of highest priority of task.
  ************************************************************************************/
-#if (PL_CFG_SYS_RSVD_HIGHEST_PRIOTITY < 2 || PL_CFG_TASK_PRIORITIES_MAX >= 512)
+#if (CONFIG_PL_CFG_SYS_RSVD_HIGHEST_PRIOTITY < 2 || \
+	 CONFIG_PL_CFG_TASK_PRIORITIES_MAX >= 512)
 	#error "PL_CFG_SYS_RSVD_HIGHEST_PRIOTITY must larger 2 and\
 	        PL_CFG_TASK_PRIORITIES_MAX must less 512"
 #endif
@@ -73,7 +74,7 @@ static u32_t cpu_rate_idle;
  *
  ************************************************************************************/
 struct task_core_blk {
-	struct task_list ready_list[PL_CFG_TASK_PRIORITIES_MAX + 1];
+	struct task_list ready_list[CONFIG_PL_CFG_TASK_PRIORITIES_MAX + 1];
 	struct task_list delay_list;
 	struct list_node pend_list;
 	struct list_node exit_list;
@@ -92,7 +93,7 @@ struct task_core_blk {
  * Description: Obtain the highest priority through the priority bit map.
  *              Supports up to 4096 priority levels.
  ************************************************************************************/
-static u32_t g_hiprio_bitmap[(PL_CFG_TASK_PRIORITIES_MAX + 31) / 32];
+static u32_t g_hiprio_bitmap[(CONFIG_PL_CFG_TASK_PRIORITIES_MAX + 31) / 32];
 
 /*************************************************************************************
  * Global Variable Name: g_task_core_blk
@@ -191,7 +192,7 @@ static u16_t get_hiprio(void)
 	return hiprio;
 }
 
-#ifdef PL_CFG_CHECK_STACK_OVERFLOW
+#ifdef CONFIG_PL_CFG_CHECK_STACK_OVERFLOW
 /*************************************************************************************
  * Function Name: pl_check_stack_overflow
  * Description: check stack overflow whether or not.
@@ -206,13 +207,13 @@ static u16_t get_hiprio(void)
  ************************************************************************************/
 static bool pl_check_stack_overflow(void *context_sp, struct tcb *tcb)
 {
-	if (((*(uintptr_t *)(tcb->context_top_sp)) == PL_CFG_CHECK_STACK_OVERFLOW_MAGIC)
+	if (((*(uintptr_t *)(tcb->context_top_sp)) == CONFIG_PL_CFG_CHECK_STACK_OVERFLOW_MAGIC)
 	    || context_sp < tcb->context_top_sp)
 		return false;
 
 	return true;
 }
-#endif /* PL_CFG_CHECK_STACK_OVERFLOW */
+#endif /* CONFIG_PL_CFG_CHECK_STACK_OVERFLOW */
 
 /*************************************************************************************
  * Function Name: pl_callee_save_curr_context_sp
@@ -228,11 +229,11 @@ void pl_callee_save_curr_context_sp(void *context_sp)
 {
 	struct tcb *tcb = g_task_core_blk.curr_tcb;
 
-#ifdef PL_CFG_CHECK_STACK_OVERFLOW
+#ifdef CONFIG_PL_CFG_CHECK_STACK_OVERFLOW
 	/* check stack overflow */
 	if (pl_check_stack_overflow(context_sp, tcb))
 		pl_panic_dump(PL_PANIC_REASON_STACKOVF, NULL);
-#endif /* PL_CFG_CHECK_STACK_OVERFLOW */
+#endif /* CONFIG_PL_CFG_CHECK_STACK_OVERFLOW */
 
 	tcb->context_sp = context_sp;
 }
@@ -287,7 +288,7 @@ static void rdytask_list_init(void)
 {
 	u16_t i;
 
-	for (i = 0; i < PL_CFG_TASK_PRIORITIES_MAX + 1; i++) {
+	for (i = 0; i < CONFIG_PL_CFG_TASK_PRIORITIES_MAX + 1; i++) {
 		g_task_core_blk.ready_list[i].head = NULL;
 		g_task_core_blk.ready_list[i].num = 0;
 	}
@@ -546,7 +547,7 @@ void pl_task_context_switch(void)
 	curr_tcb = g_task_core_blk.curr_tcb;
 	next_tcb = g_task_core_blk.ready_list[hiprio].head;
 
-	idle_tcb = g_task_core_blk.ready_list[PL_CFG_TASK_PRIORITIES_MAX].head;
+	idle_tcb = g_task_core_blk.ready_list[CONFIG_PL_CFG_TASK_PRIORITIES_MAX].head;
 	if (next_tcb == idle_tcb)
 		++cpu_rate_idle;
 
@@ -627,7 +628,7 @@ static void task_init_tcb(const char *name, main_t task, u16_t prio,
 	tcb->delay_ticks = 0;
 	tcb->wait_for_task_ret = -EUNKNOWE;
 	list_init(&tcb->wait_head);
-	*((uintptr_t *)(tcb->context_top_sp)) = PL_CFG_CHECK_STACK_OVERFLOW_MAGIC;
+	*((uintptr_t *)(tcb->context_top_sp)) = CONFIG_PL_CFG_CHECK_STACK_OVERFLOW_MAGIC;
 }
 
 /*************************************************************************************
@@ -685,7 +686,7 @@ pl_tid_t pl_task_sys_create_with_stack(const char *name, main_t task, u16_t prio
 
 	/* check parameters */
 	if (name == NULL || task == NULL || stack == NULL ||
-	    prio > PL_CFG_TASK_PRIORITIES_MAX) {
+	    prio > CONFIG_PL_CFG_TASK_PRIORITIES_MAX) {
 		pl_early_syslog_err("param is invalid\r\n");
 		return NULL;
 	}
@@ -723,7 +724,7 @@ pl_tid_t pl_task_create_with_stack(const char *name, main_t task, u16_t prio,
 {
 	struct tcb *tcb;
 
-	if (prio < PL_CFG_SYS_RSVD_HIGHEST_PRIOTITY)
+	if (prio < CONFIG_PL_CFG_SYS_RSVD_HIGHEST_PRIOTITY)
 		prio = g_task_core_blk.curr_tcb->prio;
 
 	tcb = pl_task_sys_create_with_stack(name, task, prio, stack, stack_size, argc, argv);
@@ -753,7 +754,7 @@ pl_tid_t pl_task_sys_create(const char *name, main_t task, u16_t prio,
 	struct tcb *tcb_and_stack;
 
 	/* check parameters */
-	if (name == NULL || task == NULL || prio > PL_CFG_TASK_PRIORITIES_MAX) {
+	if (name == NULL || task == NULL || prio > CONFIG_PL_CFG_TASK_PRIORITIES_MAX) {
 		pl_early_syslog_err("param is invalid\r\n");
 		return NULL;
 	}
@@ -789,7 +790,7 @@ pl_tid_t pl_task_create(const char *name, main_t task, u16_t prio,
 {
 	struct tcb *tcb_and_stack;
 
-	if (prio < PL_CFG_SYS_RSVD_HIGHEST_PRIOTITY)
+	if (prio < CONFIG_PL_CFG_SYS_RSVD_HIGHEST_PRIOTITY)
 		prio = g_task_core_blk.curr_tcb->prio;
 
 	tcb_and_stack = pl_task_sys_create(name, task, prio, stack_size, argc, argv);
@@ -997,7 +998,7 @@ static void update_counter_of_cpu_rate(void)
 {
 	/* update counter of utilization rate */
 	++cpu_rate_base;
-	if (cpu_rate_base == PL_CFG_CPU_RATE_INTERVAL_TICKS) {
+	if (cpu_rate_base == CONFIG_PL_CFG_CPU_RATE_INTERVAL_TICKS) {
 		g_task_core_blk.cpu_rate_base = cpu_rate_base;
 		g_task_core_blk.cpu_rate_useful = cpu_rate_base -  cpu_rate_idle;
 		cpu_rate_base = 0;
@@ -1226,7 +1227,7 @@ int pl_task_get_cpu_rate(u32_t *int_part, u32_t *deci_part)
 static void pl_task_init_dummy_tcb(struct tcb *delay_dummy_tcb,
                                    struct tcb *first_dummy_tcb)
 {
-	static uintptr_t dummy_sp = PL_CFG_CHECK_STACK_OVERFLOW_MAGIC;
+	static uintptr_t dummy_sp = CONFIG_PL_CFG_CHECK_STACK_OVERFLOW_MAGIC;
 
 	/* init delay tcb */
 	list_init(&delay_dummy_tcb->node);
@@ -1269,8 +1270,8 @@ int pl_task_core_init(void)
 	/* init task core block */
 	g_task_core_blk.curr_tcb = &first_dummy_tcb;
 	g_task_core_blk.systicks = 0;
-	g_task_core_blk.cpu_rate_base = PL_CFG_CPU_RATE_INTERVAL_TICKS;
-	g_task_core_blk.cpu_rate_useful = PL_CFG_CPU_RATE_INTERVAL_TICKS;
+	g_task_core_blk.cpu_rate_base = CONFIG_PL_CFG_CPU_RATE_INTERVAL_TICKS;
+	g_task_core_blk.cpu_rate_useful = CONFIG_PL_CFG_CPU_RATE_INTERVAL_TICKS;
 	g_task_core_blk.sched_lock_ref = 0;
 	g_task_core_blk.delay_list.num = 0;
 	g_task_core_blk.delay_list.head = &delay_dummy_tcb;

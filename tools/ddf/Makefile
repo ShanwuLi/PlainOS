@@ -1,1 +1,0 @@
-# this is a tool used to parse device description file and generate a binary file.

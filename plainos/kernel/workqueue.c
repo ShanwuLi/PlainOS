@@ -32,8 +32,8 @@ SOFTWARE.
 
 static struct pl_workqueue pl_sys_hiwq;
 static struct pl_workqueue pl_sys_lowq;
-static struct pl_work *pl_sys_hiwq_fifo[PL_CFG_HI_WORKQUEUE_FIFO_CAPACITY];
-static struct pl_work *pl_sys_lowq_fifo[PL_CFG_LO_WORKQUEUE_FIFO_CAPACITY];
+static struct pl_work *pl_sys_hiwq_fifo[CONFIG_PL_CFG_HI_WORKQUEUE_FIFO_CAPACITY];
+static struct pl_work *pl_sys_lowq_fifo[CONFIG_PL_CFG_LO_WORKQUEUE_FIFO_CAPACITY];
 
 struct pl_workqueue *g_pl_sys_hiwq_handle = &pl_sys_hiwq;
 struct pl_workqueue *g_pl_sys_lowq_handle = &pl_sys_lowq;
@@ -119,7 +119,7 @@ static int pl_workqueue_init(struct pl_workqueue *wq, const char *name, u16_t pr
  *  @struct pl_workqueue*: handle of workqueue requested.
  ************************************************************************************/
 struct pl_workqueue *pl_workqueue_create(const char *name, u16_t prio,
-                                         size_t wq_stack_sz, u32_t wq_fifo_cap)
+                                size_t wq_stack_sz, u32_t wq_fifo_cap)
 {
 	int ret;
 	struct pl_workqueue *wq;
@@ -260,8 +260,8 @@ int pl_sys_wq_init(void)
 	int ret;
 
 	ret = pl_workqueue_init(&pl_sys_hiwq, "pl_sys_hiwq", 1,
-	                        PL_CFG_HI_WORKQUEUE_TASK_STACK_SIZE,
-	                        PL_CFG_HI_WORKQUEUE_FIFO_CAPACITY,
+	                        CONFIG_PL_CFG_HI_WORKQUEUE_TASK_STACK_SIZE,
+	                        CONFIG_PL_CFG_HI_WORKQUEUE_FIFO_CAPACITY,
 	                        pl_sys_hiwq_fifo);
 	if (ret < 0) {
 		g_pl_sys_hiwq_handle = NULL;
@@ -270,9 +270,9 @@ int pl_sys_wq_init(void)
 	}
 
 	ret = pl_workqueue_init(&pl_sys_lowq, "pl_sys_lowq",
-	                        PL_CFG_LO_WORKQUEUE_TASK_PRIORITY,
-	                        PL_CFG_LO_WORKQUEUE_TASK_STACK_SIZE,
-	                        PL_CFG_LO_WORKQUEUE_FIFO_CAPACITY,
+	                        CONFIG_PL_CFG_LO_WORKQUEUE_TASK_PRIORITY,
+	                        CONFIG_PL_CFG_LO_WORKQUEUE_TASK_STACK_SIZE,
+	                        CONFIG_PL_CFG_LO_WORKQUEUE_FIFO_CAPACITY,
 	                        pl_sys_lowq_fifo);
 	if (ret < 0) {
 		g_pl_sys_lowq_handle = NULL;

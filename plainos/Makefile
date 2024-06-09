@@ -19,6 +19,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+#==================================================================================================
+# replace gcc with your own host compiler.
+HOSTCC   := gcc
+MAKE     := make
+export   HOSTCC
+
 #=================================================================================================#
 #////////////////////////////// Do not to modify following code //////////////////////////////////#
 # get all arguments,MAKECMDGOALS is folder name, just like stm32f10x_config、original_config and so on.
@@ -40,6 +46,7 @@ ASM_SRCS :=
 LINK_SCRIPT :=
 RM := rm -rf
 CPY := cp -a
+MV  := mv
 MKDIR := mkdir -p
 
 #=================================================================================================#
@@ -83,11 +90,11 @@ DIR_GUARD = @$(MKDIR) $(@D)
 
 #=================================================================================================#
 # Configuration Target
-%_config:
-	@echo "writing config.h"
-	@echo "writing config.mk"
-	@$(CPY) $(TOPDIR)/configs/$(FIRST_ARG)/config.h $(TOPDIR)/include/
-	@$(CPY) $(TOPDIR)/configs/$(FIRST_ARG)/config.mk $(TOPDIR)/
+%_defconfig:
+	@$(MAKE) -C $(TOPDIR)/tools/cfgparser
+	@echo "parsing " $(FIRST_ARG)
+	@./tools/cfgparser/cfgparser $(TOPDIR)/configs/$(FIRST_ARG)
+	@$(MV) $(TOPDIR)/config.h $(TOPDIR)/include/config.h
 	@echo "write done"
 
 #=================================================================================================#
@@ -171,3 +178,4 @@ debug_flags:
 	@echo "C_FLAGS:" $(C_FLAGS)
 	@echo "INC:" $(INC)
 	@echo "CHIP:" $(CHIP)
+	@echo "CURDIR:" $(CURDIR)

@@ -70,7 +70,7 @@ int pl_port_systick_init(void)
 	/* 设置PendSV为最低优先级 */
 	*((volatile uint32_t *)(0xE000ED22)) = 0xff;
 	__asm__ volatile("cpsid	i\n\t");     /*< 关中断 */
-	SysTick_Config(PL_CFG_SYSTICK_TIME_SLICE_US * 72); // 1us 1900: 12.5us,  1800:25us,   3600:50us,   72000:1ms
+	SysTick_Config(CONFIG_PL_CFG_SYSTICK_TIME_SLICE_US * 72); // 1us 1900: 12.5us,  1800:25us,   3600:50us,   72000:1ms
 	__asm__ volatile("cpsie	i\n\t");     /*< 开中断 */
 	return 0;
 }
