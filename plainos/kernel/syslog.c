@@ -27,7 +27,7 @@ SOFTWARE.
 #include <lib/string.h>
 #include <kernel/syslog.h>
 #include <kernel/semaphore.h>
-#include "syslog.h"
+#include <kernel/initcall.h>
 
 struct pl_syslog_ctrl {
 	struct pl_sem syslog_semaphore;
@@ -91,7 +91,7 @@ void pl_syslog_put_chars(int (*putc)(const char c), const char *start, const cha
  * Return:
  *   none.
  ************************************************************************************/
-void pl_vformat_log(int (*putc)(const char c), const char *fmt, va_list valist)
+static void pl_vformat_log(int (*putc)(const char c), const char *fmt, va_list valist)
 {
 	char str[24];
 	int state = 0;
@@ -253,10 +253,12 @@ int pl_syslog_redirect(int (*put_char)(char c))
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_syslog_init(void)
+static int pl_syslog_init(void)
 {
 	pl_syslog_ctrl.put_char = NULL;
 	pl_semaphore_init(&pl_syslog_ctrl.syslog_semaphore, 1);
-	pl_early_syslog("syslog init successfully\r\n");
+
+	pl_early_syslog_info("syslog init done\r\n");
 	return OK;
 }
+pl_early_initcall(pl_syslog_init);

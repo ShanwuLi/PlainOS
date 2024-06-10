@@ -431,4 +431,4 @@ static int pl_iomux_init(void)
 	pl_early_syslog_info("iomux core init done\r\n");
 	return OK;
 }
-pl_core_initcall(pl_iomux_init);
+pl_subsys_initcall(pl_iomux_init);

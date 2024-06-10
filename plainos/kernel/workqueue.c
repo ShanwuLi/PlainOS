@@ -27,7 +27,8 @@ SOFTWARE.
 #include <port/port.h>
 #include <kernel/mempool.h>
 #include <kernel/syslog.h>
-#include "workqueue.h"
+#include <kernel/initcall.h>
+#include <kernel/workqueue.h>
 #include "task.h"
 
 static struct pl_workqueue pl_sys_hiwq;
@@ -255,7 +256,7 @@ void *pl_work_get_private_data(struct pl_work *wk)
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_sys_wq_init(void)
+static int pl_sys_wq_init(void)
 {
 	int ret;
 
@@ -283,3 +284,4 @@ int pl_sys_wq_init(void)
 	pl_early_syslog_info("sys workqueue init done\r\n");
 	return OK;
 }
+pl_core_initcall(pl_sys_wq_init);

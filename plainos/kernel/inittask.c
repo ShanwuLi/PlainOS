@@ -29,8 +29,6 @@ SOFTWARE.
 #include "task.h"
 #include "initcall.h"
 #include "inittask.h"
-#include "softtimer.h"
-#include "workqueue.h"
 
 /*************************************************************************************
  * Function Name: init_task
@@ -41,15 +39,11 @@ static int init_task(int argc, char *argv[])
 	USED(argc);
 	USED(argv);
 
-	int ret;
-	pl_do_early_initcalls();
-	ret = pl_port_systick_init();
+	int ret = pl_port_systick_init();
 	pl_assert(ret == 0);
-	ret = pl_softtimer_core_init();
-	pl_assert(ret == 0);
-	ret = pl_sys_wq_init();
-	pl_assert(ret == 0);
+
 	pl_do_initcalls();
+
 	pl_syslog_info("init task done\r\n");
 	return 0;
 }

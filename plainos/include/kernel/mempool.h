@@ -35,21 +35,6 @@ extern "C" {
 #endif
 
 /*************************************************************************************
- * Function Name: pl_mempool_calloc
- *
- * Description:
- *   Alloca memory interface of array method.
- *   The value of memory will set to zero.
- *
- * Param:
- *   none
- *
- * Return:
- *   Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
-int pl_default_mempool_init(void);
-
-/*************************************************************************************
  * Function Name: pl_mempool_init
  * 
  * Description:

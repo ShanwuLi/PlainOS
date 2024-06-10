@@ -35,7 +35,7 @@ SOFTWARE.
 
 #define PL_INIT_CALLS_SECTION       __initcall_start = .; \
 	                                __early_initcall_start = .; \
-	                                KEEP(*(.initcallearly.init)) \
+	                                KEEP(*(.pl_initcallearly.init)) \
 	                                __early_initcall_end = .; \
 	                                INIT_CALLS_LEVEL(0) \
 	                                INIT_CALLS_LEVEL(1) \
