@@ -65,7 +65,7 @@ static u32_t cpu_rate_idle;
  *   @delay_list: list head of delay tasks.
  *   @exit_list: list head of exit tasks(killed or exited).
  *   @timer_list: list head of soft timer.
- *   @exit_free: work for freeing wxit tcb.
+ *   @exit_free_work: work for freeing wxit tcb.
  *   @curr_tcb: current context tcb.
  *   @systicks: systicks.
  *   @cpu_rate_base: cpu rate base counter.
@@ -79,7 +79,7 @@ struct task_core_blk {
 	struct list_node pend_list;
 	struct list_node exit_list;
 	struct list_node timer_list;
-	struct pl_work exit_free;
+	struct pl_work exit_free_work;
 	struct tcb *curr_tcb;
 	u64_t systicks;
 	u32_t cpu_rate_base;
@@ -468,6 +468,57 @@ void pl_task_remove_tcb_from_rdylist(struct tcb *tcb)
 }
 
 /*************************************************************************************
+ * Function Name: pl_task_remove_tcb_from_exitlist
+ * Description: remove a tcb to list of exit task.
+ *
+ * Param:
+ *   @tcb: task control block.
+ * Return:
+ *   void
+ ************************************************************************************/
+void pl_task_remove_tcb_from_exitlist(struct tcb *tcb)
+{
+	if (tcb == NULL || tcb->curr_state != PL_TASK_STATE_EXIT)
+		return;
+
+	list_del_node(&tcb->node);
+}
+
+/*************************************************************************************
+ * Function Name: pl_task_remove_tcb_from_waitlist
+ * Description: Remove a tcb to list of wait task.
+ *
+ * Param:
+ *   @tcb: task control block.
+ * Return:
+ *   void
+ ************************************************************************************/
+void pl_task_remove_tcb_from_waitlist(struct tcb *tcb)
+{
+	if (tcb == NULL || tcb->curr_state != PL_TASK_STATE_WAITING)
+		return;
+
+	list_del_node(&tcb->node);
+}
+
+/*************************************************************************************
+ * Function Name: pl_task_remove_tcb_from_pendlist
+ * Description: Remove a tcb to list of pending task.
+ *
+ * Param:
+ *   @tcb: task control block.
+ * Return:
+ *   void
+ ************************************************************************************/
+void pl_task_remove_tcb_from_pendlist(struct tcb *tcb)
+{
+	if (tcb == NULL || tcb->curr_state != PL_TASK_STATE_PENDING)
+		return;
+
+	list_del_node(&tcb->node);
+}
+
+/*************************************************************************************
  * Function Name: pl_callee_get_next_context_sp
  * Description: update context and return context_sp of the current task.
  *
@@ -621,7 +672,7 @@ static void task_entry(struct tcb *tcb)
 
 done:
 	pl_port_exit_critical();
-	pl_work_add(g_pl_sys_hiwq_handle, &g_task_core_blk.exit_free);
+	pl_work_add(g_pl_sys_hiwq_handle, &g_task_core_blk.exit_free_work);
 	/* switch task*/
 	pl_task_context_switch();
 
@@ -870,9 +921,6 @@ int pl_task_join(pl_tid_t tid, int *ret)
  * Description:
  *   pend task.
  * 
- * NOTE:
- *   Do not use it in pl_port_enter_critical.
- *
  * Parameters:
  *  @tid: task id, if tid is NULL, it will pend himself.
  *
@@ -904,9 +952,6 @@ void pl_task_pend(pl_tid_t tid)
  * Description:
  *   resume task.
  *
- * NOTE:
- *   Do not use it in pl_port_enter_critical.
- * 
  * Parameters:
  *  @tid: task id;
  *
@@ -922,11 +967,36 @@ void pl_task_resume(pl_tid_t tid)
 
 	if (tcb->curr_state == PL_TASK_STATE_PENDING) {
 		pl_port_enter_critical();
-		list_del_node(&tcb->node);
+		pl_task_remove_tcb_from_pendlist(tcb);
 		pl_task_insert_tcb_to_rdylist(tcb);
 		pl_port_exit_critical();
 		pl_task_context_switch();
 	}
+}
+
+/*************************************************************************************
+ * Function Name: pl_task_restart
+ *
+ * Description:
+ *   restart task.
+ * NOTE: task id must not be itself
+ * 
+ * Parameters:
+ *  @tid: task id;
+ *
+ * Return:
+ *  void.
+ ************************************************************************************/
+void pl_task_restart(pl_tid_t tid)
+{
+	struct tcb *tcb = (struct tcb *)tid;
+
+	if (tcb == NULL || tcb == g_task_core_blk.curr_tcb)
+		return;
+
+	pl_port_enter_critical();
+	tcb->context_sp = tcb->context_init_sp;
+	pl_port_exit_critical();
 }
 
 /*************************************************************************************
@@ -1288,7 +1358,7 @@ int pl_task_core_init(void)
 	g_task_core_blk.delay_list.head = &delay_dummy_tcb;
 
 	/* init work for freeing exit tcb */
-	pl_work_init(&g_task_core_blk.exit_free, pl_task_free_exit_tcb, NULL);
+	pl_work_init(&g_task_core_blk.exit_free_work, pl_task_free_exit_tcb, NULL);
 
 	pl_early_syslog_info("task core init done\r\n");
 	return OK;

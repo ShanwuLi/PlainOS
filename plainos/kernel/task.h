@@ -228,6 +228,39 @@ void pl_task_remove_tcb_from_delaylist(struct tcb *tcb);
 void pl_task_remove_tcb_from_rdylist(struct tcb *tcb);
 
 /*************************************************************************************
+ * Function Name: pl_task_remove_tcb_from_exitlist
+ * Description: remove a tcb to list of exit task.
+ *
+ * Param:
+ *   @tcb: task control block.
+ * Return:
+ *   void
+ ************************************************************************************/
+void pl_task_remove_tcb_from_exitlist(struct tcb *tcb);
+
+/*************************************************************************************
+ * Function Name: pl_task_remove_tcb_from_waitlist
+ * Description: Remove a tcb to list of wait task.
+ *
+ * Param:
+ *   @tcb: task control block.
+ * Return:
+ *   void
+ ************************************************************************************/
+void pl_task_remove_tcb_from_waitlist(struct tcb *tcb);
+
+/*************************************************************************************
+ * Function Name: pl_task_remove_tcb_from_pendlist
+ * Description: Remove a tcb to list of pending task.
+ *
+ * Param:
+ *   @tcb: task control block.
+ * Return:
+ *   void
+ ************************************************************************************/
+void pl_task_remove_tcb_from_pendlist(struct tcb *tcb);
+
+/*************************************************************************************
  * Function Name: pl_task_sys_create_with_stack
  * Description: create a task with stack that must be provided in system.
  *

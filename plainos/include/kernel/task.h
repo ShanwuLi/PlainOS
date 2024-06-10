@@ -130,9 +130,6 @@ int pl_task_join(pl_tid_t tid, int *ret);
  *
  * Description:
  *   pend task.
- * 
- * NOTE:
- *   Do not use it in pl_port_enter_critical.
  *
  * Parameters:
  *  @tid: task id, if tid is NULL, it will pend himself.
@@ -147,9 +144,6 @@ void pl_task_pend(pl_tid_t tid);
  *
  * Description:
  *   resume task.
- *
- * NOTE:
- *   Do not use it in pl_port_enter_critical.
  * 
  * Parameters:
  *  @tid: task id;
@@ -163,10 +157,8 @@ void pl_task_resume(pl_tid_t tid);
  * Function Name: pl_task_restart
  *
  * Description:
- *   restart a task.
- *
- * NOTE:
- *   Do not use it in pl_port_enter_critical.
+ *   restart task.
+ * NOTE: task id must not be itself
  * 
  * Parameters:
  *  @tid: task id;
