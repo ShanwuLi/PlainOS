@@ -25,13 +25,13 @@ SOFTWARE.
 
 #include "errno.h"
 
-#define PL_CONST_SECTION            *(pl_const)
+#define PL_CONST_SECTION            KEEP(*(pl_const))
 
 #define INIT_CALLS_LEVEL(level)     __initcall##level##_start = .; \
 	                                KEEP(*(.pl_initcall##level##.init)) \
 	                                KEEP(*(.pl_initcall##level##s.init))
 
-#define PL_INIT_SECTION             *(.pl_init.init) /* __init */
+#define PL_INIT_SECTION             KEEP(*(.pl_init.init)) /* __init */
 
 #define PL_INIT_CALLS_SECTION       __initcall_start = .; \
 	                                __early_initcall_start = .; \
