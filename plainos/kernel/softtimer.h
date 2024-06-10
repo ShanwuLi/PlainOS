@@ -35,20 +35,6 @@ struct pl_stimer_ctrl {
 };
 
 /*************************************************************************************
- * Function Name: pl_softtimer_core_init
- *
- * Description:
- *   init soft timer system.
- * 
- * Parameters:
- *  none.
- *
- * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
-int pl_softtimer_core_init(void);
-
-/*************************************************************************************
  * Function Name: pl_softtimer_get_ctrl
  *
  * Description:

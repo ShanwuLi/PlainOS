@@ -510,4 +510,4 @@ static int pl_serial_core_init(void)
 	pl_early_syslog_info("serial core init done\r\n");
 	return 0;
 }
-pl_core_initcall(pl_serial_core_init);
+pl_subsys_initcall(pl_serial_core_init);

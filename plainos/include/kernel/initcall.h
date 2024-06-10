@@ -33,15 +33,26 @@ typedef int                             (*exitcall_t)(void);
 
 #define __init                           __attribute__((section(".pl_init.init")))
 
+
+
+/* system setup before */
 #define pl_early_initcall(fn)            __define_initcall(fn, early)
+
+/* system setup doing */
 #define pl_pure_initcall(fn)             __define_initcall(fn, 0)
 #define pl_pure_initcall_sync(fn)        __define_initcall(fn, 0s)
+
+/* system core components setup doing */
 #define pl_core_initcall(fn)             __define_initcall(fn, 1)
 #define pl_core_initcall_sync(fn)        __define_initcall(fn, 1s)
+
+/* system core components setup done */
 #define pl_postcore_initcall(fn)         __define_initcall(fn, 2)
 #define pl_postcore_initcall_sync(fn)    __define_initcall(fn, 2s)
 #define pl_arch_initcall(fn)             __define_initcall(fn, 3)
 #define pl_arch_initcall_sync(fn)        __define_initcall(fn, 3s)
+
+/* subsystems setup */
 #define pl_subsys_initcall(fn)           __define_initcall(fn, 4)
 #define pl_subsys_initcall_sync(fn)      __define_initcall(fn, 4s)
 #define pl_fs_initcall(fn)               __define_initcall(fn, 5)

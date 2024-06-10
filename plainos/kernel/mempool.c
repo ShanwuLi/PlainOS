@@ -28,6 +28,8 @@ SOFTWARE.
 #include <kernel/mempool.h>
 #include <kernel/assert.h>
 #include <kernel/semaphore.h>
+#include <kernel/initcall.h>
+#include <kernel/syslog.h>
 
 /*************************************************************************************
  * Description: mempool structure definition.
@@ -745,7 +747,7 @@ void *pl_mempool_calloc(pl_mempool_handle_t mempool, size_t num, size_t size)
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_default_mempool_init(void)
+static int pl_default_mempool_init(void)
 {
 	int ret = pl_semaphore_init(&pl_default_mempool.sem, 1);
 	pl_assert(ret == OK);
@@ -754,5 +756,8 @@ int pl_default_mempool_init(void)
 	                                       0, CONFIG_PL_DEFAULT_MEMPOOL_SIZE,
 	                                       CONFIG_PL_DEFAULT_MEMPOOL_GRAIN_ORDER);
 	pl_assert(g_pl_default_mempool != NULL);
+
+	pl_early_syslog_info("mempool init done\r\n");
 	return OK;
 }
+pl_early_initcall(pl_default_mempool_init);

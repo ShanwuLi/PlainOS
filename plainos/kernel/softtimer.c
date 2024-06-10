@@ -27,6 +27,7 @@ SOFTWARE.
 #include <port/port.h>
 #include <kernel/mempool.h>
 #include <kernel/syslog.h>
+#include <kernel/initcall.h>
 #include "softtimer.h"
 #include "task.h"
 
@@ -339,7 +340,7 @@ struct pl_stimer_ctrl *pl_softtimer_get_ctrl(void)
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_softtimer_core_init(void)
+static int pl_softtimer_core_init(void)
 {
 	list_init(&pl_stimer_ctrl.head);
 	pl_stimer_ctrl.daemon = pl_task_sys_create("softtimer_daemon",
@@ -353,3 +354,4 @@ int pl_softtimer_core_init(void)
 	pl_syslog_info("soft timer init done\r\n");
 	return 0;
 }
+pl_core_initcall(pl_softtimer_core_init);
