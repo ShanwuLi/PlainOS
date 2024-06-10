@@ -106,9 +106,9 @@ pl_tid_t pl_task_create(const char *name, main_t task, u16_t prio,
  *  @ticks: delay ticks;
  *
  * Return:
- *  none.
+ *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-void pl_task_delay_ticks(u32_t ticks);
+void pl_task_delay_ticks(u64_t ticks);
 
 /*************************************************************************************
  * Function Name: pl_task_join

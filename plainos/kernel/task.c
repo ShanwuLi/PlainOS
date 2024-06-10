@@ -1041,9 +1041,9 @@ int pl_task_kill(pl_tid_t tid)
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-void pl_task_delay_ticks(u32_t ticks)
+void pl_task_delay_ticks(u64_t ticks)
 {
-	u32_t end_ticks;
+	u64_t end_ticks;
 
 	if (ticks == 0)
 		return;
