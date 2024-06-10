@@ -85,7 +85,7 @@ ASM_DEPS := $(subst .o,.d,$(ASM_OBJS))
 DEPS := $(C_DEPS) $(ASM_DEPS)
 
 #=================================================================================================#
-TARGET_FILES := $(TARGET).elf $(TARGET).hex $(TARGET).bin $(TARGET).lst $(TARGET).map
+TARGET_FILES := $(TARGET).elf $(TARGET).hex $(TARGET).bin $(TARGET).lst
 DIR_GUARD = @$(MKDIR) $(@D)
 
 #=================================================================================================#
