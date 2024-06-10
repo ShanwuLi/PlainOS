@@ -74,6 +74,7 @@ static int workqueue_task(int argc, char **argv)
  *   init a workqueue.
  * 
  * Parameters:
+ *  @is_sys: is system workqueue or not.
  *  @wq: workqueue struct address.
  *  @name: name of workqueue.
  *  @prio: priority of workqueue.
@@ -84,8 +85,8 @@ static int workqueue_task(int argc, char **argv)
  * Return:
  *   Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-static int pl_workqueue_init(struct pl_workqueue *wq, const char *name, u16_t prio,
-                   size_t wq_stack_sz, u32_t wq_fifo_cap, struct pl_work **wq_fifo)
+static int pl_workqueue_init(bool is_sys, struct pl_workqueue *wq, const char *name,
+       u16_t prio, size_t wq_stack_sz, u32_t wq_fifo_cap, struct pl_work **wq_fifo)
 {
 	if (wq == NULL || wq_fifo == NULL)
 		return -EFAULT;
@@ -96,8 +97,12 @@ static int pl_workqueue_init(struct pl_workqueue *wq, const char *name, u16_t pr
 	wq->fifo = wq_fifo;
 	wq->name = (name == NULL) ? "anonymous wq" : name;
 
-	wq->exec_thread = pl_task_sys_create(name, workqueue_task, prio,
-	                                     wq_stack_sz, 1, (char **)wq);
+	if (is_sys)
+		wq->exec_thread = pl_task_sys_create(name, workqueue_task, prio,
+		                                     wq_stack_sz, 1, (char **)wq);
+	else
+		wq->exec_thread = pl_task_create(name, workqueue_task, prio,
+		                                 wq_stack_sz, 1, (char **)wq);
 	if (wq->exec_thread == NULL)
 		return -EUNKNOWE;
 
@@ -133,7 +138,7 @@ struct pl_workqueue *pl_workqueue_create(const char *name, u16_t prio,
 	if (wq == NULL)
 		return NULL;
 
-	ret = pl_workqueue_init(wq, name, prio, wq_stack_sz, wq_fifo_cap,
+	ret = pl_workqueue_init(false, wq, name, prio, wq_stack_sz, wq_fifo_cap,
 	                        (struct pl_work **)(wq + 1));
 	if (ret < 0)
 		return NULL;
@@ -260,7 +265,7 @@ static int pl_sys_wq_init(void)
 {
 	int ret;
 
-	ret = pl_workqueue_init(&pl_sys_hiwq, "pl_sys_hiwq", 1,
+	ret = pl_workqueue_init(true, &pl_sys_hiwq, "pl_sys_hiwq", 1,
 	                        CONFIG_PL_HI_WORKQUEUE_TASK_STACK_SIZE,
 	                        CONFIG_PL_HI_WORKQUEUE_FIFO_CAPACITY,
 	                        pl_sys_hiwq_fifo);
@@ -270,7 +275,7 @@ static int pl_sys_wq_init(void)
 		return ret;
 	}
 
-	ret = pl_workqueue_init(&pl_sys_lowq, "pl_sys_lowq",
+	ret = pl_workqueue_init(true, &pl_sys_lowq, "pl_sys_lowq",
 	                        CONFIG_PL_LO_WORKQUEUE_TASK_PRIORITY,
 	                        CONFIG_PL_LO_WORKQUEUE_TASK_STACK_SIZE,
 	                        CONFIG_PL_LO_WORKQUEUE_FIFO_CAPACITY,
