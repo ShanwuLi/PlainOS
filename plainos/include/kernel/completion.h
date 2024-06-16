@@ -96,4 +96,4 @@ int pl_completion_post_all(struct pl_completion *comp);
 }
 #endif
 
-#endif /* __KERNEL_SEMAPHORE_H__ */
+#endif /* __KERNEL_COMPLETE_H__ */

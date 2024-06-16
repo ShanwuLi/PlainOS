@@ -101,4 +101,4 @@ static inline int pl_mutex_unlock(struct pl_mutex *mutex)
 }
 #endif
 
-#endif /* __KERNEL_SEMAPHORE_H__ */
+#endif /* __KERNEL_MUTEX_H__ */
