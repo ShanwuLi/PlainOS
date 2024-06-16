@@ -42,7 +42,7 @@ $$/       $$/  $$$$$$$/ $$/ $$/   $$/  $$$$$$/   $$$$$$/  \r\n\
 #endif
 
 /*************************************************************************************
- * Function Name: pl_dis_os_char_logo
+ * Function Name: pl_disp_os_char_logo
  * Description:
  *    Display character logo.
  *
@@ -52,7 +52,7 @@ $$/       $$/  $$$$$$$/ $$/ $$/   $$/  $$$$$$/   $$$$$$/  \r\n\
  * Return:
  *   void.
  ************************************************************************************/
-void pl_dis_os_char_logo(void)
+void pl_disp_os_char_logo(void)
 {
 #ifdef CONFIG_PL_OS_CHAR_LOGO
 	int i = 0;

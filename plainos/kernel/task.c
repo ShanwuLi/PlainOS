@@ -900,10 +900,12 @@ int pl_task_join(pl_tid_t tid, int *ret)
 	if (tcb == NULL)
 		return -EFAULT;
 
-	if (tcb->curr_state == PL_TASK_STATE_EXIT)
-		return -EALREADY;
-
 	pl_port_enter_critical();
+	if (tcb->curr_state == PL_TASK_STATE_EXIT) {
+		pl_port_exit_critical();
+		return -EALREADY;
+	}
+
 	pl_task_remove_tcb_from_rdylist(g_task_core_blk.curr_tcb);
 	pl_task_insert_tcb_to_waitlist(&tcb->wait_head, g_task_core_blk.curr_tcb);
 	pl_port_exit_critical();
@@ -965,13 +967,16 @@ void pl_task_resume(pl_tid_t tid)
 	if (tcb == NULL)
 		return;
 
-	if (tcb->curr_state == PL_TASK_STATE_PENDING) {
-		pl_port_enter_critical();
-		pl_task_remove_tcb_from_pendlist(tcb);
-		pl_task_insert_tcb_to_rdylist(tcb);
+	pl_port_enter_critical();
+	if (tcb->curr_state != PL_TASK_STATE_PENDING) {
 		pl_port_exit_critical();
-		pl_task_context_switch();
+		return;
 	}
+
+	pl_task_remove_tcb_from_pendlist(tcb);
+	pl_task_insert_tcb_to_rdylist(tcb);
+	pl_port_exit_critical();
+	pl_task_context_switch();
 }
 
 /*************************************************************************************
@@ -1018,10 +1023,12 @@ int pl_task_kill(pl_tid_t tid)
 	if (tcb == NULL)
 		return -EFAULT;
 
-	if (tcb->curr_state == PL_TASK_STATE_EXIT)
-		return -EALREADY;
-
 	pl_port_enter_critical();
+	if (tcb->curr_state == PL_TASK_STATE_EXIT) {
+		pl_port_exit_critical();
+		return -EALREADY;
+	}
+
 	pl_task_remove_tcb_from_rdylist(tcb);
 	pl_task_insert_tcb_to_exitlist(tcb);
 	pl_port_exit_critical();

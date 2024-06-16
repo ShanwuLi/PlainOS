@@ -28,7 +28,7 @@ SOFTWARE.
 #include <kernel/kernel.h>
 
 /*************************************************************************************
- * Function Name: pl_dis_os_char_logo
+ * Function Name: pl_disp_os_char_logo
  * Description:
  *    Display character logo.
  *
@@ -38,6 +38,6 @@ SOFTWARE.
  * Return:
  *   void.
  ************************************************************************************/
-void pl_dis_os_char_logo(void);
+void pl_disp_os_char_logo(void);
 
 #endif /* __COMMON_OSCHLOGO_H__ */

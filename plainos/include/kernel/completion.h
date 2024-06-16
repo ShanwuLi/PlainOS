@@ -21,131 +21,79 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include <config.h>
-#include <errno.h>
-#include <port/port.h>
+#ifndef __KERNEL_COMPLETE_H__
+#define __KERNEL_COMPLETE_H__
+
+#include <types.h>
 #include <kernel/list.h>
-#include <kernel/kernel.h>
-#include <kernel/semaphore.h>
-#include "task.h"
+
+struct pl_completion {
+	struct list_node wait_list;
+	int_t done;
+};
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*************************************************************************************
- * Function Name: pl_semaphore_init
+ * Function Name: pl_completion_init
  *
  * Description:
- *   initialize a semaphore.
- * 
- * Parameters:
- *  @semap: semaphore.
- *  @val: value of semaphore.
+ *   request a semaphore.
  *
- * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
-int pl_semaphore_init(struct pl_sem *sem, int val)
-{
-	if (sem == NULL)
-		return -EFAULT;
-
-	pl_port_enter_critical();
-	sem->value = val;
-	list_init(&sem->wait_list);
-	pl_port_exit_critical();
-
-	return OK;
-}
-
-/*************************************************************************************
- * Function Name: pl_semaphore_reset
- *
- * Description:
- *   reset a semaphore.
- * 
  * Parameters:
- *  @sem: semaphore.
- *  @val: value of semaphore.
+ *  @comp: completion handle.
  *
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure..
  ************************************************************************************/
-int pl_semaphore_reset(struct pl_sem *sem, int val)
-{
-	if (sem == NULL)
-		return -EFAULT;
-	
-	pl_port_enter_critical();
-	sem->value = val;
-	list_init(&sem->wait_list);
-	pl_port_exit_critical();
-
-	return OK;
-}
+int pl_completion_init(struct pl_completion *comp);
 
 /*************************************************************************************
- * Function Name: pl_semaphore_wait
+ * Function Name: pl_completion_wait
  *
  * Description:
- *    take semaphore.
+ *    wait a completion.
  * 
  * Parameters:
- *  @sem: semaphore handle.
+ *  @comp: completion handle.
  *
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_semaphore_wait(struct pl_sem *sem)
-{
-	struct tcb *curr_tcb;
-
-	if (sem == NULL)
-		return -EFAULT;
-
-	pl_port_enter_critical();
-	--sem->value;
-	if (sem->value < 0) {
-		curr_tcb = pl_task_get_curr_tcb();
-		pl_task_remove_tcb_from_rdylist(curr_tcb);
-		pl_task_insert_tcb_to_waitlist(&sem->wait_list, curr_tcb);
-		pl_port_exit_critical();
-		pl_task_context_switch();
-		return OK;
-	}
-
-	pl_port_exit_critical();
-	return OK;
-}
+int pl_completion_wait(struct pl_completion *comp);
 
 /*************************************************************************************
- * Function Name: pl_semaphore_post
+ * Function Name: pl_completion_post
  *
  * Description:
- *    give semaphore.
+ *    post a completion.
  * 
  * Parameters:
- *  @sem: semaphore handle.
+ *  @comp: completion handle.
  *
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_semaphore_post(struct pl_sem *sem)
-{
-	struct tcb *front_tcb;
-	struct list_node *front_node;
+int pl_completion_post(struct pl_completion *comp);
 
-	if (sem == NULL)
-		return -EFAULT;
+/*************************************************************************************
+ * Function Name: pl_completion_post_all
+ *
+ * Description:
+ *    post all completion.
+ * 
+ * Parameters:
+ *  @comp: completion handle.
+ *
+ * Return:
+ *  Greater than or equal to 0 on success, less than 0 on failure.
+ ************************************************************************************/
+int pl_completion_post_all(struct pl_completion *comp);
 
-	pl_port_enter_critical();
-	++sem->value;
-	if (sem->value <= 0) {
-		front_node = list_del_front_node(&sem->wait_list);
-		front_tcb = container_of(front_node, struct tcb, node);
-		pl_task_insert_tcb_to_rdylist(front_tcb);
-		pl_port_exit_critical();
-		pl_task_context_switch();
-		return OK;
-	}
-
-	pl_port_exit_critical();
-	return OK;
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* __KERNEL_SEMAPHORE_H__ */

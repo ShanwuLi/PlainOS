@@ -30,7 +30,6 @@ SOFTWARE.
 struct pl_sem {
 	struct list_node wait_list;
 	int_t value;
-	bool valid;
 };
 
 #ifdef __cplusplus
@@ -41,7 +40,7 @@ extern "C" {
  * Function Name: pl_semaphore_init
  *
  * Description:
- *   request a semaphore.
+ *   initialize a semaphore.
  * 
  * Parameters:
  *  @sem: semaphore.
@@ -53,18 +52,19 @@ extern "C" {
 int pl_semaphore_init(struct pl_sem *sem, int val);
 
 /*************************************************************************************
- * Function Name: pl_semaphore_request
+ * Function Name: pl_semaphore_reset
  *
  * Description:
- *   request a semaphore.
+ *   reset a semaphore.
  * 
  * Parameters:
+ *  @sem: semaphore.
  *  @val: value of semaphore.
  *
  * Return:
- *  @semaphore_handle.
+ *  Greater than or equal to 0 on success, less than 0 on failure..
  ************************************************************************************/
-struct pl_sem *pl_semaphore_request(int val);
+int pl_semaphore_reset(struct pl_sem *sem, int val);
 
 /*************************************************************************************
  * Function Name: pl_semaphore_wait
@@ -93,20 +93,6 @@ int pl_semaphore_wait(struct pl_sem *sem);
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
 int pl_semaphore_post(struct pl_sem *sem);
-
-/*************************************************************************************
- * Function Name: pl_semaphore_release
- *
- * Description:
- *   release a semaphore.
- * 
- * Parameters:
- *   @sem: semaphore handle;
- *
- * Return:
- *   void.
- ************************************************************************************/
-void pl_semaphore_release(struct pl_sem *sem);
 
 #ifdef __cplusplus
 }

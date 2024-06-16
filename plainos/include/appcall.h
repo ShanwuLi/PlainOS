@@ -32,7 +32,7 @@ struct pl_app_entry {
 	const char *name;
 };
 
-#define __define_appcall(fn, _name)  static struct pl_app_entry \
+#define __define_appcall(fn, _name) static struct pl_app_entry \
 	__appcall_##fn pl_used \
 	__attribute__((section(".pl_appcall.app"))) = { \
 		.entry = fn, \

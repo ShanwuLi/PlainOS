@@ -36,7 +36,7 @@ void pl_callee_entry(void)
 	if (ret < 0)
 		while(1);
 
-	pl_dis_os_char_logo();
+	pl_disp_os_char_logo();
 	pl_early_syslog_info("PlainOS is starting...\r\n");
 
 	pl_do_early_initcalls();

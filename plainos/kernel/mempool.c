@@ -753,8 +753,8 @@ static int pl_default_mempool_init(void)
 	pl_assert(ret == OK);
 
 	g_pl_default_mempool = pl_mempool_init(pl_default_mempool.pool_data,
-	                                       0, CONFIG_PL_DEFAULT_MEMPOOL_SIZE,
-	                                       CONFIG_PL_DEFAULT_MEMPOOL_GRAIN_ORDER);
+										   0, CONFIG_PL_DEFAULT_MEMPOOL_SIZE,
+										   CONFIG_PL_DEFAULT_MEMPOOL_GRAIN_ORDER);
 	pl_assert(g_pl_default_mempool != NULL);
 
 	pl_early_syslog_info("mempool init done\r\n");

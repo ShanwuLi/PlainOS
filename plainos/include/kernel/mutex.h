@@ -21,131 +21,84 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include <config.h>
+#ifndef __KERNEL_MUTEX_H__
+#define __KERNEL_MUTEX_H__
+
+#include <types.h>
 #include <errno.h>
-#include <port/port.h>
 #include <kernel/list.h>
-#include <kernel/kernel.h>
-#include <kernel/semaphore.h>
-#include "task.h"
+#include <semaphore.h>
+
+struct pl_mutex {
+	struct pl_sem sem;
+};
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*************************************************************************************
- * Function Name: pl_semaphore_init
+ * Function Name: pl_mutex_init
  *
  * Description:
- *   initialize a semaphore.
+ *   init a mutex.
  * 
  * Parameters:
- *  @semap: semaphore.
- *  @val: value of semaphore.
- *
- * Return:
- *  Greater than or equal to 0 on success, less than 0 on failure.
- ************************************************************************************/
-int pl_semaphore_init(struct pl_sem *sem, int val)
-{
-	if (sem == NULL)
-		return -EFAULT;
-
-	pl_port_enter_critical();
-	sem->value = val;
-	list_init(&sem->wait_list);
-	pl_port_exit_critical();
-
-	return OK;
-}
-
-/*************************************************************************************
- * Function Name: pl_semaphore_reset
- *
- * Description:
- *   reset a semaphore.
- * 
- * Parameters:
- *  @sem: semaphore.
- *  @val: value of semaphore.
+ *  @mutex: mutex.
  *
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure..
  ************************************************************************************/
-int pl_semaphore_reset(struct pl_sem *sem, int val)
+static inline int pl_mutex_init(struct pl_mutex *mutex)
 {
-	if (sem == NULL)
+	if (mutex == NULL)
 		return -EFAULT;
-	
-	pl_port_enter_critical();
-	sem->value = val;
-	list_init(&sem->wait_list);
-	pl_port_exit_critical();
 
-	return OK;
+	return pl_semaphore_init(&mutex->sem, 1);
 }
 
 /*************************************************************************************
- * Function Name: pl_semaphore_wait
+ * Function Name: pl_mutex_lock
  *
  * Description:
- *    take semaphore.
+ *    lock a mutex.
  * 
  * Parameters:
- *  @sem: semaphore handle.
+ *  @mutex: mutex handle.
  *
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_semaphore_wait(struct pl_sem *sem)
+static inline int pl_mutex_lock(struct pl_mutex *mutex)
 {
-	struct tcb *curr_tcb;
-
-	if (sem == NULL)
+	if (mutex == NULL)
 		return -EFAULT;
 
-	pl_port_enter_critical();
-	--sem->value;
-	if (sem->value < 0) {
-		curr_tcb = pl_task_get_curr_tcb();
-		pl_task_remove_tcb_from_rdylist(curr_tcb);
-		pl_task_insert_tcb_to_waitlist(&sem->wait_list, curr_tcb);
-		pl_port_exit_critical();
-		pl_task_context_switch();
-		return OK;
-	}
-
-	pl_port_exit_critical();
-	return OK;
+	return pl_semaphore_wait(&mutex->sem);
 }
 
 /*************************************************************************************
- * Function Name: pl_semaphore_post
+ * Function Name: pl_mutex_unlock
  *
  * Description:
- *    give semaphore.
+ *    unlock a mutex.
  * 
  * Parameters:
- *  @sem: semaphore handle.
+ *  @mutex: mutex handle.
  *
  * Return:
  *  Greater than or equal to 0 on success, less than 0 on failure.
  ************************************************************************************/
-int pl_semaphore_post(struct pl_sem *sem)
+static inline int pl_mutex_unlock(struct pl_mutex *mutex)
 {
-	struct tcb *front_tcb;
-	struct list_node *front_node;
-
-	if (sem == NULL)
+	if (mutex == NULL)
 		return -EFAULT;
 
-	pl_port_enter_critical();
-	++sem->value;
-	if (sem->value <= 0) {
-		front_node = list_del_front_node(&sem->wait_list);
-		front_tcb = container_of(front_node, struct tcb, node);
-		pl_task_insert_tcb_to_rdylist(front_tcb);
-		pl_port_exit_critical();
-		pl_task_context_switch();
-		return OK;
-	}
-
-	pl_port_exit_critical();
-	return OK;
+	return pl_semaphore_post(&mutex->sem);
 }
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __KERNEL_SEMAPHORE_H__ */
